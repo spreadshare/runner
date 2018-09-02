@@ -5,8 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Services;
 using SpreadShare.Services.Support;
+using SpreadShare.Strategy;
 
-namespace SpreadShare.DependencyInjection
+namespace SpreadShare
 {
     public class Startup
     {
@@ -40,7 +41,7 @@ namespace SpreadShare.DependencyInjection
                 .SetMinimumLevel(LogLevel.Information));
 
             // Add Configuration dependency (provides access to appsettings.json)
-            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddSingleton(Configuration);
 
             // Add MyService dependency
             services.AddSingleton<IDatabaseMigrationService, DatabaseMigrationService>();
@@ -54,6 +55,9 @@ namespace SpreadShare.DependencyInjection
         {
             // Add BinanceGetExchangeData dependency
             services.AddSingleton<IGetExchangeData, BinanceGetExchangeData>();
+
+            // Strategy to be executed
+            services.AddSingleton<IStrategy, SimpleBandWagonStrategy>();
         }
 
         /// <summary>

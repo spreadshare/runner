@@ -2,6 +2,7 @@
 using SpreadShare.Services;
 using Microsoft.Extensions.DependencyInjection;
 using SpreadShare.DependencyInjection;
+using SpreadShare.Strategy;
 
 namespace SpreadShare
 {
@@ -30,10 +31,14 @@ namespace SpreadShare
 
         private static void ExecuteBusinessLogic(IServiceProvider serviceProvider)
         {
-            // Get Service and call method
+            // Start service to fetch exchange data
             var service = serviceProvider.GetService<IGetExchangeData>();
             service.Connect();
 
+            // Start strategy service
+            var strategy = serviceProvider.GetService<IStrategy>();
+            strategy.Start();
+            
             // TODO: Find more suitable way to manage application flow and keep it running
             Console.ReadLine();
         }
