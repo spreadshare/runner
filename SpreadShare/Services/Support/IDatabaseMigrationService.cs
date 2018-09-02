@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace SpreadShare.Services
+namespace SpreadShare.Services.Support
 {
     interface IDatabaseMigrationService
     {

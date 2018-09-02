@@ -2,8 +2,9 @@
 using Binance.Net;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
-using SpreadShare.DependencyInjection;
 using SpreadShare.Models;
+using SpreadShare.Services.Support;
+using SpreadShare.Strategy;
 
 namespace SpreadShare.Services
 {
@@ -11,11 +12,13 @@ namespace SpreadShare.Services
     {
         private readonly DatabaseContext _dbContext;
         private readonly ILogger _logger;
+        private readonly BaseStrategy _strategy;
 
-        public BinanceGetExchangeData(DatabaseContext dbContext, ILoggerFactory loggerFactory)
+        public BinanceGetExchangeData(DatabaseContext dbContext, ILoggerFactory loggerFactory, IStrategy strategy)
         {
             _dbContext = dbContext;
             _logger = loggerFactory.CreateLogger<BinanceGetExchangeData>();
+            _strategy = (BaseStrategy)strategy;
         }
 
         public async Task Connect()
@@ -27,6 +30,7 @@ namespace SpreadShare.Services
                 {
                     Candle c = new Candle(data.Data);
                     _dbContext.Add(c);
+                    _strategy.StateManager.OnSomeAction();
                     _logger.LogInformation(c.ToString());
                 });
                 candles.Data.Closed += () => _logger.LogInformation("Socket closed");
