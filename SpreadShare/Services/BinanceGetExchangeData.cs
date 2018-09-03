@@ -36,7 +36,6 @@ namespace SpreadShare.Services
                 {
                     await GetCandles(client, tradingPair.Value);
                 }
-
             }
         }
 
