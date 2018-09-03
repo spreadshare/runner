@@ -37,6 +37,9 @@ namespace SpreadShare
             var trading = serviceProvider.GetService<ITradingService>();
             trading.Start();
 
+            var user = serviceProvider.GetService<IUserService>();
+            user.Start();
+
             // Start strategy service
             var strategy = serviceProvider.GetService<IStrategy>();
             strategy.Start();

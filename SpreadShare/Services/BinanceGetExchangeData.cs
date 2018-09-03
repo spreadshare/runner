@@ -30,7 +30,7 @@ namespace SpreadShare.Services
                 {
                     Candle c = new Candle(data.Data);
                     _dbContext.Add(c);
-                    _strategy.StateManager.OnSomeAction();
+                    //_strategy.StateManager.OnSomeAction();
                     _logger.LogInformation(c.ToString());
                 });
                 candles.Data.Closed += () => _logger.LogInformation("Socket closed");

@@ -57,8 +57,12 @@ namespace SpreadShare
             // Add BinanceGetExchangeData dependency
             services.AddSingleton<IGetExchangeData, BinanceGetExchangeData>();
 
+
             // Add Binance Rest API dependency
             services.AddSingleton<ITradingService, BinanceTradingService>();
+
+            // Add Binance User Websocket dependency
+            services.AddSingleton<IUserService, BinanceUserService>();
 
             // Strategy to be executed
             services.AddSingleton<IStrategy, SimpleBandWagonStrategy>();
