@@ -55,7 +55,7 @@ namespace SpreadShare.Services
                 {
 
                 });
-            _logger.LogInformation("Binance User Service was succefully started!");
+            _logger.LogInformation("Binance User Service was succesfully started!");
         }
     }
 }

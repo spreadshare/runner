@@ -57,7 +57,6 @@ namespace SpreadShare
             // Add BinanceGetExchangeData dependency
             services.AddSingleton<IGetExchangeData, BinanceGetExchangeData>();
 
-
             // Add Binance Rest API dependency
             services.AddSingleton<ITradingService, BinanceTradingService>();
 
