@@ -1,19 +1,22 @@
 ﻿using Microsoft.Extensions.Logging;
+using SpreadShare.Services;
 
 namespace SpreadShare.Strategy
 {
     abstract class BaseStrategy : IStrategy
     {
         private readonly ILoggerFactory _loggerFactory;
+        protected readonly ITradingService _tradingService;
         public StateManager StateManager { get; private set; }
 
         /// <summary>
         /// BaseConstrcutor: Provides dependencies required by the StateManager
         /// </summary>
         /// <param name="loggerFactory"></param>
-        protected BaseStrategy(ILoggerFactory loggerFactory)
+        protected BaseStrategy(ILoggerFactory loggerFactory, ITradingService tradingService)
         {
             _loggerFactory = loggerFactory;
+            _tradingService = tradingService;
         }
 
         /// <summary>
@@ -21,7 +24,7 @@ namespace SpreadShare.Strategy
         /// </summary>
         public void Start()
         {
-            StateManager = new StateManager(GetInitialState(), _loggerFactory);
+            StateManager = new StateManager(GetInitialState(), _loggerFactory, _tradingService);
         }
 
         public abstract State GetInitialState();

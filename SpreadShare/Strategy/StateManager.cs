@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using SpreadShare.Services;
 
 namespace SpreadShare.Strategy
 {
@@ -11,6 +12,7 @@ namespace SpreadShare.Strategy
         private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
+        public BinanceTradingService TradingService;
 
         public string CurrentState => _activeState.GetType().ToString().Split('+').Last();
 
@@ -19,14 +21,15 @@ namespace SpreadShare.Strategy
         /// </summary>
         /// <param name="initial">First state to be active. Can't be null</param>
         /// <param name="loggerFactory">Provides logger for StateManager and states</param>
-        public StateManager(State initial, ILoggerFactory loggerFactory)
+        public StateManager(State initial, ILoggerFactory loggerFactory, ITradingService tradingService)
         {
             lock (_lock)
             {
                 _logger = loggerFactory.CreateLogger("StateManager");
                 _loggerFactory = loggerFactory;
+                TradingService = tradingService as BinanceTradingService;
                 _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
-                initial.Activate(null, this, _loggerFactory);
+                initial.Activate(new Context(), this, _loggerFactory);
             }
         }
 
