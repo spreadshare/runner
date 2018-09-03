@@ -5,6 +5,10 @@ namespace SpreadShare.Models
 {
     public class Candle
     {
+        public Candle()
+        {
+        }
+
         public Candle(DateTime openTime, DateTime closeTime, string symbol, decimal open, decimal close,
             decimal high, decimal low, decimal volume, int tradeCount, bool final, decimal quoteAssetVolume,
             decimal takerBuyBaseAssetVolume, decimal takerBuyQuoteAssetVolume)

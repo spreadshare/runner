@@ -1,6 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Binance.Net;
 using Binance.Net.Objects;
+using CryptoExchange.Net.Objects;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 using SpreadShare.Services.Support;
@@ -13,30 +17,56 @@ namespace SpreadShare.Services
         private readonly DatabaseContext _dbContext;
         private readonly ILogger _logger;
         private readonly BaseStrategy _strategy;
+        private readonly IConfiguration _configuration;
 
-        public BinanceGetExchangeData(DatabaseContext dbContext, ILoggerFactory loggerFactory, IStrategy strategy)
+        public BinanceGetExchangeData(DatabaseContext dbContext, ILoggerFactory loggerFactory, 
+            IStrategy strategy, IConfiguration configuration)
         {
             _dbContext = dbContext;
             _logger = loggerFactory.CreateLogger<BinanceGetExchangeData>();
             _strategy = (BaseStrategy)strategy;
+            _configuration = configuration;
         }
 
         public async Task Connect()
         {
-            _logger.LogInformation("Got here");
             using (var client = new BinanceSocketClient())
             {
-                var candles = await client.SubscribeToKlineStreamAsync("bnbbtc", KlineInterval.OneMinute, data =>
+                foreach (var tradingPair in _configuration.GetSection("BinanceClientSettings:tradingPairs").GetChildren().AsEnumerable())
                 {
-                    Candle c = new Candle(data.Data);
-                    _dbContext.Add(c);
-                    //_strategy.StateManager.OnSomeAction();
-                    _logger.LogInformation(c.ToString());
-                });
-                candles.Data.Closed += () => _logger.LogInformation("Socket closed");
-                candles.Data.Error += e => _logger.LogInformation("Socket error: {1}", e);
-
+                    await GetCandles(client, tradingPair.Value);
+                }
             }
+        }
+
+        private async Task<CallResult<BinanceStreamSubscription>> GetCandles(BinanceSocketClient client, string tradingPair)
+        {
+            // Temporary Candle
+            Candle prev = new Candle { OpenTime = new DateTime() };
+
+            // Subscription
+            var candles = await client.SubscribeToKlineStreamAsync(tradingPair, KlineInterval.OneMinute, data =>
+            {
+                Candle c = new Candle(data.Data);
+                _logger.LogDebug("Received Candle \t{0}", c.ToString());
+
+                // New Candle
+                if (!c.OpenTime.Equals(prev.OpenTime))
+                {
+                    _logger.LogInformation("Received new Candle\n\t{0}", prev.ToString());
+
+                    if (prev.Symbol != null)
+                    {
+                        _dbContext.Add(prev);
+                        _strategy.StateManager.OnCandle(prev);
+                    }
+                    prev = c;
+                }
+
+            });
+            candles.Data.Closed += () => _logger.LogInformation("Socket closed");
+            candles.Data.Error += e => _logger.LogInformation("Socket error: {1}", e);
+            return candles;
         }
     }
 }
