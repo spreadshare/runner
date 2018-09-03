@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
 {
@@ -42,6 +43,6 @@ namespace SpreadShare.Strategy
             _stateManager.SwitchState(s);
         }
 
-        public abstract void OnSomeAction();
+        public abstract void OnCandle(Candle c);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.Services;
 using System;
+using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
 {
@@ -36,7 +37,7 @@ namespace SpreadShare.Strategy
                 SwitchState(new ConfirmBuyState());
             }
 
-            public override void OnSomeAction()
+            public override void OnCandle(Candle c)
             {
                 Logger.LogInformation("Some action");
             }
@@ -59,7 +60,7 @@ namespace SpreadShare.Strategy
                 }
             }
 
-            public override void OnSomeAction()
+            public override void OnCandle(Candle c)
             {
                 Logger.LogInformation("Some action");
                 SwitchState(new EntryState());
