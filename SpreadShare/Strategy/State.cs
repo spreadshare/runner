@@ -4,7 +4,7 @@ namespace SpreadShare.Strategy
 {
     abstract class State
     {
-        private StateManager _stateManager;
+        protected StateManager _stateManager;
         public Context Context { get; set; }
         protected ILogger Logger;
 
