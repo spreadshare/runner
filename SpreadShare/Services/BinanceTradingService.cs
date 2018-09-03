@@ -13,8 +13,8 @@ namespace SpreadShare.Services
     class BinanceTradingService : ITradingService
     {
         private readonly ILogger _logger;
+        private readonly IConfiguration _configuration;
         private BinanceClient _client;
-        private IConfiguration _configuration;
         private long _receiveWindow;
 
         public BinanceTradingService(ILoggerFactory loggerFactory, IConfiguration configuration)
@@ -27,15 +27,15 @@ namespace SpreadShare.Services
         public void Start()
         {
             //Read the custom receive window, the standard window is often too short.
-            _receiveWindow = _configuration.GetValue<long>("receiveWindow");
+            _receiveWindow = _configuration.GetValue<long>("BinanceClientSettings:receiveWindow");
 
             //Enforce the right protocol for the connection
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             _client = new BinanceClient();
             //Read authentication from configuration.
-            string apikey = _configuration.GetValue<string>("apikey");
-            string apisecret = _configuration.GetValue<string>("apisecret");
+            string apikey = _configuration.GetValue<string>("BinanceCredentials:api-key");
+            string apisecret = _configuration.GetValue<string>("BinanceCredentials:api-secret");
             _client.SetApiCredentials(apikey, apisecret);
 
             //Test the connection to binance

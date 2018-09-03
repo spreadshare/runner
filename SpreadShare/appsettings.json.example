@@ -1,0 +1,12 @@
+{
+    "ConnectionStrings": {
+        "LocalConnection": "Server=db;Database=spreadshare;User ID=postgres;Password=password;Integrated Security=true;Pooling=true;"
+    },
+    "BinanceCredentials": {
+        "api-key": "api-key",
+        "api-secret": "api-secret"
+    },
+    "BinanceClientSettings": {
+        "receiveWindow": 1000000
+    }
+}
