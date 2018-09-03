@@ -1,0 +1,103 @@
+﻿using Microsoft.Extensions.Logging;
+using SpreadShare.Services.Support;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Binance.Net;
+using Microsoft.Extensions.Configuration;
+using System.Net;
+using Binance.Net.Objects;
+
+namespace SpreadShare.Services
+{
+    class BinanceTradingService : ITradingService
+    {
+        private readonly ILogger _logger;
+        private BinanceClient _client;
+        private IConfiguration _configuration;
+        private long _receiveWindow;
+
+        public BinanceTradingService(ILoggerFactory loggerFactory, IConfiguration configuration)
+        {
+            _logger = loggerFactory.CreateLogger<BinanceTradingService>();
+            _configuration = configuration;
+            _logger.LogInformation("Creating new Binance Client");
+        }
+
+        public void Start()
+        {
+            //Read the custom receive window, the standard window is often too short.
+            _receiveWindow = _configuration.GetValue<long>("receiveWindow");
+
+            //Enforce the right protocol for the connection
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            _client = new BinanceClient();
+            //Read authentication from configuration.
+            string apikey = _configuration.GetValue<string>("apikey");
+            string apisecret = _configuration.GetValue<string>("apisecret");
+            _client.SetApiCredentials(apikey, apisecret);
+
+            //Test the connection to binance
+            _logger.LogInformation("Testing connection to Binance...");
+            var ping = _client.Ping();
+            if (ping.Success)
+                _logger.LogInformation("Connection to Binance succesful");
+            else
+                _logger.LogCritical($"Connection to binance failed: no response ==> {ping.Error.Message}");
+
+
+            //Test the credentials by retrieving the account information
+            var result = _client.GetAccountInfo(_receiveWindow);
+            if (result.Success)
+            {
+                _logger.LogInformation("Binance account info:");
+                foreach (BinanceBalance balance in result.Data.Balances)
+                    if (balance.Total > 0)
+                        _logger.LogInformation($"{balance.Total} {balance.Asset} (free: {balance.Free} - locked: {balance.Locked})");
+            } else
+            {
+                _logger.LogCritical($"Authenticated Binance request failed: { result.Error.Message}");
+            }
+        }
+
+        public long PlaceMarketOrder(string symbol, OrderSide side)
+        {
+            var response = _client.PlaceTestOrder("BNBETH", OrderSide.Buy, OrderType.Market, 1, null, null, null, null, null, null, (int)_receiveWindow);
+            if (response.Success)
+            {
+                _logger.LogInformation($"Order {response.Data.OrderId} placement succeeded!");
+                return response.Data.OrderId;
+            }
+            else
+            {
+                _logger.LogWarning($"Error while placing order: {response.Error.Message}");
+                throw new Exception("Order placement failed!");
+            }
+        }
+
+        public void CancelOrder(string symbol, long orderId)
+        {
+            var response = _client.CancelOrder(symbol, orderId, null, null, _receiveWindow);
+            if (response.Success)
+                _logger.LogInformation($"Order {orderId} succesfully cancelled");
+            else
+            {
+                _logger.LogWarning($"Failed to cancel order {orderId}: {response.Error.Message}");
+                throw new Exception("Order cancellation failed!");
+            }
+        }
+
+        public void QueryOrder(string symbol, long orderId)
+        {
+            var response = _client.QueryOrder(symbol, orderId, null, _receiveWindow);
+            if (response.Success)
+            {
+               // _logger.LogInformation("Succesfully querried an order");
+            } else
+            {
+                _logger.LogWarning($"Unable to querry order {orderId}: {response.Error.Message}");
+            }
+        }
+    }
+}

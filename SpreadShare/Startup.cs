@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,7 +38,7 @@ namespace SpreadShare
 
             // Add Logging dependency
             services.AddLogging(loggingBuilder => loggingBuilder
-                .AddConsole(opt => opt.DisableColors = true)
+                .AddConsole(opt => opt.DisableColors = false)
                 .SetMinimumLevel(LogLevel.Information));
 
             // Add Configuration dependency (provides access to appsettings.json)
@@ -55,6 +56,9 @@ namespace SpreadShare
         {
             // Add BinanceGetExchangeData dependency
             services.AddSingleton<IGetExchangeData, BinanceGetExchangeData>();
+
+            // Add Binance Rest API dependency
+            services.AddSingleton<ITradingService, BinanceTradingService>();
 
             // Strategy to be executed
             services.AddSingleton<IStrategy, SimpleBandWagonStrategy>();
