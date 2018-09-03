@@ -21,7 +21,9 @@ namespace SpreadShare.Services
             _configuration = configuration;
         }
 
-
+        /// <summary>
+        /// Start the BinanceUserService, will configure callback functions.
+        /// </summary>
         public void Start()
         {
             //Setup the socket client
