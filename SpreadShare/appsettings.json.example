@@ -7,6 +7,10 @@
         "api-secret": "api-secret"
     },
     "BinanceClientSettings": {
-        "receiveWindow": 1000000
+        "receiveWindow": 1000000,
+        "tradingPairs": [
+          "bnbbtc",
+          "ethbtc"
+        ]
     }
 }

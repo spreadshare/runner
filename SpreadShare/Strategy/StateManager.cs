@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Services;
+using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
 {
@@ -52,11 +53,11 @@ namespace SpreadShare.Strategy
         /// <summary>
         /// Example of an action
         /// </summary>
-        public void OnSomeAction()
+        public void OnCandle(Candle c)
         {
             lock (_lock)
             {
-                _activeState.OnSomeAction();
+                _activeState.OnCandle(c);
             }
         }
     }
