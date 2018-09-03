@@ -6,7 +6,7 @@ namespace SpreadShare.Strategy
     abstract class BaseStrategy : IStrategy
     {
         private readonly ILoggerFactory _loggerFactory;
-        protected readonly ITradingService _tradingService;
+        private readonly ITradingService _tradingService;
         public StateManager StateManager { get; private set; }
 
         /// <summary>
