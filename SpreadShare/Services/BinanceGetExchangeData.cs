@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Objects;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 using SpreadShare.Services.Support;
@@ -15,21 +17,26 @@ namespace SpreadShare.Services
         private readonly DatabaseContext _dbContext;
         private readonly ILogger _logger;
         private readonly BaseStrategy _strategy;
+        private readonly IConfiguration _configuration;
 
         public BinanceGetExchangeData(DatabaseContext dbContext, ILoggerFactory loggerFactory, 
-            IStrategy strategy)
+            IStrategy strategy, IConfiguration configuration)
         {
             _dbContext = dbContext;
             _logger = loggerFactory.CreateLogger<BinanceGetExchangeData>();
             _strategy = (BaseStrategy)strategy;
+            _configuration = configuration;
         }
 
         public async Task Connect()
         {
             using (var client = new BinanceSocketClient())
             {
-                await GetCandles(client, "bnbbtc");
-                await GetCandles(client, "ethbtc");
+                foreach (var tradingPair in _configuration.GetSection("BinanceClientSettings:tradingPairs").GetChildren().AsEnumerable())
+                {
+                    await GetCandles(client, tradingPair.Value);
+                }
+
             }
         }
 
