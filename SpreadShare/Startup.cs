@@ -38,7 +38,7 @@ namespace SpreadShare
 
             // Add Logging dependency
             services.AddLogging(loggingBuilder => loggingBuilder
-                .AddConsole(opt => opt.DisableColors = false)
+                .AddConsole(opt => opt.DisableColors = true)
                 .SetMinimumLevel(LogLevel.Information));
 
             // Add Configuration dependency (provides access to appsettings.json)
