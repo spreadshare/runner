@@ -1,7 +1,6 @@
 ﻿using System;
 using SpreadShare.Services;
 using Microsoft.Extensions.DependencyInjection;
-using SpreadShare.DependencyInjection;
 using SpreadShare.Strategy;
 
 namespace SpreadShare
