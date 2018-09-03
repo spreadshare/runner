@@ -37,6 +37,9 @@ namespace SpreadShare
             // Start strategy service
             var strategy = serviceProvider.GetService<IStrategy>();
             strategy.Start();
+
+            var trading = serviceProvider.GetService<ITradingService>();
+            trading.Start();
             
             // TODO: Find more suitable way to manage application flow and keep it running
             Console.ReadLine();

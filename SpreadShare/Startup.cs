@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,6 +56,9 @@ namespace SpreadShare
         {
             // Add BinanceGetExchangeData dependency
             services.AddSingleton<IGetExchangeData, BinanceGetExchangeData>();
+
+            // Add Binance Rest API dependency
+            services.AddSingleton<ITradingService, BinanceTradingService>();
 
             // Strategy to be executed
             services.AddSingleton<IStrategy, SimpleBandWagonStrategy>();
