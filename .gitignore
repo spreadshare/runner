@@ -40,4 +40,4 @@ postgres-data
 .env
 
 # Configuration (until secrets work)
-appsettings.json
+SpreadShare/appsettings.json
