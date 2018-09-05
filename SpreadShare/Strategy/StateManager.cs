@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Services;
+using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 
 namespace SpreadShare.Strategy

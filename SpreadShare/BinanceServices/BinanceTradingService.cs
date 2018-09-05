@@ -1,14 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
-using SpreadShare.Services.Support;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Binance.Net;
-using Microsoft.Extensions.Configuration;
+﻿using System;
 using System.Net;
+using Binance.Net;
 using Binance.Net.Objects;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
-namespace SpreadShare.Services
+namespace SpreadShare.BinanceServices
 {
     class BinanceTradingService : ITradingService
     {

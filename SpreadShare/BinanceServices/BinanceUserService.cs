@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Binance.Net;
-using Binance.Net.Objects;
-using CryptoExchange.Net.Objects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace SpreadShare.Services
+namespace SpreadShare.BinanceServices
 {
     class BinanceUserService : IUserService
     {
