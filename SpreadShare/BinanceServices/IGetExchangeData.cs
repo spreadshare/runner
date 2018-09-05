@@ -2,7 +2,7 @@
 
 namespace SpreadShare.BinanceServices
 {
-    interface IGetExchangeData
+    interface IFetchCandles
     {
         Task Connect();
     }

@@ -12,18 +12,18 @@ using SpreadShare.SupportServices;
 
 namespace SpreadShare.BinanceServices
 {
-    class BinanceGetExchangeData : IGetExchangeData
+    class BinanceFetchCandles : IFetchCandles
     {
         private readonly DatabaseContext _dbContext;
         private readonly ILogger _logger;
         private readonly BaseStrategy _strategy;
         private readonly IConfiguration _configuration;
 
-        public BinanceGetExchangeData(DatabaseContext dbContext, ILoggerFactory loggerFactory, 
+        public BinanceFetchCandles(DatabaseContext dbContext, ILoggerFactory loggerFactory, 
             IStrategy strategy, IConfiguration configuration)
         {
             _dbContext = dbContext;
-            _logger = loggerFactory.CreateLogger<BinanceGetExchangeData>();
+            _logger = loggerFactory.CreateLogger<BinanceFetchCandles>();
             _strategy = (BaseStrategy)strategy;
             _configuration = configuration;
         }
