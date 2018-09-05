@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace SpreadShare.Services.Support
+namespace SpreadShare.SupportServices
 {
     class DatabaseMigrationService : IDatabaseMigrationService
     {

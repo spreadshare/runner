@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpreadShare.Models;
 
-namespace SpreadShare.Services.Support
+namespace SpreadShare.SupportServices
 {
     /// <summary>
     /// Database context that is connected to PostgreSQL

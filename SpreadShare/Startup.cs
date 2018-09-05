@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Services;
-using SpreadShare.Services.Support;
+using SpreadShare.BinanceServices;
 using SpreadShare.Strategy;
+using SpreadShare.SupportServices;
 
 namespace SpreadShare
 {

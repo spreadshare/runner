@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using SpreadShare.Services;
 using System;
+using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 
 namespace SpreadShare.Strategy

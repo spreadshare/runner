@@ -7,10 +7,10 @@ using CryptoExchange.Net.Objects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
-using SpreadShare.Services.Support;
 using SpreadShare.Strategy;
+using SpreadShare.SupportServices;
 
-namespace SpreadShare.Services
+namespace SpreadShare.BinanceServices
 {
     class BinanceGetExchangeData : IGetExchangeData
     {

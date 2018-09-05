@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace SpreadShare.Services
+namespace SpreadShare.BinanceServices
 {
     interface IGetExchangeData
     {

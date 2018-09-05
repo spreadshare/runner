@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using SpreadShare.Services;
+using SpreadShare.BinanceServices;
 
 namespace SpreadShare.Strategy
 {
