@@ -31,7 +31,7 @@ namespace SpreadShare
         private static void ExecuteBusinessLogic(IServiceProvider serviceProvider)
         {
             // Start service to fetch exchange data
-            var service = serviceProvider.GetService<IGetExchangeData>();
+            var service = serviceProvider.GetService<IFetchCandles>();
             service.Connect();
 
             var trading = serviceProvider.GetService<ITradingService>();
