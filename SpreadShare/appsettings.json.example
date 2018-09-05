@@ -9,8 +9,13 @@
     "BinanceClientSettings": {
         "receiveWindow": 1000000,
         "tradingPairs": [
-          "bnbbtc",
-          "ethbtc"
+            "bnbbtc",
+            "ethbtc"
         ]
-    }
+    },
+    "SimpleBandWagonStrategy": {
+        "baseCurrency": "btc",
+        "checkTime": 18,
+        "holdTime": 12
+    } 
 }
