@@ -166,14 +166,10 @@ Failure states:
 ---
 
 ## Status updates
-These commands may be used to gather information about the current configuration of the bot.
+These commands may be used to gather information about the current configuration of the bot. These commands have no arguments and no failure states. They can be run in any context and in all states of the bot.
 
 ##### Command: Get current trading pairs
 Command: `command_check_tradingpairs`
-
-Arguments: None
-
-Failure states: None
 
 Example output: `[bnbbtc, ethbtc]`
 
@@ -182,10 +178,6 @@ Example output: `[bnbbtc, ethbtc]`
 ##### Command: Get current base currency
 Command: `command_get_basecurrency`
 
-Arguments: None
-
-Failure states: None
-
 Example output: `btc`
 
 ---
@@ -193,20 +185,12 @@ Example output: `btc`
 ##### Command: Get current checking time
 Command: `command_get_checktime`
 
-Arguments: None
-
-Failure states: None
-
 Example output: `18`
 
 ---
 
 ##### Command: Get current holding time
 Command: `command_get_holdtime`
-
-Arguments: None
-
-Failure states: None
 
 Example output: `12`
 
