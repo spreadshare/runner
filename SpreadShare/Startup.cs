@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Strategy;
 using SpreadShare.SupportServices;
+using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
@@ -64,6 +65,9 @@ namespace SpreadShare
 
             // Strategy to be executed
             services.AddSingleton<IStrategy, SimpleBandWagonStrategy>();
+
+            // ZeroMQ Service to interface with other programs
+            services.AddSingleton<IZeroMqService, ZeroMqService>();
         }
 
         /// <summary>
