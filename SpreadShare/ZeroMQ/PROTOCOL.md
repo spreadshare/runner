@@ -31,7 +31,9 @@ Simple commands may be executed while the bot is in a `started` state.
 
 ##### Command: Stop bot
 Command: `command_stop_bot`
+
 Arguments: None
+
 Failure states:
 - Failure will be returned if the bot is already in a `stopped` state
 
@@ -39,7 +41,9 @@ Failure states:
 
 ##### Command: Reset holding time
 Command: `command_reset_holding_time`
+
 Arguments: None
+
 Failure states:
 - Failure will be returned if the bot is not in a holding position
 
@@ -47,6 +51,7 @@ Failure states:
 
 ##### Command: Switch to different currency
 Command: `command_switch_currency`
+
 Arguments:
 
 | Argument    | Name                 | Description          | Example |
@@ -62,7 +67,9 @@ Failure states:
 
 ##### Command: Revert to base currency
 Command: `command_revert_base_currency`
+
 Arguments: None
+
 Failure states:
 - Failure will be returned if the bot is already in that currency
 - Failure will be returned if the Binance account does not have enough BNB to the fees
@@ -71,7 +78,9 @@ Failure states:
 
 ##### Command: Add trading pair
 Command: `command_add_tradingpair`
+
 Note: This command may be run in any state.
+
 Arguments:
 
 | Argument    | Name                 | Description          | Example |
@@ -86,7 +95,9 @@ Failure states:
 
 ##### Command: Remove trading pair
 Command: `command_remove_tradingpair`
+
 Note: This command may be run in any state.
+
 Arguments:
 
 | Argument    | Name                 | Description          | Example |
@@ -104,7 +115,9 @@ Simple commands may be executed while the bot is in a `stopped` state.
 
 ##### Command: Start bot
 Command: `command_start_bot`
+
 Arguments: None
+
 Failure states:
 - Failure will be returned if the bot is already in a `started` state
 
@@ -112,6 +125,7 @@ Failure states:
 
 ##### Command: Change configuration: base currency
 Command: `command_change_basecurrency`
+
 Arguments:
 
 | Argument    | Name                 | Description          | Example |
@@ -125,6 +139,7 @@ Failure states:
 
 ##### Command: Change configuration: check time
 Command: `command_change_checktime`
+
 Arguments:
 
 | Argument    | Name                 | Description          | Example |
@@ -138,6 +153,7 @@ Failure states:
 
 ##### Command: Change configuration: hold time
 Command: `command_change_holdtime`
+
 Arguments:
 
 | Argument    | Name                 | Description          | Example |
@@ -154,32 +170,44 @@ These commands may be used to gather information about the current configuration
 
 ##### Command: Get current trading pairs
 Command: `command_check_tradingpairs`
+
 Arguments: None
+
 Failure states: None
+
 Example output: `[bnbbtc, ethbtc]`
 
 ---
 
 ##### Command: Get current base currency
 Command: `command_get_basecurrency`
+
 Arguments: None
+
 Failure states: None
+
 Example output: `btc`
 
 ---
 
 ##### Command: Get current checking time
 Command: `command_get_checktime`
+
 Arguments: None
+
 Failure states: None
+
 Example output: `18`
 
 ---
 
 ##### Command: Get current holding time
 Command: `command_get_holdtime`
+
 Arguments: None
+
 Failure states: None
+
 Example output: `12`
 
 ---
@@ -190,12 +218,16 @@ Broadcasts use the [pub-sub](http://zguide.zeromq.org/page:all#Chapter-Advanced-
 
 ##### Broadcast: Status
 Topic: `topic_status`
+
 Publish-mode: On change
+
 Example output: `started` or `stopped`
 
 ---
 
 ##### Broadcast: Remaining holding time
 Topic: `topic_holdtime`
+
 Publish-mode: Every minute
+
 Example output: `23400` (seconds)
