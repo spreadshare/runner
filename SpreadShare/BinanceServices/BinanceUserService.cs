@@ -38,7 +38,7 @@ namespace SpreadShare.BinanceServices
                 listenKey = getListenKey.Data.ListenKey;
             else
             {
-                _logger.LogCritical("Unable to obtain Listen Key for binance websocket");
+                _logger.LogCritical($"Unable to obtain Listen Key for binance websocket: {getListenKey.Error.Message}");
                 throw new Exception();
             }
 
@@ -51,7 +51,7 @@ namespace SpreadShare.BinanceServices
                 },
                 (orderInfoUpdate) =>
                 {
-
+                    _logger.LogInformation($"ORDER UPDATE: { orderInfoUpdate.ExecutionType } ");
                 });
             _logger.LogInformation("Binance User Service was succesfully started!");
         }
