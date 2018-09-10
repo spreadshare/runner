@@ -34,7 +34,7 @@ namespace SpreadShare.Strategy
                 _loggerFactory = loggerFactory;
                 TradingService = tradingService as BinanceTradingService;
                 UserService = userService as BinanceUserService;
-                UserService.NewOrder += OnNewOrder;
+                UserService.OrderUpdateHandler += OnOrderUpdate;
                 _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
                 initial.Activate(new Context(), this, _loggerFactory);
             }
@@ -67,10 +67,10 @@ namespace SpreadShare.Strategy
             }
         }
 
-        private void OnNewOrder(object sender, BinanceStreamOrderUpdate order) {
+        private void OnOrderUpdate(object sender, BinanceStreamOrderUpdate order) {
             lock (_lock)
             {
-                _activeState.OnNewOrder(order);
+                _activeState.OnOrderUpdate(order);
             }
         }
     }

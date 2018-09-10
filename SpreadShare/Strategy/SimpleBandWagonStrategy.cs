@@ -2,6 +2,7 @@
 using System;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
+using Binance.Net.Objects;
 
 namespace SpreadShare.Strategy
 {
@@ -25,7 +26,7 @@ namespace SpreadShare.Strategy
                 Logger.LogInformation("Placing buy order...");
                 try
                 {
-                    long orderId = _stateManager.TradingService.PlaceMarketOrder("ETHBNB", Binance.Net.Objects.OrderSide.Buy);
+                    long orderId = _stateManager.TradingService.PlaceMarketOrder("ETHBNB", OrderSide.Buy);
                     Context.SetObject("orderId", orderId);
                 }
                 catch(Exception e)
@@ -42,7 +43,7 @@ namespace SpreadShare.Strategy
                 Logger.LogInformation("Some action");
             }
 
-            public override void OnNewOrder(Binance.Net.Objects.BinanceStreamOrderUpdate order) {
+            public override void OnOrderUpdate(BinanceStreamOrderUpdate order) {
 
             }
         }
@@ -70,9 +71,9 @@ namespace SpreadShare.Strategy
                // SwitchState(new EntryState());
             }
 
-            public override void OnNewOrder(Binance.Net.Objects.BinanceStreamOrderUpdate order) {
+            public override void OnOrderUpdate(BinanceStreamOrderUpdate order) {
                 Logger.LogInformation($"Registered a new order with id: {order.OrderId}");
-                if (order.OrderId == orderId) {
+                if (order.OrderId == orderId && order.ExecutionType == ExecutionType.New) {
                     Logger.LogInformation($"Succesfully placed order!");
                 }
             }

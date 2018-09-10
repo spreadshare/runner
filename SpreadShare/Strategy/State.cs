@@ -45,6 +45,6 @@ namespace SpreadShare.Strategy
         }
 
         public abstract void OnCandle(Candle c);
-        public abstract void OnNewOrder(BinanceStreamOrderUpdate order);
+        public abstract void OnOrderUpdate(BinanceStreamOrderUpdate order);
     }
 }

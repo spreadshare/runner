@@ -13,7 +13,7 @@ namespace SpreadShare.BinanceServices
         private BinanceSocketClient _client;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
-        public EventHandler<BinanceStreamOrderUpdate> NewOrder;
+        public EventHandler<BinanceStreamOrderUpdate> OrderUpdateHandler;
 
         public BinanceUserService(ILoggerFactory loggerFactory, IConfiguration configuration)
         {
@@ -55,17 +55,14 @@ namespace SpreadShare.BinanceServices
                 },
                 (orderInfoUpdate) =>
                 {
-                    _logger.LogInformation($"ORDER UPDATE: { orderInfoUpdate.ExecutionType } ");
-                    if (orderInfoUpdate.ExecutionType == ExecutionType.New) {
-                        OnNewOrder(orderInfoUpdate);
-                    }
+                    OnOrderUpdate(orderInfoUpdate);
                 });
             _logger.LogInformation("Binance User Service was succesfully started!");
         }
 
-        private void OnNewOrder(BinanceStreamOrderUpdate e) 
+        private void OnOrderUpdate(BinanceStreamOrderUpdate e) 
         {
-             EventHandler<BinanceStreamOrderUpdate> handler = NewOrder;
+             EventHandler<BinanceStreamOrderUpdate> handler = OrderUpdateHandler;
              if (handler != null) {
                  handler(this, e);
              }
