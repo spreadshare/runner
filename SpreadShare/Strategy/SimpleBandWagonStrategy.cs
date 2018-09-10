@@ -7,7 +7,8 @@ namespace SpreadShare.Strategy
 {
     class SimpleBandWagonStrategy : BaseStrategy
     {
-        public SimpleBandWagonStrategy(ILoggerFactory loggerFactory, ITradingService tradingService) : base(loggerFactory, tradingService)
+        public SimpleBandWagonStrategy(ILoggerFactory loggerFactory, ITradingService tradingService, IUserService userService) 
+            : base(loggerFactory, tradingService, userService)
         {
         }
 
@@ -18,7 +19,6 @@ namespace SpreadShare.Strategy
 
         internal class EntryState : State
         {
-
             protected override void ValidateContext()
             {
                 Logger.LogInformation("Opening the entry state...");
@@ -41,14 +41,18 @@ namespace SpreadShare.Strategy
             {
                 Logger.LogInformation("Some action");
             }
+
+            public override void OnNewOrder(Binance.Net.Objects.BinanceStreamOrderUpdate order) {
+
+            }
         }
 
         internal class ConfirmBuyState : State
         {
+            long orderId;
             protected override void ValidateContext()
             {
                 Logger.LogInformation("Validating context...");
-                long orderId;
                 try
                 {
                     orderId = (long)Context.GetObject("orderId");
@@ -63,7 +67,14 @@ namespace SpreadShare.Strategy
             public override void OnCandle(Candle c)
             {
                 Logger.LogInformation("Some action");
-                SwitchState(new EntryState());
+               // SwitchState(new EntryState());
+            }
+
+            public override void OnNewOrder(Binance.Net.Objects.BinanceStreamOrderUpdate order) {
+                Logger.LogInformation($"Registered a new order with id: {order.OrderId}");
+                if (order.OrderId == orderId) {
+                    Logger.LogInformation($"Succesfully placed order!");
+                }
             }
         }
     }

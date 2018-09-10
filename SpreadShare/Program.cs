@@ -35,7 +35,7 @@ namespace SpreadShare
         {
             // Start service to fetch exchange data
             var service = serviceProvider.GetService<IFetchCandles>();
-            service.Connect();
+            //service.Connect();
 
             var trading = serviceProvider.GetService<ITradingService>();
             trading.Start();

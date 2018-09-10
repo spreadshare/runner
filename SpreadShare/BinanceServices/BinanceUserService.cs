@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Binance.Net;
+using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -10,6 +13,7 @@ namespace SpreadShare.BinanceServices
         private BinanceSocketClient _client;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+        public EventHandler<BinanceStreamOrderUpdate> NewOrder;
 
         public BinanceUserService(ILoggerFactory loggerFactory, IConfiguration configuration)
         {
@@ -52,8 +56,19 @@ namespace SpreadShare.BinanceServices
                 (orderInfoUpdate) =>
                 {
                     _logger.LogInformation($"ORDER UPDATE: { orderInfoUpdate.ExecutionType } ");
+                    if (orderInfoUpdate.ExecutionType == ExecutionType.New) {
+                        OnNewOrder(orderInfoUpdate);
+                    }
                 });
             _logger.LogInformation("Binance User Service was succesfully started!");
+        }
+
+        private void OnNewOrder(BinanceStreamOrderUpdate e) 
+        {
+             EventHandler<BinanceStreamOrderUpdate> handler = NewOrder;
+             if (handler != null) {
+                 handler(this, e);
+             }
         }
     }
 }
