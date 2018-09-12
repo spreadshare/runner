@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using SpreadShare.BinanceServices;
 using SpreadShare.Strategy;
@@ -26,6 +27,8 @@ namespace SpreadShare
             // --------------------------------------------------
             // Setup finished --> Execute business logic services
             ExecuteBusinessLogic(serviceProvider);
+
+            KeepRunningForever();
         }
 
         private static void ExecuteBusinessLogic(IServiceProvider serviceProvider)
@@ -44,8 +47,14 @@ namespace SpreadShare
             var strategy = serviceProvider.GetService<IStrategy>();
             strategy.Start();
             
-            // TODO: Find more suitable way to manage application flow and keep it running
-            Console.ReadLine();
+            KeepRunningForever();
+        }
+
+        private static void KeepRunningForever()
+        {
+            Thread t = new Thread(() => { while (true) { Thread.Sleep(1000); } });
+            t.Start();
+            t.Join();
         }
     }
 }
