@@ -53,7 +53,7 @@ namespace SpreadShare.Strategy
             long orderId;
             protected override void ValidateContext()
             {
-                _stateManager.SetTimer(5000);
+
                 Logger.LogInformation("Validating context...");
                 try
                 {
@@ -111,7 +111,6 @@ namespace SpreadShare.Strategy
                 Logger.LogInformation($"Registered a new order with order id: {order.OrderId}");
                 if (order.OrderId == orderId && order.ExecutionType == ExecutionType.Trade) {
                     Logger.LogInformation("Order Confirmed!");
-                    SwitchState(new WinnerState());
                 }
             }
         }
