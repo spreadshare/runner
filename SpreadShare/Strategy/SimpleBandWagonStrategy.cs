@@ -35,7 +35,7 @@ namespace SpreadShare.Strategy
                     Logger.LogCritical(e.Message);
                     throw;
                 }
-                SwitchState(new ConfirmBuyPlacedState());
+                SwitchState(new ConfirmOrderPlacedState());
             }
 
             public override void OnCandle(Candle c)
@@ -48,7 +48,7 @@ namespace SpreadShare.Strategy
             }
         }
 
-        internal class ConfirmBuyPlacedState : State
+        internal class ConfirmOrderPlacedState : State
         {
             long orderId;
             protected override void ValidateContext()
