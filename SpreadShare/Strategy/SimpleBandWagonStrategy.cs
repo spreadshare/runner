@@ -35,7 +35,7 @@ namespace SpreadShare.Strategy
                     Logger.LogCritical(e.Message);
                     throw;
                 }
-                SwitchState(new ConfirmBuyState());
+                SwitchState(new ConfirmBuyPlacedState());
             }
 
             public override void OnCandle(Candle c)
@@ -48,11 +48,12 @@ namespace SpreadShare.Strategy
             }
         }
 
-        internal class ConfirmBuyState : State
+        internal class ConfirmBuyPlacedState : State
         {
             long orderId;
             protected override void ValidateContext()
             {
+                _stateManager.SetTimer(5000);
                 Logger.LogInformation("Validating context...");
                 try
                 {
@@ -75,7 +76,61 @@ namespace SpreadShare.Strategy
                 Logger.LogInformation($"Registered a new order with id: {order.OrderId}");
                 if (order.OrderId == orderId && order.ExecutionType == ExecutionType.New) {
                     Logger.LogInformation($"Succesfully placed order!");
+                    SwitchState(new ConfirmTradeState());
                 }
+            }
+
+            public override void OnTimer() {
+                SwitchState(new WinnerState());
+            }
+        }
+
+        internal class ConfirmTradeState : State
+        {
+            long orderId;
+            protected override void ValidateContext()
+            {
+                Logger.LogInformation("Validating context...");
+                try
+                {
+                    orderId = (long)Context.GetObject("orderId");
+                }
+                catch(Exception)
+                {
+                    Logger.LogCritical("Failed to validate context!");
+                    throw;
+                }
+            }
+            public override void OnCandle(Candle c)
+            {
+                //throw new NotImplementedException();
+            }
+
+            public override void OnOrderUpdate(BinanceStreamOrderUpdate order)
+            {
+                Logger.LogInformation($"Registered a new order with order id: {order.OrderId}");
+                if (order.OrderId == orderId && order.ExecutionType == ExecutionType.Trade) {
+                    Logger.LogInformation("Order Confirmed!");
+                    SwitchState(new WinnerState());
+                }
+            }
+        }
+
+        internal class WinnerState : State
+        {
+            public override void OnCandle(Candle c)
+            {
+            }
+
+            public override void OnOrderUpdate(BinanceStreamOrderUpdate order)
+            {
+                
+            }
+
+            protected override void ValidateContext()
+            {
+                //throw new NotImplementedException();
+                Logger.LogInformation("YOU WIN!");
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using Binance.Net.Objects;
+﻿using System;
+using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
@@ -46,5 +47,9 @@ namespace SpreadShare.Strategy
 
         public abstract void OnCandle(Candle c);
         public abstract void OnOrderUpdate(BinanceStreamOrderUpdate order);
+
+        public virtual void OnTimer() {
+            throw new Exception("Timer callback not present in this state.");
+        }
     }
 }
