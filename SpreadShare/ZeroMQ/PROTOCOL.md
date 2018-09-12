@@ -66,7 +66,7 @@ Failure states:
 ---
 
 ##### Command: Revert to base currency
-Command: `command_revert_base_currency`
+Command: `command_revert_basecurrency`
 
 Arguments: None
 
@@ -169,7 +169,7 @@ Failure states:
 These commands may be used to gather information about the current configuration of the bot. These commands have no arguments and no failure states. They can be run in any context and in all states of the bot.
 
 ##### Command: Get current trading pairs
-Command: `command_check_tradingpairs`
+Command: `command_get_tradingpairs`
 
 Example output: `[bnbbtc, ethbtc]`
 
