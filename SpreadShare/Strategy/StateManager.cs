@@ -18,7 +18,6 @@ namespace SpreadShare.Strategy
         public BinanceUserService UserService;
 
         
-
         public string CurrentState => _activeState.GetType().ToString().Split('+').Last();
 
         /// <summary>

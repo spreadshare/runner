@@ -35,7 +35,7 @@ namespace SpreadShare
         {
             // Start service to fetch exchange data
             var service = serviceProvider.GetService<IFetchCandles>();
-            //service.Connect();
+            service.Connect();
 
             var trading = serviceProvider.GetService<ITradingService>();
             trading.Start();
@@ -47,8 +47,7 @@ namespace SpreadShare
             var strategy = serviceProvider.GetService<IStrategy>();
             strategy.Start();
             
-            // TODO: Find more suitable way to manage application flow and keep it running
-            Console.ReadLine();
+            KeepRunningForever();
         }
 
         private static void KeepRunningForever()
