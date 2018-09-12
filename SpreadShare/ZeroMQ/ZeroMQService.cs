@@ -2,50 +2,75 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using ZeroMQ;
+using NetMQ;
+using NetMQ.Sockets;
 
 namespace SpreadShare.ZeroMQ
 {
     class ZeroMqService : IZeroMqService
     {
         private readonly ILogger _logger;
+        private readonly ILoggerFactory _loggerFactory;
 
         public ZeroMqService(ILoggerFactory loggerFactory)
         {
+            _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<ZeroMqService>();
         }
 
         public Task BroadcastMessage(string message)
         {
-            var y = Command.GetCommand("{\"command\": \"commandX\"}");
             throw new System.NotImplementedException();
         }
 
         public Task StartCommandReceiver()
         {
-            // Create
-            using (var context = new ZContext())
-            using (var responder = new ZSocket(context, ZSocketType.REP))
+            using (var server = new ResponseSocket())
             {
-                // Bind
-                responder.Bind("tcp://*:5555");
+                server.Bind("tcp://*:5555");
 
                 while (true)
                 {
-                    // Receive
-                    using (ZFrame request = responder.ReceiveFrame())
+                    string message;
+                    try
                     {
-                        Console.WriteLine("Received {0}", request.ReadString());
-
-                        // Do some work
-                        Thread.Sleep(1);
-
-                        // Send
-                        //responder.Send(new ZFrame(name));
+                        message = server.ReceiveFrameString();
                     }
+                    catch (NetMQ.FiniteStateMachineException e)
+                    {
+                        _logger.LogError("NetMQ.FiniteStateMachineException occured");
+                        continue;
+                    }
+
+                    _logger.LogInformation($"Received {message}");
+
+                    // Parse command
+                    Command c;
+                    try
+                    {
+                        c = Command.GetCommand(message, _loggerFactory);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogCritical($"Exception occured: {e.Message}");
+                        server.SendFrame(new Response(Response.Type.failure, e.Message).ToJson());
+                        continue;
+                    }
+
+                    // Run action
+                    try
+                    {
+                        c.Action();
+                    }
+                    catch (Exception e)
+                    {
+                        server.SendFrame(new Response(Response.Type.error, $"Action errored: {e.Message}").ToJson());
+                        continue;
+                    }
+
+                    server.SendFrame(new Response(Response.Type.success, "Action completed successfully").ToJson());
                 }
             }
-            throw new System.NotImplementedException();
         }
     }
 }

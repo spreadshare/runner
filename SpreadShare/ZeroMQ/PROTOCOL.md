@@ -14,9 +14,9 @@ The bot supports changing configuration via commands and is capable of publishin
 
 # Commands
 Commands use the [request-reply](http://zguide.zeromq.org/page:all#The-Simple-Reply-Envelope) pattern in ZeroMQ. A program may request a certain action of the bot, and the bot may respond in three different ways:
-- `Success`: The requested action has been processed succesfully.
-- `Failure`: The action is invalid or prohibited in the current context.
-- `Error`: An error has occurred. The bot may have crashed or the request was invalid.
+- `success`: The requested action has been processed succesfully.
+- `failure`: The action is invalid or prohibited in the current context.
+- `error`: An error has occurred. The bot may have crashed or the request was invalid.
 
 Failure and error states will contain a message indicating what went wrong. Three different types of commands are listed. Status commands request aspects of the current configuration of the bot. Active commands may be executed while the bot is in a `started` or `stopped` state. Passive commands may __only__ be executed while the bot is in a `stopped` state. 
 

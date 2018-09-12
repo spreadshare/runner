@@ -47,7 +47,7 @@ namespace SpreadShare
 
             // Start zeroMQ service
             var zeroMqService = serviceProvider.GetService<IZeroMqService>();
-            zeroMqService.BroadcastMessage(null);
+            zeroMqService.StartCommandReceiver();
 
             // TODO: Find more suitable way to manage application flow and keep it running
             Console.ReadLine();

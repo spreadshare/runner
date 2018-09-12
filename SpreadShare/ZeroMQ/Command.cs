@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -9,10 +10,11 @@ namespace SpreadShare.ZeroMQ
 {
     abstract class Command
     {
+        protected ILogger _logger;
         protected abstract string CommandString { get; }
         protected virtual Dictionary<string, string> Arguments => new Dictionary<string, string>();
 
-        public static Command GetCommand(string json)
+        public static Command GetCommand(string json, ILoggerFactory loggerFactory)
         {
             // ParseArguments json
             JObject jsonObject;
@@ -22,13 +24,13 @@ namespace SpreadShare.ZeroMQ
             }
             catch (JsonReaderException e)
             {
-                throw new Exception("Invalid json");
+                throw new Exception("Provided json is not formatted properly.");
             }
 
             // Check if json contains command
             if (!jsonObject.ContainsKey("command"))
             {
-                throw new Exception("Json does not contain command");
+                throw new Exception("Provided json does not contain 'command' key.");
             }
             
             // Get all command classes
@@ -48,18 +50,19 @@ namespace SpreadShare.ZeroMQ
                     .GetValue(subcommand);
 
                 // Check CommandString with json
-                if (jsonObject["command"] == commandString)
+                if (jsonObject["command"].ToString().Equals(commandString))
                 {
-                    var x = (Command)subcommand;
+                    var x = (Command) subcommand;
+                    x._logger = loggerFactory.CreateLogger(type);
                     x.ParseArguments(jsonObject);
                     return x;
                 }
             }
-            throw new Exception("Json command not recognised");
+            throw new Exception($"Command '{jsonObject["command"]}' was not recognised.");
         }
         
         /// <summary>
-        /// Parse arguments
+        /// Parse arguments required
         /// </summary>
         /// <param name="jsonObject"></param>
         private void ParseArguments(JObject jsonObject)
@@ -76,8 +79,7 @@ namespace SpreadShare.ZeroMQ
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"{arg.Key} was not found in provided json");
-                    Console.WriteLine(e);
+                    throw new Exception($"Argument missing: {arg.Key}.");
                 }
             }
 
@@ -86,7 +88,7 @@ namespace SpreadShare.ZeroMQ
             {
                 if (providedArg.Key != "command" && !Arguments.ContainsKey(providedArg.Key))
                 {
-                    throw new Exception($"No args found matching {providedArg.Key}");
+                    throw new Exception($"Provided argument not recognised: '{providedArg.Key}'.");
                 }
             }
         }

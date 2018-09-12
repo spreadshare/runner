@@ -1,4 +1,6 @@
-﻿namespace SpreadShare.ZeroMQ.Commands
+﻿using Microsoft.Extensions.Logging;
+
+namespace SpreadShare.ZeroMQ.Commands
 {
     class CommandStartBot : Command
     {
