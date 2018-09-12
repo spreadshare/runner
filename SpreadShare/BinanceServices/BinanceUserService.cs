@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Binance.Net;
-using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 

@@ -14,8 +14,8 @@ namespace SpreadShare.Strategy
         private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
-        public BinanceTradingService TradingService;
-        public BinanceUserService UserService;
+        public AbstractTradingService TradingService;
+        public AbstractUserService UserService;
 
         
         public string CurrentState => _activeState.GetType().ToString().Split('+').Last();
@@ -31,8 +31,8 @@ namespace SpreadShare.Strategy
             {
                 _logger = loggerFactory.CreateLogger("StateManager");
                 _loggerFactory = loggerFactory;
-                TradingService = tradingService as BinanceTradingService;
-                UserService = userService as BinanceUserService;
+                TradingService = tradingService as AbstractTradingService;
+                UserService = userService as AbstractUserService;
                 UserService.OrderUpdateHandler += OnOrderUpdate;
                 _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
                 initial.Activate(new Context(), this, _loggerFactory);

@@ -1,7 +1,4 @@
-﻿using System;
-using Binance.Net.Objects;
-
-namespace SpreadShare.BinanceServices
+﻿namespace SpreadShare.BinanceServices
 {
     interface IUserService
     {
