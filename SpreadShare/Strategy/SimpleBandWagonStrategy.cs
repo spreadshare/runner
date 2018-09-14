@@ -38,13 +38,14 @@ namespace SpreadShare.Strategy
                 SwitchState(new ConfirmOrderPlacedState());
             }
 
-            public override void OnCandle(Candle c)
+            public override ResponseCodes OnCandle(Candle c)
             {
                 Logger.LogInformation("Some action");
+                return ResponseCodes.SUCCES;
             }
 
-            public override void OnOrderUpdate(BinanceStreamOrderUpdate order) {
-
+            public override ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order) {
+                return ResponseCodes.SUCCES;
             }
         }
 
@@ -53,7 +54,6 @@ namespace SpreadShare.Strategy
             long orderId;
             protected override void ValidateContext()
             {
-
                 Logger.LogInformation("Validating context...");
                 try
                 {
@@ -66,18 +66,13 @@ namespace SpreadShare.Strategy
                 }
             }
 
-            public override void OnCandle(Candle c)
-            {
-                Logger.LogInformation("Some action");
-               // SwitchState(new EntryState());
-            }
-
-            public override void OnOrderUpdate(BinanceStreamOrderUpdate order) {
+            public override ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order) {
                 Logger.LogInformation($"Registered a new order with id: {order.OrderId}");
                 if (order.OrderId == orderId && order.ExecutionType == ExecutionType.New) {
                     Logger.LogInformation($"Succesfully placed order!");
                     SwitchState(new ConfirmTradeState());
                 }
+                return ResponseCodes.SUCCES;
             }
 
             public override ResponseCodes OnTimer() {
@@ -102,31 +97,19 @@ namespace SpreadShare.Strategy
                     throw;
                 }
             }
-            public override void OnCandle(Candle c)
-            {
-                //throw new NotImplementedException();
-            }
 
-            public override void OnOrderUpdate(BinanceStreamOrderUpdate order)
+            public override ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order)
             {
                 Logger.LogInformation($"Registered a new order with order id: {order.OrderId}");
                 if (order.OrderId == orderId && order.ExecutionType == ExecutionType.Trade) {
                     Logger.LogInformation("Order Confirmed!");
                 }
+                return ResponseCodes.SUCCES;
             }
         }
 
         internal class WinnerState : State
         {
-            public override void OnCandle(Candle c)
-            {
-            }
-
-            public override void OnOrderUpdate(BinanceStreamOrderUpdate order)
-            {
-                
-            }
-
             protected override void ValidateContext()
             {
                 //throw new NotImplementedException();

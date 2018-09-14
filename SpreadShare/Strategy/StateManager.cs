@@ -65,7 +65,10 @@ namespace SpreadShare.Strategy
         {
             lock (_lock)
             {
-                _activeState.OnCandle(c);
+                State.ResponseCodes response = _activeState.OnCandle(c);
+                if (response != State.ResponseCodes.SUCCES) {
+                    _logger.LogInformation($"Candle was not processed by state. Response Code: { response }");
+                }
             }
         }
 
@@ -76,11 +79,12 @@ namespace SpreadShare.Strategy
         private void OnTimer() {
             lock(_lock) {
                 //Recheck if the timer has not been resetted by another thread in the meantime
-                if (_activeState.OnTimer() == State.ResponseCodes.SUCCES) {
+                State.ResponseCodes response = _activeState.OnTimer();
+                if (response == State.ResponseCodes.SUCCES) {
                     _logger.LogInformation("Timer succesfully triggered!");
                 }
                 else {
-                    _logger.LogInformation("Timer callback failed, must have been interrupted.");
+                    _logger.LogInformation($"Timer callback was not used by state. Response Code: { response }");
                 }
             }
         }
@@ -88,7 +92,10 @@ namespace SpreadShare.Strategy
         private void OnOrderUpdate(object sender, BinanceStreamOrderUpdate order) {
             lock (_lock)
             {
-                _activeState.OnOrderUpdate(order);
+                State.ResponseCodes response = _activeState.OnOrderUpdate(order);
+                if (response != State.ResponseCodes.SUCCES) {
+                    _logger.LogInformation($"Order update was not processed by the current state. Response Code: { response }");
+                }
             }
         }
     }

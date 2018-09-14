@@ -46,8 +46,12 @@ namespace SpreadShare.Strategy
             _stateManager.SwitchState(s);
         }
 
-        public abstract void OnCandle(Candle c);
-        public abstract void OnOrderUpdate(BinanceStreamOrderUpdate order);
+        public virtual ResponseCodes OnCandle(Candle c) {
+            return ResponseCodes.NOT_DEFINED;
+        }
+        public virtual ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order) {
+            return ResponseCodes.NOT_DEFINED;
+        }
 
         public virtual ResponseCodes OnTimer() {
             return ResponseCodes.NOT_DEFINED;
