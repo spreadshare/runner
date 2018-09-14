@@ -80,8 +80,9 @@ namespace SpreadShare.Strategy
                 }
             }
 
-            public override void OnTimer() {
+            public override ResponseCodes OnTimer() {
                 SwitchState(new WinnerState());
+                return ResponseCodes.SUCCES;
             }
         }
 

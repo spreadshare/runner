@@ -54,7 +54,6 @@ namespace SpreadShare.Strategy
 
             Context c = _activeState.Context;
             Interlocked.Exchange(ref _activeState, child);
-            GC.SuppressFinalize(_activeState);
             child.Activate(c, this, _loggerFactory);
         }
 
@@ -77,12 +76,11 @@ namespace SpreadShare.Strategy
         private void OnTimer() {
             lock(_lock) {
                 //Recheck if the timer has not been resetted by another thread in the meantime
-                if (timer.Valid) {
-                    try {
-                        _activeState.OnTimer();
-                    } catch(Exception e) {
-                        _logger.LogInformation("Timer callback failed, must have been interrupted.");
-                    }
+                if (_activeState.OnTimer() == State.ResponseCodes.SUCCES) {
+                    _logger.LogInformation("Timer succesfully triggered!");
+                }
+                else {
+                    _logger.LogInformation("Timer callback failed, must have been interrupted.");
                 }
             }
         }

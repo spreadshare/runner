@@ -7,6 +7,7 @@ namespace SpreadShare.Strategy
 {
     abstract class State
     {
+        public enum ResponseCodes { SUCCES, NOT_DEFINED }
         protected StateManager _stateManager;
         public Context Context { get; set; }
         protected ILogger Logger;
@@ -48,8 +49,8 @@ namespace SpreadShare.Strategy
         public abstract void OnCandle(Candle c);
         public abstract void OnOrderUpdate(BinanceStreamOrderUpdate order);
 
-        public virtual void OnTimer() {
-            throw new Exception("Timer callback not present in this state.");
+        public virtual ResponseCodes OnTimer() {
+            return ResponseCodes.NOT_DEFINED;
         }
     }
 }
