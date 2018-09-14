@@ -60,7 +60,7 @@ namespace SpreadShare.BinanceServices
 
         public override long PlaceMarketOrder(string symbol, OrderSide side, decimal amount)
         {
-            var response = _client.PlaceOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
+            var response = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
             if (response.Success)
             {
                 _logger.LogInformation($"Order {response.Data.OrderId} placement succeeded!");

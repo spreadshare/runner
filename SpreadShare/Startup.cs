@@ -64,7 +64,7 @@ namespace SpreadShare
             services.AddSingleton<IUserService, BinanceUserService>();
 
             // Strategy to be executed
-            services.AddSingleton<IStrategy, StabilityTestStrategy>();
+            services.AddSingleton<IStrategy, SimpleBandWagonStrategy>();
 
             // ZeroMQ Service to interface with other programs
             services.AddSingleton<IZeroMqService, ZeroMqService>();
