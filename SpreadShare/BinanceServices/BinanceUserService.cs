@@ -2,12 +2,14 @@
 using Binance.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using SpreadShare.Models;
 
 namespace SpreadShare.BinanceServices
 {
     class BinanceUserService : AbstractUserService
     {
-        private BinanceSocketClient _client;
+        private BinanceClient _client;
+        private BinanceSocketClient _socketclient;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
 
@@ -23,18 +25,16 @@ namespace SpreadShare.BinanceServices
         /// </summary>
         public override void Start()
         {
-            //Setup the socket client
-            _client = new BinanceSocketClient();
+            //Setup the clients
+            _client = new BinanceClient();
+            _socketclient = new BinanceSocketClient();
             string apikey = _configuration.GetValue<string>("BinanceCredentials:api-key");
             string apisecret = _configuration.GetValue<string>("BinanceCredentials:api-secret");
             _client.SetApiCredentials(apikey, apisecret);
-
-            //Create a temporary client in order to obtain the listen key needed for the socket connection.
-            var tempClient = new BinanceClient();
-            tempClient.SetApiCredentials(apikey, apisecret);
+            _socketclient.SetApiCredentials(apikey, apisecret);
 
             string listenKey;
-            var getListenKey = tempClient.StartUserStream();
+            var getListenKey = _client.StartUserStream();
             if (getListenKey.Success)
                 listenKey = getListenKey.Data.ListenKey;
             else
@@ -45,7 +45,7 @@ namespace SpreadShare.BinanceServices
 
 
             //Start socket connection
-            var succesOrderBook = _client.SubscribeToUserStream(listenKey,
+            var succesOrderBook = _socketclient.SubscribeToUserStream(listenKey,
                 (accountInfoUpdate) =>
                 {
 
@@ -55,6 +55,15 @@ namespace SpreadShare.BinanceServices
                     OnOrderUpdate(orderInfoUpdate);
                 });
             _logger.LogInformation("Binance User Service was succesfully started!");
+        }
+
+        public override Assets GetPortfolio()
+        {
+            var accountInfo = _client.GetAccountInfo();
+            if (!accountInfo.Success) {
+                throw new Exception($"Could not get acccount info: {accountInfo.Error}");
+            }
+            return new Assets(accountInfo.Data.Balances);
         }
     }
 }

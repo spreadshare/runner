@@ -23,7 +23,7 @@ namespace SpreadShare.Strategy
                     return;
                 Thread.Sleep(1);
             }
-            new Thread(new ThreadStart(callback)).Start();
+            callback();
         }
 
         public long getRemaining() {

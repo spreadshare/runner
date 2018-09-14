@@ -26,7 +26,7 @@ namespace SpreadShare.Strategy
                 Logger.LogInformation("Placing buy order...");
                 try
                 {
-                    long orderId = _stateManager.TradingService.PlaceMarketOrder("ETHBNB", OrderSide.Buy);
+                    long orderId = TradingService.PlaceMarketOrder("ETHBNB", OrderSide.Buy, 0);
                     Context.SetObject("orderId", orderId);
                 }
                 catch(Exception e)
@@ -54,6 +54,11 @@ namespace SpreadShare.Strategy
             long orderId;
             protected override void ValidateContext()
             {
+                Assets assets = UserService.GetPortfolio();
+                var list = assets.GetAllLockedBalances();
+                foreach(var item in list) {
+                    Console.WriteLine($"{item.Symbol} - {item.Value}");
+                }
                 Logger.LogInformation("Validating context...");
                 try
                 {
@@ -112,7 +117,6 @@ namespace SpreadShare.Strategy
         {
             protected override void ValidateContext()
             {
-                //throw new NotImplementedException();
                 Logger.LogInformation("YOU WIN!");
             }
         }
