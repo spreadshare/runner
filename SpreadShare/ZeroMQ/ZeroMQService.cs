@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NetMQ;
@@ -11,18 +12,54 @@ namespace SpreadShare.ZeroMQ
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
 
+        /// <summary>
+        /// Constructor: Provides loggers
+        /// </summary>
+        /// <param name="loggerFactory"></param>
         public ZeroMqService(ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<ZeroMqService>();
         }
 
-        public Task BroadcastMessage(string message)
+        /// <summary>
+        /// Start both threads
+        /// </summary>
+        /// <returns></returns>
+        public Task Start()
         {
-            throw new NotImplementedException();
+            Thread broadcastService = new Thread(StartBroadcastService);
+            broadcastService.Start();
+
+            Thread commandReceiver = new Thread(StartCommandReceiver);
+            commandReceiver.Start();
+
+            return Task.FromResult(0);
         }
 
-        public Task StartCommandReceiver()
+        /// <summary>
+        /// Start pub-sub publisher for broadcasting status and holdtime
+        /// </summary>
+        public void StartBroadcastService()
+        {
+            using (var pubSocket = new PublisherSocket())
+            {
+                pubSocket.Options.SendHighWatermark = 1000;
+                pubSocket.Bind("tcp://*:5556");
+
+                while (true)
+                {
+                    pubSocket.SendMoreFrame("topic_status").SendFrame("TODO");
+                    pubSocket.SendMoreFrame("topic_holdtime").SendFrame("TODO");
+                    Thread.Sleep(60000);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Start req-rep listener for commands
+        /// </summary>
+        public void StartCommandReceiver()
         {
             using (var server = new ResponseSocket())
             {

@@ -198,7 +198,7 @@ Example output: `12`
 ---
 
 # Broadcasts
-Broadcasts use the [pub-sub](http://zguide.zeromq.org/page:all#Chapter-Advanced-Pub-Sub-Patterns) pattern in ZeroMQ. A program may subscribe to a topic of the bot, and the bot publishes updates at a regular interval or on change on these topics. When subscribing to a topic, a cached value is sent.
+Broadcasts use the [pub-sub](http://zguide.zeromq.org/page:all#Chapter-Advanced-Pub-Sub-Patterns) pattern in ZeroMQ. A program may subscribe to a topic of the bot, and the bot publishes updates at a regular interval or on change on these topics. When subscribing to a topic, a cached value is sent. The bot is operating on port `5556`.
 
 ##### Broadcast: Status
 Topic: `topic_status`
