@@ -2,12 +2,8 @@
 The bot supports changing configuration via commands and is capable of publishing updates.
 
 # TODO
-##### Documentation
-- Add example input
-- Add example output
-
 ##### Code
-- Everything
+- Implementation of actions and broadcasting real data
 
 ##### Other
 - Should bot stop fetching data when in stopped state?
@@ -21,9 +17,10 @@ Commands use the [request-reply](http://zguide.zeromq.org/page:all#The-Simple-Re
 Failure and error states will contain a message indicating what went wrong. Three different types of commands are listed. Status commands request aspects of the current configuration of the bot. Active commands may be executed while the bot is in a `started` or `stopped` state. Passive commands may __only__ be executed while the bot is in a `stopped` state. 
 
 The bot has two states:
-- `Started`: The bot is actively running
-- `Stopped`: The bot is alive, but is not trading or fetching data (?)
+- `started`: The bot is actively running
+- `stopped`: The bot is alive, but is not trading or fetching data (?)
 
+This service is operating on port `5555` and returns JSON data.
 ---
 
 ## Active commands
@@ -37,6 +34,12 @@ Arguments: None
 Failure states:
 - Failure will be returned if the bot is already in a `stopped` state
 
+Example input:
+```
+{
+  "command": "command_stop_bot"
+}
+```
 ---
 
 ##### Command: Reset holding time
@@ -47,6 +50,12 @@ Arguments: None
 Failure states:
 - Failure will be returned if the bot is not in a holding position
 
+Example input:
+```
+{
+  "command": "command_reset_holding_time"
+}
+```
 ---
 
 ##### Command: Switch to different currency
@@ -63,6 +72,13 @@ Failure states:
 - Failure will be returned if the Binance account does not have enough BNB to the fees
 - Failure will be returned if the bot does not recognise the currency
 
+Example input:
+```
+{
+  "command": "command_switch_currency",
+  "arg_currency" : "btc"
+}
+```
 ---
 
 ##### Command: Revert to base currency
@@ -74,6 +90,12 @@ Failure states:
 - Failure will be returned if the bot is already in that currency
 - Failure will be returned if the Binance account does not have enough BNB to the fees
 
+Example input:
+```
+{
+  "command": "command_revert_basecurrency"
+}
+```
 ---
 
 ##### Command: Add trading pair
@@ -91,6 +113,13 @@ Failure states:
 - Failure will be returned if the tradingpair is already included in the list
 - Failure will be returned if the tradingpair is not recognised
 
+Example input:
+```
+{
+  "command": "command_add_tradingpair",
+  "arg_tradingpair" : "bnbbtc"
+}
+```
 ---
 
 ##### Command: Remove trading pair
@@ -108,6 +137,13 @@ Failure states:
 - Failure will be returned if the tradingpair is not in the list of current tradingpairs
 - Failure will be returned if the tradingpair is not recognised
 
+Example input:
+```
+{
+  "command": "command_remove_tradingpair",
+  "arg_tradingpair" : "bnbbtc"
+}
+```
 ---
 
 ## Passive commands
@@ -121,6 +157,12 @@ Arguments: None
 Failure states:
 - Failure will be returned if the bot is already in a `started` state
 
+Example input:
+```
+{
+  "command": "command_start_bot"
+}
+```
 ---
 
 ##### Command: Change configuration: base currency
@@ -135,6 +177,13 @@ Arguments:
 Failure states:
 - Failure will be returned if the currency is not one of btc, eth, usdt
 
+Example input:
+```
+{
+  "command": "command_change_basecurrency",
+  "arg_currency" : "btc"
+}
+```
 ---
 
 ##### Command: Change configuration: check time
@@ -149,6 +198,13 @@ Arguments:
 Failure states:
 - Failure will be returned if the time is not between 1 and 72
 
+Example input:
+```
+{
+  "command": "command_change_checktime",
+  "arg_time" : "18"
+}
+```
 ---
 
 ##### Command: Change configuration: hold time
@@ -163,6 +219,13 @@ Arguments:
 Failure states:
 - Failure will be returned if the time is not between 1 and 72
 
+Example input:
+```
+{
+  "command": "command_change_holdtime",
+  "arg_time" : "12"
+}
+```
 ---
 
 ## Status updates
@@ -171,34 +234,83 @@ These commands may be used to gather information about the current configuration
 ##### Command: Get current trading pairs
 Command: `command_get_tradingpairs`
 
-Example output: `[bnbbtc, ethbtc]`
+Example input:
+```
+{
+  "command": "command_get_tradingpairs"
+}
+```
 
+Example output:
+```
+{
+  "result": "success",
+  "message" : "[bnbbtc, ethbtc]"
+}
+```
 ---
 
 ##### Command: Get current base currency
 Command: `command_get_basecurrency`
 
-Example output: `btc`
+Example input:
+```
+{
+  "command": "command_get_basecurrency"
+}
+```
 
+Example output:
+```
+{
+  "result": "success",
+  "message" : "btc"
+}
+```
 ---
 
 ##### Command: Get current checking time
 Command: `command_get_checktime`
 
-Example output: `18`
+Example input:
+```
+{
+  "command": "command_get_checktime"
+}
+```
 
+Example output:
+```
+{
+  "result": "success",
+  "message" : "18"
+}
+```
 ---
 
 ##### Command: Get current holding time
 Command: `command_get_holdtime`
 
-Example output: `12`
+Example input:
+```
+{
+  "command": "command_get_holdtime"
+}
+```
+
+Example output:
+```
+{
+  "result": "success",
+  "message" : "12"
+}
+```
 
 ---
 ---
 
 # Broadcasts
-Broadcasts use the [pub-sub](http://zguide.zeromq.org/page:all#Chapter-Advanced-Pub-Sub-Patterns) pattern in ZeroMQ. A program may subscribe to a topic of the bot, and the bot publishes updates at a regular interval or on change on these topics. When subscribing to a topic, a cached value is sent. The bot is operating on port `5556`.
+Broadcasts use the [pub-sub](http://zguide.zeromq.org/page:all#Chapter-Advanced-Pub-Sub-Patterns) pattern in ZeroMQ. A program may subscribe to a topic of the bot, and the bot publishes updates at a regular interval or on change on these topics. When subscribing to a topic, a cached value is sent. This service is operating on port `5556` and returns plaintext data.
 
 ##### Broadcast: Status
 Topic: `topic_status`
