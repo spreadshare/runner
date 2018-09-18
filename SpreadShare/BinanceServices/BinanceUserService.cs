@@ -5,11 +5,12 @@ using Microsoft.Extensions.Logging;
 
 namespace SpreadShare.BinanceServices
 {
-    class BinanceUserService : IUserService
+    class BinanceUserService : AbstractUserService
     {
         private BinanceSocketClient _client;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+
 
         public BinanceUserService(ILoggerFactory loggerFactory, IConfiguration configuration)
         {
@@ -20,7 +21,7 @@ namespace SpreadShare.BinanceServices
         /// <summary>
         /// Start the BinanceUserService, will configure callback functions.
         /// </summary>
-        public void Start()
+        public override void Start()
         {
             //Setup the socket client
             _client = new BinanceSocketClient();
@@ -38,7 +39,7 @@ namespace SpreadShare.BinanceServices
                 listenKey = getListenKey.Data.ListenKey;
             else
             {
-                _logger.LogCritical("Unable to obtain Listen Key for binance websocket");
+                _logger.LogCritical($"Unable to obtain Listen Key for binance websocket: {getListenKey.Error.Message}");
                 throw new Exception();
             }
 
@@ -51,7 +52,7 @@ namespace SpreadShare.BinanceServices
                 },
                 (orderInfoUpdate) =>
                 {
-
+                    OnOrderUpdate(orderInfoUpdate);
                 });
             _logger.LogInformation("Binance User Service was succesfully started!");
         }

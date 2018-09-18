@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Binance.Net.Objects;
+using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
@@ -44,5 +45,6 @@ namespace SpreadShare.Strategy
         }
 
         public abstract void OnCandle(Candle c);
+        public abstract void OnOrderUpdate(BinanceStreamOrderUpdate order);
     }
 }

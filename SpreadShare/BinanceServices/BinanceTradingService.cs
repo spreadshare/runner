@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace SpreadShare.BinanceServices
 {
-    class BinanceTradingService : ITradingService
+    class BinanceTradingService : AbstractTradingService
     {
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
@@ -21,7 +21,7 @@ namespace SpreadShare.BinanceServices
             _logger.LogInformation("Creating new Binance Client");
         }
 
-        public void Start()
+        public override void Start()
         {
             //Read the custom receive window, the standard window is often too short.
             _receiveWindow = _configuration.GetValue<long>("BinanceClientSettings:receiveWindow");
@@ -58,7 +58,7 @@ namespace SpreadShare.BinanceServices
             }
         }
 
-        public long PlaceMarketOrder(string symbol, OrderSide side)
+        public override long PlaceMarketOrder(string symbol, OrderSide side)
         {
             var response = _client.PlaceTestOrder("BNBETH", OrderSide.Buy, OrderType.Market, 1, null, null, null, null, null, null, (int)_receiveWindow);
             if (response.Success)
@@ -73,7 +73,7 @@ namespace SpreadShare.BinanceServices
             }
         }
 
-        public void CancelOrder(string symbol, long orderId)
+        public override void CancelOrder(string symbol, long orderId)
         {
             var response = _client.CancelOrder(symbol, orderId, null, null, _receiveWindow);
             if (response.Success)
