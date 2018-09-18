@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NetMQ;
@@ -20,7 +19,7 @@ namespace SpreadShare.ZeroMQ
 
         public Task BroadcastMessage(string message)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task StartCommandReceiver()
@@ -36,7 +35,7 @@ namespace SpreadShare.ZeroMQ
                     {
                         message = server.ReceiveFrameString();
                     }
-                    catch (NetMQ.FiniteStateMachineException e)
+                    catch (FiniteStateMachineException e)
                     {
                         _logger.LogError("NetMQ.FiniteStateMachineException occured");
                         continue;

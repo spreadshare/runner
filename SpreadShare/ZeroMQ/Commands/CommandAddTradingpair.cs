@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Logging;
 
-namespace SpreadShare.ZeroMQ
+namespace SpreadShare.ZeroMQ.Commands
 {
     class CommandAddTradingpair : Command
     {
