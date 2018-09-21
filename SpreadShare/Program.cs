@@ -3,6 +3,7 @@ using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using SpreadShare.BinanceServices;
 using SpreadShare.Strategy;
+using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
@@ -46,7 +47,11 @@ namespace SpreadShare
             // Start strategy service
             var strategy = serviceProvider.GetService<IStrategy>();
             strategy.Start();
-            
+
+            // Start zeroMQ service
+            var zeroMqService = serviceProvider.GetService<IZeroMqService>();
+            zeroMqService.Start();
+
             KeepRunningForever();
         }
 
