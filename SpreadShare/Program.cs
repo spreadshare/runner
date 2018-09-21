@@ -36,17 +36,17 @@ namespace SpreadShare
         {
             // Start service to fetch exchange data
             var service = serviceProvider.GetService<IFetchCandles>();
-            //service.Connect();
+            service.Connect();
 
             var trading = serviceProvider.GetService<ITradingService>();
-            //trading.Start();
+            trading.Start();
 
             var user = serviceProvider.GetService<IUserService>();
-            //user.Start();
+            user.Start();
 
             // Start strategy service
             var strategy = serviceProvider.GetService<IStrategy>();
-            //strategy.Start();
+            strategy.Start();
 
             // Start zeroMQ service
             var zeroMqService = serviceProvider.GetService<IZeroMqService>();
