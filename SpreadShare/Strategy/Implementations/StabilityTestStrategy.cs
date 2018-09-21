@@ -24,7 +24,7 @@ namespace SpreadShare.Strategy.Implementations
                 Logger.LogInformation("Welcome to the great stability test, no profit just checking.");
                 var assets = UserService.GetPortfolio();
                 foreach(var asset in assets.GetAllFreeBalances()) {
-                    Console.WriteLine($"{asset.Symbol} - {asset.Value}");
+                    Logger.LogInformation($"{asset.Symbol} - {asset.Value}");
                 }
 
                 decimal price = 0;
@@ -38,7 +38,7 @@ namespace SpreadShare.Strategy.Implementations
                 decimal amount = assets.GetFreeBalance("ETH") / price;
                 amount = Math.Floor(amount*100)/100;
 
-                Console.WriteLine($"Placing a buy order for {amount} BNB");
+                Logger.LogInformation($"Placing a buy order for {amount} BNB");
                 long orderId = TradingService.PlaceMarketOrder("BNB", OrderSide.Buy, amount);
                 Context.SetObject("OrderId", orderId);
                 SwitchState(new ConfirmBuyOrderPlacedState());
@@ -113,7 +113,7 @@ namespace SpreadShare.Strategy.Implementations
                 Logger.LogInformation("Welcome to the great stability test, no profit, just checking.");
                 var assets = UserService.GetPortfolio();
                 foreach(var asset in assets.GetAllFreeBalances()) {
-                    Console.WriteLine($"{asset.Symbol} - {asset.Value}");
+                    Logger.LogInformation($"{asset.Symbol} - {asset.Value}");
                 }
 
                 decimal amount = assets.GetFreeBalance("BNB");

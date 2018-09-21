@@ -57,7 +57,7 @@ namespace SpreadShare.Strategy.Implementations
                 Assets assets = UserService.GetPortfolio();
                 var list = assets.GetAllLockedBalances();
                 foreach(var item in list) {
-                    Console.WriteLine($"{item.Symbol} - {item.Value}");
+                    Logger.LogInformation($"{item.Symbol} - {item.Value}");
                 }
                 Logger.LogInformation("Validating context...");
                 try
