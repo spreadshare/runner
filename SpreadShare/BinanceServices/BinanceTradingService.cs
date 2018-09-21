@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace SpreadShare.BinanceServices
 {
-    class BinanceTradingService : AbstractTradingService
+    internal class BinanceTradingService : AbstractTradingService
     {
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;

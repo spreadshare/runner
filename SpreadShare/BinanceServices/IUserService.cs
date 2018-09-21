@@ -2,7 +2,7 @@
 
 namespace SpreadShare.BinanceServices
 {
-    interface IUserService
+    internal interface IUserService
     {
         void Start();
         Assets GetPortfolio();

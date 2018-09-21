@@ -6,7 +6,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.BinanceServices
 {
-    class BinanceUserService : AbstractUserService
+    internal class BinanceUserService : AbstractUserService
     {
         private BinanceClient _client;
         private BinanceSocketClient _socketclient;

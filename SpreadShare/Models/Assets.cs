@@ -5,43 +5,43 @@ namespace SpreadShare.Models
 {
     public class Assets
     {
-        private Dictionary<string, decimal> free;
-        private Dictionary<string, decimal> locked;
-        private Dictionary<string, decimal> total;
+        private readonly Dictionary<string, decimal> _free;
+        private readonly Dictionary<string, decimal> _locked;
+        private readonly Dictionary<string, decimal> _total;
         public Assets() {
-            free   = new Dictionary<string, decimal>();    
-            locked = new Dictionary<string, decimal>();
-            total  = new Dictionary<string, decimal>();    
+            _free   = new Dictionary<string, decimal>();    
+            _locked = new Dictionary<string, decimal>();
+            _total  = new Dictionary<string, decimal>();    
         }
 
         public Assets(List<BinanceBalance> input) : this() {
-            foreach(BinanceBalance balance in input) {
-                free.Add(balance.Asset, balance.Free);
-                locked.Add(balance.Asset, balance.Locked);
-                total.Add(balance.Asset, balance.Total);
+            foreach(var balance in input) {
+                _free.Add(balance.Asset, balance.Free);
+                _locked.Add(balance.Asset, balance.Locked);
+                _total.Add(balance.Asset, balance.Total);
             }
         }
 
         public decimal GetFreeBalance(string symbol) 
         {
-            return free.GetValueOrDefault(symbol, 0);
+            return _free.GetValueOrDefault(symbol, 0);
         }
 
         public decimal GetLockedBalance(string symbol)
         {
-            return locked.GetValueOrDefault(symbol, 0);
+            return _locked.GetValueOrDefault(symbol, 0);
         }
 
         public decimal GetTotalBalance(string symbol)
         {
-            return free.GetValueOrDefault(symbol, 0);
+            return _free.GetValueOrDefault(symbol, 0);
         }
 
         public List<AssetValue> GetAllFreeBalances() {
             List<AssetValue> ret = new List<AssetValue>();
-            foreach(string symbol in free.Keys) {
-                if (free[symbol] > 0) {
-                    ret.Add(new AssetValue(symbol, free[symbol]));
+            foreach(var symbol in _free.Keys) {
+                if (_free[symbol] > 0) {
+                    ret.Add(new AssetValue(symbol, _free[symbol]));
                 }
             }
             return ret;
@@ -49,9 +49,9 @@ namespace SpreadShare.Models
 
         public List<AssetValue> GetAllLockedBalances() {
             List<AssetValue> ret = new List<AssetValue>();
-            foreach(string symbol in locked.Keys) {
-                if (locked[symbol] > 0) {
-                    ret.Add(new AssetValue(symbol, locked[symbol]));
+            foreach(var symbol in _locked.Keys) {
+                if (_locked[symbol] > 0) {
+                    ret.Add(new AssetValue(symbol, _locked[symbol]));
                 }
             }
             return ret;
@@ -59,9 +59,9 @@ namespace SpreadShare.Models
 
         public List<AssetValue> GetAllTotalBalances() {
             List<AssetValue> ret = new List<AssetValue>();
-            foreach(string symbol in total.Keys) {
-                if (total[symbol] > 0) {
-                    ret.Add(new AssetValue(symbol, total[symbol]));
+            foreach(var symbol in _total.Keys) {
+                if (_total[symbol] > 0) {
+                    ret.Add(new AssetValue(symbol, _total[symbol]));
                 }
             }
             return ret;
@@ -69,14 +69,12 @@ namespace SpreadShare.Models
     }
 
     public struct AssetValue {
-        string symbol;
-        decimal value;
-        public string Symbol { get { return symbol; }}
-        public decimal Value { get { return value; }}
+        public string Symbol { get; }
+        public decimal Value { get; }
 
         public AssetValue(string symbol, decimal value) {
-            this.symbol = symbol;
-            this.value = value;
+            Symbol = symbol;
+            Value = value;
         }
     }
 }

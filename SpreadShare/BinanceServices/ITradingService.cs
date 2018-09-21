@@ -1,6 +1,6 @@
 ﻿namespace SpreadShare.BinanceServices
 {
-    interface ITradingService
+    internal interface ITradingService
     {
         void Start();
     }

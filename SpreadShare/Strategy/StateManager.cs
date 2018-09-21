@@ -66,7 +66,7 @@ namespace SpreadShare.Strategy
             lock (_lock)
             {
                 State.ResponseCodes response = _activeState.OnCandle(c);
-                if (response != State.ResponseCodes.SUCCES) {
+                if (response != State.ResponseCodes.SUCCESS) {
                     _logger.LogInformation($"Candle was not processed by state. Response Code: { response }");
                 }
             }
@@ -80,7 +80,7 @@ namespace SpreadShare.Strategy
             lock(_lock) {
                 //Recheck if the timer has not been resetted by another thread in the meantime
                 State.ResponseCodes response = _activeState.OnTimer();
-                if (response == State.ResponseCodes.SUCCES) {
+                if (response == State.ResponseCodes.SUCCESS) {
                     _logger.LogInformation("Timer succesfully triggered!");
                 }
                 else {
@@ -93,7 +93,7 @@ namespace SpreadShare.Strategy
             lock (_lock)
             {
                 State.ResponseCodes response = _activeState.OnOrderUpdate(order);
-                if (response != State.ResponseCodes.SUCCES) {
+                if (response != State.ResponseCodes.SUCCESS) {
                     _logger.LogInformation($"Order update was not processed by the current state. Response Code: { response }");
                 }
             }

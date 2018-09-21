@@ -1,5 +1,4 @@
-﻿using System;
-using Binance.Net.Objects;
+﻿using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
@@ -8,7 +7,7 @@ namespace SpreadShare.Strategy
 {
     abstract class State
     {
-        public enum ResponseCodes { SUCCES, NOT_DEFINED }
+        public enum ResponseCodes { SUCCESS, NOT_DEFINED }
         public Context Context { get; set; }
 
         private StateManager _stateManager;

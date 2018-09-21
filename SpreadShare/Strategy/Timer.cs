@@ -4,35 +4,36 @@ using System.Threading;
 namespace SpreadShare.Strategy
 {
     public class Timer {
-        long countdown;
-        Thread thread;
-        Action callback;
-        bool shouldStop = false;
+        private readonly long _countdown;
+        private readonly Thread _thread;
+        private readonly Action _callback;
+        private bool _shouldStop;
 
-        public bool Valid { get { return DateTimeOffset.Now.ToUnixTimeMilliseconds() >= countdown; }}
+        public bool Valid => DateTimeOffset.Now.ToUnixTimeMilliseconds() >= _countdown;
+
         public Timer(long ms, Action callback) {
-            this.callback = callback;
-            countdown = DateTimeOffset.Now.ToUnixTimeMilliseconds() + ms;
-            thread = new Thread(Wait);
-            thread.Start();
+            _callback = callback;
+            _countdown = DateTimeOffset.Now.ToUnixTimeMilliseconds() + ms;
+            _thread = new Thread(Wait);
+            _thread.Start();
         }
 
         private void Wait() {
-            while(DateTimeOffset.Now.ToUnixTimeMilliseconds() < countdown) {
-                if (shouldStop)
+            while(DateTimeOffset.Now.ToUnixTimeMilliseconds() < _countdown) {
+                if (_shouldStop)
                     return;
                 Thread.Sleep(1);
             }
-            callback();
+            _callback();
         }
 
-        public long getRemaining() {
-            return countdown - DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        public long GetRemaining() {
+            return _countdown - DateTimeOffset.Now.ToUnixTimeMilliseconds();
         }
 
         public void Stop() {
-            shouldStop = true;
-            thread.Join();
+            _shouldStop = true;
+            _thread.Join();
         }
     }
 }

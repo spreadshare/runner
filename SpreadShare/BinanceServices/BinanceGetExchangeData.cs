@@ -12,7 +12,7 @@ using SpreadShare.SupportServices;
 
 namespace SpreadShare.BinanceServices
 {
-    class BinanceFetchCandles : IFetchCandles
+    internal class BinanceFetchCandles : IFetchCandles
     {
         private readonly DatabaseContext _dbContext;
         private readonly ILogger _logger;
@@ -47,7 +47,7 @@ namespace SpreadShare.BinanceServices
             // Subscription
             var candles = await client.SubscribeToKlineStreamAsync(tradingPair, KlineInterval.OneMinute, data =>
             {
-                Candle c = new Candle(data.Data);
+                var c = new Candle(data.Data);
                 _logger.LogDebug("Received Candle \t{0}", c.ToString());
 
                 // New Candle

@@ -4,7 +4,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.BinanceServices
 {
-    abstract class AbstractUserService : IUserService
+    internal abstract class AbstractUserService : IUserService
     {   
         public EventHandler<BinanceStreamOrderUpdate> OrderUpdateHandler;
 
