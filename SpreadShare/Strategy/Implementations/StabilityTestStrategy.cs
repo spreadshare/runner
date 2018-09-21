@@ -1,10 +1,10 @@
 using System;
+using System.Threading;
+using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
-using Binance.Net.Objects;
-using System.Threading;
 
-namespace SpreadShare.Strategy
+namespace SpreadShare.Strategy.Implementations
 {
     class StabilityTestStrategy : BaseStrategy
     {

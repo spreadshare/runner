@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
+using Binance.Net.Objects;
+using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
-using Binance.Net.Objects;
 
-namespace SpreadShare.Strategy
+namespace SpreadShare.Strategy.Implementations
 {
     class SimpleBandWagonStrategy : BaseStrategy
     {

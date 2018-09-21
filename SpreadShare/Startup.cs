@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Strategy;
+using SpreadShare.Strategy.Implementations;
 using SpreadShare.SupportServices;
 using SpreadShare.ZeroMQ;
 
