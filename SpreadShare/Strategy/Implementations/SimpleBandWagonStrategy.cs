@@ -41,11 +41,11 @@ namespace SpreadShare.Strategy.Implementations
             public override ResponseCodes OnCandle(Candle c)
             {
                 Logger.LogInformation("Some action");
-                return ResponseCodes.SUCCESS;
+                return ResponseCodes.Success;
             }
 
             public override ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order) {
-                return ResponseCodes.SUCCESS;
+                return ResponseCodes.Success;
             }
         }
 
@@ -77,12 +77,12 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogInformation($"Succesfully placed order!");
                     SwitchState(new ConfirmTradeState());
                 }
-                return ResponseCodes.SUCCESS;
+                return ResponseCodes.Success;
             }
 
             public override ResponseCodes OnTimer() {
                 SwitchState(new WinnerState());
-                return ResponseCodes.SUCCESS;
+                return ResponseCodes.Success;
             }
         }
 
@@ -109,7 +109,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (order.OrderId == orderId && order.ExecutionType == ExecutionType.Trade) {
                     Logger.LogInformation("Order Confirmed!");
                 }
-                return ResponseCodes.SUCCESS;
+                return ResponseCodes.Success;
             }
         }
 

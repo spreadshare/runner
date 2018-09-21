@@ -64,7 +64,7 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogInformation("Order Placement Confirmed!");
                     SwitchState(new ConfirmBuyOrderTradedState());
                 }
-                return ResponseCodes.SUCCESS;
+                return ResponseCodes.Success;
             }
         }
 
@@ -85,7 +85,7 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogInformation("Order Trade Confirmed!");
                     SwitchState(new SleepBeforeSellState());
                 }
-                return ResponseCodes.SUCCESS;
+                return ResponseCodes.Success;
             }
         }
 
@@ -102,7 +102,7 @@ namespace SpreadShare.Strategy.Implementations
             {
                 Logger.LogInformation("Waking up again!");
                 SwitchState(new StartSellState());
-                return ResponseCodes.SUCCESS;
+                return ResponseCodes.Success;
             }
         }
 
@@ -145,7 +145,7 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogInformation("Order Placement Confirmed");
                     SwitchState(new SellOrderTradedState());
                 }
-                return ResponseCodes.SUCCESS;
+                return ResponseCodes.Success;
             }
         }
 
@@ -169,7 +169,7 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogInformation("Trade Confirmed!");
                     SwitchState(new SleepBeforeBuyState());
                 }
-                return ResponseCodes.SUCCESS;
+                return ResponseCodes.Success;
             }
         }
 
@@ -185,7 +185,7 @@ namespace SpreadShare.Strategy.Implementations
             public override ResponseCodes OnTimer()
             {
                 SwitchState(new StartBuyState());
-                return ResponseCodes.SUCCESS;
+                return ResponseCodes.Success;
             }
         }
     }

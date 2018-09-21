@@ -7,7 +7,7 @@ namespace SpreadShare.Strategy
 {
     abstract class State
     {
-        public enum ResponseCodes { SUCCESS, NOT_DEFINED }
+        public enum ResponseCodes { Success, NotDefined }
         public Context Context { get; set; }
 
         private StateManager _stateManager;
@@ -56,14 +56,14 @@ namespace SpreadShare.Strategy
         }
 
         public virtual ResponseCodes OnCandle(Candle c) {
-            return ResponseCodes.NOT_DEFINED;
+            return ResponseCodes.NotDefined;
         }
         public virtual ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order) {
-            return ResponseCodes.NOT_DEFINED;
+            return ResponseCodes.NotDefined;
         }
 
         public virtual ResponseCodes OnTimer() {
-            return ResponseCodes.NOT_DEFINED;
+            return ResponseCodes.NotDefined;
         }
     }
 }
