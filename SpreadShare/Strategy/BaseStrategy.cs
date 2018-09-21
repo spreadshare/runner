@@ -14,7 +14,10 @@ namespace SpreadShare.Strategy
         /// BaseConstrcutor: Provides dependencies required by the StateManager
         /// </summary>
         /// <param name="loggerFactory"></param>
-        protected BaseStrategy(ILoggerFactory loggerFactory, ITradingService tradingService, IUserService userService)
+        /// <param name="tradingService">Provides trading capabilities</param>
+        /// <param name="userService">Provides user watching capabilities</param>
+        protected BaseStrategy(ILoggerFactory loggerFactory,
+            ITradingService tradingService, IUserService userService)
         {
             _loggerFactory = loggerFactory;
             _tradingService = tradingService;
@@ -26,7 +29,12 @@ namespace SpreadShare.Strategy
         /// </summary>
         public void Start()
         {
-            StateManager = new StateManager(GetInitialState(), _loggerFactory, _tradingService, _userService);
+            StateManager = new StateManager(
+                GetInitialState(), 
+                _loggerFactory, 
+                _tradingService, 
+                _userService
+            );
         }
 
         public abstract State GetInitialState();

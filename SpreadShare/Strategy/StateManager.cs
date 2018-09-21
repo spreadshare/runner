@@ -88,7 +88,7 @@ namespace SpreadShare.Strategy
                      * will return NotDefined by default.
                     */
                     var response = _activeState.OnTimer();
-                    _logger.LogInformation(response == State.ResponseCodes.Success
+                    _logger.LogInformation(response == ResponseCodes.Success
                         ? "Timer succesfully triggered!"
                         : $"Timer callback was not used by state. Response Code: {response}");
                 }
@@ -106,7 +106,7 @@ namespace SpreadShare.Strategy
             lock (_lock)
             {
                 var response = _activeState.OnCandle(c);
-                if (response != State.ResponseCodes.Success) {
+                if (response != ResponseCodes.Success) {
                     _logger.LogInformation($"Candle was not processed by state. Response Code: { response }");
                 }
             }
@@ -122,7 +122,7 @@ namespace SpreadShare.Strategy
             lock (_lock)
             {
                 var response = _activeState.OnOrderUpdate(order);
-                if (response != State.ResponseCodes.Success) {
+                if (response != ResponseCodes.Success) {
                     _logger.LogInformation($"Order update was not processed by the current state. Response Code: { response }");
                 }
             }
