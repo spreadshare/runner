@@ -2,7 +2,8 @@
 {
     enum ResponseCodes
     {
-        Success,
-        NotDefined
+        Error,
+        NotDefined,
+        Success
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Binance.Net.Objects;
 using SpreadShare.Models;
 
@@ -8,7 +9,7 @@ namespace SpreadShare.BinanceServices
     {   
         public EventHandler<BinanceStreamOrderUpdate> OrderUpdateHandler;
 
-        public abstract void Start();
+        public abstract Task Start();
 
         public abstract Assets GetPortfolio();
 

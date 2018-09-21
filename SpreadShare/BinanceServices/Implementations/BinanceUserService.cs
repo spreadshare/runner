@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Binance.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
+using SpreadShare.Strategy;
 
 namespace SpreadShare.BinanceServices.Implementations
 {
@@ -23,7 +25,7 @@ namespace SpreadShare.BinanceServices.Implementations
         /// <summary>
         /// Start the BinanceUserService, will configure callback functions.
         /// </summary>
-        public override void Start()
+        public override Task Start()
         {
             //Setup the clients
             _client = new BinanceClient();
@@ -40,7 +42,7 @@ namespace SpreadShare.BinanceServices.Implementations
             else
             {
                 _logger.LogCritical($"Unable to obtain Listen Key for binance websocket: {getListenKey.Error.Message}");
-                throw new Exception();
+                return Task.FromResult(ResponseCodes.Error);
             }
 
 
@@ -55,6 +57,8 @@ namespace SpreadShare.BinanceServices.Implementations
                     OnOrderUpdate(orderInfoUpdate);
                 });
             _logger.LogInformation("Binance User Service was succesfully started!");
+
+            return Task.FromResult(ResponseCodes.Success);
         }
 
         public override Assets GetPortfolio()

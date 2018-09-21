@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Strategy;
 
@@ -22,7 +24,7 @@ namespace SpreadShare
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
             // Configure application
-            startup.Configure(serviceProvider);
+            startup.Configure(serviceProvider, (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory)));
 
             // --------------------------------------------------
             // Setup finished --> Execute business logic services
@@ -41,11 +43,14 @@ namespace SpreadShare
             trading.Start();
 
             var user = serviceProvider.GetService<IUserService>();
-            user.Start();
+            var result = user.Start();
 
             // Start strategy service
-            var strategy = serviceProvider.GetService<IStrategy>();
-            strategy.Start();
+            if (result == Task.FromResult(ResponseCodes.Success))
+            {
+                var strategy = serviceProvider.GetService<IStrategy>();
+                strategy.Start();
+            }
             
             KeepRunningForever();
         }
