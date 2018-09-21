@@ -10,7 +10,7 @@ using SpreadShare.Models;
 using SpreadShare.Strategy;
 using SpreadShare.SupportServices;
 
-namespace SpreadShare.BinanceServices
+namespace SpreadShare.BinanceServices.Implementations
 {
     internal class BinanceFetchCandles : IFetchCandles
     {

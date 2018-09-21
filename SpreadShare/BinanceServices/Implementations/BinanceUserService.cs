@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
-namespace SpreadShare.BinanceServices
+namespace SpreadShare.BinanceServices.Implementations
 {
     internal class BinanceUserService : AbstractUserService
     {

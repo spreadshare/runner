@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
+using SpreadShare.BinanceServices.Implementations;
 using SpreadShare.Strategy;
 using SpreadShare.Strategy.Implementations;
 using SpreadShare.SupportServices;

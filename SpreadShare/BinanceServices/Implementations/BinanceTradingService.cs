@@ -5,7 +5,7 @@ using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace SpreadShare.BinanceServices
+namespace SpreadShare.BinanceServices.Implementations
 {
     internal class BinanceTradingService : AbstractTradingService
     {
