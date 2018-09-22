@@ -1,0 +1,4 @@
+# Unit Testing Research
+This folder contains a basic unit test setup using the tutorial at https://docs.microsoft.com/nl-nl/dotnet/core/testing/unit-testing-with-dotnet-test
+
+
