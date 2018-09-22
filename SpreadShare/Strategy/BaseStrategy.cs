@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
+using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
 {
@@ -27,7 +29,7 @@ namespace SpreadShare.Strategy
         /// <summary>
         /// Start strategy with initial state using a StateManager
         /// </summary>
-        public void Start()
+        public ResponseObject Start()
         {
             StateManager = new StateManager(
                 GetInitialState(), 
@@ -35,6 +37,7 @@ namespace SpreadShare.Strategy
                 _tradingService, 
                 _userService
             );
+            return new ResponseObject(ResponseCodes.Success);
         }
 
         public abstract State GetInitialState();

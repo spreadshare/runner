@@ -58,6 +58,7 @@ namespace SpreadShare.BinanceServices.Implementations
                     if (prev.Symbol != null)
                     {
                         _dbContext.Add(prev);
+                        _logger.LogInformation($"LET'S FUCKING GO: {_strategy.StateManager == null }");
                         _strategy.StateManager.OnCandle(prev);
                     }
                     prev = c;

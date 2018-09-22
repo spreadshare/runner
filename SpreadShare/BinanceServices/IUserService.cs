@@ -5,7 +5,7 @@ namespace SpreadShare.BinanceServices
 {
     internal interface IUserService
     {
-        Task Start();
+        ResponseObject Start();
         Assets GetPortfolio();
     }
 }

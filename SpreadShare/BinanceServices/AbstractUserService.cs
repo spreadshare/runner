@@ -9,7 +9,7 @@ namespace SpreadShare.BinanceServices
     {   
         public EventHandler<BinanceStreamOrderUpdate> OrderUpdateHandler;
 
-        public abstract Task Start();
+        public abstract ResponseObject Start();
 
         public abstract Assets GetPortfolio();
 

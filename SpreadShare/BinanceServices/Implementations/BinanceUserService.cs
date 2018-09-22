@@ -25,7 +25,7 @@ namespace SpreadShare.BinanceServices.Implementations
         /// <summary>
         /// Start the BinanceUserService, will configure callback functions.
         /// </summary>
-        public override Task Start()
+        public override ResponseObject Start()
         {
             //Setup the clients
             _client = new BinanceClient();
@@ -42,7 +42,7 @@ namespace SpreadShare.BinanceServices.Implementations
             else
             {
                 _logger.LogCritical($"Unable to obtain Listen Key for binance websocket: {getListenKey.Error.Message}");
-                return Task.FromResult(ResponseCodes.Error);
+                return new ResponseObject(ResponseCodes.Error);
             }
 
 
@@ -58,7 +58,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 });
             _logger.LogInformation("Binance User Service was succesfully started!");
 
-            return Task.FromResult(ResponseCodes.Success);
+            return new ResponseObject(ResponseCodes.Success);
         }
 
         public override Assets GetPortfolio()

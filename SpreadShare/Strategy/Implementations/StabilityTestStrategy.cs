@@ -3,6 +3,7 @@ using System.Threading;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
+using SpreadShare.Models;
 
 namespace SpreadShare.Strategy.Implementations
 {
@@ -59,12 +60,12 @@ namespace SpreadShare.Strategy.Implementations
                 }
             }
 
-            public override ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order) {
+            public override ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {
                 if (order.ExecutionType == ExecutionType.New && order.OrderId == orderId) {
                     Logger.LogInformation("Order Placement Confirmed!");
                     SwitchState(new ConfirmBuyOrderTradedState());
                 }
-                return ResponseCodes.Success;
+                return new ResponseObject(ResponseCodes.Success);
             }
         }
 
@@ -80,12 +81,12 @@ namespace SpreadShare.Strategy.Implementations
                 }
             }
 
-            public override ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order) {
+            public override ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {
                 if (order.ExecutionType == ExecutionType.Trade && order.OrderId == orderId) {
                     Logger.LogInformation("Order Trade Confirmed!");
                     SwitchState(new SleepBeforeSellState());
                 }
-                return ResponseCodes.Success;
+                return new ResponseObject(ResponseCodes.Success);
             }
         }
 
@@ -98,11 +99,11 @@ namespace SpreadShare.Strategy.Implementations
                 Logger.LogInformation("Going to sleep for a while (4 hours)");
             }
 
-            public override ResponseCodes OnTimer()
+            public override ResponseObject OnTimer()
             {
                 Logger.LogInformation("Waking up again!");
                 SwitchState(new StartSellState());
-                return ResponseCodes.Success;
+                return new ResponseObject(ResponseCodes.Success);
             }
         }
 
@@ -140,12 +141,12 @@ namespace SpreadShare.Strategy.Implementations
                 }
             }
 
-            public override ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order) {
+            public override ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {
                 if (order.ExecutionType == ExecutionType.New && order.OrderId == orderId) {
                     Logger.LogInformation("Order Placement Confirmed");
                     SwitchState(new SellOrderTradedState());
                 }
-                return ResponseCodes.Success;
+                return new ResponseObject(ResponseCodes.Success);
             }
         }
 
@@ -163,13 +164,13 @@ namespace SpreadShare.Strategy.Implementations
                 }
             }
 
-            public override ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order)
+            public override ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order)
             {
                 if (order.ExecutionType == ExecutionType.Trade && order.OrderId == orderId) {
                     Logger.LogInformation("Trade Confirmed!");
                     SwitchState(new SleepBeforeBuyState());
                 }
-                return ResponseCodes.Success;
+                return new ResponseObject(ResponseCodes.Success);
             }
         }
 
@@ -182,10 +183,10 @@ namespace SpreadShare.Strategy.Implementations
                 Logger.LogInformation("Goin to sleep for while (4 hours)");
             }
 
-            public override ResponseCodes OnTimer()
+            public override ResponseObject OnTimer()
             {
                 SwitchState(new StartBuyState());
-                return ResponseCodes.Success;
+                return new ResponseObject(ResponseCodes.Success);
             }
         }
     }

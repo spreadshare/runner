@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
+using SpreadShare.Models;
 using SpreadShare.Strategy;
 
 namespace SpreadShare
@@ -43,10 +44,11 @@ namespace SpreadShare
             trading.Start();
 
             var user = serviceProvider.GetService<IUserService>();
+
             var result = user.Start();
 
             // Start strategy service
-            if (result == Task.FromResult(ResponseCodes.Success))
+            if (result.Code == ResponseCodes.Success)
             {
                 var strategy = serviceProvider.GetService<IStrategy>();
                 strategy.Start();

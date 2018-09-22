@@ -26,7 +26,7 @@ namespace SpreadShare.Strategy.Implementations
                 Logger.LogInformation("Placing buy order...");
                 try
                 {
-                    long orderId = TradingService.PlaceMarketOrder("ETHBNB", OrderSide.Buy, 0);
+                    long orderId = TradingService.PlaceMarketOrder("ETHBNB", OrderSide.Buy, 1);
                     Context.SetObject("orderId", orderId);
                 }
                 catch(Exception e)
@@ -38,14 +38,14 @@ namespace SpreadShare.Strategy.Implementations
                 SwitchState(new ConfirmOrderPlacedState());
             }
 
-            public override ResponseCodes OnCandle(Candle c)
+            public override ResponseObject OnCandle(Candle c)
             {
                 Logger.LogInformation("Some action");
-                return ResponseCodes.Success;
+                return new ResponseObject(ResponseCodes.Success);
             }
 
-            public override ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order) {
-                return ResponseCodes.Success;
+            public override ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {
+                return new ResponseObject(ResponseCodes.Success);
             }
         }
 
@@ -71,18 +71,18 @@ namespace SpreadShare.Strategy.Implementations
                 }
             }
 
-            public override ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order) {
+            public override ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {
                 Logger.LogInformation($"Registered a new order with id: {order.OrderId}");
                 if (order.OrderId == orderId && order.ExecutionType == ExecutionType.New) {
                     Logger.LogInformation($"Succesfully placed order!");
                     SwitchState(new ConfirmTradeState());
                 }
-                return ResponseCodes.Success;
+                return new ResponseObject(ResponseCodes.Success);
             }
 
-            public override ResponseCodes OnTimer() {
+            public override ResponseObject OnTimer() {
                 SwitchState(new WinnerState());
-                return ResponseCodes.Success;
+                return new ResponseObject(ResponseCodes.Success);
             }
         }
 
@@ -103,13 +103,13 @@ namespace SpreadShare.Strategy.Implementations
                 }
             }
 
-            public override ResponseCodes OnOrderUpdate(BinanceStreamOrderUpdate order)
+            public override ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order)
             {
                 Logger.LogInformation($"Registered a new order with order id: {order.OrderId}");
                 if (order.OrderId == orderId && order.ExecutionType == ExecutionType.Trade) {
                     Logger.LogInformation("Order Confirmed!");
                 }
-                return ResponseCodes.Success;
+                return new ResponseObject(ResponseCodes.Success);
             }
         }
 
