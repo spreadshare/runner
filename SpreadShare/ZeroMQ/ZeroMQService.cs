@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NetMQ;
 using NetMQ.Sockets;
+using SpreadShare.Models;
 
 namespace SpreadShare.ZeroMQ
 {
@@ -26,7 +27,7 @@ namespace SpreadShare.ZeroMQ
         /// Start both threads
         /// </summary>
         /// <returns></returns>
-        public Task Start()
+        public ResponseObject Start()
         {
             Thread broadcastService = new Thread(StartBroadcastService);
             broadcastService.Start();
@@ -34,7 +35,7 @@ namespace SpreadShare.ZeroMQ
             Thread commandReceiver = new Thread(StartCommandReceiver);
             commandReceiver.Start();
 
-            return Task.FromResult(0);
+            return new ResponseObject(ResponseCodes.Success);
         }
 
         /// <summary>
