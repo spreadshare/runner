@@ -1,7 +1,10 @@
-﻿namespace SpreadShare.Strategy
+﻿using System.Threading.Tasks;
+using SpreadShare.Models;
+
+namespace SpreadShare.Strategy
 {
     interface IStrategy
     {
-        void Start();
+        ResponseObject Start();
     }
 }

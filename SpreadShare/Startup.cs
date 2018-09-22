@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
+using SpreadShare.BinanceServices.Implementations;
 using SpreadShare.Strategy;
+using SpreadShare.Strategy.Implementations;
 using SpreadShare.SupportServices;
 using SpreadShare.ZeroMQ;
 
@@ -74,10 +77,16 @@ namespace SpreadShare
         /// Additional configuration after all have been configured
         /// </summary>
         /// <param name="serviceProvider">Provides access to configured services</param>
-        public void Configure(IServiceProvider serviceProvider)
+        public void Configure(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
+            ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
+
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
+            if (service.Migrate() != Task.FromResult(0))
+            {
+                logger.LogError("Could not migrate database");
+            };
         }
     }
 }

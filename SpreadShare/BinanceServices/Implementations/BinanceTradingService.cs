@@ -5,9 +5,9 @@ using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace SpreadShare.BinanceServices
+namespace SpreadShare.BinanceServices.Implementations
 {
-    class BinanceTradingService : AbstractTradingService
+    internal class BinanceTradingService : AbstractTradingService
     {
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
@@ -58,9 +58,9 @@ namespace SpreadShare.BinanceServices
             }
         }
 
-        public override long PlaceMarketOrder(string symbol, OrderSide side)
+        public override long PlaceMarketOrder(string symbol, OrderSide side, decimal amount)
         {
-            var response = _client.PlaceTestOrder("BNBETH", OrderSide.Buy, OrderType.Market, 1, null, null, null, null, null, null, (int)_receiveWindow);
+            var response = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
             if (response.Success)
             {
                 _logger.LogInformation($"Order {response.Data.OrderId} placement succeeded!");
@@ -85,15 +85,13 @@ namespace SpreadShare.BinanceServices
             }
         }
 
-        public void QueryOrder(string symbol, long orderId)
-        {
-            var response = _client.QueryOrder(symbol, orderId, null, _receiveWindow);
-            if (response.Success)
-            {
-               // _logger.LogInformation("Succesfully querried an order");
-            } else
-            {
-                _logger.LogWarning($"Unable to querry order {orderId}: {response.Error.Message}");
+        public override decimal GetPrice(string symbol) {
+            var response = _client.GetPrice(symbol);
+            if (response.Success) {
+                return response.Data.Price;
+            } else {
+                _logger.LogWarning($"Could not fetch price for {symbol} from binance!");
+                return 0;
             }
         }
     }

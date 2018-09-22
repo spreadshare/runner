@@ -1,7 +1,11 @@
-﻿namespace SpreadShare.BinanceServices
+﻿using System.Threading.Tasks;
+using SpreadShare.Models;
+
+namespace SpreadShare.BinanceServices
 {
-    interface IUserService
+    internal interface IUserService
     {
-        void Start();
+        ResponseObject Start();
+        Assets GetPortfolio();
     }
 }

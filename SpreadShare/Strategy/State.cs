@@ -1,14 +1,18 @@
 ﻿using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
+using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
 {
     abstract class State
     {
-        protected StateManager _stateManager;
         public Context Context { get; set; }
+
+        private StateManager _stateManager;
         protected ILogger Logger;
+        protected AbstractUserService UserService;
+        protected AbstractTradingService TradingService;
 
         protected State()
         {
@@ -25,6 +29,8 @@ namespace SpreadShare.Strategy
         {
             Context = context;
             _stateManager = stateManager;
+            UserService = stateManager.UserService;
+            TradingService = stateManager.TradingService;
             Logger = loggerFactory.CreateLogger(GetType());
             ValidateContext();
         }
@@ -44,7 +50,19 @@ namespace SpreadShare.Strategy
             _stateManager.SwitchState(s);
         }
 
-        public abstract void OnCandle(Candle c);
-        public abstract void OnOrderUpdate(BinanceStreamOrderUpdate order);
+        protected void SetTimer(long ms) {
+            _stateManager.SetTimer(ms);
+        }
+
+        public virtual ResponseObject OnCandle(Candle c) {
+            return new ResponseObject(ResponseCodes.NotDefined);
+        }
+        public virtual ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {
+            return new ResponseObject(ResponseCodes.NotDefined);
+        }
+
+        public virtual ResponseObject OnTimer() {
+            return new ResponseObject(ResponseCodes.NotDefined);
+        }
     }
 }

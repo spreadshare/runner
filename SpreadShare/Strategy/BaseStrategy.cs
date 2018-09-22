@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
+using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
 {
@@ -14,7 +16,10 @@ namespace SpreadShare.Strategy
         /// BaseConstrcutor: Provides dependencies required by the StateManager
         /// </summary>
         /// <param name="loggerFactory"></param>
-        protected BaseStrategy(ILoggerFactory loggerFactory, ITradingService tradingService, IUserService userService)
+        /// <param name="tradingService">Provides trading capabilities</param>
+        /// <param name="userService">Provides user watching capabilities</param>
+        protected BaseStrategy(ILoggerFactory loggerFactory,
+            ITradingService tradingService, IUserService userService)
         {
             _loggerFactory = loggerFactory;
             _tradingService = tradingService;
@@ -24,9 +29,15 @@ namespace SpreadShare.Strategy
         /// <summary>
         /// Start strategy with initial state using a StateManager
         /// </summary>
-        public void Start()
+        public ResponseObject Start()
         {
-            StateManager = new StateManager(GetInitialState(), _loggerFactory, _tradingService, _userService);
+            StateManager = new StateManager(
+                GetInitialState(), 
+                _loggerFactory, 
+                _tradingService, 
+                _userService
+            );
+            return new ResponseObject(ResponseCodes.Success);
         }
 
         public abstract State GetInitialState();

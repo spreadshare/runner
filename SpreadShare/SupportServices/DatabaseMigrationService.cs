@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace SpreadShare.SupportServices
@@ -14,8 +15,15 @@ namespace SpreadShare.SupportServices
 
         public Task Migrate()
         {
-            _dbContext.Database.Migrate();
-            return Task.FromResult(0);
+            try
+            {
+                _dbContext.Database.Migrate();
+                return Task.FromResult(0);
+            }
+            catch (System.Net.Sockets.SocketException e)
+            {
+                return Task.FromException(e);
+            }
         }
     }
 }
