@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PrimeService\PrimeService.csproj" />
+    <ProjectReference Include="..\..\SpreadShare\SpreadShare.csproj" />
   </ItemGroup>
 
 </Project>
