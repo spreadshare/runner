@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using SpreadShare.Models;
 
 namespace SpreadShare.ZeroMQ
 {
@@ -9,6 +8,6 @@ namespace SpreadShare.ZeroMQ
          * Interface documentation is found in the PROTOCOL.md
          */
 
-        ResponseObject Start();
+        Task Start();
     }
 }

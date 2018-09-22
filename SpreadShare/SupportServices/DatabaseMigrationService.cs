@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {
@@ -14,16 +13,16 @@ namespace SpreadShare.SupportServices
             _dbContext = dbContext;
         }
 
-        public ResponseObject Migrate()
+        public Task Migrate()
         {
             try
             {
                 _dbContext.Database.Migrate();
-                return new ResponseObject(ResponseCodes.Success);
+                return Task.FromResult(0);
             }
             catch (System.Net.Sockets.SocketException e)
             {
-                return new ResponseObject(ResponseCodes.Error, e.Message);
+                return Task.FromException(e);
             }
         }
     }
