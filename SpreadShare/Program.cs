@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.Strategy;
+using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
@@ -54,6 +55,10 @@ namespace SpreadShare
                 strategy.Start();
             }
             
+            // Start zeroMQ service
+            var zeroMqService = serviceProvider.GetService<IZeroMqService>();
+            zeroMqService.Start();
+
             KeepRunningForever();
         }
 

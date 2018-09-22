@@ -8,7 +8,6 @@ namespace SpreadShare.ZeroMQ
          * Interface documentation is found in the PROTOCOL.md
          */
 
-        Task BroadcastMessage(string message);
-        Task StartCommandReceiver();
+        Task Start();
     }
 }
