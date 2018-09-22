@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.BinanceServices.Implementations;
+using SpreadShare.Models;
 using SpreadShare.Strategy;
 using SpreadShare.Strategy.Implementations;
 using SpreadShare.SupportServices;
@@ -83,7 +84,7 @@ namespace SpreadShare
 
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
-            if (service.Migrate() != Task.FromResult(0))
+            if (service.Migrate().Code == ResponseCodes.Success)
             {
                 logger.LogError("Could not migrate database");
             };
