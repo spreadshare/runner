@@ -4,6 +4,7 @@ using Binance.Net;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using SpreadShare.Models;
 
 namespace SpreadShare.BinanceServices.Implementations
 {
@@ -21,7 +22,7 @@ namespace SpreadShare.BinanceServices.Implementations
             _logger.LogInformation("Creating new Binance Client");
         }
 
-        public override void Start()
+        public override ResponseObject Start()
         {
             //Read the custom receive window, the standard window is often too short.
             _receiveWindow = _configuration.GetValue<long>("BinanceClientSettings:receiveWindow");
@@ -52,9 +53,10 @@ namespace SpreadShare.BinanceServices.Implementations
                 foreach (BinanceBalance balance in result.Data.Balances)
                     if (balance.Total > 0)
                         _logger.LogInformation($"{balance.Total} {balance.Asset} (free: {balance.Free} - locked: {balance.Locked})");
+                return new ResponseObject(ResponseCodes.Success);
             } else
             {
-                _logger.LogCritical($"Authenticated Binance request failed: { result.Error.Message}");
+               return new ResponseObject(ResponseCodes.Error, $"Authenticated Binance request failed: { result.Error.Message}");
             }
         }
 
