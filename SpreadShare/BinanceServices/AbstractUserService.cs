@@ -11,7 +11,7 @@ namespace SpreadShare.BinanceServices
 
         public abstract ResponseObject Start();
 
-        public abstract Assets GetPortfolio();
+        public abstract ResponseObject<Assets> GetPortfolio();
 
         protected void OnOrderUpdate(BinanceStreamOrderUpdate e) 
         {

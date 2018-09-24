@@ -63,45 +63,47 @@ namespace SpreadShare.BinanceServices.Implementations
             }
         }
 
-        public override long PlaceMarketOrder(string symbol, OrderSide side, decimal amount)
+        public override ResponseObject<long> PlaceMarketOrder(string symbol, OrderSide side, decimal amount)
         {
             var assets = _userService.GetPortfolio();
             var response = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
             if (response.Success)
             {
                 _logger.LogInformation($"Order {response.Data.OrderId} placement succeeded!");
-                return response.Data.OrderId;
+                return new ResponseObject<long>(ResponseCodes.Success, response.Data.OrderId);
             }
             else
             {
                 _logger.LogWarning($"Error while placing order: {response.Error.Message}");
-                throw new Exception("Order placement failed!");
+                return new ResponseObject<long>(ResponseCodes.Error);
             }
         }
 
-        public override void CancelOrder(string symbol, long orderId)
+        public override ResponseObject CancelOrder(string symbol, long orderId)
         {
             var response = _client.CancelOrder(symbol, orderId, null, null, _receiveWindow);
-            if (response.Success)
+            if (response.Success) {
                 _logger.LogInformation($"Order {orderId} succesfully cancelled");
+                return new ResponseObject(ResponseCodes.Success);
+            }
             else
             {
                 _logger.LogWarning($"Failed to cancel order {orderId}: {response.Error.Message}");
-                throw new Exception("Order cancellation failed!");
+                return new ResponseObject(ResponseCodes.Error, response.Error.Message);
             }
         }
 
-        public override decimal GetCurrentPrice(string symbol) {
+        public override ResponseObject<decimal> GetCurrentPrice(string symbol) {
             var response = _client.GetPrice(symbol);
             if (response.Success) {
-                return response.Data.Price;
+                return new ResponseObject<decimal>(ResponseCodes.Success, response.Data.Price);
             } else {
                 _logger.LogWarning($"Could not fetch price for {symbol} from binance!");
-                return 0;
+                return new ResponseObject<decimal>(ResponseCodes.Error);
             }
         }
 
-        public override decimal GetPerformancePastHours(string symbol, double hoursBack, DateTime endTime) {
+        public override ResponseObject<decimal> GetPerformancePastHours(string symbol, double hoursBack, DateTime endTime) {
             if (hoursBack <= 0) {
                 throw new ArgumentException("Argument hoursBack should be larger than 0.");
             }
@@ -112,15 +114,15 @@ namespace SpreadShare.BinanceServices.Implementations
                 var length = response.Data.Length;
                 var first = response.Data[0].Open;
                 var last = response.Data[length - 1].Close;
-                return last / first;
+                return new ResponseObject<decimal>(ResponseCodes.Success, last / first);
             } else {
                 _logger.LogCritical(response.Error.Message);
                 _logger.LogWarning($"Could not fetch price for {symbol} from binance!");
-                return 0;
+                return new ResponseObject<decimal>(ResponseCodes.Error);
             }
         }
 
-        public override Tuple<string, decimal> GetTopPerformance(double hoursBack, DateTime endTime) {
+        public override ResponseObject<Tuple<string, decimal>> GetTopPerformance(double hoursBack, DateTime endTime) {
             if (hoursBack <= 0) {
                 throw new ArgumentException("Argument hoursBack should be larger than 0.");
             }
@@ -134,7 +136,14 @@ namespace SpreadShare.BinanceServices.Implementations
                 // GetSection gives a null value
                 if  (tradingPair.Value == null) continue;
 
-                var performance = GetPerformancePastHours(tradingPair.Value, hoursBack, endTime);
+                var performanceQuery = GetPerformancePastHours(tradingPair.Value, hoursBack, endTime);
+                decimal performance;
+                if (performanceQuery.Code == ResponseCodes.Success) {
+                    performance = performanceQuery.Data;
+                } else {
+                    return new ResponseObject<Tuple<string, decimal>>(ResponseCodes.Error);
+                }
+
                 
                 if (max < performance) {
                     max = performance;
@@ -142,7 +151,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 }
             }
 
-            return new Tuple<string, decimal>(maxTradingPair, max);
+            return new ResponseObject<Tuple<string, decimal>>(ResponseCodes.Success, new Tuple<string, decimal>(maxTradingPair, max));
         }
 
     }
