@@ -81,10 +81,10 @@ namespace SpreadShare.Strategy
                     //Recheck if the timer has not changed while aqcuiring the lock
                     if (_activeTimer.Valid)
                     {
-                    var response = _activeState.OnTimer();
-                    _logger.LogInformation(response.Code == ResponseCodes.Success
-                        ? "Timer succesfully triggered!"
-                        : $"Timer callback was not used by state. Response Code: {response}");
+                        var response = _activeState.OnTimer();
+                        _logger.LogInformation(response.Code == ResponseCodes.Success
+                            ? "Timer succesfully triggered!"
+                            : $"Timer callback was not used by state. Response Code: {response}");
                     }
                 }
             } );
