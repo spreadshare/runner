@@ -64,7 +64,6 @@ namespace SpreadShare.BinanceServices.Implementations
 
         public override long PlaceMarketOrder(string symbol, OrderSide side, decimal amount)
         {
-            var assets = _userService.GetPortfolio();
             var response = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
             if (response.Success)
             {
@@ -76,7 +75,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 _logger.LogWarning($"Error while placing order: {response.Error.Message}");
                 throw new Exception("Order placement failed!");
             }
-        }
+        } 
 
         public override void CancelOrder(string symbol, long orderId)
         {

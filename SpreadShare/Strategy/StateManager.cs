@@ -17,7 +17,6 @@ namespace SpreadShare.Strategy
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         public AbstractTradingService TradingService;
-        public AbstractUserService UserService;
 
 
         public string CurrentState => _activeState.GetType().ToString().Split('+').Last();
@@ -30,7 +29,7 @@ namespace SpreadShare.Strategy
         /// <param name="tradingService">Provides trading capabilities</param>
         /// <param name="userService">Provides user watching capabilities</param>
         public StateManager(State initial, ILoggerFactory loggerFactory, 
-            ITradingService tradingService, IUserService userService)
+            ITradingService tradingService)
         {
             lock (_lock)
             {
@@ -38,18 +37,8 @@ namespace SpreadShare.Strategy
                 _logger = loggerFactory.CreateLogger("StateManager");
                 _loggerFactory = loggerFactory;
 
-                // Setup Binance services
+                // Setup trading services (gain access to abstract members)
                 TradingService = tradingService as AbstractTradingService;
-                UserService = userService as AbstractUserService;
-                try
-                {
-                    UserService.OrderUpdateHandler += OnOrderUpdate;
-                }
-                catch (NullReferenceException e)
-                {
-                    _logger.LogError("UserService could not be cast as AbstractUserService");
-                    throw;
-                }
 
                 // Setup initial state
                 _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
@@ -114,22 +103,6 @@ namespace SpreadShare.Strategy
                 var response = _activeState.OnCandle(c);
                 if (response.Code != ResponseCodes.Success) {
                     _logger.LogInformation($"Candle was not processed by state. Response Code: { response }");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Callback method for EventHandler of UserService
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="order"></param>
-        private void OnOrderUpdate(object sender, BinanceStreamOrderUpdate order)
-        {
-            lock (_lock)
-            {
-                var response = _activeState.OnOrderUpdate(order);
-                if (response.Code != ResponseCodes.Success) {
-                    _logger.LogInformation($"Order update was not processed by the current state. Response Code: { response }");
                 }
             }
         }
