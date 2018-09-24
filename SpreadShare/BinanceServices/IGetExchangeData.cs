@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
+using SpreadShare.Models;
 
 namespace SpreadShare.BinanceServices
 {
-    internal interface IFetchCandles
+    public interface IFetchCandles
     {
-        Task Connect();
+        ResponseObject Connect();
     }
 }

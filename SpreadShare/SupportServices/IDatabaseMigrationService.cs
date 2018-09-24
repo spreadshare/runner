@@ -3,7 +3,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {
-    interface IDatabaseMigrationService
+    public interface IDatabaseMigrationService
     {
         ResponseObject Migrate();
     }
