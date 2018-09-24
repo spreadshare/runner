@@ -9,7 +9,7 @@ using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.Strategy;
 using SpreadShare.ZeroMQ;
-
+using SpreadShare.SupportServices;
 
 namespace UnitTests
 {
@@ -19,12 +19,13 @@ namespace UnitTests
 		//the SpreadShare.* namespace as private members 
 		//and initialize them in the constructor.
 
-		private IServiceCollection services;
+
+		//private IServiceCollection services;
 		private IServiceProvider serviceProvider;
 		
 		public TestServicesStartup() { 
 			// Create service collection
-            services = new ServiceCollection();
+            IServiceCollection services = new ServiceCollection();
 
             // Configure services - Provide depencies for services
             Startup startup = new Startup();
@@ -32,17 +33,41 @@ namespace UnitTests
             startup.ConfigureBusinessServices(services);
 
             // Create service provider
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
+            serviceProvider = services.BuildServiceProvider();
 
             // Configure application
             startup.Configure(serviceProvider, (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory)));
 		}
 
 		[Fact]
+		public void FetchCandleServiceStarts()
+		{
+			var result = serviceProvider.GetService<IFetchCandles>().Connect();
+            Assert.True(result.Code == ResponseCodes.Success, $"FetchCandles service not started succesfully, Code: {result.Code}");
+		}
+
+		[Fact]
 		public void UserServiceStarts()
 		{
-			//IUserService user = serviceProvider.GetService<IUserService>();
-			Assert.True(true, "lol");
+			var result = serviceProvider.GetService<IUserService>().Start();
+			Assert.True(result.Code == ResponseCodes.Success, $"UserService not started succesfully, Code {result}");
 		}
+
+
+		[Fact]
+		public void TradingServiceStarts()
+		{
+			var result = serviceProvider.GetService<ITradingService>().Start();
+			Assert.True(result.Code == ResponseCodes.Success, $"TradingService not started succesfully, Code {result}");
+		}
+
+		/*
+		[Fact]
+		public void DatabaseServiceStarts()
+		{
+			var result = serviceProvider.GetService<IDatabaseMigrationService>().Migrate();
+			Assert.True(result.Code == ResponseCodes.Success, $"DatabaseService not started succesfully, Code {result}");
+		}
+		*/
   }
 }
