@@ -12,14 +12,16 @@ namespace SpreadShare.BinanceServices.Implementations
     {
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
         private BinanceClient _client;
         private long _receiveWindow;
 
-        public BinanceTradingService(ILoggerFactory loggerFactory, IConfiguration configuration)
+        public BinanceTradingService(ILoggerFactory loggerFactory, IConfiguration configuration, IUserService userService)
         {
             _logger = loggerFactory.CreateLogger<BinanceTradingService>();
             _configuration = configuration;
             _logger.LogInformation("Creating new Binance Client");
+            _userService = userService;
         }
 
         public override ResponseObject Start()
@@ -62,6 +64,7 @@ namespace SpreadShare.BinanceServices.Implementations
 
         public override long PlaceMarketOrder(string symbol, OrderSide side, decimal amount)
         {
+            var assets = _userService.GetPortfolio();
             var response = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
             if (response.Success)
             {

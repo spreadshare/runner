@@ -79,6 +79,8 @@ namespace SpreadShare.Strategy
         /// <param name="ms">Time to wait</param>
         public void SetTimer(long ms)
         {
+            //Ensure the previous timer has gone out.
+            _activeTimer?.Stop();
             _activeTimer = new Timer(ms, () =>
             {
                 // Callback returned after waiting period
@@ -87,10 +89,14 @@ namespace SpreadShare.Strategy
                     /* State.OnTimer should return Success, while states without implementing a timer
                      * will return NotDefined by default.
                     */
-                    var response = _activeState.OnTimer();
-                    _logger.LogInformation(response.Code == ResponseCodes.Success
-                        ? "Timer succesfully triggered!"
-                        : $"Timer callback was not used by state. Response Code: {response}");
+                    //Recheck if the timer has not changed while aqcuiring the lock
+                    if (_activeTimer.Valid)
+                    {
+                        var response = _activeState.OnTimer();
+                        _logger.LogInformation(response.Code == ResponseCodes.Success
+                            ? "Timer succesfully triggered!"
+                            : $"Timer callback was not used by state. Response Code: {response}");
+                    }
                 }
             } );
         }
