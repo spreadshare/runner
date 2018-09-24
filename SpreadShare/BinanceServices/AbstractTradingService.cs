@@ -11,5 +11,6 @@ namespace SpreadShare.BinanceServices
         public abstract void CancelOrder(string symbol, long orderId);
         public abstract decimal GetCurrentPrice(string symbol);
         public abstract decimal GetPerformancePastHours(string symbol, double hoursBack, DateTime endTime);
+        public abstract Tuple<string, decimal> GetTopPerformance(double hoursBack, DateTime endTime);
     }
 }

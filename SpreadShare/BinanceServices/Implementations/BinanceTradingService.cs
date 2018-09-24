@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using Binance.Net;
 using Binance.Net.Objects;
@@ -101,6 +102,7 @@ namespace SpreadShare.BinanceServices.Implementations
             if (hoursBack <= 0) {
                 throw new ArgumentException("Argument hoursBack should be larger than 0.");
             }
+
             DateTime startTime = endTime.AddHours(-hoursBack);
             var response = _client.GetKlines(symbol, KlineInterval.OneMinute,startTime, endTime);
             if (response.Success) {
@@ -113,6 +115,31 @@ namespace SpreadShare.BinanceServices.Implementations
                 _logger.LogWarning($"Could not fetch price for {symbol} from binance!");
                 return 0;
             }
+        }
+
+        public override Tuple<string, decimal> GetTopPerformance(double hoursBack, DateTime endTime) {
+            if (hoursBack <= 0) {
+                throw new ArgumentException("Argument hoursBack should be larger than 0.");
+            }
+            
+            var tradingPairs = _configuration.GetSection("BinanceClientSettings:tradingPairs").AsEnumerable().ToArray();
+
+            decimal max = -1;
+            string maxTradingPair = "";
+
+            foreach(var tradingPair in tradingPairs) {
+                // GetSection gives a null value
+                if  (tradingPair.Value == null) continue;
+
+                var performance = GetPerformancePastHours(tradingPair.Value, hoursBack, endTime);
+                
+                if (max < performance) {
+                    max = performance;
+                    maxTradingPair = tradingPair.Value;
+                }
+            }
+
+            return new Tuple<string, decimal>(maxTradingPair, max);
         }
 
     }
