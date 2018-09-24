@@ -62,7 +62,7 @@ namespace SpreadShare.BinanceServices.Implementations
             }
         }
 
-        public override long PlaceMarketOrder(string symbol, OrderSide side, decimal amount)
+        protected override long PlaceMarketOrder(string symbol, OrderSide side, decimal amount)
         {
             var response = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
             if (response.Success)
@@ -75,19 +75,12 @@ namespace SpreadShare.BinanceServices.Implementations
                 _logger.LogWarning($"Error while placing order: {response.Error.Message}");
                 throw new Exception("Order placement failed!");
             }
-        } 
-
-        public override void CancelOrder(string symbol, long orderId)
-        {
-            var response = _client.CancelOrder(symbol, orderId, null, null, _receiveWindow);
-            if (response.Success)
-                _logger.LogInformation($"Order {orderId} succesfully cancelled");
-            else
-            {
-                _logger.LogWarning($"Failed to cancel order {orderId}: {response.Error.Message}");
-                throw new Exception("Order cancellation failed!");
-            }
         }
+
+        public override ResponseObject ChangeEntirePosition(string symbol) {
+            var assets = _userService.GetPortfolio();
+            return new ResponseObject(ResponseCodes.NotDefined);
+        } 
 
         public override decimal GetPrice(string symbol) {
             var response = _client.GetPrice(symbol);
