@@ -3,7 +3,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.BinanceServices
 {
-    internal interface IUserService
+    public interface IUserService
     {
         ResponseObject Start();
         Assets GetPortfolio();

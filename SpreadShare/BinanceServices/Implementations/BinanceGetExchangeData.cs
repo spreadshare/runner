@@ -28,24 +28,25 @@ namespace SpreadShare.BinanceServices.Implementations
             _configuration = configuration;
         }
 
-        public async Task Connect()
+        public ResponseObject Connect()
         {
             using (var client = new BinanceSocketClient())
             {
                 foreach (var tradingPair in _configuration.GetSection("BinanceClientSettings:tradingPairs").GetChildren().AsEnumerable())
                 {
-                    await GetCandles(client, tradingPair.Value);
+                    GetCandles(client, tradingPair.Value);
                 }
             }
+            return new ResponseObject(ResponseCodes.Success);
         }
 
-        private async Task<CallResult<BinanceStreamSubscription>> GetCandles(BinanceSocketClient client, string tradingPair)
+        private CallResult<BinanceStreamSubscription> GetCandles(BinanceSocketClient client, string tradingPair)
         {
             // Temporary Candle
             Candle prev = new Candle { OpenTime = new DateTime() };
 
             // Subscription
-            var candles = await client.SubscribeToKlineStreamAsync(tradingPair, KlineInterval.OneMinute, data =>
+            var candles = client.SubscribeToKlineStream(tradingPair, KlineInterval.OneMinute, data =>
             {
                 var c = new Candle(data.Data);
                 _logger.LogDebug("Received Candle \t{0}", c.ToString());
