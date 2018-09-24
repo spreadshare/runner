@@ -87,7 +87,7 @@ namespace SpreadShare.BinanceServices.Implementations
             }
         }
 
-        public override decimal GetPrice(string symbol) {
+        public override decimal GetCurrentPrice(string symbol) {
             var response = _client.GetPrice(symbol);
             if (response.Success) {
                 return response.Data.Price;
@@ -96,5 +96,24 @@ namespace SpreadShare.BinanceServices.Implementations
                 return 0;
             }
         }
+
+        public override decimal GetPerformancePastHours(string symbol, double hoursBack, DateTime endTime) {
+            if (hoursBack <= 0) {
+                throw new ArgumentException("Argument hoursBack should be larger than 0.");
+            }
+            DateTime startTime = endTime.AddHours(-hoursBack);
+            var response = _client.GetKlines(symbol, KlineInterval.OneMinute,startTime, endTime);
+            if (response.Success) {
+                var length = response.Data.Length;
+                var first = response.Data[0].Open;
+                var last = response.Data[length - 1].Close;
+                return last / first;
+            } else {
+                _logger.LogCritical(response.Error.Message);
+                _logger.LogWarning($"Could not fetch price for {symbol} from binance!");
+                return 0;
+            }
+        }
+
     }
 }

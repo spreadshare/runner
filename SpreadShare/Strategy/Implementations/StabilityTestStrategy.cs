@@ -29,10 +29,10 @@ namespace SpreadShare.Strategy.Implementations
                 }
 
                 decimal price = 0;
-                price = TradingService.GetPrice("BNBETH");
+                price = TradingService.GetCurrentPrice("BNBETH");
                 Logger.LogInformation($"BNB is worth {price}ETH");
                 while(price == 0) {
-                    price = TradingService.GetPrice("BNBETH");
+                    price = TradingService.GetCurrentPrice("BNBETH");
                     Logger.LogInformation("Trying again in a few seconds");
                     Thread.Sleep(10000);
                 }
