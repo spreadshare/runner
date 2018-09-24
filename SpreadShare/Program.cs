@@ -37,27 +37,26 @@ namespace SpreadShare
 
         private static void ExecuteBusinessLogic(IServiceProvider serviceProvider)
         {
-            // Start service to fetch exchange data
-            var service = serviceProvider.GetService<IFetchCandles>();
-            service.Connect();
-
             var trading = serviceProvider.GetService<ITradingService>();
-            trading.Start();
+            var tradingResult = trading.Start();
 
             var user = serviceProvider.GetService<IUserService>();
 
-            var result = user.Start();
+            var userResult = user.Start();
 
             // Start strategy service
-            if (result.Code == ResponseCodes.Success)
+            if (userResult.Code == ResponseCodes.Success && tradingResult.Code == ResponseCodes.Success)
             {
                 var strategy = serviceProvider.GetService<IStrategy>();
-                strategy.Start();
+                var strategyResult = strategy.Start();
+                if (strategyResult.Code != ResponseCodes.Success) {
+                    Console.WriteLine($"Strategy failed to start, report: {strategyResult}");
+                }
+            } else {
+                Console.WriteLine("Strategy not started because not all needed service started");
+                Console.WriteLine($"User service report: {userResult}");
+                Console.WriteLine($"Trading Service report: {tradingResult}");
             }
-            
-            // Start zeroMQ service
-            var zeroMqService = serviceProvider.GetService<IZeroMqService>();
-            zeroMqService.Start();
 
             KeepRunningForever();
         }

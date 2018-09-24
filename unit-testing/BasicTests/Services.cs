@@ -40,13 +40,6 @@ namespace UnitTests
 		}
 
 		[Fact]
-		public void FetchCandleServiceStarts()
-		{
-			var result = serviceProvider.GetService<IFetchCandles>().Connect();
-            Assert.True(result.Code == ResponseCodes.Success, $"FetchCandles service not started succesfully, Code: {result.Code}");
-		}
-
-		[Fact]
 		public void UserServiceStarts()
 		{
 			var result = serviceProvider.GetService<IUserService>().Start();
