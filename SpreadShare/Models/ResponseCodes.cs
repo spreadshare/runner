@@ -7,20 +7,27 @@
         Success
     }
 
-    public class ResponseObject {
-        ResponseCodes _code;
-        string _message;
+    public class ResponseObject<T> {
+        public ResponseCodes Code { get; }
 
-        public ResponseCodes Code { get { return _code; }}
-        public string Message { get { return _message;}}
+        public T Data { get; }
 
-        public ResponseObject(ResponseCodes _code, string _message="") {
-            this._code = _code;
-            this._message = _message;
+        public ResponseObject(ResponseCodes code, T data) {
+            Code = code;
+            Data = data;
         }
 
-        public override string ToString() {
-            return $"{Code} | msg: {Message}";
+
+    }
+
+    public class ResponseObject : ResponseObject<string>
+    {
+        public ResponseObject(ResponseCodes code, string data = "") : base(code, data)
+        {
+        }
+        public override string ToString()
+        {
+            return $"{Code} | msg: {Data}";
         }
     }
 }
