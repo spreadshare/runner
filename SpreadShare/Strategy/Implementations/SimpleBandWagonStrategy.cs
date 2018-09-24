@@ -24,17 +24,11 @@ namespace SpreadShare.Strategy.Implementations
             {
                 Logger.LogInformation("Opening the entry state...");
                 Logger.LogInformation("Placing buy order...");
-                try
-                {
-                    long orderId = TradingService.PlaceMarketOrder("ETHBNB", OrderSide.Buy, 1);
-                    Context.SetObject("orderId", orderId);
-                }
-                catch(Exception e)
-                {
-                    Logger.LogCritical("Buy order failed, exiting.");
-                    Logger.LogCritical(e.Message);
-                    throw;
-                }
+                var orderIdQuery = TradingService.PlaceMarketOrder("ETHBNB", OrderSide.Buy, 1);
+                if (orderIdQuery.Success)
+                    Context.SetObject("orderId", orderIdQuery.Data);
+                else
+                    throw new Exception("Order placement failed!");
                 SwitchState(new ConfirmOrderPlacedState());
             }
 
@@ -54,7 +48,8 @@ namespace SpreadShare.Strategy.Implementations
             long orderId;
             protected override void ValidateContext()
             {
-                Assets assets = UserService.GetPortfolio();
+                var assetsQuery = UserService.GetPortfolio();
+                Assets assets = assetsQuery.Success ? assetsQuery.Data : throw new Exception("Could not get assets");
                 var list = assets.GetAllLockedBalances();
                 foreach(var item in list) {
                     Logger.LogInformation($"{item.Symbol} - {item.Value}");
