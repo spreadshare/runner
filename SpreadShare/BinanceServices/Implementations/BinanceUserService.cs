@@ -61,13 +61,14 @@ namespace SpreadShare.BinanceServices.Implementations
             return new ResponseObject(ResponseCodes.Success);
         }
 
-        public override Assets GetPortfolio()
+        public override ResponseObject<Assets> GetPortfolio()
         {
             var accountInfo = _client.GetAccountInfo();
             if (!accountInfo.Success) {
-                throw new Exception($"Could not get acccount info: {accountInfo.Error}");
+                _logger.LogCritical($"Could not get assets: {accountInfo.Error.Message}");
+                return new ResponseObject<Assets>(ResponseCodes.Error);
             }
-            return new Assets(accountInfo.Data.Balances);
+            return new ResponseObject<Assets>(ResponseCodes.Success, new Assets(accountInfo.Data.Balances));
         }
     }
 }

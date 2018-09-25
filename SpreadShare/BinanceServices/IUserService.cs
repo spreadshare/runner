@@ -6,6 +6,6 @@ namespace SpreadShare.BinanceServices
     public interface IUserService
     {
         ResponseObject Start();
-        Assets GetPortfolio();
+        ResponseObject<Assets> GetPortfolio();
     }
 }
