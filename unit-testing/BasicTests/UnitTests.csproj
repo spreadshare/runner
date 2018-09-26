@@ -16,8 +16,4 @@
     <ProjectReference Include="..\..\SpreadShare\SpreadShare.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="BinanceServices\" />
-  </ItemGroup>
-
 </Project>
