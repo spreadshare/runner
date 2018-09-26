@@ -1,9 +1,8 @@
-﻿using System.Threading.Tasks;
-using SpreadShare.Models;
+﻿using SpreadShare.Models;
 
 namespace SpreadShare.ZeroMQ
 {
-    interface IZeroMqService
+    public interface IZeroMqService
     {
         /*
          * Interface documentation is found in the PROTOCOL.md

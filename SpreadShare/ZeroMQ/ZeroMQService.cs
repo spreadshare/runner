@@ -52,7 +52,7 @@ namespace SpreadShare.ZeroMQ
                 {
                     pubSocket.SendMoreFrame("topic_status").SendFrame("TODO");
                     pubSocket.SendMoreFrame("topic_holdtime").SendFrame("TODO");
-                    Thread.Sleep(60000);
+                    Thread.Sleep(600);
                 }
             }
         }
