@@ -12,6 +12,6 @@ namespace SpreadShare.BinanceServices
         public abstract ResponseObject CancelOrder(CurrencyPair pair, long orderId);
         public abstract ResponseObject<decimal> GetCurrentPrice(Currency symbol);
         public abstract ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTime endTime);
-        public abstract ResponseObject<Tuple<string, decimal>> GetTopPerformance(double hoursBack, DateTime endTime);
+        public abstract ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(double hoursBack, DateTime endTime);
     }
 }
