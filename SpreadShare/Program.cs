@@ -27,23 +27,19 @@ namespace SpreadShare
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
             // Configure application
-            startup.Configure(serviceProvider, (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory)));
+            ILoggerFactory loggerFactory = (ILoggerFactory) serviceProvider.GetService(typeof(ILoggerFactory));
+            startup.Configure(serviceProvider, loggerFactory);
 
             // --------------------------------------------------
             // Setup finished --> Execute business logic services
-            ExecuteBusinessLogic(serviceProvider);
+            ExecuteBusinessLogic(serviceProvider, loggerFactory);
 
             KeepRunningForever();
         }
 
-        private static void ExecuteBusinessLogic(IServiceProvider serviceProvider)
+        private static void ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
-            var configuration = serviceProvider.GetService<ISettingsService>();
-            var configurationResult = configuration.Start();
-            if (!configurationResult.Success) {
-                Console.WriteLine("SettingsService failed to start, aborting other services");
-                return;
-            }
+            ILogger logger = loggerFactory.CreateLogger("ExecuteBusinessLogic");
             
             var trading = serviceProvider.GetService<ITradingService>();
             var tradingResult = trading.Start();
@@ -58,12 +54,12 @@ namespace SpreadShare
                 var strategy = serviceProvider.GetService<IStrategy>();
                 var strategyResult = strategy.Start();
                 if (strategyResult.Code != ResponseCodes.Success) {
-                    Console.WriteLine($"Strategy failed to start, report: {strategyResult}");
+                    logger.LogError($"Strategy failed to start, report: {strategyResult}");
                 }
             } else {
-                Console.WriteLine("Strategy not started because not all needed service started");
-                Console.WriteLine($"User service report: {userResult}");
-                Console.WriteLine($"Trading Service report: {tradingResult}");
+                logger.LogError("Strategy not started because not all needed service started");
+                logger.LogError($"User service report: {userResult}");
+                logger.LogError($"Trading Service report: {tradingResult}");
             }
 
             KeepRunningForever();
