@@ -70,16 +70,16 @@ namespace SpreadShare.BinanceServices.Implementations
             }
         }
 
-        public override ResponseObject PlaceFullMarketOrder(string symbol, OrderSide side)
+        public override ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
         {
             var query = _userService.GetPortfolio();
             if (!query.Success) return new ResponseObject(ResponseCodes.Error, "Could not retreive assets");
             //TODO
             //Implement pairs
             //Implement LOT_SIZE per pair.
-            decimal amount = query.Data.GetFreeBalance("BNB");
+            decimal amount = query.Data.GetFreeBalance(pair.Left);
             amount = Math.Floor(amount*100) / 100;
-            _logger.LogInformation($"About to place a {side} order for {amount}{symbol}.");
+            _logger.LogInformation($"About to place a {side} order for {amount}{pair}.");
 
             var response = _client.PlaceOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
             if (response.Success)
@@ -111,13 +111,13 @@ namespace SpreadShare.BinanceServices.Implementations
             return new ResponseObject(ResponseCodes.Error, $"Trade was not confirmed in time, last state: {state}");
         }
 
-        public override ResponseObject CancelOrder(string symbol, long orderId)
+        public override ResponseObject CancelOrder(CurrencyPair pair, long orderId)
         {
             throw new NotImplementedException();
         }
 
-        public override ResponseObject<decimal> GetCurrentPrice(string symbol) {
-            var response = _client.GetPrice(symbol);
+        public override ResponseObject<decimal> GetCurrentPrice(Currency symbol) {
+            var response = _client.GetPrice(symbol.ToString());
             if (response.Success) {
                 return new ResponseObject<decimal>(ResponseCodes.Success, response.Data.Price);
             } else {
@@ -126,12 +126,12 @@ namespace SpreadShare.BinanceServices.Implementations
             }
         }
 
-        public override ResponseObject<decimal> GetPerformancePastHours(string symbol, double hoursBack, DateTime endTime) {
+        public override ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTime endTime) {
             if (hoursBack <= 0) {
                 throw new ArgumentException("Argument hoursBack should be larger than 0.");
             }
             DateTime startTime = endTime.AddHours(-hoursBack);
-            var response = _client.GetKlines(symbol, KlineInterval.OneMinute,startTime, endTime);
+            var response = _client.GetKlines(pair.ToString(), KlineInterval.OneMinute,startTime, endTime);
             if (response.Success) {
                 var length = response.Data.Length;
                 var first = response.Data[0].Open;
@@ -139,7 +139,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 return new ResponseObject<decimal>(ResponseCodes.Success, last / first);
             } else {
                 _logger.LogCritical(response.Error.Message);
-                _logger.LogWarning($"Could not fetch price for {symbol} from binance!");
+                _logger.LogWarning($"Could not fetch price for {pair} from binance!");
                 return new ResponseObject<decimal>(ResponseCodes.Error);
             }
         }
@@ -158,7 +158,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 // GetSection gives a null value
                 if  (tradingPair.Value == null) continue;
 
-                var performanceQuery = GetPerformancePastHours(tradingPair.Value, hoursBack, endTime);
+                var performanceQuery = GetPerformancePastHours(CurrencyPairs.BNBETH, hoursBack, endTime);
                 decimal performance;
                 if (performanceQuery.Code == ResponseCodes.Success) {
                     performance = performanceQuery.Data;

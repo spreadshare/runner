@@ -13,7 +13,7 @@ namespace UnitTests
 
         [Fact]
         public void MoneyIsZero() {
-            var result = _assets.GetTotalBalance("MoonCoin");
+            var result = _assets.GetTotalBalance(new Currency("MoonCoin",2));
             Assert.True(result==0, "Non existing currencies should return a quantity of 0");
         }
 

@@ -22,19 +22,19 @@ namespace SpreadShare.Models
             }
         }
 
-        public decimal GetFreeBalance(string symbol) 
+        public decimal GetFreeBalance(Currency symbol) 
         {
-            return _free.GetValueOrDefault(symbol, 0);
+            return _free.GetValueOrDefault(symbol.ToString(), 0);
         }
 
-        public decimal GetLockedBalance(string symbol)
+        public decimal GetLockedBalance(Currency symbol)
         {
-            return _locked.GetValueOrDefault(symbol, 0);
+            return _locked.GetValueOrDefault(symbol.ToString(), 0);
         }
 
-        public decimal GetTotalBalance(string symbol)
+        public decimal GetTotalBalance(Currency symbol)
         {
-            return _free.GetValueOrDefault(symbol, 0);
+            return _free.GetValueOrDefault(symbol.ToString(), 0);
         }
 
         public List<AssetValue> GetAllFreeBalances() {

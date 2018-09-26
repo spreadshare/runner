@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.Strategy;
+using SpreadShare.SupportServices;
 using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
@@ -37,6 +38,13 @@ namespace SpreadShare
 
         private static void ExecuteBusinessLogic(IServiceProvider serviceProvider)
         {
+            var configuration = serviceProvider.GetService<ISettingsService>();
+            var configurationResult = configuration.Start();
+            if (!configurationResult.Success) {
+                Console.WriteLine("SettingsService failed to start, aborting other services");
+                return;
+            }
+
             var trading = serviceProvider.GetService<ITradingService>();
             var tradingResult = trading.Start();
 
@@ -45,7 +53,7 @@ namespace SpreadShare
             var userResult = user.Start();
 
             // Start strategy service
-            if (userResult.Code == ResponseCodes.Success && tradingResult.Code == ResponseCodes.Success)
+            if (userResult.Success && tradingResult.Success)
             {
                 var strategy = serviceProvider.GetService<IStrategy>();
                 var strategyResult = strategy.Start();

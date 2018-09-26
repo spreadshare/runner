@@ -69,6 +69,9 @@ namespace SpreadShare
 
             // ZeroMQ Service to interface with other programs
             services.AddSingleton<IZeroMqService, ZeroMqService>();
+
+            // Configuration files globals
+            services.AddSingleton<ISettingsService, SettingsService>();
         }
 
         /// <summary>
