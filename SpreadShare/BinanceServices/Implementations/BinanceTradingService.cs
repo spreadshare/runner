@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using Binance.Net;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
@@ -13,16 +15,21 @@ namespace SpreadShare.BinanceServices.Implementations
     {
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-        private readonly IUserService _userService;
+        private readonly AbstractUserService _userService;
         private BinanceClient _client;
         private long _receiveWindow;
+        private ConcurrentDictionary<long, TradeState> _orderStatus;
 
         public BinanceTradingService(ILoggerFactory loggerFactory, IConfiguration configuration, IUserService userService)
         {
             _logger = loggerFactory.CreateLogger<BinanceTradingService>();
             _configuration = configuration;
             _logger.LogInformation("Creating new Binance Client");
-            _userService = userService;
+            _userService = userService as AbstractUserService;
+            _orderStatus = new ConcurrentDictionary<long, TradeState>();
+
+            //Subscribe to orderUpdates
+            _userService.OrderUpdateHandler += OnOrderUpdate;
         }
 
         public override ResponseObject Start()
@@ -63,34 +70,50 @@ namespace SpreadShare.BinanceServices.Implementations
             }
         }
 
-        public override ResponseObject<long> PlaceMarketOrder(string symbol, OrderSide side, decimal amount)
+        public override ResponseObject PlaceFullMarketOrder(string symbol, OrderSide side)
         {
-            var assets = _userService.GetPortfolio();
-            var response = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
+            var query = _userService.GetPortfolio();
+            if (!query.Success) return new ResponseObject(ResponseCodes.Error, "Could not retreive assets");
+            //TODO
+            //Implement pairs
+            //Implement LOT_SIZE per pair.
+            decimal amount = query.Data.GetFreeBalance("BNB");
+            amount = Math.Floor(amount*100) / 100;
+            _logger.LogInformation($"About to place a {side} order for {amount}{symbol}.");
+
+            var response = _client.PlaceOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
             if (response.Success)
-            {
-                _logger.LogInformation($"Order {response.Data.OrderId} placement succeeded!");
-                return new ResponseObject<long>(ResponseCodes.Success, response.Data.OrderId);
-            }
+                _logger.LogInformation($"Order {response.Data.OrderId} request succeeded!");
             else
             {
                 _logger.LogWarning($"Error while placing order: {response.Error.Message}");
-                return new ResponseObject<long>(ResponseCodes.Error);
+                return new ResponseObject(ResponseCodes.Error, response.Error.Message);
             }
+
+            int msTicker = 0;
+            TradeState state;
+            while(true) {
+                state = _orderStatus.GetOrAdd(response.Data.OrderId, TradeState.Unknown);
+                if (state == TradeState.Executed) {
+                    return new ResponseObject(ResponseCodes.Success);
+                }
+                if (state == TradeState.Canceled | state == TradeState.Rejected) {
+                    return new ResponseObject(ResponseCodes.Error, $"Trade was not executed, reason: {state}");
+                }
+
+                //Wait for a maximum of 10 seconds
+                if (msTicker < 10000) {
+                    Thread.Sleep(1);
+                } else {
+                    break;
+                }
+            }
+            return new ResponseObject(ResponseCodes.Error, $"Trade was not confirmed in time, last state: {state}");
         }
 
         public override ResponseObject CancelOrder(string symbol, long orderId)
         {
-            var response = _client.CancelOrder(symbol, orderId, null, null, _receiveWindow);
-            if (response.Success) {
-                _logger.LogInformation($"Order {orderId} succesfully cancelled");
-                return new ResponseObject(ResponseCodes.Success);
-            }
-            else
-            {
-                _logger.LogWarning($"Failed to cancel order {orderId}: {response.Error.Message}");
-                return new ResponseObject(ResponseCodes.Error, response.Error.Message);
-            }
+            throw new NotImplementedException();
         }
 
         public override ResponseObject<decimal> GetCurrentPrice(string symbol) {
@@ -107,7 +130,6 @@ namespace SpreadShare.BinanceServices.Implementations
             if (hoursBack <= 0) {
                 throw new ArgumentException("Argument hoursBack should be larger than 0.");
             }
-
             DateTime startTime = endTime.AddHours(-hoursBack);
             var response = _client.GetKlines(symbol, KlineInterval.OneMinute,startTime, endTime);
             if (response.Success) {
@@ -152,6 +174,24 @@ namespace SpreadShare.BinanceServices.Implementations
             }
 
             return new ResponseObject<Tuple<string, decimal>>(ResponseCodes.Success, new Tuple<string, decimal>(maxTradingPair, max));
+        }
+
+
+        public void OnOrderUpdate(object sender, BinanceStreamOrderUpdate order) {
+            _logger.LogInformation($"Order update | id {order.OrderId}, executionType {order.ExecutionType}");
+            TradeState state;
+            switch(order.ExecutionType) {
+                case ExecutionType.New: state = TradeState.Received; break;
+                case ExecutionType.Canceled: state = TradeState.Canceled; break;
+                case ExecutionType.Expired: state = TradeState.Expired; break;
+                case ExecutionType.Rejected: state = TradeState.Rejected; break;
+                case ExecutionType.Trade: state = TradeState.Executed; break;
+                default: _logger.LogCritical($"Unknown Execution Type received from Binance: {order.ExecutionType}"); return;
+            }
+
+            //The function is used to generate a value when the key was already present, in this case it should
+            //just update the value as is.
+            _orderStatus.AddOrUpdate(order.OrderId, state, (p,q) => state);
         }
 
     }

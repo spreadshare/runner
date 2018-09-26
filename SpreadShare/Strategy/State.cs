@@ -11,7 +11,6 @@ namespace SpreadShare.Strategy
 
         private StateManager _stateManager;
         protected ILogger Logger;
-        protected AbstractUserService UserService;
         protected AbstractTradingService TradingService;
 
         protected State()
@@ -29,7 +28,6 @@ namespace SpreadShare.Strategy
         {
             Context = context;
             _stateManager = stateManager;
-            UserService = stateManager.UserService;
             TradingService = stateManager.TradingService;
             Logger = loggerFactory.CreateLogger(GetType());
             ValidateContext();
