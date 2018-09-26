@@ -69,6 +69,9 @@ namespace SpreadShare
 
             // ZeroMQ Service to interface with other programs
             services.AddSingleton<IZeroMqService, ZeroMqService>();
+
+            // Configuration files globals
+            services.AddSingleton<ISettingsService, SettingsService>();
         }
 
         /// <summary>
@@ -85,6 +88,14 @@ namespace SpreadShare
             {
                 logger.LogError("Could not migrate database");
             };
+
+            // Setup Settings service
+            var configuration = serviceProvider.GetService<ISettingsService>();
+            var configurationResult = configuration.Start();
+            if (!configurationResult.Success)
+            {
+                logger.LogError("SettingsService failed to start, aborting other services");
+            }
         }
     }
 }

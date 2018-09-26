@@ -8,22 +8,23 @@ using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
+using SpreadShare.SupportServices;
 
 namespace SpreadShare.BinanceServices.Implementations
 {
     internal class BinanceTradingService : AbstractTradingService
     {
         private readonly ILogger _logger;
-        private readonly IConfiguration _configuration;
+        private readonly SettingsService _settings;
         private readonly AbstractUserService _userService;
         private BinanceClient _client;
         private long _receiveWindow;
         private ConcurrentDictionary<long, TradeState> _orderStatus;
 
-        public BinanceTradingService(ILoggerFactory loggerFactory, IConfiguration configuration, IUserService userService)
+        public BinanceTradingService(ILoggerFactory loggerFactory, ISettingsService settings, IUserService userService)
         {
             _logger = loggerFactory.CreateLogger<BinanceTradingService>();
-            _configuration = configuration;
+            _settings = settings as SettingsService;
             _logger.LogInformation("Creating new Binance Client");
             _userService = userService as AbstractUserService;
             _orderStatus = new ConcurrentDictionary<long, TradeState>();
@@ -35,15 +36,15 @@ namespace SpreadShare.BinanceServices.Implementations
         public override ResponseObject Start()
         {
             //Read the custom receive window, the standard window is often too short.
-            _receiveWindow = _configuration.GetValue<long>("BinanceClientSettings:receiveWindow");
+            _receiveWindow = _settings.BinanceSettings.ReceiveWindow;
 
             //Enforce the right protocol for the connection
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             _client = new BinanceClient();
             //Read authentication from configuration.
-            string apikey = _configuration.GetValue<string>("BinanceCredentials:api-key");
-            string apisecret = _configuration.GetValue<string>("BinanceCredentials:api-secret");
+            string apikey = _settings.BinanceSettings.Credentials.Key;
+            string apisecret = _settings.BinanceSettings.Credentials.Secret;
             _client.SetApiCredentials(apikey, apisecret);
 
             //Test the connection to binance
@@ -70,16 +71,16 @@ namespace SpreadShare.BinanceServices.Implementations
             }
         }
 
-        public override ResponseObject PlaceFullMarketOrder(string symbol, OrderSide side)
+        public override ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
         {
             var query = _userService.GetPortfolio();
             if (!query.Success) return new ResponseObject(ResponseCodes.Error, "Could not retreive assets");
             //TODO
             //Implement pairs
             //Implement LOT_SIZE per pair.
-            decimal amount = query.Data.GetFreeBalance("BNB");
+            decimal amount = query.Data.GetFreeBalance(pair.Left);
             amount = Math.Floor(amount*100) / 100;
-            _logger.LogInformation($"About to place a {side} order for {amount}{symbol}.");
+            _logger.LogInformation($"About to place a {side} order for {amount}{pair}.");
 
             var response = _client.PlaceOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
             if (response.Success)
@@ -111,13 +112,13 @@ namespace SpreadShare.BinanceServices.Implementations
             return new ResponseObject(ResponseCodes.Error, $"Trade was not confirmed in time, last state: {state}");
         }
 
-        public override ResponseObject CancelOrder(string symbol, long orderId)
+        public override ResponseObject CancelOrder(CurrencyPair pair, long orderId)
         {
             throw new NotImplementedException();
         }
 
-        public override ResponseObject<decimal> GetCurrentPrice(string symbol) {
-            var response = _client.GetPrice(symbol);
+        public override ResponseObject<decimal> GetCurrentPrice(Currency symbol) {
+            var response = _client.GetPrice(symbol.ToString());
             if (response.Success) {
                 return new ResponseObject<decimal>(ResponseCodes.Success, response.Data.Price);
             } else {
@@ -126,12 +127,12 @@ namespace SpreadShare.BinanceServices.Implementations
             }
         }
 
-        public override ResponseObject<decimal> GetPerformancePastHours(string symbol, double hoursBack, DateTime endTime) {
+        public override ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTime endTime) {
             if (hoursBack <= 0) {
                 throw new ArgumentException("Argument hoursBack should be larger than 0.");
             }
             DateTime startTime = endTime.AddHours(-hoursBack);
-            var response = _client.GetKlines(symbol, KlineInterval.OneMinute,startTime, endTime);
+            var response = _client.GetKlines(pair.ToString(), KlineInterval.OneMinute,startTime, endTime);
             if (response.Success) {
                 var length = response.Data.Length;
                 var first = response.Data[0].Open;
@@ -139,41 +140,39 @@ namespace SpreadShare.BinanceServices.Implementations
                 return new ResponseObject<decimal>(ResponseCodes.Success, last / first);
             } else {
                 _logger.LogCritical(response.Error.Message);
-                _logger.LogWarning($"Could not fetch price for {symbol} from binance!");
+                _logger.LogWarning($"Could not fetch price for {pair} from binance!");
                 return new ResponseObject<decimal>(ResponseCodes.Error);
             }
         }
 
-        public override ResponseObject<Tuple<string, decimal>> GetTopPerformance(double hoursBack, DateTime endTime) {
+        public override ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(double hoursBack, DateTime endTime) {
             if (hoursBack <= 0) {
                 throw new ArgumentException("Argument hoursBack should be larger than 0.");
             }
             
-            var tradingPairs = _configuration.GetSection("BinanceClientSettings:tradingPairs").AsEnumerable().ToArray();
-
             decimal max = -1;
-            string maxTradingPair = "";
+            CurrencyPair maxTradingPair = null;
 
-            foreach(var tradingPair in tradingPairs) {
-                // GetSection gives a null value
-                if  (tradingPair.Value == null) continue;
-
-                var performanceQuery = GetPerformancePastHours(tradingPair.Value, hoursBack, endTime);
+            foreach(var tradingPair in _settings.TradingPairs) {
+                var performanceQuery = GetPerformancePastHours(CurrencyPairs.BNBETH, hoursBack, endTime);
                 decimal performance;
                 if (performanceQuery.Code == ResponseCodes.Success) {
                     performance = performanceQuery.Data;
                 } else {
-                    return new ResponseObject<Tuple<string, decimal>>(ResponseCodes.Error);
+                    return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Error);
                 }
 
                 
                 if (max < performance) {
                     max = performance;
-                    maxTradingPair = tradingPair.Value;
+                    maxTradingPair = tradingPair;
                 }
             }
 
-            return new ResponseObject<Tuple<string, decimal>>(ResponseCodes.Success, new Tuple<string, decimal>(maxTradingPair, max));
+            if (maxTradingPair == null)
+                return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Error);
+
+            return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Success, new Tuple<CurrencyPair, decimal>(maxTradingPair, max));
         }
 
 

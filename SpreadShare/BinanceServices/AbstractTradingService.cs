@@ -8,10 +8,10 @@ namespace SpreadShare.BinanceServices
     {
         protected enum TradeState { Received, Executed, Canceled, Expired, Rejected, Unknown };
         public abstract ResponseObject Start();
-        public abstract ResponseObject PlaceFullMarketOrder(string symbol, OrderSide side);
-        public abstract ResponseObject CancelOrder(string symbol, long orderId);
-        public abstract ResponseObject<decimal> GetCurrentPrice(string symbol);
-        public abstract ResponseObject<decimal> GetPerformancePastHours(string symbol, double hoursBack, DateTime endTime);
-        public abstract ResponseObject<Tuple<string, decimal>> GetTopPerformance(double hoursBack, DateTime endTime);
+        public abstract ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side);
+        public abstract ResponseObject CancelOrder(CurrencyPair pair, long orderId);
+        public abstract ResponseObject<decimal> GetCurrentPrice(Currency symbol);
+        public abstract ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTime endTime);
+        public abstract ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(double hoursBack, DateTime endTime);
     }
 }
