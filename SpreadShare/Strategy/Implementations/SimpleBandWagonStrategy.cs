@@ -23,6 +23,18 @@ namespace SpreadShare.Strategy.Implementations
             protected override void ValidateContext()
             {
                 Logger.LogInformation("Welcome to the entry state, I do nothing yet.");
+                var query = TradingService.GetTopPerformance(2, DateTime.Now);
+                if (query.Success) {
+                    Logger.LogInformation($"Top performer is {query.Data.Item1}");
+                }
+
+                /* <-- Turned off so now unexpected trades take place -->
+                var trade = TradingService.PlaceFullMarketOrder("ETHBNB", OrderSide.Sell);
+                if (trade.Success) {
+                    Logger.LogCritical("Trade succeeded!");
+                } else {
+                    Logger.LogCritical($"Trade failed: {trade}");
+                } */
             }
 
             public override ResponseObject OnCandle(Candle c)
