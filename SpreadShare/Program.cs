@@ -44,7 +44,7 @@ namespace SpreadShare
                 Console.WriteLine("SettingsService failed to start, aborting other services");
                 return;
             }
-
+            
             var trading = serviceProvider.GetService<ITradingService>();
             var tradingResult = trading.Start();
 

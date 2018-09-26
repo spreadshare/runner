@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace SpreadShare.Models
 {
     static class CurrencyPairs
@@ -20,6 +23,16 @@ namespace SpreadShare.Models
 
         public override string ToString() {
             return $"{_left}{_right}";
+        }
+
+        private static Dictionary<string, CurrencyPair> _table = new Dictionary<string, CurrencyPair> {
+            { "BNBETH", CurrencyPairs.BNBETH }
+        };
+
+        public static CurrencyPair Parse(string str) {
+            if (_table.ContainsKey(str))
+                return _table[str];
+            throw new Exception($"{str} not found in parse table");
         }
     }
 }
