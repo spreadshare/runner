@@ -75,14 +75,24 @@ namespace SpreadShare.BinanceServices.Implementations
         {
             var query = _userService.GetPortfolio();
             if (!query.Success) return new ResponseObject(ResponseCodes.Error, "Could not retreive assets");
-            //TODO
-            //Implement pairs
-            //Implement LOT_SIZE per pair.
-            decimal amount = query.Data.GetFreeBalance(pair.Left);
-            amount = Math.Floor(amount*100) / 100;
-            _logger.LogInformation($"About to place a {side} order for {amount}{pair}.");
+ 
+            decimal amount = query.Data.GetFreeBalance(side == OrderSide.Buy ? pair.Right : pair.Left);
 
-            var response = _client.PlaceOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
+            //The amount should be expressed in the base pair.
+            if (side == OrderSide.Buy) {
+                var priceQuery = GetCurrentPrice(pair);
+                if (priceQuery.Success) {
+                    _logger.LogInformation($"Current price of {pair} is {priceQuery.Data}{pair.Right}");
+                    amount = amount / priceQuery.Data;
+                } else {
+                    return new ResponseObject(ResponseCodes.Error, priceQuery.ToString());
+                }
+            }
+            _logger.LogInformation($"Pre rounded amount {amount}{pair.Right}");
+            amount = pair.RoundToTradable(amount);
+            _logger.LogInformation($"About to place a {side.ToString().ToLower()} order for {amount}{pair.Left}.");
+
+            var response = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
             if (response.Success)
                 _logger.LogInformation($"Order {response.Data.OrderId} request succeeded!");
             else
@@ -94,7 +104,7 @@ namespace SpreadShare.BinanceServices.Implementations
             int msTicker = 0;
             TradeState state;
             while(true) {
-                state = _orderStatus.GetOrAdd(response.Data.OrderId, TradeState.Unknown);
+                state = _orderStatus.GetOrAdd(response.Data.OrderId, TradeState.Unreceived);
                 if (state == TradeState.Executed) {
                     return new ResponseObject(ResponseCodes.Success);
                 }
@@ -103,7 +113,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 }
 
                 //Wait for a maximum of 10 seconds
-                if (msTicker < 10000) {
+                if (msTicker++ < 10000) {
                     Thread.Sleep(1);
                 } else {
                     break;
@@ -117,12 +127,12 @@ namespace SpreadShare.BinanceServices.Implementations
             throw new NotImplementedException();
         }
 
-        public override ResponseObject<decimal> GetCurrentPrice(Currency symbol) {
-            var response = _client.GetPrice(symbol.ToString());
+        public override ResponseObject<decimal> GetCurrentPrice(CurrencyPair pair) {
+            var response = _client.GetPrice(pair.ToString());
             if (response.Success) {
                 return new ResponseObject<decimal>(ResponseCodes.Success, response.Data.Price);
             } else {
-                _logger.LogWarning($"Could not fetch price for {symbol} from binance!");
+                _logger.LogWarning($"Could not fetch price for {pair} from binance!");
                 return new ResponseObject<decimal>(ResponseCodes.Error);
             }
         }

@@ -21,8 +21,8 @@ namespace SpreadShare.Models
         public CurrencyPair Flipped { get { return new CurrencyPair(Right, Left, _decimals); }}
 
         public decimal RoundToTradable(decimal amount) { 
-            decimal lotSize = 10^_decimals;
-            return Math.Floor(amount * lotSize) * lotSize; 
+            decimal lotSize = (decimal)Math.Pow(10, _decimals);
+            return Math.Floor(amount * lotSize) / lotSize; 
         }
 
         public override string ToString() {

@@ -45,14 +45,14 @@
 
     }
 
-    public class ResponseObject : ResponseObject<object>
+    public class ResponseObject : ResponseObject<string>
     {
         public ResponseObject(ResponseCodes code, string data = "") : base(code, data)
         {
         }
         public override string ToString()
         {
-            return $"{Code} | msg: {Data}";
+            return $"{Code} | msg: {Message}";
         }
     }
 }
