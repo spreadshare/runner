@@ -26,6 +26,8 @@ namespace SpreadShare.Strategy.Implementations
                 var query = TradingService.GetTopPerformance(2, DateTime.Now);
                 if (query.Success) {
                     Logger.LogInformation($"Top performer is {query.Data.Item1}");
+                } else {
+                    Logger.LogWarning($"Could not fetch top performer, {query}");
                 }
 
                 /* <-- Turned off so now unexpected trades take place -->

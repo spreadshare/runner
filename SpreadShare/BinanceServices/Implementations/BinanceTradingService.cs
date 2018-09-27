@@ -153,13 +153,14 @@ namespace SpreadShare.BinanceServices.Implementations
             decimal max = -1;
             CurrencyPair maxTradingPair = null;
 
-            foreach(var tradingPair in _settings.TradingPairs) {
+            foreach(var tradingPair in _settings.ActiveTradingPairs) {
                 var performanceQuery = GetPerformancePastHours(tradingPair, hoursBack, endTime);
                 decimal performance;
                 if (performanceQuery.Code == ResponseCodes.Success) {
                     performance = performanceQuery.Data;
                 } else {
-                    return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Error);
+                    _logger.LogWarning($"Error fetching performance data: {performanceQuery}");
+                    return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Error, performanceQuery.ToString());
                 }
 
                 
@@ -170,7 +171,7 @@ namespace SpreadShare.BinanceServices.Implementations
             }
 
             if (maxTradingPair == null)
-                return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Error);
+                return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Error, "No trading pairs defined");
 
             return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Success, new Tuple<CurrencyPair, decimal>(maxTradingPair, max));
         }

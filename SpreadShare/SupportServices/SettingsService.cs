@@ -13,18 +13,32 @@ namespace SpreadShare.SupportServices
     public class SettingsService : ISettingsService
     {
         IConfiguration _configuration;
-        List<CurrencyPair> _tradingPairs;
+        List<CurrencyPair> _activeTradingPairs;
         BinanceSettings _binanceSettings;
-
         ITradingService _tradingService;
         ILogger _logger;
         public SettingsService(IConfiguration Configuration, ILoggerFactory loggerFactory)
         {
             _configuration = Configuration;
-            _tradingPairs = new List<CurrencyPair>();
+            _activeTradingPairs = new List<CurrencyPair>();
             _logger = loggerFactory.CreateLogger<SettingsService>();
+        }
+        public ResponseObject Start()
+        {
+            try {
+                DownloadCurrencies();
+                ReadTradingPairs();
+                ReadBinanceSettings();
+            } catch(Exception e) {
+                return new ResponseObject(ResponseCodes.Error, e.Message);
+            }
+            return new ResponseObject(ResponseCodes.Success);
+        }
+
+        private void DownloadCurrencies() {
             using(var client = new BinanceClient())
             {
+                //Disect by extracting the known base pairs.
                 Regex rx = new Regex("(.*)(BTC|ETH|USDT|BNB)",
                      RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -32,26 +46,21 @@ namespace SpreadShare.SupportServices
                 var listQuery = client.GetAllPrices();
                 if (listQuery.Success) {
                     foreach(var item in listQuery.Data) {
-                        Console.WriteLine(item.Symbol);
                         var pairs = rx.Matches(item.Symbol);
                         foreach(var pair in pairs.Reverse()) {
-                            if (!pair.Success) continue;
+                            if (!pair.Success) {
+                                _logger.LogWarning($"Could not extract pairs from {item.Symbol}");
+                                continue;
+                            }
                             string left = pair.Groups[1].Value;
                             string right = pair.Groups[2].Value;
+                            var result = new CurrencyPair(new Currency(left), new Currency(right), 2);
+                            //Add the instance to the parseTable to make it available for parsing
+                            CurrencyPair._table.Add(pair.Value, result);
                         }
                     }
                 }
             }
-        }
-        public ResponseObject Start()
-        {
-            try {
-                ReadTradingPairs();
-                ReadBinanceSettings();
-            } catch(Exception e) {
-                return new ResponseObject(ResponseCodes.Error, e.Message);
-            }
-            return new ResponseObject(ResponseCodes.Success);
         }
 
         private void ReadBinanceSettings() {
@@ -75,11 +84,14 @@ namespace SpreadShare.SupportServices
                     _logger.LogInformation(e.Message);
                     continue;
                 }
-                _tradingPairs.Add(pair);
+                _activeTradingPairs.Add(pair);
             }
         }
-
-        public List<CurrencyPair> TradingPairs { get { return _tradingPairs; }}
+        /// <summary>
+        /// Get the trading pairs specified in the appsettings
+        /// </summary>
+        /// <value></value>
+        public List<CurrencyPair> ActiveTradingPairs { get { return _activeTradingPairs; }}
         public BinanceSettings BinanceSettings { get {return _binanceSettings;}}
     }
 

@@ -18,7 +18,6 @@ namespace SpreadShare.Models
 
         public Currency Left { get { return _left; }}
         public Currency Right { get { return _right; }}
-
         public CurrencyPair Flipped { get { return new CurrencyPair(Right, Left, _decimals); }}
 
         public decimal RoundToTradable(decimal amount) { 
@@ -29,8 +28,7 @@ namespace SpreadShare.Models
         public override string ToString() {
             return $"{_left}{_right}";
         }
-
-        private static Dictionary<string, CurrencyPair> _table = new Dictionary<string, CurrencyPair>();
+        public static Dictionary<string, CurrencyPair> _table = new Dictionary<string, CurrencyPair>();
 
         public static CurrencyPair Parse(string str) {
             if (_table.ContainsKey(str))
