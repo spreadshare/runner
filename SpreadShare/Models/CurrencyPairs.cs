@@ -3,13 +3,6 @@ using System.Collections.Generic;
 
 namespace SpreadShare.Models
 {
-    static class CurrencyPairs
-    {
-        public static readonly CurrencyPair BNBETH = new CurrencyPair(Currencies.BNB, Currencies.ETH, 2);
-        public static readonly CurrencyPair ETHBTC = new CurrencyPair(Currencies.ETH, Currencies.BTC, 2);
-        public static readonly CurrencyPair BNBBTC = new CurrencyPair(Currencies.BNB, Currencies.BTC, 2);
-    }
-
     public class CurrencyPair
     {
         Currency _left;
@@ -37,11 +30,7 @@ namespace SpreadShare.Models
             return $"{_left}{_right}";
         }
 
-        private static Dictionary<string, CurrencyPair> _table = new Dictionary<string, CurrencyPair> {
-            { "BNBETH", CurrencyPairs.BNBETH },
-            { "ETCBTC", CurrencyPairs.ETHBTC },
-            { "BNBBTC", CurrencyPairs.BNBBTC }
-        };
+        private static Dictionary<string, CurrencyPair> _table = new Dictionary<string, CurrencyPair>();
 
         public static CurrencyPair Parse(string str) {
             if (_table.ContainsKey(str))

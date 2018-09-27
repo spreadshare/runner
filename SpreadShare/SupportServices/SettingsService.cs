@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Binance.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
@@ -12,12 +15,33 @@ namespace SpreadShare.SupportServices
         IConfiguration _configuration;
         List<CurrencyPair> _tradingPairs;
         BinanceSettings _binanceSettings;
+
+        ITradingService _tradingService;
         ILogger _logger;
         public SettingsService(IConfiguration Configuration, ILoggerFactory loggerFactory)
         {
             _configuration = Configuration;
             _tradingPairs = new List<CurrencyPair>();
             _logger = loggerFactory.CreateLogger<SettingsService>();
+            using(var client = new BinanceClient())
+            {
+                Regex rx = new Regex("(.*)(BTC|ETH|USDT|BNB)",
+                     RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+
+                var listQuery = client.GetAllPrices();
+                if (listQuery.Success) {
+                    foreach(var item in listQuery.Data) {
+                        Console.WriteLine(item.Symbol);
+                        var pairs = rx.Matches(item.Symbol);
+                        foreach(var pair in pairs.Reverse()) {
+                            if (!pair.Success) continue;
+                            string left = pair.Groups[1].Value;
+                            string right = pair.Groups[2].Value;
+                        }
+                    }
+                }
+            }
         }
         public ResponseObject Start()
         {

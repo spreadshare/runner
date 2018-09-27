@@ -90,9 +90,9 @@ namespace SpreadShare
             };
 
             // Setup Settings service
-            var configuration = serviceProvider.GetService<ISettingsService>();
-            var configurationResult = configuration.Start();
-            if (!configurationResult.Success)
+            var settings = serviceProvider.GetService<ISettingsService>();
+            var settingsResult = settings.Start();
+            if (!settingsResult.Success)
             {
                 logger.LogError("SettingsService failed to start, aborting other services");
             }

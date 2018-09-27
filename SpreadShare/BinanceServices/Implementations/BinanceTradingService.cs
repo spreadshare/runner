@@ -154,7 +154,7 @@ namespace SpreadShare.BinanceServices.Implementations
             CurrencyPair maxTradingPair = null;
 
             foreach(var tradingPair in _settings.TradingPairs) {
-                var performanceQuery = GetPerformancePastHours(CurrencyPairs.BNBETH, hoursBack, endTime);
+                var performanceQuery = GetPerformancePastHours(tradingPair, hoursBack, endTime);
                 decimal performance;
                 if (performanceQuery.Code == ResponseCodes.Success) {
                     performance = performanceQuery.Data;
