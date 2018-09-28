@@ -109,7 +109,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 }
 
                 //Try a maximum of 20 times.
-                if (attempts++ < 20) {
+                if (++attempts < 20) {
                     Thread.Sleep(500);
                 } else {
                     break;
