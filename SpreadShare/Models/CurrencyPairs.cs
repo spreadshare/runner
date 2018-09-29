@@ -28,7 +28,16 @@ namespace SpreadShare.Models
         public override string ToString() {
             return $"{_left}{_right}";
         }
-        public static Dictionary<string, CurrencyPair> _table = new Dictionary<string, CurrencyPair>();
+        private static Dictionary<string, CurrencyPair> _table = new Dictionary<string, CurrencyPair>();
+
+        /// <summary>
+        /// This function adds a parse option tot the table, this should only be used to initialize the environment
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="pair"></param>
+        public static void AddParseEntry(string str, CurrencyPair pair) {
+            _table.Add(str, pair);
+        }
 
         public static CurrencyPair Parse(string str) {
             if (_table.ContainsKey(str))
