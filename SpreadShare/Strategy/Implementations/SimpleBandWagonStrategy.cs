@@ -30,7 +30,7 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogWarning($"Could not fetch top performer, {query}");
                 }
 
-                var response = TradingService.PlaceFullMarketOrder(CurrencyPair.Parse("BNBETH"), OrderSide.Buy);
+                var response = TradingService.PlaceFullMarketOrder(CurrencyPair.Parse("BNBETH"), OrderSide.Sell);
                 if (response.Success)
                     Logger.LogInformation("You Win!");
                 else
