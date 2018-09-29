@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace SpreadShare.Strategy
 {
-    public class Timer {
+    internal class Timer {
         private readonly long _endTime;
         private readonly Thread _thread;
         private readonly Action _callback;

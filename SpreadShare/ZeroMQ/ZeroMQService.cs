@@ -7,7 +7,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.ZeroMQ
 {
-    class ZeroMqService : IZeroMqService
+    internal class ZeroMqService : IZeroMqService
     {
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;

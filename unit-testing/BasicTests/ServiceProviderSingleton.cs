@@ -3,9 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare;
 
-namespace UnitTests
+namespace Tests
 {
-    class ServiceProviderSingleton
+    internal class ServiceProviderSingleton
     {
         private static readonly Lazy<ServiceProviderSingleton> lazy =
             new Lazy<ServiceProviderSingleton>(() => new ServiceProviderSingleton());

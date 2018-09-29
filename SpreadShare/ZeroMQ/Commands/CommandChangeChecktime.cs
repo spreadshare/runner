@@ -2,7 +2,7 @@
 
 namespace SpreadShare.ZeroMQ.Commands
 {
-    class CommandChangeChecktime : Command
+    internal class CommandChangeChecktime : Command
     {
         protected override string CommandString => "command_change_checktime";
         protected override Dictionary<string, string> Arguments => new Dictionary<string, string>()

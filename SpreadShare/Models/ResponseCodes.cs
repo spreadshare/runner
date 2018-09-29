@@ -1,13 +1,13 @@
 ﻿namespace SpreadShare.Models
 {
-    public enum ResponseCodes
+    internal enum ResponseCodes
     {
         Error,
         NotDefined,
         Success
     }
 
-    public class ResponseObject<T> {
+    internal class ResponseObject<T> {
         public ResponseCodes Code { get; }
         public string Message { get; }
         public T Data { get; }
@@ -41,7 +41,7 @@
         }
     }
 
-    public class ResponseObject : ResponseObject<string>
+    internal class ResponseObject : ResponseObject<string>
     {
         public ResponseObject(ResponseCodes code, string data = "") : base(code, data)
         {

@@ -2,7 +2,7 @@
 
 namespace SpreadShare.Strategy
 {
-    interface IStrategy
+    internal interface IStrategy
     {
         ResponseObject Start();
     }

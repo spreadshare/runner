@@ -7,7 +7,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
 {
-    class StateManager
+    internal class StateManager
     {
         private State _activeState;
         private Timer _activeTimer;

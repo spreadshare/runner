@@ -4,7 +4,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
 {
-    abstract class BaseStrategy : IStrategy
+    internal abstract class BaseStrategy : IStrategy
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly ITradingService _tradingService;

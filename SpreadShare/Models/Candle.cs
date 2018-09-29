@@ -3,7 +3,7 @@ using Binance.Net.Objects;
 
 namespace SpreadShare.Models
 {
-    public class Candle
+    internal class Candle
     {
         public Candle()
         {

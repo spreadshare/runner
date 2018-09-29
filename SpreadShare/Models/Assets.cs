@@ -3,7 +3,7 @@ using Binance.Net.Objects;
 
 namespace SpreadShare.Models
 {
-    public class Assets
+    internal class Assets
     {
         private readonly Dictionary<string, decimal> _free;
         private readonly Dictionary<string, decimal> _locked;
@@ -68,7 +68,7 @@ namespace SpreadShare.Models
         }
     }
 
-    public struct AssetValue {
+    internal struct AssetValue {
         public string Symbol { get; }
         public decimal Value { get; }
 

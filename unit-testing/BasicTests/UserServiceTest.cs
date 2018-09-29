@@ -5,7 +5,7 @@ using SpreadShare.BinanceServices;
 using SpreadShare.BinanceServices.Implementations;
 using Xunit;
 
-namespace UnitTests
+namespace Tests
 {
     public class UserServiceTest : BaseTest
     {

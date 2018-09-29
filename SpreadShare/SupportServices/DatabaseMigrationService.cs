@@ -3,7 +3,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {
-    class DatabaseMigrationService : IDatabaseMigrationService
+    internal class DatabaseMigrationService : IDatabaseMigrationService
     {
         private readonly DatabaseContext _dbContext;
 

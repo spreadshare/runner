@@ -2,7 +2,7 @@
 
 namespace SpreadShare.BinanceServices
 {
-    public interface ITradingService
+    internal interface ITradingService
     {
         ResponseObject Start();
     }
