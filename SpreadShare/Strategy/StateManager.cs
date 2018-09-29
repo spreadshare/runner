@@ -16,6 +16,7 @@ namespace SpreadShare.Strategy
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         public AbstractTradingService TradingService;
+        public AbstractUserService UserService;
 
 
         public string CurrentState => _activeState.GetType().ToString().Split('+').Last();
@@ -27,7 +28,7 @@ namespace SpreadShare.Strategy
         /// <param name="loggerFactory">Provides logger for StateManager and states</param>
         /// <param name="tradingService">Provides trading capabilities</param>
         public StateManager(State initial, ILoggerFactory loggerFactory, 
-            ITradingService tradingService)
+            ITradingService tradingService, IUserService userService)
         {
             lock (_lock)
             {
@@ -37,6 +38,7 @@ namespace SpreadShare.Strategy
 
                 // Setup trading services (gain access to abstract members)
                 TradingService = tradingService as AbstractTradingService;
+                UserService = userService as AbstractUserService;
 
                 // Setup initial state
                 _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
@@ -76,14 +78,10 @@ namespace SpreadShare.Strategy
                     /* State.OnTimer should return Success, while states without implementing a timer
                      * will return NotDefined by default.
                     */
-                    //Recheck if the timer has not changed while aqcuiring the lock
-                    if (_activeTimer.Valid)
-                    {
-                        var response = _activeState.OnTimer();
-                        _logger.LogInformation(response.Code == ResponseCodes.Success
-                            ? "Timer succesfully triggered!"
-                            : $"Timer callback was not used by state. Response Code: {response}");
-                    }
+                    var response = _activeState.OnTimer();
+                    if (!response.Success) {
+                        _logger.LogInformation($"Timer callback was not used by state. Response Code: {response}");
+                    }   
                 }
             } );
         }

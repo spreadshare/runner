@@ -13,6 +13,8 @@ namespace SpreadShare.Strategy
         protected ILogger Logger;
         protected AbstractTradingService TradingService;
 
+        protected AbstractUserService UserService;
+
         protected State()
         {
             Context = new Context();
@@ -29,6 +31,7 @@ namespace SpreadShare.Strategy
             Context = context;
             _stateManager = stateManager;
             TradingService = stateManager.TradingService;
+            UserService = stateManager.UserService;
             Logger = loggerFactory.CreateLogger(GetType());
             ValidateContext();
         }
@@ -50,10 +53,6 @@ namespace SpreadShare.Strategy
 
         protected void SetTimer(long ms) {
             _stateManager.SetTimer(ms);
-        }
-
-        public virtual ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {
-            return new ResponseObject(ResponseCodes.NotDefined);
         }
 
         public virtual ResponseObject OnTimer() {

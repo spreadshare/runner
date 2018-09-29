@@ -75,16 +75,16 @@ namespace SpreadShare.BinanceServices.Implementations
                 var priceQuery = GetCurrentPrice(pair);
                 if (priceQuery.Success) {
                     _logger.LogInformation($"Current price of {pair} is {priceQuery.Data}{pair.Right}");
-                    amount = amount / priceQuery.Data;
+                    amount = (amount / priceQuery.Data) * 0.995M; //ensure that the price stay valid for a short while.
                 } else {
                     return new ResponseObject(ResponseCodes.Error, priceQuery.ToString());
                 }
             }
-            _logger.LogInformation($"Pre rounded amount {amount}{pair.Right}");
+            _logger.LogInformation($"Pre rounded amount {amount}{pair.Left}");
             amount = pair.RoundToTradable(amount);
             _logger.LogInformation($"About to place a {side.ToString().ToLower()} order for {amount}{pair.Left}.");
 
-            var trade = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
+            var trade = _client.PlaceOrder(pair.ToString(), side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
             if (trade.Success)
                 _logger.LogInformation($"Order {trade.Data.OrderId} request succeeded! pending confirmation...");
             else

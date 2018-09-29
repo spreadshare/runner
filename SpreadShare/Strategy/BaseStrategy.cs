@@ -8,6 +8,8 @@ namespace SpreadShare.Strategy
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly ITradingService _tradingService;
+
+        private readonly IUserService _userService;
         public StateManager StateManager { get; private set; }
 
         /// <summary>
@@ -16,10 +18,11 @@ namespace SpreadShare.Strategy
         /// <param name="loggerFactory"></param>
         /// <param name="tradingService">Provides trading capabilities</param>
         protected BaseStrategy(ILoggerFactory loggerFactory,
-            ITradingService tradingService)
+            ITradingService tradingService, IUserService userService)
         {
             _loggerFactory = loggerFactory;
             _tradingService = tradingService;
+            _userService = userService;
         }
 
         /// <summary>
@@ -30,7 +33,8 @@ namespace SpreadShare.Strategy
             StateManager = new StateManager(
                 GetInitialState(), 
                 _loggerFactory, 
-                _tradingService
+                _tradingService,
+                _userService
             );
             return new ResponseObject(ResponseCodes.Success);
         }
