@@ -17,9 +17,9 @@ namespace SpreadShare.SupportServices
         BinanceSettings _binanceSettings;
         ITradingService _tradingService;
         ILogger _logger;
-        public SettingsService(IConfiguration Configuration, ILoggerFactory loggerFactory)
+        public SettingsService(IConfiguration configuration, ILoggerFactory loggerFactory)
         {
-            _configuration = Configuration;
+            _configuration = configuration;
             _activeTradingPairs = new List<CurrencyPair>();
             _logger = loggerFactory.CreateLogger<SettingsService>();
         }
