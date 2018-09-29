@@ -2,7 +2,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {
-    public interface ISettingsService
+    internal interface ISettingsService
     {
         ResponseObject Start();
     }

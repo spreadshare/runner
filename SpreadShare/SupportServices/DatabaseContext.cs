@@ -8,7 +8,7 @@ namespace SpreadShare.SupportServices
     /// 
     /// This class defines the tables in the database using DBSets
     /// </summary>
-    public class DatabaseContext : DbContext
+    internal class DatabaseContext : DbContext
     {
         /// <summary>
         /// Constructor: This empty constructor is required for instantiation

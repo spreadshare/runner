@@ -1,6 +1,6 @@
 namespace SpreadShare.Models
 {
-    public class Currency
+    internal class Currency
     {
         public string Symbol { get; }
 

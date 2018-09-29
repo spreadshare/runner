@@ -6,7 +6,7 @@ using NetMQ.Sockets;
 using SpreadShare.ZeroMQ;
 using Xunit;
 
-namespace UnitTests.ZeroMQ
+namespace Tests.ZeroMQ
 {
     public class ZeroMqTests : BaseTest
     {

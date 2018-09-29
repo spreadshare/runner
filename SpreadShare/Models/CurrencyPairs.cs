@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpreadShare.Models
 {
-    public class CurrencyPair
+    internal class CurrencyPair
     {
         private static readonly Dictionary<string, CurrencyPair> Table = new Dictionary<string, CurrencyPair>();
         private readonly int _decimals;

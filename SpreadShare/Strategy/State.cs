@@ -5,7 +5,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
 {
-    abstract class State
+    internal abstract class State
     {
         public Context Context { get; set; }
 

@@ -5,7 +5,7 @@ namespace SpreadShare.Strategy
     /// <summary>
     /// Context is a dictionary in which states can put values
     /// </summary>
-    class Context
+    internal class Context
     {
         private readonly Dictionary<string, object> _dict;
 

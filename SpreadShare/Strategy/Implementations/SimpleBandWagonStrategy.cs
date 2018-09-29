@@ -6,7 +6,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.Strategy.Implementations
 {
-    class SimpleBandWagonStrategy : BaseStrategy
+    internal class SimpleBandWagonStrategy : BaseStrategy
     {
         public SimpleBandWagonStrategy(ILoggerFactory loggerFactory, ITradingService tradingService) 
             : base(loggerFactory, tradingService)

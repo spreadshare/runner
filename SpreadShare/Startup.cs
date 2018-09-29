@@ -13,7 +13,7 @@ using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
-    public class Startup
+    internal class Startup
     {
         public IConfiguration Configuration { get; }
 

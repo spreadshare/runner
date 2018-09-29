@@ -9,10 +9,10 @@ using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {
-    public class SettingsService : ISettingsService
+    internal class SettingsService : ISettingsService
     {
-        readonly IConfiguration _configuration;
-        readonly ILogger _logger;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
 
         public SettingsService(IConfiguration configuration, ILoggerFactory loggerFactory)
         {

@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace SpreadShare.ZeroMQ
 {
-    abstract class Command
+    internal abstract class Command
     {
         protected ILogger _logger;
         protected abstract string CommandString { get; }

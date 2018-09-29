@@ -2,7 +2,7 @@
 
 namespace SpreadShare.ZeroMQ
 {
-    public interface IZeroMqService
+    internal interface IZeroMqService
     {
         /*
          * Interface documentation is found in the PROTOCOL.md

@@ -2,7 +2,7 @@
 
 namespace SpreadShare.ZeroMQ.Commands
 {
-    class CommandRemoveTradingPair : Command
+    internal class CommandRemoveTradingPair : Command
     {
         protected override string CommandString => "command_remove_tradingpair";
         protected override Dictionary<string, string> Arguments => new Dictionary<string, string>()

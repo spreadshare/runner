@@ -2,7 +2,7 @@
 
 namespace SpreadShare.SupportServices
 {
-    public interface IDatabaseMigrationService
+    internal interface IDatabaseMigrationService
     {
         ResponseObject Migrate();
     }
