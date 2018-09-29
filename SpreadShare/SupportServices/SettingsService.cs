@@ -17,9 +17,9 @@ namespace SpreadShare.SupportServices
         BinanceSettings _binanceSettings;
         ITradingService _tradingService;
         ILogger _logger;
-        public SettingsService(IConfiguration Configuration, ILoggerFactory loggerFactory)
+        public SettingsService(IConfiguration configuration, ILoggerFactory loggerFactory)
         {
-            _configuration = Configuration;
+            _configuration = configuration;
             _activeTradingPairs = new List<CurrencyPair>();
             _logger = loggerFactory.CreateLogger<SettingsService>();
         }
@@ -56,7 +56,7 @@ namespace SpreadShare.SupportServices
                             string right = pair.Groups[2].Value;
                             var result = new CurrencyPair(new Currency(left), new Currency(right), 2);
                             //Add the instance to the parseTable to make it available for parsing
-                            CurrencyPair._table.Add(pair.Value, result);
+                            CurrencyPair.AddParseEntry(pair.Value, result);
                         }
                     }
                 }
@@ -91,8 +91,8 @@ namespace SpreadShare.SupportServices
         /// Get the trading pairs specified in the appsettings
         /// </summary>
         /// <value></value>
-        public List<CurrencyPair> ActiveTradingPairs { get { return _activeTradingPairs; }}
-        public BinanceSettings BinanceSettings { get {return _binanceSettings;}}
+        public List<CurrencyPair> ActiveTradingPairs => _activeTradingPairs;
+        public BinanceSettings BinanceSettings => _binanceSettings;
     }
 
     public struct Authy {
