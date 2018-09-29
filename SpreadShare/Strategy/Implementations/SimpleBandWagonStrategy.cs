@@ -31,10 +31,9 @@ namespace SpreadShare.Strategy.Implementations
                 }
 
                 var response = TradingService.PlaceFullMarketOrder(CurrencyPair.Parse("BNBETH"), OrderSide.Sell);
-                if (response.Success)
-                    Logger.LogInformation("You Win!");
-                else
-                    Logger.LogInformation($"What exactly do you think you are doing Dave?\n{response}");
+                Logger.LogInformation(response.Success
+                    ? "You Win!"
+                    : $"What exactly do you think you are doing Hugo?\n{response}");
             }
 
             public override ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {

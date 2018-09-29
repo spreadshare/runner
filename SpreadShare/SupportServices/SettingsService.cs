@@ -13,8 +13,6 @@ namespace SpreadShare.SupportServices
     internal class SettingsService : ISettingsService
     {
         private readonly IConfiguration _configuration;
-        List<CurrencyPair> _activeTradingPairs;
-        BinanceSettings _binanceSettings;
         private readonly ILogger _logger;
     
 
@@ -49,8 +47,6 @@ namespace SpreadShare.SupportServices
                     throw new Exception("No connection to Binance!");
                 }
                 foreach(var item in listQuery.Data.Symbols) {
-                    string left;
-                    string right;
                     decimal stepSize = 0;
 
                     //Extract the pair from the string
@@ -59,8 +55,8 @@ namespace SpreadShare.SupportServices
                             _logger.LogWarning($"Could not extract pairs from {item.Name}, skipping");
                             continue;
                     }
-                    left = pair.Groups[1].Value;
-                    right = pair.Groups[2].Value;
+                    string left = pair.Groups[1].Value;
+                    string right = pair.Groups[2].Value;
 
 
                     //Extract the stepSize from the filter
