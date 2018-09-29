@@ -30,10 +30,10 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogWarning($"Could not fetch top performer, {query}");
                 }
 
-                var trade = TradingService.PlaceFullMarketOrder(CurrencyPair.Parse("BNBETH"), OrderSide.Sell);
-                Logger.LogInformation(trade.Success
+                var response = TradingService.PlaceFullMarketOrder(CurrencyPair.Parse("BNBETH"), OrderSide.Sell);
+                Logger.LogInformation(response.Success
                     ? "You Win!"
-                    : $"What exactly do you think you are doing Hugo?\n{trade}");
+                    : $"What exactly do you think you are doing Hugo?\n{response}");
             }
 
             public override ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {

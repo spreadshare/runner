@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Binance.Net;
+using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
@@ -13,6 +14,7 @@ namespace SpreadShare.SupportServices
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+    
 
         public SettingsService(IConfiguration configuration, ILoggerFactory loggerFactory)
         {
@@ -39,23 +41,40 @@ namespace SpreadShare.SupportServices
                 Regex rx = new Regex("(.*)(BTC|ETH|USDT|BNB)",
                      RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+                var listQuery = client.GetExchangeInfo();
+                if (!listQuery.Success) {
+                    _logger.LogInformation("Could not get exchange info");
+                    throw new Exception("No connection to Binance!");
+                }
+                foreach(var item in listQuery.Data.Symbols) {
+                    decimal stepSize = 0;
 
-                var listQuery = client.GetAllPrices();
-                if (listQuery.Success) {
-                    foreach(var item in listQuery.Data) {
-                        var pairs = rx.Matches(item.Symbol);
-                        foreach(var pair in pairs.Reverse()) {
-                            if (!pair.Success) {
-                                _logger.LogWarning($"Could not extract pairs from {item.Symbol}");
-                                continue;
-                            }
-                            string left = pair.Groups[1].Value;
-                            string right = pair.Groups[2].Value;
-                            var result = new CurrencyPair(new Currency(left), new Currency(right), 2);
-                            //Add the instance to the parseTable to make it available for parsing
-                            CurrencyPair.AddParseEntry(pair.Value, result);
+                    //Extract the pair from the string
+                    var pair = rx.Match(item.Name);
+                    if (!pair.Success) {
+                            _logger.LogWarning($"Could not extract pairs from {item.Name}, skipping");
+                            continue;
+                    }
+                    string left = pair.Groups[1].Value;
+                    string right = pair.Groups[2].Value;
+
+
+                    //Extract the stepSize from the filter
+                    foreach(var filter in item.Filters) {
+                        if (filter.FilterType == SymbolFilterType.LotSize) {
+                            var nfilter = filter as BinanceSymbolLotSizeFilter;
+                            stepSize = nfilter.StepSize;
                         }
                     }
+                    if (stepSize == 0) {
+                        _logger.LogWarning($"Could not extract stepSize from {item.Name}, skipping");
+                        continue;
+                    }
+
+                    //Add the instance to the parseTable to make it available for parsing
+                    int decimals = -(int)Math.Log10((double)stepSize);
+                    var result = new CurrencyPair(new Currency(left), new Currency(right), decimals);
+                    CurrencyPair.AddParseEntry(pair.Value, result);
                 }
             }
         }
