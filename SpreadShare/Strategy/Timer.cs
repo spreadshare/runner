@@ -17,7 +17,7 @@ namespace SpreadShare.Strategy
         /// <param name="ms">Waiting time; can't be negative</param>
         /// <param name="callback">Callback to execute after wait; can't be null</param>
         public Timer(long ms, Action callback) {
-            if (ms < 0) throw new ArgumentException("Argument ms can't be negative.");
+            if (ms < 0) throw new ArgumentException("Argument 'ms' can't be negative.");
 
             _callback = callback ?? throw new ArgumentException("Argument callback can't be null.");
             _endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds() + ms;
@@ -52,7 +52,7 @@ namespace SpreadShare.Strategy
         /// </summary>
         public void Stop() {
             _shouldStop = true;
-            _thread.Join();
+            if (_thread.IsAlive) _thread.Join();
         }
     }
 }
