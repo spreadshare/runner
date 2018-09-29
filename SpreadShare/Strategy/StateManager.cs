@@ -4,6 +4,7 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
+using SpreadShare.SupportServices;
 
 namespace SpreadShare.Strategy
 {
@@ -12,11 +13,11 @@ namespace SpreadShare.Strategy
         private State _activeState;
         private Timer _activeTimer;
         private readonly object _lock = new object();
-
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         public AbstractTradingService TradingService;
         public AbstractUserService UserService;
+        public SettingsService SettingsService;
 
 
         public string CurrentState => _activeState.GetType().ToString().Split('+').Last();
@@ -28,7 +29,7 @@ namespace SpreadShare.Strategy
         /// <param name="loggerFactory">Provides logger for StateManager and states</param>
         /// <param name="tradingService">Provides trading capabilities</param>
         public StateManager(State initial, ILoggerFactory loggerFactory, 
-            ITradingService tradingService, IUserService userService)
+            ITradingService tradingService, IUserService userService, ISettingsService settingsService)
         {
             lock (_lock)
             {
@@ -39,6 +40,7 @@ namespace SpreadShare.Strategy
                 // Setup trading services (gain access to abstract members)
                 TradingService = tradingService as AbstractTradingService;
                 UserService = userService as AbstractUserService;
+                SettingsService = settingsService as SettingsService;
 
                 // Setup initial state
                 _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");

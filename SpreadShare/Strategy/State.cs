@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
+using SpreadShare.SupportServices;
 
 namespace SpreadShare.Strategy
 {
@@ -12,8 +13,8 @@ namespace SpreadShare.Strategy
         private StateManager _stateManager;
         protected ILogger Logger;
         protected AbstractTradingService TradingService;
-
         protected AbstractUserService UserService;
+        protected SettingsService SettingsService;
 
         protected State()
         {
@@ -32,6 +33,7 @@ namespace SpreadShare.Strategy
             _stateManager = stateManager;
             TradingService = stateManager.TradingService;
             UserService = stateManager.UserService;
+            SettingsService = stateManager.SettingsService;
             Logger = loggerFactory.CreateLogger(GetType());
             ValidateContext();
         }

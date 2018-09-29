@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
+using SpreadShare.SupportServices;
 
 namespace SpreadShare.Strategy
 {
@@ -8,8 +9,9 @@ namespace SpreadShare.Strategy
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly ITradingService _tradingService;
-
         private readonly IUserService _userService;
+
+        private readonly ISettingsService _settingsService;
         public StateManager StateManager { get; private set; }
 
         /// <summary>
@@ -18,11 +20,12 @@ namespace SpreadShare.Strategy
         /// <param name="loggerFactory"></param>
         /// <param name="tradingService">Provides trading capabilities</param>
         protected BaseStrategy(ILoggerFactory loggerFactory,
-            ITradingService tradingService, IUserService userService)
+            ITradingService tradingService, IUserService userService, ISettingsService settingsService)
         {
             _loggerFactory = loggerFactory;
             _tradingService = tradingService;
             _userService = userService;
+            _settingsService = settingsService;
         }
 
         /// <summary>
@@ -34,7 +37,8 @@ namespace SpreadShare.Strategy
                 GetInitialState(), 
                 _loggerFactory, 
                 _tradingService,
-                _userService
+                _userService,
+                _settingsService
             );
             return new ResponseObject(ResponseCodes.Success);
         }

@@ -3,15 +3,16 @@ using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
+using SpreadShare.SupportServices;
 
 namespace SpreadShare.Strategy.Implementations
 {
     internal class SimpleBandWagonStrategy : BaseStrategy
     {
-        public SimpleBandWagonStrategy(ILoggerFactory loggerFactory, ITradingService tradingService, IUserService userService) 
-            : base(loggerFactory, tradingService, userService)
-        { 
-        }
+        public SimpleBandWagonStrategy(ILoggerFactory loggerFactory, ITradingService tradingService, 
+           IUserService userService, ISettingsService settingsService) 
+            : base(loggerFactory, tradingService, userService, settingsService)
+        { }
 
         public override State GetInitialState()
         {
@@ -31,8 +32,8 @@ namespace SpreadShare.Strategy.Implementations
         {
             protected override void ValidateContext()
             {
-                string baseSymbol = "ETH";
-                decimal valueMinimum = 0.01M;
+                Currency baseSymbol = SettingsService.SimpleBandWagon.baseCurrency;
+                decimal valueMinimum = SettingsService.SimpleBandWagon.minimalRevertValue;
 
                 var assetsQuery = UserService.GetPortfolio();
                 if (!assetsQuery.Success) throw new Exception("Could not get portfolio!");
@@ -61,6 +62,7 @@ namespace SpreadShare.Strategy.Implementations
                     }
                 }
                 Logger.LogInformation("Reverting to base succeeded.");
+                SwitchState(new BuyState());
             }
         }
 
@@ -68,15 +70,16 @@ namespace SpreadShare.Strategy.Implementations
         {
             protected override void ValidateContext()
             {
-                Logger.LogInformation("Looking for the top performer");
-                var query = TradingService.GetTopPerformance(2, DateTime.Now);
+                int checkTime = SettingsService.SimpleBandWagon.checkTime;
+                Logger.LogInformation($"Looking for the top performer from the previous {checkTime} hours");
+                var query = TradingService.GetTopPerformance(checkTime, DateTime.Now);
                 if (query.Success) {
                     Logger.LogInformation($"Top performer is {query.Data.Item1}");
                 } else {
                     Logger.LogWarning($"Could not fetch top performer, {query}");
                 }
 
-                var response = TradingService.PlaceFullMarketOrder(CurrencyPair.Parse("VETETH"), OrderSide.Buy);
+                var response = TradingService.PlaceFullMarketOrder(query.Data.Item1, OrderSide.Buy);
                 if (response.Success) {
                     SwitchState(new WaitState());
                 } else {
@@ -89,23 +92,15 @@ namespace SpreadShare.Strategy.Implementations
         {
             protected override void ValidateContext()
             {
-                SetTimer(10*1000);
+                Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagon.holdTime} hours ({DateTime.Now.ToLocalTime().ToString()})");
+                SetTimer(1000*3600*SettingsService.SimpleBandWagon.holdTime);
             }
 
             public override ResponseObject OnTimer() 
             {
-                Console.WriteLine("Waited long enough, it's getting hot here!");
-                SwitchState(new SellState());
+                Logger.LogInformation("Waking up!");
+                SwitchState(new RevertToBaseState());
                 return new ResponseObject(ResponseCodes.Success);
-            }
-        }
-
-        internal class SellState : State
-        {
-            protected override void ValidateContext()
-            {
-                TradingService.PlaceFullMarketOrder(CurrencyPair.Parse("VETETH"), OrderSide.Sell);
-                Logger.LogInformation("I'm out!");
             }
         }
     }
