@@ -98,8 +98,7 @@ namespace SpreadShare.Strategy.Implementations
             protected override void ValidateContext()
             {
                 Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagon.holdTime} hours ({DateTime.Now.ToLocalTime().ToString()})");
-                //SetTimer(1000*3600*SettingsService.SimpleBandWagon.holdTime);
-                SetTimer(1000*5);
+                SetTimer(1000*3600*SettingsService.SimpleBandWagon.holdTime);
             }
 
             public override ResponseObject OnTimer() 
