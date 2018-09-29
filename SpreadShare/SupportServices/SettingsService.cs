@@ -6,29 +6,22 @@ using Binance.Net;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {
-    public class SettingsService : ISettingsService
+    internal class SettingsService : ISettingsService
     {
-        IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
         List<CurrencyPair> _activeTradingPairs;
         BinanceSettings _binanceSettings;
-        ITradingService _tradingService;
-        ILogger _logger;
-        
-        [Flags]
-        public enum Options 
-        {
-            stepSize = 0
-        }
+        private readonly ILogger _logger;
+    
 
         public SettingsService(IConfiguration configuration, ILoggerFactory loggerFactory)
         {
             _configuration = configuration;
-            _activeTradingPairs = new List<CurrencyPair>();
+            ActiveTradingPairs = new List<CurrencyPair>();
             _logger = loggerFactory.CreateLogger<SettingsService>();
         }
         public ResponseObject Start()
@@ -96,7 +89,7 @@ namespace SpreadShare.SupportServices
             Authy authy = new Authy(key, secret);
 
             long receiveWindow = _configuration.GetValue<long>("BinanceClientSettings:receiveWindow");
-            _binanceSettings = new BinanceSettings(authy, receiveWindow);
+            BinanceSettings = new BinanceSettings(authy, receiveWindow);
 
         }
 
@@ -111,15 +104,15 @@ namespace SpreadShare.SupportServices
                     _logger.LogInformation(e.Message);
                     continue;
                 }
-                _activeTradingPairs.Add(pair);
+                ActiveTradingPairs.Add(pair);
             }
         }
         /// <summary>
         /// Get the trading pairs specified in the appsettings
         /// </summary>
         /// <value></value>
-        public List<CurrencyPair> ActiveTradingPairs => _activeTradingPairs;
-        public BinanceSettings BinanceSettings => _binanceSettings;
+        public List<CurrencyPair> ActiveTradingPairs { get; }
+        public BinanceSettings BinanceSettings { get; private set; }
     }
 
     public struct Authy {

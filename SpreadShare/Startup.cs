@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +13,7 @@ using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
-    public class Startup
+    internal class Startup
     {
         public IConfiguration Configuration { get; }
 

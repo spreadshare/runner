@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
-using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
 {
-    class StateManager
+    internal class StateManager
     {
         private State _activeState;
         private Timer _activeTimer;
@@ -27,7 +26,6 @@ namespace SpreadShare.Strategy
         /// <param name="initial">First state to be active. Can't be null</param>
         /// <param name="loggerFactory">Provides logger for StateManager and states</param>
         /// <param name="tradingService">Provides trading capabilities</param>
-        /// <param name="userService">Provides user watching capabilities</param>
         public StateManager(State initial, ILoggerFactory loggerFactory, 
             ITradingService tradingService)
         {
@@ -88,23 +86,6 @@ namespace SpreadShare.Strategy
                     }
                 }
             } );
-        }
-
-
-
-        /// <summary>
-        /// Incoming candles trigger State.OnCandle
-        /// </summary>
-        /// <param name="c">Incoming candle</param>
-        public void OnCandle(Candle c)
-        {
-            lock (_lock)
-            {
-                var response = _activeState.OnCandle(c);
-                if (response.Code != ResponseCodes.Success) {
-                    _logger.LogInformation($"Candle was not processed by state. Response Code: { response }");
-                }
-            }
         }
     }
 }

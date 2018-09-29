@@ -1,11 +1,9 @@
-﻿using System.Linq.Expressions;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {
-    class DatabaseMigrationService : IDatabaseMigrationService
+    internal class DatabaseMigrationService : IDatabaseMigrationService
     {
         private readonly DatabaseContext _dbContext;
 

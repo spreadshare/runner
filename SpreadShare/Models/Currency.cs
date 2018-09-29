@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-
 namespace SpreadShare.Models
 {
-    public class Currency
+    internal class Currency
     {
-        string _symbol;
+        public string Symbol { get; }
 
-        public Currency(string Symbol) {
-            _symbol = Symbol;
+        public Currency(string symbol) {
+            Symbol = symbol;
         }
-
-        public string Symbol { get { return _symbol; }}
 
         public override string ToString() {
             return Symbol;

@@ -1,6 +1,6 @@
 ﻿namespace SpreadShare.ZeroMQ.Commands
 {
-    class CommandStopBot : Command
+    internal class CommandStopBot : Command
     {
         protected override string CommandString => "command_stop_bot";
         public override void Action()

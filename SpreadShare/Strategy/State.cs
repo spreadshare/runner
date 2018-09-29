@@ -5,7 +5,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.Strategy
 {
-    abstract class State
+    internal abstract class State
     {
         public Context Context { get; set; }
 
@@ -52,9 +52,6 @@ namespace SpreadShare.Strategy
             _stateManager.SetTimer(ms);
         }
 
-        public virtual ResponseObject OnCandle(Candle c) {
-            return new ResponseObject(ResponseCodes.NotDefined);
-        }
         public virtual ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {
             return new ResponseObject(ResponseCodes.NotDefined);
         }

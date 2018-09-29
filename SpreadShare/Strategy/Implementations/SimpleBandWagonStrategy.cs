@@ -6,7 +6,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.Strategy.Implementations
 {
-    class SimpleBandWagonStrategy : BaseStrategy
+    internal class SimpleBandWagonStrategy : BaseStrategy
     {
         public SimpleBandWagonStrategy(ILoggerFactory loggerFactory, ITradingService tradingService) 
             : base(loggerFactory, tradingService)
@@ -35,12 +35,6 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogInformation("You Win!");
                 else
                     Logger.LogInformation($"What exactly do you think you are doing Dave?\n{response}");
-            }
-
-            public override ResponseObject OnCandle(Candle c)
-            {
-                Logger.LogInformation("Some action");
-                return new ResponseObject(ResponseCodes.Success);
             }
 
             public override ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {

@@ -1,9 +1,8 @@
-﻿using System.Threading.Tasks;
-using SpreadShare.Models;
+﻿using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {
-    public interface IDatabaseMigrationService
+    internal interface IDatabaseMigrationService
     {
         ResponseObject Migrate();
     }

@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using Microsoft.Extensions.Logging;
 
-namespace UnitTests
+namespace Tests
 {
     public abstract class BaseTest
     {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NetMQ;
 using NetMQ.Sockets;
@@ -8,7 +7,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.ZeroMQ
 {
-    class ZeroMqService : IZeroMqService
+    internal class ZeroMqService : IZeroMqService
     {
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;

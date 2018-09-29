@@ -3,32 +3,32 @@ using System.Collections.Generic;
 
 namespace SpreadShare.Models
 {
-    public class CurrencyPair
+    internal class CurrencyPair
     {
-        Currency _left;
-        Currency _right;
-        int _decimals;
+        private static readonly Dictionary<string, CurrencyPair> Table = new Dictionary<string, CurrencyPair>();
+        private readonly int _decimals;
 
-        public CurrencyPair(Currency Left, Currency Right, int decimals) {
+        public Currency Left { get; }
+        public Currency Right { get; }
+        public CurrencyPair Flipped => new CurrencyPair(Right, Left, _decimals);
+
+
+        public CurrencyPair(Currency left, Currency right, int decimals) {
             if (!(decimals >= 0 && decimals < 10)) throw new ArgumentException("Decimals should be between 0 and 10");
-            _left = Left;
-            _right = Right;
+            Left = left;
+            Right = right;
             _decimals = decimals;
         }
-
-        public Currency Left { get { return _left; }}
-        public Currency Right { get { return _right; }}
-        public CurrencyPair Flipped { get { return new CurrencyPair(Right, Left, _decimals); }}
-
+        
+        /// <summary>
+        /// Round unrounded amount to the tradable amount conform to currency's decimals
+        /// </summary>
+        /// <param name="amount">Unrounded amount</param>
+        /// <returns>Rounded amount</returns>
         public decimal RoundToTradable(decimal amount) { 
             decimal lotSize = (decimal)Math.Pow(10, _decimals);
             return Math.Floor(amount * lotSize) / lotSize; 
         }
-
-        public override string ToString() {
-            return $"{_left}{_right}";
-        }
-        private static Dictionary<string, CurrencyPair> _table = new Dictionary<string, CurrencyPair>();
 
         /// <summary>
         /// This function adds a parse option tot the table, this should only be used to initialize the environment
@@ -36,13 +36,23 @@ namespace SpreadShare.Models
         /// <param name="str"></param>
         /// <param name="pair"></param>
         public static void AddParseEntry(string str, CurrencyPair pair) {
-            _table.Add(str, pair);
+            Table.Add(str, pair);
         }
 
-        public static CurrencyPair Parse(string str) {
-            if (_table.ContainsKey(str))
-                return _table[str];
-            throw new Exception($"{str} not found in parse table");
+        /// <summary>
+        /// Parse given string to currency pair
+        /// </summary>
+        /// <param name="currencyPair">String representation of currencyPair</param>
+        /// <returns>CurrencyPair</returns>
+        public static CurrencyPair Parse(string currencyPair) {
+            if (Table.ContainsKey(currencyPair))
+                return Table[currencyPair];
+            throw new Exception($"{currencyPair} not found in parse table");
+        }
+
+        public override string ToString()
+        {
+            return $"{Left}{Right}";
         }
     }
 }

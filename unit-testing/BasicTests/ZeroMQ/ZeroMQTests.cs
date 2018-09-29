@@ -1,13 +1,12 @@
 ﻿using System.Linq;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using NetMQ;
 using NetMQ.Sockets;
 using SpreadShare.ZeroMQ;
 using Xunit;
 
-namespace UnitTests.ZeroMQ
+namespace Tests.ZeroMQ
 {
     public class ZeroMqTests : BaseTest
     {

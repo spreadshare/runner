@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using Binance.Net;
 using Binance.Net.Objects;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
@@ -19,7 +16,6 @@ namespace SpreadShare.BinanceServices.Implementations
         private readonly AbstractUserService _userService;
         private BinanceClient _client;
         private long _receiveWindow;
-        private ConcurrentDictionary<long, TradeState> _orderStatus;
 
         public BinanceTradingService(ILoggerFactory loggerFactory, ISettingsService settings, IUserService userService)
         {
@@ -27,10 +23,6 @@ namespace SpreadShare.BinanceServices.Implementations
             _settings = settings as SettingsService;
             _logger.LogInformation("Creating new Binance Client");
             _userService = userService as AbstractUserService;
-            _orderStatus = new ConcurrentDictionary<long, TradeState>();
-
-            //Subscribe to orderUpdates
-            _userService.OrderUpdateHandler += OnOrderUpdate;
         }
 
         public override ResponseObject Start()
@@ -92,34 +84,35 @@ namespace SpreadShare.BinanceServices.Implementations
             amount = pair.RoundToTradable(amount);
             _logger.LogInformation($"About to place a {side.ToString().ToLower()} order for {amount}{pair.Left}.");
 
-            var response = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
-            if (response.Success)
-                _logger.LogInformation($"Order {response.Data.OrderId} request succeeded!");
+            var trade = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
+            if (trade.Success)
+                _logger.LogInformation($"Order {trade.Data.OrderId} request succeeded! pending confirmation...");
             else
             {
-                _logger.LogWarning($"Error while placing order: {response.Error.Message}");
-                return new ResponseObject(ResponseCodes.Error, response.Error.Message);
+                _logger.LogWarning($"Error while placing order: {trade.Error.Message}");
+                return new ResponseObject(ResponseCodes.Error, trade.Error.Message);
             }
 
-            int msTicker = 0;
-            TradeState state;
+            int attempts = 0;
+            OrderStatus state = OrderStatus.New;
             while(true) {
-                state = _orderStatus.GetOrAdd(response.Data.OrderId, TradeState.Unreceived);
-                if (state == TradeState.Executed) {
-                    return new ResponseObject(ResponseCodes.Success);
-                }
-                if (state == TradeState.Canceled | state == TradeState.Rejected) {
-                    return new ResponseObject(ResponseCodes.Error, $"Trade was not executed, reason: {state}");
+                //The only way to confirm an order has been filled is using the public endpoint.
+                var orderQuery = _client.QueryOrder(pair.ToString(), trade.Data.OrderId, null, _settings.BinanceSettings.ReceiveWindow);
+
+                if (orderQuery.Success) {
+                    state = orderQuery.Data.Status;
+                    if (state == OrderStatus.Filled)
+                        return new ResponseObject(ResponseCodes.Success);
                 }
 
-                //Wait for a maximum of 10 seconds
-                if (msTicker++ < 10000) {
-                    Thread.Sleep(1);
+                //Try a maximum of 20 times.
+                if (++attempts < 20) {
+                    Thread.Sleep(500);
                 } else {
                     break;
                 }
             }
-            return new ResponseObject(ResponseCodes.Error, $"Trade was not confirmed in time, last state: {state}");
+            return new ResponseObject(ResponseCodes.Error, $"Trade was not filled or queried in time ({attempts} attempts), last state: {state}");
         }
 
         public override ResponseObject CancelOrder(CurrencyPair pair, long orderId)
@@ -143,16 +136,17 @@ namespace SpreadShare.BinanceServices.Implementations
             }
             DateTime startTime = endTime.AddHours(-hoursBack);
             var response = _client.GetKlines(pair.ToString(), KlineInterval.OneMinute,startTime, endTime);
+
             if (response.Success) {
                 var length = response.Data.Length;
                 var first = response.Data[0].Open;
                 var last = response.Data[length - 1].Close;
                 return new ResponseObject<decimal>(ResponseCodes.Success, last / first);
-            } else {
-                _logger.LogCritical(response.Error.Message);
-                _logger.LogWarning($"Could not fetch price for {pair} from binance!");
-                return new ResponseObject<decimal>(ResponseCodes.Error);
             }
+
+            _logger.LogCritical(response.Error.Message);
+            _logger.LogWarning($"Could not fetch price for {pair} from binance!");
+            return new ResponseObject<decimal>(ResponseCodes.Error);
         }
 
         public override ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(double hoursBack, DateTime endTime) {
@@ -181,28 +175,11 @@ namespace SpreadShare.BinanceServices.Implementations
             }
 
             if (maxTradingPair == null)
+            {
                 return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Error, "No trading pairs defined");
+            }
 
             return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Success, new Tuple<CurrencyPair, decimal>(maxTradingPair, max));
         }
-
-
-        public void OnOrderUpdate(object sender, BinanceStreamOrderUpdate order) {
-            _logger.LogInformation($"Order update | id {order.OrderId}, executionType {order.ExecutionType}");
-            TradeState state;
-            switch(order.ExecutionType) {
-                case ExecutionType.New: state = TradeState.Received; break;
-                case ExecutionType.Canceled: state = TradeState.Canceled; break;
-                case ExecutionType.Expired: state = TradeState.Expired; break;
-                case ExecutionType.Rejected: state = TradeState.Rejected; break;
-                case ExecutionType.Trade: state = TradeState.Executed; break;
-                default: _logger.LogCritical($"Unknown Execution Type received from Binance: {order.ExecutionType}"); return;
-            }
-
-            //The function is used to generate a value when the key was already present, in this case it should
-            //just update the value as is.
-            _orderStatus.AddOrUpdate(order.OrderId, state, (p,q) => state);
-        }
-
     }
 }
