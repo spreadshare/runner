@@ -26,21 +26,14 @@ namespace SpreadShare.Strategy.Implementations
                 var query = TradingService.GetTopPerformance(2, DateTime.Now);
                 if (query.Success) {
                     Logger.LogInformation($"Top performer is {query.Data.Item1}");
+                } else {
+                    Logger.LogWarning($"Could not fetch top performer, {query}");
                 }
 
-                /* <-- Turned off so now unexpected trades take place -->
-                var trade = TradingService.PlaceFullMarketOrder("ETHBNB", OrderSide.Sell);
-                if (trade.Success) {
-                    Logger.LogCritical("Trade succeeded!");
-                } else {
-                    Logger.LogCritical($"Trade failed: {trade}");
-                } */
-            }
-
-            public override ResponseObject OnCandle(Candle c)
-            {
-                Logger.LogInformation("Some action");
-                return new ResponseObject(ResponseCodes.Success);
+                var trade = TradingService.PlaceFullMarketOrder(CurrencyPair.Parse("BNBETH"), OrderSide.Sell);
+                Logger.LogInformation(trade.Success
+                    ? "You Win!"
+                    : $"What exactly do you think you are doing Hugo?\n{trade}");
             }
 
             public override ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {

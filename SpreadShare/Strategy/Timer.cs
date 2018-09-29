@@ -9,7 +9,7 @@ namespace SpreadShare.Strategy
         private readonly Action _callback;
         private bool _shouldStop;
 
-        public bool Valid { get { return !_shouldStop && DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime; } }
+        public bool Valid => !_shouldStop && DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime;
 
         /// <summary>
         /// Constructor: Startes waiting period

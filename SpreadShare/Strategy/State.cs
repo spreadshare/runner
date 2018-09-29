@@ -52,9 +52,6 @@ namespace SpreadShare.Strategy
             _stateManager.SetTimer(ms);
         }
 
-        public virtual ResponseObject OnCandle(Candle c) {
-            return new ResponseObject(ResponseCodes.NotDefined);
-        }
         public virtual ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {
             return new ResponseObject(ResponseCodes.NotDefined);
         }

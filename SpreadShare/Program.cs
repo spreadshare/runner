@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.Strategy;
-using SpreadShare.SupportServices;
-using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
@@ -61,8 +58,6 @@ namespace SpreadShare
                 logger.LogError($"User service report: {userResult}");
                 logger.LogError($"Trading Service report: {tradingResult}");
             }
-
-            KeepRunningForever();
         }
 
         private static void KeepRunningForever()
