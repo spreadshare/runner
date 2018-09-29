@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 
@@ -16,7 +15,6 @@ namespace SpreadShare.Strategy
         /// </summary>
         /// <param name="loggerFactory"></param>
         /// <param name="tradingService">Provides trading capabilities</param>
-        /// <param name="userService">Provides user watching capabilities</param>
         protected BaseStrategy(ILoggerFactory loggerFactory,
             ITradingService tradingService)
         {

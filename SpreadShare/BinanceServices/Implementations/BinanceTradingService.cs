@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using Binance.Net;
 using Binance.Net.Objects;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
@@ -139,16 +136,17 @@ namespace SpreadShare.BinanceServices.Implementations
             }
             DateTime startTime = endTime.AddHours(-hoursBack);
             var response = _client.GetKlines(pair.ToString(), KlineInterval.OneMinute,startTime, endTime);
+
             if (response.Success) {
                 var length = response.Data.Length;
                 var first = response.Data[0].Open;
                 var last = response.Data[length - 1].Close;
                 return new ResponseObject<decimal>(ResponseCodes.Success, last / first);
-            } else {
-                _logger.LogCritical(response.Error.Message);
-                _logger.LogWarning($"Could not fetch price for {pair} from binance!");
-                return new ResponseObject<decimal>(ResponseCodes.Error);
             }
+
+            _logger.LogCritical(response.Error.Message);
+            _logger.LogWarning($"Could not fetch price for {pair} from binance!");
+            return new ResponseObject<decimal>(ResponseCodes.Error);
         }
 
         public override ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(double hoursBack, DateTime endTime) {
@@ -177,7 +175,9 @@ namespace SpreadShare.BinanceServices.Implementations
             }
 
             if (maxTradingPair == null)
+            {
                 return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Error, "No trading pairs defined");
+            }
 
             return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Success, new Tuple<CurrencyPair, decimal>(maxTradingPair, max));
         }

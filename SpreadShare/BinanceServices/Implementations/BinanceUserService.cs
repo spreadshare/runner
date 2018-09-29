@@ -1,10 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using Binance.Net;
+﻿using Binance.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
-using SpreadShare.Strategy;
 
 namespace SpreadShare.BinanceServices.Implementations
 {
