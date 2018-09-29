@@ -93,26 +93,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 return new ResponseObject(ResponseCodes.Error, trade.Error.Message);
             }
 
-            int attempts = 0;
-            OrderStatus state = OrderStatus.New;
-            while(true) {
-                //The only way to confirm an order has been filled is using the public endpoint.
-                var orderQuery = _client.QueryOrder(pair.ToString(), trade.Data.OrderId, null, _settings.BinanceSettings.ReceiveWindow);
-
-                if (orderQuery.Success) {
-                    state = orderQuery.Data.Status;
-                    if (state == OrderStatus.Filled)
-                        return new ResponseObject(ResponseCodes.Success);
-                }
-
-                //Try a maximum of 20 times.
-                if (++attempts < 20) {
-                    Thread.Sleep(500);
-                } else {
-                    break;
-                }
-            }
-            return new ResponseObject(ResponseCodes.Error, $"Trade was not filled or queried in time ({attempts} attempts), last state: {state}");
+            return WaitForOrderFilledConfirmation(pair, trade.Data.OrderId);            
         }
 
         public override ResponseObject CancelOrder(CurrencyPair pair, long orderId)
@@ -180,6 +161,30 @@ namespace SpreadShare.BinanceServices.Implementations
             }
 
             return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Success, new Tuple<CurrencyPair, decimal>(maxTradingPair, max));
+        }
+
+        private ResponseObject WaitForOrderFilledConfirmation(CurrencyPair pair, long orderId)
+        {
+            int attempts = 0;
+            OrderStatus state = OrderStatus.New;
+            while(true) {
+                //The only way to confirm an order has been filled is using the public endpoint.
+                var orderQuery = _client.QueryOrder(pair.ToString(), orderId, null, _settings.BinanceSettings.ReceiveWindow);
+
+                if (orderQuery.Success) {
+                    state = orderQuery.Data.Status;
+                    if (state == OrderStatus.Filled)
+                        return new ResponseObject(ResponseCodes.Success);
+                }
+
+                //Try a maximum of 20 times.
+                if (++attempts < 20) {
+                    Thread.Sleep(500);
+                } else {
+                    break;
+                }
+            }
+            return new ResponseObject(ResponseCodes.Error, $"Trade was not filled or queried in time ({attempts} attempts), last state: {state}");
         }
     }
 }
