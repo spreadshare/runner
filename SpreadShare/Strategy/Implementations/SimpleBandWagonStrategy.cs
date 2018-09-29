@@ -15,10 +15,19 @@ namespace SpreadShare.Strategy.Implementations
 
         public override State GetInitialState()
         {
-            return new RevertToBase();
+            return new RevertToBaseState();
         }
 
-        internal class RevertToBase : State
+        internal class EntryState : State
+        {
+            protected override void ValidateContext()
+            {
+                Logger.LogInformation("Welcome to the SimpleBandWagon strategy!");
+                SwitchState(new RevertToBaseState());
+            }
+        }
+
+        internal class RevertToBaseState : State
         {
             protected override void ValidateContext()
             {
@@ -59,7 +68,7 @@ namespace SpreadShare.Strategy.Implementations
         {
             protected override void ValidateContext()
             {
-                Logger.LogInformation("Welcome to the SimpleBandWagon Strategy!");
+                Logger.LogInformation("Looking for the top performer");
                 var query = TradingService.GetTopPerformance(2, DateTime.Now);
                 if (query.Success) {
                     Logger.LogInformation($"Top performer is {query.Data.Item1}");
