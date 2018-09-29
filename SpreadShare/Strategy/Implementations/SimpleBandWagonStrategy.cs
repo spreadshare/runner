@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
@@ -54,8 +55,11 @@ namespace SpreadShare.Strategy.Implementations
                     if (value >= valueMinimum) {
                         Logger.LogInformation($"Reverting for {pair}");
                         var orderQuery = TradingService.PlaceFullMarketOrder(pair, OrderSide.Sell);
-                        if (!orderQuery.Success) {
+                        while (!orderQuery.Success) {
                             Logger.LogInformation($"Reverting for {pair} failed: {orderQuery}");
+                            Logger.LogInformation($"Retrying in a few seconds...");
+                            Thread.Sleep(4000);
+                            orderQuery = TradingService.PlaceFullMarketOrder(pair, OrderSide.Sell);
                         }
                     } else {
                         Logger.LogInformation($"{pair} value not relevant");
@@ -83,7 +87,8 @@ namespace SpreadShare.Strategy.Implementations
                 if (response.Success) {
                     SwitchState(new WaitState());
                 } else {
-                    Logger.LogInformation("Order has failed, stalling...");
+                    Logger.LogInformation("Order has failed, retrying...");
+                    SwitchState(new BuyState());
                 }
             }
         }
@@ -93,7 +98,8 @@ namespace SpreadShare.Strategy.Implementations
             protected override void ValidateContext()
             {
                 Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagon.holdTime} hours ({DateTime.Now.ToLocalTime().ToString()})");
-                SetTimer(1000*3600*SettingsService.SimpleBandWagon.holdTime);
+                //SetTimer(1000*3600*SettingsService.SimpleBandWagon.holdTime);
+                SetTimer(1000*5);
             }
 
             public override ResponseObject OnTimer() 
