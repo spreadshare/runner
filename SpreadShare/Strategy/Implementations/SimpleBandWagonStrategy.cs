@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
@@ -25,7 +26,52 @@ namespace SpreadShare.Strategy.Implementations
             protected override void ValidateContext()
             {
                 Logger.LogInformation("Welcome to the SimpleBandWagon strategy!");
-                SwitchState(new RevertToBaseState());
+                SwitchState(new CheckPositionValidity());
+            }
+        }
+
+        /// <summary>
+        /// Checks if the winner is not already the majority share of the portfolio.
+        /// </summary>
+        internal class CheckPositionValidity : State
+        {
+            protected override void ValidateContext()
+            {
+                Currency baseSymbol = SettingsService.SimpleBandWagon.baseCurrency;
+                int checkTime = SettingsService.SimpleBandWagon.checkTime;
+
+                var winnerQuery = TradingService.GetTopPerformance(checkTime, DateTime.Now);
+                if (!winnerQuery.Success) throw new Exception($"Could not get top performer!\n{winnerQuery}");
+
+                var winner = winnerQuery.Data.Item1; 
+                Logger.LogInformation($"Top performer from the past {checkTime} hours is {winner}");              
+
+                var assetsQuery = UserService.GetPortfolio();
+                if (!assetsQuery.Success) throw new Exception($"Could not get portfolio!\n{assetsQuery}");
+                var assets = assetsQuery.Data.GetAllFreeBalances();
+                var sorted = assets.ToArray().Select(x =>
+                    {
+                        CurrencyPair pair;
+                        try {
+                            pair = CurrencyPair.Parse($"{x.Symbol}{baseSymbol}");
+                        } catch {
+                            return new AssetValue(x.Symbol, 0);
+                        }
+                        var query = TradingService.GetCurrentPrice(pair);
+                        if (query.Success) {
+                            return new AssetValue(x.Symbol, x.Value * query.Data);
+                        }
+                        return new AssetValue(x.Symbol, 0);
+                    }
+                ).OrderBy(x => x.Value);
+                Logger.LogInformation($"Most valuable asset in portfolio: {sorted.Last().Symbol}");
+
+                if ($"{sorted.Last().Symbol}{baseSymbol}" == winner.ToString()) {
+                    Logger.LogInformation($"Already in the possesion of the winner: {winner}");
+                    SwitchState(new WaitState());
+                } else {
+                    SwitchState(new RevertToBaseState());
+                }
             }
         }
 
@@ -97,7 +143,7 @@ namespace SpreadShare.Strategy.Implementations
         {
             protected override void ValidateContext()
             {
-                Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagon.holdTime} hours ({DateTime.Now.ToLocalTime().ToString()})");
+                Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagon.holdTime} hours ({DateTime.Now.ToLocalTime()})");
                 SetTimer(1000*3600*SettingsService.SimpleBandWagon.holdTime);
             }
 
