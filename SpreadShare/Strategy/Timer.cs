@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace SpreadShare.Strategy
 {
-    internal class Timer {
+    internal class Timer : IDisposable {
         private readonly long _endTime;
         private readonly Thread _thread;
         private readonly Action _callback;
@@ -29,12 +29,15 @@ namespace SpreadShare.Strategy
         /// Execute callback after the timer is finished or exit prematurely
         /// </summary>
         private void Wait() {
-            while(DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime) {
-                if (_shouldStop)
-                    return;
-                Thread.Sleep(1);
+            using(this)
+            {
+                while(DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime) {
+                    if (_shouldStop)
+                        return;
+                    Thread.Sleep(1);
+                }
+                _callback();
             }
-            _callback();
         }
 
         /// <summary>
@@ -53,6 +56,11 @@ namespace SpreadShare.Strategy
         public void Stop() {
             _shouldStop = true;
             _thread.Join();
+        }
+
+        public void Dispose()
+        {
+            
         }
     }
 }
