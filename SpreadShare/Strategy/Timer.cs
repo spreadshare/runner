@@ -1,13 +1,15 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SpreadShare.Strategy
 {
     internal class Timer : IDisposable {
         private readonly long _endTime;
-        private readonly Thread _thread;
         private readonly Action _callback;
         private bool _shouldStop;
+
 
         public bool Valid => !_shouldStop && DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime;
 
@@ -19,22 +21,23 @@ namespace SpreadShare.Strategy
         public Timer(long ms, Action callback) {
             if (ms < 0) throw new ArgumentException("Argument 'ms' can't be negative.");
 
+            _shouldStop = false;
             _callback = callback ?? throw new ArgumentException("Argument callback can't be null.");
             _endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds() + ms;
-            _thread = new Thread(Wait);
-            _thread.Start();
+            WaitAsync();
         }
 
         /// <summary>
         /// Execute callback after the timer is finished or exit prematurely
         /// </summary>
-        private void Wait() {
-            using(this)
-            {
+        private async Task WaitAsync() {
+            using(this) {
                 while(DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime) {
-                    if (_shouldStop)
+                    if (_shouldStop) {
+                        Console.WriteLine("TIMER GOT INTERRUPTED");
                         return;
-                    Thread.Sleep(1);
+                    }
+                    await Task.Delay(1);
                 }
                 _callback();
             }
@@ -55,12 +58,8 @@ namespace SpreadShare.Strategy
         /// </summary>
         public void Stop() {
             _shouldStop = true;
-            _thread.Join();
         }
 
-        public void Dispose()
-        {
-            
-        }
+        public void Dispose() { }
     }
 }
