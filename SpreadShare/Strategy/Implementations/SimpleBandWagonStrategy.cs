@@ -17,7 +17,7 @@ namespace SpreadShare.Strategy.Implementations
 
         public override State GetInitialState()
         {
-            return new RevertToBaseState();
+            return new EntryState();
         }
 
         internal class EntryState : State

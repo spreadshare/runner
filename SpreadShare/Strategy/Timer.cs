@@ -52,7 +52,7 @@ namespace SpreadShare.Strategy
         /// </summary>
         public void Stop() {
             _shouldStop = true;
-            if (_thread.IsAlive) _thread.Join();
+            _thread.Join();
         }
     }
 }

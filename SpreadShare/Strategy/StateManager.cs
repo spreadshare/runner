@@ -49,7 +49,7 @@ namespace SpreadShare.Strategy
         }
 
         /// <summary>
-        /// Switches the active state to the given state
+        /// Switches the active state to the given state, only to be used by states
         /// </summary>
         /// <param name="child">State to switch to</param>
         public void SwitchState(State child)
