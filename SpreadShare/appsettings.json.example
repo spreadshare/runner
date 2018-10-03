@@ -28,6 +28,7 @@
     "SimpleBandwagonStrategy": {
         "baseCurrency": "ETH",
         "minimalRevertValue": "0.01",
+        "minimalGrowthPercentage": 7
         "checkTime": 18,
         "holdTime": 1
     } 

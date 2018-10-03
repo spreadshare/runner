@@ -50,7 +50,13 @@ namespace SpreadShare.Strategy.Implementations
                 }
 
                 var winner = winnerQuery.Data.Item1; 
-                Logger.LogInformation($"Top performer from the past {checkTime} hours is {winner} | {winnerQuery.Data.Item2 * 100}%");              
+                Logger.LogInformation($"Top performer from the past {checkTime} hours is {winner} | {winnerQuery.Data.Item2 * 100}%"); 
+
+                if (winnerQuery.Data.Item2 * 100 - 100 < SettingsService.SimpleBandWagon.minimalGrowthPercentage) {
+                    Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagon.minimalGrowthPercentage}%, disregard.");
+                    SwitchState(new WaitState());
+                    return;
+                }             
 
                 var assetsQuery = UserService.GetPortfolio();
                 if (!assetsQuery.Success) {
@@ -156,6 +162,12 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogInformation($"Top performer is {query.Data.Item1}");
                 } else {
                     Logger.LogWarning($"Could not fetch top performer, {query}");
+                }
+
+                if (query.Data.Item2 * 100 - 100 < SettingsService.SimpleBandWagon.minimalGrowthPercentage) {
+                    Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagon.minimalGrowthPercentage}%, disregard.");
+                    SwitchState(new WaitState());
+                    return;
                 }
 
                 var response = TradingService.PlaceFullMarketOrder(query.Data.Item1, OrderSide.Buy);

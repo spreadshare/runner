@@ -85,9 +85,10 @@ namespace SpreadShare.SupportServices
         private void ReadSimpleBandwagonSettings() {
             Currency baseCurrency = new Currency(_configuration.GetValue<string>("SimpleBandwagonStrategy:baseCurrency"));
             decimal minimalRevertValue = _configuration.GetValue<decimal>("SimpleBandwagonStrategy:minimalRevertValue");
+            decimal minimalGrowthPercentage = _configuration.GetValue<decimal>("SimpleBandwagonStrategy:minimalGrowthPercentage");
             int holdTime = _configuration.GetValue<int>("SimpleBandwagonStrategy:holdTime");
             int checkTime = _configuration.GetValue<int>("SimpleBandwagonStrategy:checkTime");
-            SimpleBandWagon = new SimpleBandWagonStrategySettings(baseCurrency, minimalRevertValue, checkTime, holdTime);
+            SimpleBandWagon = new SimpleBandWagonStrategySettings(baseCurrency, minimalRevertValue, minimalGrowthPercentage, checkTime, holdTime);
         }
 
         private void ReadBinanceSettings() {
@@ -147,13 +148,15 @@ namespace SpreadShare.SupportServices
     internal class SimpleBandWagonStrategySettings {
         public readonly Currency baseCurrency;
         public readonly decimal minimalRevertValue;
+        public readonly decimal minimalGrowthPercentage;
         public readonly int checkTime;
         public readonly int holdTime;
-        public SimpleBandWagonStrategySettings(Currency baseCurrency, decimal minimalRevertValue,
+        public SimpleBandWagonStrategySettings(Currency baseCurrency, decimal minimalRevertValue, decimal minimalGrowthPercentage,
             int  checkTime, int holdTime)
         {
             this.baseCurrency = baseCurrency;
             this.minimalRevertValue = minimalRevertValue;
+            this.minimalGrowthPercentage = minimalGrowthPercentage;
             this.checkTime = checkTime;
             this.holdTime = holdTime;
         }
