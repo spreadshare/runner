@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Binance.Net.Objects;
 using SpreadShare.Models;
 

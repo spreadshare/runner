@@ -8,9 +8,6 @@ namespace SpreadShare.Strategy
     internal class Timer {
         private System.Timers.Timer _timer;
 
-
-        //public bool Valid => !_shouldStop && DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime;
-
         /// <summary>
         /// Constructor: Startes waiting period
         /// </summary>
@@ -23,7 +20,6 @@ namespace SpreadShare.Strategy
             _timer.AutoReset = false;
             _timer.Start();
         }
-
         
         public void Stop() {
             _timer.Stop();

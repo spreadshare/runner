@@ -44,7 +44,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (!winnerQuery.Success) throw new Exception($"Could not get top performer!\n{winnerQuery}");
 
                 var winner = winnerQuery.Data.Item1; 
-                Logger.LogInformation($"Top performer from the past {checkTime} hours is {winner}");              
+                Logger.LogInformation($"Top performer from the past {checkTime} hours is {winner} | {winnerQuery.Data.Item2 * 100}%");              
 
                 var assetsQuery = UserService.GetPortfolio();
                 if (!assetsQuery.Success) throw new Exception($"Could not get portfolio!\n{assetsQuery}");
@@ -83,7 +83,13 @@ namespace SpreadShare.Strategy.Implementations
                 decimal valueMinimum = SettingsService.SimpleBandWagon.minimalRevertValue;
 
                 var assetsQuery = UserService.GetPortfolio();
-                if (!assetsQuery.Success) throw new Exception("Could not get portfolio!");
+                if (!assetsQuery.Success) {
+                    Logger.LogInformation("Could not get portfolio, going idle for 10 seconds, then try again.");
+                    Context.SetObject("TimerIdleTime", (long)10*1000);
+                    Context.SetObject("TimerCallback", new RevertToBaseState());
+                    SwitchState(new TimerCallbackState());
+                    return;
+                }
                 var assets = assetsQuery.Data.GetAllFreeBalances();
                 foreach(var asset in assets) {
                     //Try to get a valid pair against the base assets
@@ -151,6 +157,28 @@ namespace SpreadShare.Strategy.Implementations
             {
                 Logger.LogInformation("Waking up!");
                 SwitchState(new CheckPositionValidity());
+                return new ResponseObject(ResponseCodes.Success);
+            }
+        }
+
+        internal class TimerCallbackState : State
+        {
+            long idleTime;
+            State callback;
+            protected override void ValidateContext()
+            {
+                try {
+                    idleTime = (long)Context.GetObject("TimerIdleTime");
+                    callback = (State)Context.GetObject("TimerCallback");
+                } catch (Exception e) {
+                    throw e;
+                }
+
+                SetTimer(idleTime);
+            }
+
+            public override ResponseObject OnTimer() {
+                SwitchState(callback);
                 return new ResponseObject(ResponseCodes.Success);
             }
         }
