@@ -41,7 +41,7 @@ namespace SpreadShare.BinanceServices.Implementations
             string apisecret = _configuration.GetValue<string>("BinanceCredentials:api-secret");
             _client.SetApiCredentials(apikey, apisecret);
 
-            // Get listen key
+            // Setup ListenKeyManager
             _listenKeyManager = new ListenKeyManager(_loggerFactory, _client);
 
             // Setup streams

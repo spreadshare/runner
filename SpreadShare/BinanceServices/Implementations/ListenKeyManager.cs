@@ -44,14 +44,14 @@ namespace SpreadShare.BinanceServices.Implementations
             if (!getListenKey.Success)
             {
                 _logger.LogCritical($"Unable to obtain ListenKey for Binance WebSocket: {getListenKey.Error.Message}");
-                return new ResponseObject(ResponseCodes.Error);
+                return new ResponseObject<string>(ResponseCodes.Error);
             }
             _listenKey = getListenKey.Data.ListenKey;
 
             // Set timer every 30 min for autorenewal
             SetTimer();
 
-            return new ResponseObject<string>(ResponseCodes.Success, _listenKey);
+            return new ResponseObject<string>(ResponseCodes.Success, _listenKey, "Successfully obtained listenKey");
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace SpreadShare.BinanceServices.Implementations
         private void Cleanup()
         {
             // Clear timer
-            _timer.Dispose();
+            _timer?.Dispose();
 
             // Clear listenKey
             _listenKey = null;
@@ -86,13 +86,13 @@ namespace SpreadShare.BinanceServices.Implementations
         /// <param name="stateInfo"></param>
         private void Renew(object stateInfo)
         {
-            _logger.LogInformation($"Requesting renewal of listenKey {_listenKey} at {DateTime.UtcNow}");
+            _logger.LogInformation($"{DateTime.UtcNow} | Requesting renewal of listenKey: {_listenKey}");
             var renewal = _client.KeepAliveUserStream(_listenKey);
 
             // If renewal error'ed
             if (!renewal.Success)
             {
-                _logger.LogError($"Could not renew listenKey {_listenKey} at {DateTime.UtcNow}");
+                _logger.LogError($"{DateTime.UtcNow} | Could not renew listenKey: {_listenKey}");
                 _logger.LogError($"Error {renewal.Error.Code}: {renewal.Error.Message}");
 
                 if (!_isRetry)
@@ -111,7 +111,7 @@ namespace SpreadShare.BinanceServices.Implementations
             }
 
             // Renewal succeeded
-            _logger.LogInformation($"Renewed listenKey {_listenKey} at {DateTime.UtcNow}");
+            _logger.LogInformation($"{DateTime.UtcNow} | Renewed listenKey: {_listenKey}");
         }
     }
 }
