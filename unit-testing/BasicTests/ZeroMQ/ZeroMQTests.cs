@@ -5,12 +5,13 @@ using NetMQ;
 using NetMQ.Sockets;
 using SpreadShare.ZeroMQ;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Tests.ZeroMQ
 {
     public class ZeroMqTests : BaseTest
     {
-        public ZeroMqTests()
+        public ZeroMqTests(ITestOutputHelper outputHelper) : base(outputHelper)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             var zeroMqService = serviceProvider.GetService<IZeroMqService>();
