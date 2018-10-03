@@ -1,12 +1,12 @@
 using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace SpreadShare.Strategy
 {
     internal class Timer {
-        private System.Timers.Timer _timer;
+        private System.Threading.Timer _timer;
 
         /// <summary>
         /// Constructor: Startes waiting period
@@ -15,14 +15,17 @@ namespace SpreadShare.Strategy
         /// <param name="callback">Callback to execute after wait; can't be null</param>
         public Timer(long ms, Action callback) {
             if (ms < 0) throw new ArgumentException("Argument 'ms' can't be negative.");
-            _timer = new System.Timers.Timer(ms);
-            _timer.Elapsed += (obj, args) => callback();
-            _timer.AutoReset = false;
-            _timer.Start();
+            _timer = new System.Threading.Timer(
+                (_) => { _timer.Dispose(); callback();},
+                null,
+                ms,
+                Timeout.Infinite
+            );
         }
         
         public void Stop() {
-            _timer.Stop();
+            _timer.Change(Timeout.Infinite, Timeout.Infinite);
+            _timer.Dispose();
         }
     }
 }
