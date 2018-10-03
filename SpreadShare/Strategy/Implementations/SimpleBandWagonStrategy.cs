@@ -45,7 +45,7 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 10 seconds");
                     Context.SetObject("TimerIdleTime", (long)10*1000);
                     Context.SetObject("TimerCallback", new CheckPositionValidity());
-                    SwitchState(new TimerCallbackState());
+                    SwitchState(new TryAfterWaitState());
                     return;
                 }
 
@@ -57,7 +57,7 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogError($"Could not get portfolio!\n{assetsQuery}\ntrying again after 10 seconds");
                     Context.SetObject("TimerIdleTime", (long)10*1000);
                     Context.SetObject("TimerCallback", new CheckPositionValidity());
-                    SwitchState(new TimerCallbackState());
+                    SwitchState(new TryAfterWaitState());
                     return;
                 }
                 var assets = assetsQuery.Data.GetAllFreeBalances();
@@ -86,7 +86,9 @@ namespace SpreadShare.Strategy.Implementations
                 }
             }
         }
-
+        /// <summary>
+        /// Trade in all relevant assets for the base currency.
+        /// </summary>
         internal class RevertToBaseState : State
         {
             protected override void ValidateContext()
@@ -99,7 +101,7 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogInformation("Could not get portfolio, going idle for 10 seconds, then try again.");
                     Context.SetObject("TimerIdleTime", (long)10*1000);
                     Context.SetObject("TimerCallback", new RevertToBaseState());
-                    SwitchState(new TimerCallbackState());
+                    SwitchState(new TryAfterWaitState());
                     return;
                 }
                 var assets = assetsQuery.Data.GetAllFreeBalances();
@@ -138,7 +140,11 @@ namespace SpreadShare.Strategy.Implementations
                 SwitchState(new BuyState());
             }
         }
-
+        /// <summary>
+        /// Obtain the top performing coin
+        /// (This will execute a trade even if the coin is already the majority share,
+        /// consider to run the CheckPositionValidityState first.)
+        /// </summary>
         internal class BuyState : State
         {
             protected override void ValidateContext()
@@ -156,12 +162,17 @@ namespace SpreadShare.Strategy.Implementations
                 if (response.Success) {
                     SwitchState(new WaitState());
                 } else {
-                    Logger.LogInformation("Order has failed, retrying...");
-                    SwitchState(new BuyState());
+                    Logger.LogInformation("Order has failed, retrying in 10 seconds");
+                    Context.SetObject("TimerIdleTime", (long)10*1000);
+                    Context.SetObject("TimerCallback", new BuyState());
+                    SwitchState(new TryAfterWaitState());
                 }
             }
         }
 
+        /// <summary>
+        /// What as many hours as the holdTime dictactes and then proceed to checking the position again.
+        /// </summary>
         internal class WaitState : State
         {
             protected override void ValidateContext()
@@ -178,7 +189,13 @@ namespace SpreadShare.Strategy.Implementations
             }
         }
 
-        internal class TimerCallbackState : State
+        /// <summary>
+        /// Helper state that enables 'try again after wait' solutions
+        /// when exceptions pop up.
+        /// This state returns to the state under the "TimerCallback" key in the
+        /// Context after waiting for an amount of time specified under the "TimerIdleTime" key
+        /// </summary>
+        internal class TryAfterWaitState : State
         {
             long idleTime;
             State callback;
@@ -188,7 +205,7 @@ namespace SpreadShare.Strategy.Implementations
                     idleTime = (long)Context.GetObject("TimerIdleTime");
                     callback = (State)Context.GetObject("TimerCallback");
                 } catch (Exception e) {
-                    Logger.LogError($"TimerCallbackState could not validate the context\n{e.Message}")
+                    Logger.LogError($"TimerCallbackState could not validate the context\n{e.Message}");
                     throw e;
                 }
 
