@@ -1,17 +1,15 @@
 using System;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace SpreadShare.Strategy
 {
-    internal class Timer : IDisposable {
-        private readonly long _endTime;
-        private readonly Action _callback;
-        private bool _shouldStop;
+    internal class Timer {
+        private System.Timers.Timer _timer;
 
 
-        public bool Valid => !_shouldStop && DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime;
+        //public bool Valid => !_shouldStop && DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime;
 
         /// <summary>
         /// Constructor: Startes waiting period
@@ -20,46 +18,15 @@ namespace SpreadShare.Strategy
         /// <param name="callback">Callback to execute after wait; can't be null</param>
         public Timer(long ms, Action callback) {
             if (ms < 0) throw new ArgumentException("Argument 'ms' can't be negative.");
-
-            _shouldStop = false;
-            _callback = callback ?? throw new ArgumentException("Argument callback can't be null.");
-            _endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds() + ms;
-            WaitAsync();
+            _timer = new System.Timers.Timer(ms);
+            _timer.Elapsed += (obj, args) => callback();
+            _timer.AutoReset = false;
+            _timer.Start();
         }
 
-        /// <summary>
-        /// Execute callback after the timer is finished or exit prematurely
-        /// </summary>
-        private async Task WaitAsync() {
-            using(this) {
-                while(DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime) {
-                    if (_shouldStop) {
-                        Console.WriteLine("TIMER GOT INTERRUPTED");
-                        return;
-                    }
-                    await Task.Delay(1);
-                }
-                _callback();
-            }
-        }
-
-        /// <summary>
-        /// Get remaining amount of time of the timer
-        /// </summary>
-        /// <returns>Remaining ms of the timer; -1 if finished</returns>
-        public long GetRemaining()
-        {
-            var remaining = _endTime - DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            return remaining < 0 ? -1 : remaining;
-        }
-
-        /// <summary>   
-        /// Stops the timer
-        /// </summary>
+        
         public void Stop() {
-            _shouldStop = true;
+            _timer.Stop();
         }
-
-        public void Dispose() { }
     }
 }
