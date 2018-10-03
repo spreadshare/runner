@@ -1,8 +1,14 @@
 language: csharp
 solution: SpreadShare.sln
 dotnet: 2.1
+
 install:
   - nuget restore SpreadShare.sln
   - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
+
 script:
  - dotnet restore SpreadShare/SpreadShare.csproj
+ - dotnet build SpreadShare/SpreadShare.csproj
+ - dotnet restore unit-testing/BasicTests/Tests.csproj
+ - dotnet build unit-testing/BasicTests/Tests.csproj
+ - dotnet test unit-testing/BasicTests/Tests.csproj
