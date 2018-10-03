@@ -188,6 +188,7 @@ namespace SpreadShare.Strategy.Implementations
                     idleTime = (long)Context.GetObject("TimerIdleTime");
                     callback = (State)Context.GetObject("TimerCallback");
                 } catch (Exception e) {
+                    Logger.LogError($"TimerCallbackState could not validate the context\n{e.Message}")
                     throw e;
                 }
 
