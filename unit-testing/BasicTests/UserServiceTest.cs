@@ -4,11 +4,16 @@ using Microsoft.Extensions.DependencyInjection;
 using SpreadShare.BinanceServices;
 using SpreadShare.BinanceServices.Implementations;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Tests
 {
     public class UserServiceTest : BaseTest
     {
+        public UserServiceTest(ITestOutputHelper outputHelper) : base(outputHelper)
+        {
+        }
+
         [Fact]
         public void TestMessage()
         {
