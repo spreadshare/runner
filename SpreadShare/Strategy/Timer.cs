@@ -16,7 +16,7 @@ namespace SpreadShare.Strategy
         public Timer(long ms, Action callback) {
             if (ms < 0) throw new ArgumentException("Argument 'ms' can't be negative.");
             _timer = new System.Threading.Timer(
-                (_) => { _timer.Dispose(); callback();},
+                (_) => { callback(); },
                 null,
                 ms,
                 Timeout.Infinite
@@ -25,7 +25,6 @@ namespace SpreadShare.Strategy
         
         public void Stop() {
             _timer.Change(Timeout.Infinite, Timeout.Infinite);
-            _timer.Dispose();
         }
     }
 }
