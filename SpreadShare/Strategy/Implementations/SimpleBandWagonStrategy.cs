@@ -92,17 +92,22 @@ namespace SpreadShare.Strategy.Implementations
                 }
                 var assets = assetsQuery.Data.GetAllFreeBalances();
                 foreach(var asset in assets) {
+
+                    //Skip the base currency itself (ETHETH e.d. makes no sense)
+                    if (asset.Symbol == baseSymbol.ToString()) continue;
+
                     //Try to get a valid pair against the base assets
                     CurrencyPair pair;
                     try {
                         pair = CurrencyPair.Parse($"{asset.Symbol}{baseSymbol}");
-                    } catch(Exception) {Logger.LogInformation($"{asset.Symbol}{baseSymbol} not listed on exchange"); continue;}
+                    } catch(Exception) {Logger.LogWarning($"{asset.Symbol}{baseSymbol} not listed on exchange"); continue;}
 
                     //Check if the value is relevant.
                     var priceQuery = TradingService.GetCurrentPrice(pair);
                     if (!priceQuery.Success) { Logger.LogWarning($"Could not get price estimate for {pair}"); continue; }
                     decimal price = priceQuery.Data;
 
+                    //Check if the eth value of the asset exceeds the minimum to be consired relevant
                     decimal value = price * asset.Value;
                     if (value >= valueMinimum) {
                         Logger.LogInformation($"Reverting for {pair}");
@@ -155,7 +160,7 @@ namespace SpreadShare.Strategy.Implementations
 
             public override ResponseObject OnTimer() 
             {
-                Logger.LogInformation("Waking up!");
+                Logger.LogInformation($"Waking up! ({DateTime.Now.ToLocalTime()})");
                 SwitchState(new CheckPositionValidity());
                 return new ResponseObject(ResponseCodes.Success);
             }
