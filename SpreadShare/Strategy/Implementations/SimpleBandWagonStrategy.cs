@@ -150,7 +150,6 @@ namespace SpreadShare.Strategy.Implementations
             public override ResponseObject OnTimer() 
             {
                 Logger.LogInformation("Waking up!");
-                Console.WriteLine("Waking up with good 'ol console");
                 SwitchState(new CheckPositionValidity());
                 return new ResponseObject(ResponseCodes.Success);
             }
