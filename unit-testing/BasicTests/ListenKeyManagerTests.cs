@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Linq;
 using System.Threading;
 using Binance.Net;
-using Binance.Net.Objects;
-using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
-using SpreadShare.BinanceServices;
 using SpreadShare.BinanceServices.Implementations;
-using SpreadShare.Models;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Tests
 {
@@ -50,18 +42,19 @@ namespace Tests
             if (!response.Success)
             {
                 Logger.LogError("Unable to obtain listenKey");
-                return;
+                Assert.True(false);
             }
-            Assert.True(false);
+
+            var j = TestLoggingProvider.Messages.Count(message => message.Contains("Renewed listenKey"));
+            if (j < 2)
+            {
+                Assert.True(false);
+            }
         }
 
         [Fact]
         public void ListenKeyRenewalTest()
         {
-            Console.WriteLine("hoi");
-            // Sleep 10 seconds to autorenew twice
-
-
             var listenKeyManager = Setup(3000);
 
             // Obtain listenKey
@@ -74,7 +67,7 @@ namespace Tests
             // Sleep 10 seconds to autorenew twice
 
             Thread.Sleep(10000);
-
+            
         }
 
         private ListenKeyManager Setup(int interval)
@@ -82,7 +75,6 @@ namespace Tests
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             var configuration = (IConfiguration)serviceProvider.GetService(typeof(IConfiguration));
             var loggerFactory = (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory));
-            loggerFactory.AddProvider(TestLoggingProvider);
 
             //Setup the clients
             var client = new BinanceClient();
@@ -99,8 +91,7 @@ namespace Tests
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             var loggerFactory = (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory));
-            loggerFactory.AddProvider(TestLoggingProvider);
-
+            
             //Setup the clients
             var client = new BinanceClient();
 

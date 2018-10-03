@@ -8,28 +8,23 @@ namespace Tests
 {
     public class TestLoggingProvider : ILoggerProvider
     {
-        private List<string> _messages;
+        public List<string> Messages;
         private readonly ITestOutputHelper _outputHelper;
 
         public TestLoggingProvider(ITestOutputHelper outputHelper)
         {
-            _messages = new List<string>();
+            Messages = new List<string>();
             _outputHelper = outputHelper;
         }
 
         public void Dispose()
         {
-            _messages = null;
+            Messages = null;
         }
 
         public ILogger CreateLogger(string categoryName)
         {
-            return new TestLogger(_outputHelper, ref _messages);
-        }
-
-        public bool ContainsMessage(string target)
-        {
-            return _messages.Any(message => message.Contains(target));
+            return new TestLogger(_outputHelper, ref Messages);
         }
     }
 }
