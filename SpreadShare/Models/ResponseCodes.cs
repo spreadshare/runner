@@ -24,10 +24,10 @@
             Message = msg;
         }
 
-        public ResponseObject(ResponseCodes code, T data) {
+        public ResponseObject(ResponseCodes code, T data, string message = "") {
             Code = code;
             Data = data;
-            Message = "";
+            Message = message;
         }
 
         public ResponseObject(ResponseCodes code) {
