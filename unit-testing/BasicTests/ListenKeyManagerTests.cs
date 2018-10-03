@@ -15,6 +15,10 @@ namespace Tests
         {
         }
 
+        /// <summary>
+        /// Tests if a ListenKey can be obtained
+        /// Assumption: Correct API Credentials
+        /// </summary>
         [Fact]
         public void ListenKeyObtainTest()
         {
@@ -32,6 +36,10 @@ namespace Tests
             Assert.True(listenKey != null & listenKey.Length > 10);
         }
 
+        /// <summary>
+        /// Validates that an error response is given when the API
+        /// Credentials are wrong
+        /// </summary>
         [Fact]
         public void ListenKeyInvalidCredentialsTest()
         {
@@ -39,19 +47,16 @@ namespace Tests
 
             // Obtain listenKey
             var response = listenKeyManager.Obtain();
-            if (!response.Success)
+            if (response.Success)
             {
-                Logger.LogError("Unable to obtain listenKey");
-                Assert.True(false);
-            }
-
-            var j = TestLoggingProvider.Messages.Count(message => message.Contains("Renewed listenKey"));
-            if (j < 2)
-            {
+                Logger.LogError("I should not be able to obtain a listenKey");
                 Assert.True(false);
             }
         }
 
+        /// <summary>
+        /// Tests whether the listenkey is automatically renewed
+        /// </summary>
         [Fact]
         public void ListenKeyRenewalTest()
         {
@@ -64,12 +69,21 @@ namespace Tests
                 Logger.LogError("Unable to obtain listenKey");
                 return;
             }
-            // Sleep 10 seconds to autorenew twice
 
+            // Sleep 10 seconds to autorenew three times
             Thread.Sleep(10000);
-            
+            var j = TestLoggingProvider.Messages.Count(message => message.Contains("Renewed listenKey"));
+            if (j <= 2)
+            {
+                Assert.True(false);
+            }
         }
 
+        /// <summary>
+        /// Create a valid ListenKeyManager
+        /// </summary>
+        /// <param name="interval">Autorenewal interval</param>
+        /// <returns>Valid ListenKeyManager</returns>
         private ListenKeyManager Setup(int interval)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
@@ -87,6 +101,11 @@ namespace Tests
             return new ListenKeyManager(loggerFactory, client, interval);
         }
 
+        /// <summary>
+        /// Create an invalid ListenKeyManager (wrong credentials)
+        /// </summary>
+        /// <param name="interval">Autorenewal interval</param>
+        /// <returns>ListenKeyManager with incorrect credentials</returns>
         private ListenKeyManager SetupInvalidCredentials(int interval)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
