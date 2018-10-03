@@ -41,13 +41,25 @@ namespace SpreadShare.Strategy.Implementations
                 int checkTime = SettingsService.SimpleBandWagon.checkTime;
 
                 var winnerQuery = TradingService.GetTopPerformance(checkTime, DateTime.Now);
-                if (!winnerQuery.Success) throw new Exception($"Could not get top performer!\n{winnerQuery}");
+                if (!winnerQuery.Success) { 
+                    Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 10 seconds");
+                    Context.SetObject("TimerIdleTime", (long)10*1000);
+                    Context.SetObject("TimerCallback", new CheckPositionValidity());
+                    SwitchState(new TimerCallbackState());
+                    return;
+                }
 
                 var winner = winnerQuery.Data.Item1; 
                 Logger.LogInformation($"Top performer from the past {checkTime} hours is {winner} | {winnerQuery.Data.Item2 * 100}%");              
 
                 var assetsQuery = UserService.GetPortfolio();
-                if (!assetsQuery.Success) throw new Exception($"Could not get portfolio!\n{assetsQuery}");
+                if (!assetsQuery.Success) {
+                    Logger.LogError($"Could not get portfolio!\n{assetsQuery}\ntrying again after 10 seconds");
+                    Context.SetObject("TimerIdleTime", (long)10*1000);
+                    Context.SetObject("TimerCallback", new CheckPositionValidity());
+                    SwitchState(new TimerCallbackState());
+                    return;
+                }
                 var assets = assetsQuery.Data.GetAllFreeBalances();
                 var sorted = assets.ToArray().Select(x =>
                     {
