@@ -37,9 +37,11 @@ namespace SpreadShare.Strategy.Implementations
         {
             protected override void ValidateContext()
             {
+                //Retrieve global settings
                 Currency baseSymbol = SettingsService.SimpleBandWagon.baseCurrency;
                 int checkTime = SettingsService.SimpleBandWagon.checkTime;
 
+                //Try to get to top performer, if not try state again after 10 seconds
                 var winnerQuery = TradingService.GetTopPerformance(checkTime, DateTime.Now);
                 if (!winnerQuery.Success) { 
                     Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 10 seconds");
@@ -49,15 +51,20 @@ namespace SpreadShare.Strategy.Implementations
                     return;
                 }
 
-                var winner = winnerQuery.Data.Item1; 
-                Logger.LogInformation($"Top performer from the past {checkTime} hours is {winner} | {winnerQuery.Data.Item2 * 100}%"); 
+                //Calculate and show the percentage of increase
+                var winnerPair = winnerQuery.Data.Item1; 
+                decimal deltaPercentage = winnerQuery.Data.Item2 * 100 - 100;
+                Logger.LogInformation($"Top performer from the past {checkTime} hours is {winnerPair} | {deltaPercentage}%"); 
 
-                if (winnerQuery.Data.Item2 * 100 - 100 < SettingsService.SimpleBandWagon.minimalGrowthPercentage) {
+
+                //Filter wether this 'winner' is gained enough growth to undertake action, otherwise just got the WaitHolding state again.
+                if (deltaPercentage < SettingsService.SimpleBandWagon.minimalGrowthPercentage) {
                     Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagon.minimalGrowthPercentage}%, disregard.");
-                    SwitchState(new WaitState());
+                    SwitchState(new WaitHoldingState());
                     return;
                 }             
 
+                //Retrieve all the assets to determine if perhaps the desired asset is already a majority share, in which case we do nothing.
                 var assetsQuery = UserService.GetPortfolio();
                 if (!assetsQuery.Success) {
                     Logger.LogError($"Could not get portfolio!\n{assetsQuery}\ntrying again after 10 seconds");
@@ -67,6 +74,9 @@ namespace SpreadShare.Strategy.Implementations
                     return;
                 }
                 var assets = assetsQuery.Data.GetAllFreeBalances();
+
+                //1. Map the assets values to their respective baseSymbol values
+                //2. Order by this newgained value, making the last element the most valuable.
                 var sorted = assets.ToArray().Select(x =>
                     {
                         CurrencyPair pair;
@@ -76,32 +86,36 @@ namespace SpreadShare.Strategy.Implementations
                             return new AssetValue(x.Symbol, 0);
                         }
                         var query = TradingService.GetCurrentPrice(pair);
-                        if (query.Success) {
-                            return new AssetValue(x.Symbol, x.Value * query.Data);
-                        }
-                        return new AssetValue(x.Symbol, 0);
+                        //Use a value of zero for assets whose price retrievals fail.
+                        return query.Success ? new AssetValue(x.Symbol, x.Value * query.Data) : new AssetValue(x.Symbol, 0);
                     }
                 ).OrderBy(x => x.Value);
                 Logger.LogInformation($"Most valuable asset in portfolio: {sorted.Last().Symbol}");
 
-                if ($"{sorted.Last().Symbol}{baseSymbol}" == winner.ToString()) {
-                    Logger.LogInformation($"Already in the possesion of the winner: {winner}");
-                    SwitchState(new WaitState());
+                //Construct the most valueble asset as a currency
+                Currency majorityAsset = new Currency(sorted.Last().Symbol);
+
+                //Verify if this asset was also the top performer (winner)
+                if (majorityAsset == winnerPair.Left) {
+                    Logger.LogInformation($"Already in the possesion of the winner: {winnerPair}");
+                    SwitchState(new WaitHoldingState());
                 } else {
                     SwitchState(new RevertToBaseState());
                 }
             }
         }
         /// <summary>
-        /// Trade in all relevant assets for the base currency.
+        /// Trades in all relevant assets for the base currency.
         /// </summary>
         internal class RevertToBaseState : State
         {
             protected override void ValidateContext()
             {
+                //Retrieve globals from the settings.
                 Currency baseSymbol = SettingsService.SimpleBandWagon.baseCurrency;
                 decimal valueMinimum = SettingsService.SimpleBandWagon.minimalRevertValue;
 
+                //Retrieve the portfolio, using a fallback in case of failure.
                 var assetsQuery = UserService.GetPortfolio();
                 if (!assetsQuery.Success) {
                     Logger.LogInformation("Could not get portfolio, going idle for 10 seconds, then try again.");
@@ -110,6 +124,8 @@ namespace SpreadShare.Strategy.Implementations
                     SwitchState(new TryAfterWaitState());
                     return;
                 }
+
+                //Iterate through all the assets
                 var assets = assetsQuery.Data.GetAllFreeBalances();
                 foreach(var asset in assets) {
 
@@ -120,10 +136,14 @@ namespace SpreadShare.Strategy.Implementations
                     CurrencyPair pair;
                     try {
                         pair = CurrencyPair.Parse($"{asset.Symbol}{baseSymbol}");
-                    } catch(Exception) {Logger.LogWarning($"{asset.Symbol}{baseSymbol} not listed on exchange"); continue;}
+                    } catch(Exception) {
+                        Logger.LogWarning($"{asset.Symbol}{baseSymbol} could not be parsed, is this asset listed on the exhange?"); 
+                        continue;
+                    }
 
-                    //Check if the value is relevant.
+                    //Get the price of pair (thus in terms of baseCurrency)
                     var priceQuery = TradingService.GetCurrentPrice(pair);
+                    //In case of failure, just skip
                     if (!priceQuery.Success) { Logger.LogWarning($"Could not get price estimate for {pair}"); continue; }
                     decimal price = priceQuery.Data;
 
@@ -132,14 +152,11 @@ namespace SpreadShare.Strategy.Implementations
                     if (value >= valueMinimum) {
                         Logger.LogInformation($"Reverting for {pair}");
                         var orderQuery = TradingService.PlaceFullMarketOrder(pair, OrderSide.Sell);
-                        while (!orderQuery.Success) {
-                            Logger.LogInformation($"Reverting for {pair} failed: {orderQuery}");
-                            Logger.LogInformation($"Retrying in a few seconds...");
-                            Thread.Sleep(4000);
-                            orderQuery = TradingService.PlaceFullMarketOrder(pair, OrderSide.Sell);
+                        if (!orderQuery.Success) {
+                            Logger.LogWarning($"Reverting for {pair} failed! Is this pair trading on the exchange?");
                         }
                     } else {
-                        Logger.LogInformation($"{pair} value not relevant");
+                        Logger.LogInformation($"{pair} value not relevant ({value}{baseSymbol})");
                     }
                 }
                 Logger.LogInformation("Reverting to base succeeded.");
@@ -155,29 +172,45 @@ namespace SpreadShare.Strategy.Implementations
         {
             protected override void ValidateContext()
             {
+                //Retrieve globals from the settings.
                 int checkTime = SettingsService.SimpleBandWagon.checkTime;
+
+                //Try to retrieve the top performer, using a tryAfterWait fallback in case of failure.
                 Logger.LogInformation($"Looking for the top performer from the previous {checkTime} hours");
                 var query = TradingService.GetTopPerformance(checkTime, DateTime.Now);
                 if (query.Success) {
                     Logger.LogInformation($"Top performer is {query.Data.Item1}");
                 } else {
-                    Logger.LogWarning($"Could not fetch top performer, {query}");
-                }
-
-                if (query.Data.Item2 * 100 - 100 < SettingsService.SimpleBandWagon.minimalGrowthPercentage) {
-                    Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagon.minimalGrowthPercentage}%, disregard.");
-                    SwitchState(new WaitState());
-                    return;
-                }
-
-                var response = TradingService.PlaceFullMarketOrder(query.Data.Item1, OrderSide.Buy);
-                if (response.Success) {
-                    SwitchState(new WaitState());
-                } else {
-                    Logger.LogInformation("Order has failed, retrying in 10 seconds");
+                    Logger.LogWarning($"Could not fetch top performer, {query}\nRetyring state after 10 seconds");
                     Context.SetObject("TimerIdleTime", (long)10*1000);
                     Context.SetObject("TimerCallback", new BuyState());
                     SwitchState(new TryAfterWaitState());
+                    return;
+                }
+
+                //Calculate and show the percentage of increase
+                var winnerPair = query.Data.Item1; 
+                decimal deltaPercentage = query.Data.Item2 * 100 - 100;
+                Logger.LogInformation($"Top performer from the past {checkTime} hours is {winnerPair} | {deltaPercentage}%"); 
+
+
+                //Filter wether this 'winner' is gained enough growth to undertake action, otherwise just got the WaitHolding state again.
+                if (deltaPercentage < SettingsService.SimpleBandWagon.minimalGrowthPercentage) {
+                    Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagon.minimalGrowthPercentage}%, disregard.");
+                    SwitchState(new WaitHoldingState());
+                    return;
+                } 
+
+                //Place an order for the selected winner and goin into holding (again using a tryAfterWait fallback option)
+                var response = TradingService.PlaceFullMarketOrder(query.Data.Item1, OrderSide.Buy);
+                if (response.Success) {
+                    SwitchState(new WaitHoldingState());
+                } else {
+                    Logger.LogInformation("Order has failed, retrying state in 10 seconds");
+                    Context.SetObject("TimerIdleTime", (long)10*1000);
+                    Context.SetObject("TimerCallback", new BuyState());
+                    SwitchState(new TryAfterWaitState());
+                    return;
                 }
             }
         }
@@ -185,17 +218,20 @@ namespace SpreadShare.Strategy.Implementations
         /// <summary>
         /// What as many hours as the holdTime dictactes and then proceed to checking the position again.
         /// </summary>
-        internal class WaitState : State
+        internal class WaitHoldingState : State
         {
             protected override void ValidateContext()
             {
-                Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagon.holdTime} hours ({DateTime.Now.ToLocalTime()})");
+                Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagon.holdTime} hours ({DateTime.UtcNow})");
+                //1000 ms / s
+                //3600 s / h
                 SetTimer(1000*3600*SettingsService.SimpleBandWagon.holdTime);
             }
 
             public override ResponseObject OnTimer() 
             {
-                Logger.LogInformation($"Waking up! ({DateTime.Now.ToLocalTime()})");
+                Logger.LogInformation($"Waking up! ({DateTime.UtcNow})");
+                //First step after holding is verifying the current position.
                 SwitchState(new CheckPositionValidity());
                 return new ResponseObject(ResponseCodes.Success);
             }
@@ -218,7 +254,9 @@ namespace SpreadShare.Strategy.Implementations
                     callback = (State)Context.GetObject("TimerCallback");
                 } catch (Exception e) {
                     Logger.LogError($"TimerCallbackState could not validate the context\n{e.Message}");
-                    throw e;
+                    Logger.LogCritical("No rational options, restarting the strategy...");
+                    SwitchState(new EntryState());
+                    return;
                 }
 
                 SetTimer(idleTime);
