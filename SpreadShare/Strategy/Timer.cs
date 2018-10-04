@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 
 namespace SpreadShare.Strategy
 {
-    internal class Timer {
+    internal class Timer 
+    {
         private System.Threading.Timer _timer;
 
         /// <summary>
