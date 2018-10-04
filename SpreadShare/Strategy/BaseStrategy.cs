@@ -10,26 +10,28 @@ namespace SpreadShare.Strategy
         private readonly ILoggerFactory _loggerFactory;
         private readonly ITradingService _tradingService;
         private readonly IUserService _userService;
-
         private readonly ISettingsService _settingsService;
+        
         public StateManager StateManager { get; private set; }
 
         /// <summary>
-        /// BaseConstrcutor: Provides dependencies required by the StateManager
+        /// Base constructor, provides an abstraction of general depencies.
         /// </summary>
         /// <param name="loggerFactory"></param>
-        /// <param name="tradingService">Provides trading capabilities</param>
+        /// <param name="tradingService"></param>
+        /// <param name="userService"></param>
+        /// <param name="settingsService"></param>
         protected BaseStrategy(ILoggerFactory loggerFactory,
             ITradingService tradingService, IUserService userService, ISettingsService settingsService)
         {
-            _loggerFactory = loggerFactory;
+            _loggerFactory = loggerFactory; 
             _tradingService = tradingService;
             _userService = userService;
             _settingsService = settingsService;
         }
 
         /// <summary>
-        /// Start strategy with initial state using a StateManager
+        /// Start strategy with the initial state using a StateManager
         /// </summary>
         public ResponseObject Start()
         {
