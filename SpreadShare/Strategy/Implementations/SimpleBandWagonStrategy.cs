@@ -38,8 +38,8 @@ namespace SpreadShare.Strategy.Implementations
             protected override void ValidateContext()
             {
                 //Retrieve global settings
-                Currency baseSymbol = SettingsService.SimpleBandWagon.baseCurrency;
-                int checkTime = SettingsService.SimpleBandWagon.checkTime;
+                Currency baseSymbol = SettingsService.SimpleBandWagon.BaseCurrency;
+                int checkTime = SettingsService.SimpleBandWagon.CheckTime;
 
                 //Try to get to top performer, if not try state again after 10 seconds
                 var winnerQuery = TradingService.GetTopPerformance(checkTime, DateTime.Now);
@@ -58,8 +58,8 @@ namespace SpreadShare.Strategy.Implementations
 
 
                 //Filter wether this 'winner' is gained enough growth to undertake action, otherwise just got the WaitHolding state again.
-                if (deltaPercentage < SettingsService.SimpleBandWagon.minimalGrowthPercentage) {
-                    Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagon.minimalGrowthPercentage}%, disregard.");
+                if (deltaPercentage < SettingsService.SimpleBandWagon.MinimalGrowthPercentage) {
+                    Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagon.MinimalGrowthPercentage}%, disregard.");
                     SwitchState(new WaitHoldingState());
                     return;
                 }             
@@ -112,8 +112,8 @@ namespace SpreadShare.Strategy.Implementations
             protected override void ValidateContext()
             {
                 //Retrieve globals from the settings.
-                Currency baseSymbol = SettingsService.SimpleBandWagon.baseCurrency;
-                decimal valueMinimum = SettingsService.SimpleBandWagon.minimalRevertValue;
+                Currency baseSymbol = SettingsService.SimpleBandWagon.BaseCurrency;
+                decimal valueMinimum = SettingsService.SimpleBandWagon.MinimalRevertValue;
 
                 //Retrieve the portfolio, using a fallback in case of failure.
                 var assetsQuery = UserService.GetPortfolio();
@@ -173,7 +173,7 @@ namespace SpreadShare.Strategy.Implementations
             protected override void ValidateContext()
             {
                 //Retrieve globals from the settings.
-                int checkTime = SettingsService.SimpleBandWagon.checkTime;
+                int checkTime = SettingsService.SimpleBandWagon.CheckTime;
 
                 //Try to retrieve the top performer, using a tryAfterWait fallback in case of failure.
                 Logger.LogInformation($"Looking for the top performer from the previous {checkTime} hours");
@@ -195,8 +195,8 @@ namespace SpreadShare.Strategy.Implementations
 
 
                 //Filter wether this 'winner' is gained enough growth to undertake action, otherwise just got the WaitHolding state again.
-                if (deltaPercentage < SettingsService.SimpleBandWagon.minimalGrowthPercentage) {
-                    Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagon.minimalGrowthPercentage}%, disregard.");
+                if (deltaPercentage < SettingsService.SimpleBandWagon.MinimalGrowthPercentage) {
+                    Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagon.MinimalGrowthPercentage}%, disregard.");
                     SwitchState(new WaitHoldingState());
                     return;
                 } 
@@ -222,10 +222,10 @@ namespace SpreadShare.Strategy.Implementations
         {
             protected override void ValidateContext()
             {
-                Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagon.holdTime} hours ({DateTime.UtcNow})");
+                Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagon.HoldTime} hours ({DateTime.UtcNow})");
                 //1000 ms / s
                 //3600 s / h
-                SetTimer(1000*3600*SettingsService.SimpleBandWagon.holdTime);
+                SetTimer(1000*3600*SettingsService.SimpleBandWagon.HoldTime);
             }
 
             public override ResponseObject OnTimer() 

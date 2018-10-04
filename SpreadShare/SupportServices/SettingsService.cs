@@ -146,19 +146,19 @@ namespace SpreadShare.SupportServices
     }
 
     internal class SimpleBandWagonStrategySettings {
-        public readonly Currency baseCurrency;
-        public readonly decimal minimalRevertValue;
-        public readonly decimal minimalGrowthPercentage;
-        public readonly int checkTime;
-        public readonly int holdTime;
+        public readonly Currency BaseCurrency;
+        public readonly decimal MinimalRevertValue;
+        public readonly decimal MinimalGrowthPercentage;
+        public readonly int CheckTime;
+        public readonly int HoldTime;
         public SimpleBandWagonStrategySettings(Currency baseCurrency, decimal minimalRevertValue, decimal minimalGrowthPercentage,
             int  checkTime, int holdTime)
         {
-            this.baseCurrency = baseCurrency;
-            this.minimalRevertValue = minimalRevertValue;
-            this.minimalGrowthPercentage = minimalGrowthPercentage;
-            this.checkTime = checkTime;
-            this.holdTime = holdTime;
+            this.BaseCurrency = baseCurrency;
+            this.MinimalRevertValue = minimalRevertValue;
+            this.MinimalGrowthPercentage = minimalGrowthPercentage;
+            this.CheckTime = checkTime;
+            this.HoldTime = holdTime;
         }
     }
 }
