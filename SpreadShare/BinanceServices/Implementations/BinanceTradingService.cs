@@ -3,7 +3,6 @@ using System.Net;
 using System.Threading;
 using Binance.Net;
 using Binance.Net.Objects;
-using CryptoExchange.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
@@ -44,7 +43,7 @@ namespace SpreadShare.BinanceServices.Implementations
             _logger.LogInformation("Testing connection to Binance...");
             var ping = _client.Ping();
             if (ping.Success)
-                _logger.LogInformation("Connection to Binance succesful");
+                _logger.LogInformation("Connection to Binance succesfull");
             else
                 _logger.LogCritical($"Connection to binance failed: no response ==> {ping.Error.Message}");
 
