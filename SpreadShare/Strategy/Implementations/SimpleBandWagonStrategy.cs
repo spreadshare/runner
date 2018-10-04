@@ -206,7 +206,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (response.Success) {
                     SwitchState(new WaitHoldingState());
                 } else {
-                    Logger.LogInformation("Order has failed, retrying state in 10 seconds");
+                    Logger.LogError($"Order has failed, retrying state in 10 seconds\n{response}");
                     Context.SetObject("TimerIdleTime", (long)10*1000);
                     Context.SetObject("TimerCallback", new BuyState());
                     SwitchState(new TryAfterWaitState());
