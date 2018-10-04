@@ -245,13 +245,13 @@ namespace SpreadShare.Strategy.Implementations
         /// </summary>
         internal class TryAfterWaitState : State
         {
-            long idleTime;
-            State callback;
+            long _idleTime;
+            State _callback;
             protected override void ValidateContext()
             {
                 try {
-                    idleTime = (long)Context.GetObject("TimerIdleTime");
-                    callback = (State)Context.GetObject("TimerCallback");
+                    _idleTime = (long)Context.GetObject("TimerIdleTime");
+                    _callback = (State)Context.GetObject("TimerCallback");
                 } catch (Exception e) {
                     Logger.LogError($"TimerCallbackState could not validate the context\n{e.Message}");
                     Logger.LogCritical("No rational options, restarting the strategy...");
@@ -259,11 +259,11 @@ namespace SpreadShare.Strategy.Implementations
                     return;
                 }
 
-                SetTimer(idleTime);
+                SetTimer(_idleTime);
             }
 
             public override ResponseObject OnTimer() {
-                SwitchState(callback);
+                SwitchState(_callback);
                 return new ResponseObject(ResponseCodes.Success);
             }
         }
