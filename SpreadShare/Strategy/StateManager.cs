@@ -23,11 +23,8 @@ namespace SpreadShare.Strategy
         public string CurrentState => _activeState.GetType().ToString().Split('+').Last();
 
         /// <summary>
-        /// Constructor: Initialise the active state with an initial state
+        /// Constructor: Initialise the active state with an initial state and give basic settings
         /// </summary>
-        /// <param name="initial">First state to be active. Can't be null</param>
-        /// <param name="loggerFactory">Provides logger for StateManager and states</param>
-        /// <param name="tradingService">Provides trading capabilities</param>
         public StateManager(State initial, ILoggerFactory loggerFactory, 
             ITradingService tradingService, IUserService userService, ISettingsService settingsService)
         {
