@@ -17,10 +17,6 @@ namespace SpreadShare.Strategy
         /// <summary>
         /// Base constructor, provides an abstraction of general depencies.
         /// </summary>
-        /// <param name="loggerFactory"></param>
-        /// <param name="tradingService"></param>
-        /// <param name="userService"></param>
-        /// <param name="settingsService"></param>
         protected BaseStrategy(ILoggerFactory loggerFactory,
             ITradingService tradingService, IUserService userService, ISettingsService settingsService)
         {
