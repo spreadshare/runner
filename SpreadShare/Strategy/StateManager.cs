@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
-using SpreadShare.Models;
 using SpreadShare.SupportServices;
 
 namespace SpreadShare.Strategy
