@@ -45,7 +45,7 @@ namespace SpreadShare.Strategy.Implementations
                 var winnerQuery = TradingService.GetTopPerformance(checkTime, DateTime.Now);
                 if (!winnerQuery.Success) { 
                     Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 10 seconds");
-                    Context.SetObject("TimerIdleTime", (long)10*1000);
+                    Context.SetObject("TimerIdleTime", (long)(10*1000));
                     Context.SetObject("TimerCallback", new CheckPositionValidity());
                     SwitchState(new TryAfterWaitState());
                     return;
@@ -68,7 +68,7 @@ namespace SpreadShare.Strategy.Implementations
                 var assetsQuery = UserService.GetPortfolio();
                 if (!assetsQuery.Success) {
                     Logger.LogError($"Could not get portfolio!\n{assetsQuery}\ntrying again after 10 seconds");
-                    Context.SetObject("TimerIdleTime", (long)10*1000);
+                    Context.SetObject("TimerIdleTime", (long)(10*1000));
                     Context.SetObject("TimerCallback", new CheckPositionValidity());
                     SwitchState(new TryAfterWaitState());
                     return;
@@ -119,7 +119,7 @@ namespace SpreadShare.Strategy.Implementations
                 var assetsQuery = UserService.GetPortfolio();
                 if (!assetsQuery.Success) {
                     Logger.LogInformation("Could not get portfolio, going idle for 10 seconds, then try again.");
-                    Context.SetObject("TimerIdleTime", (long)10*1000);
+                    Context.SetObject("TimerIdleTime", (long)(10*1000));
                     Context.SetObject("TimerCallback", new RevertToBaseState());
                     SwitchState(new TryAfterWaitState());
                     return;
@@ -182,7 +182,7 @@ namespace SpreadShare.Strategy.Implementations
                     Logger.LogInformation($"Top performer is {query.Data.Item1}");
                 } else {
                     Logger.LogWarning($"Could not fetch top performer, {query}\nRetyring state after 10 seconds");
-                    Context.SetObject("TimerIdleTime", (long)10*1000);
+                    Context.SetObject("TimerIdleTime", (long)(10*1000));
                     Context.SetObject("TimerCallback", new BuyState());
                     SwitchState(new TryAfterWaitState());
                     return;
@@ -207,7 +207,7 @@ namespace SpreadShare.Strategy.Implementations
                     SwitchState(new WaitHoldingState());
                 } else {
                     Logger.LogError($"Order has failed, retrying state in 10 seconds\n{response}");
-                    Context.SetObject("TimerIdleTime", (long)10*1000);
+                    Context.SetObject("TimerIdleTime", (long)(10*1000));
                     Context.SetObject("TimerCallback", new BuyState());
                     SwitchState(new TryAfterWaitState());
                     return;
