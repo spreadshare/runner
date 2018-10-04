@@ -118,7 +118,7 @@ namespace SpreadShare.Strategy.Implementations
                 //Retrieve the portfolio, using a fallback in case of failure.
                 var assetsQuery = UserService.GetPortfolio();
                 if (!assetsQuery.Success) {
-                    Logger.LogInformation("Could not get portfolio, going idle for 10 seconds, then try again.");
+                    Logger.LogWarning("Could not get portfolio, going idle for 10 seconds, then try again.");
                     Context.SetObject("TimerIdleTime", (long)(10*1000));
                     Context.SetObject("TimerCallback", new RevertToBaseState());
                     SwitchState(new TryAfterWaitState());
