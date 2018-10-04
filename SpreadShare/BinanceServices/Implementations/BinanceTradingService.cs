@@ -43,7 +43,7 @@ namespace SpreadShare.BinanceServices.Implementations
             _logger.LogInformation("Testing connection to Binance...");
             var ping = _client.Ping();
             if (ping.Success)
-                _logger.LogInformation("Connection to Binance succesful");
+                _logger.LogInformation("Connection to Binance succesfull");
             else
                 _logger.LogCritical($"Connection to binance failed: no response ==> {ping.Error.Message}");
 
@@ -68,32 +68,37 @@ namespace SpreadShare.BinanceServices.Implementations
             var query = _userService.GetPortfolio();
             if (!query.Success) return new ResponseObject(ResponseCodes.Error, "Could not retreive assets");
  
-            decimal amount = query.Data.GetFreeBalance(side == OrderSide.Buy ? pair.Right : pair.Left);
+            decimal correction = 1.0M;
 
-            //The amount should be expressed in the base pair.
-            if (side == OrderSide.Buy) {
-                var priceQuery = GetCurrentPrice(pair);
-                if (priceQuery.Success) {
-                    _logger.LogInformation($"Current price of {pair} is {priceQuery.Data}{pair.Right}");
-                    amount = amount / priceQuery.Data;
-                } else {
-                    return new ResponseObject(ResponseCodes.Error, priceQuery.ToString());
+            while(correction > 0.95M)
+            {
+                decimal amount = query.Data.GetFreeBalance(side == OrderSide.Buy ? pair.Right : pair.Left);
+                //The amount should be expressed in the base pair.
+                if (side == OrderSide.Buy) {
+                    var priceQuery = GetCurrentPrice(pair);
+                    if (priceQuery.Success) {
+                        _logger.LogInformation($"Current price of {pair} is {priceQuery.Data}{pair.Right}");
+                        amount = (amount / priceQuery.Data) * correction; //ensure that the price stay valid for a short while.
+                    } else {
+                        return new ResponseObject(ResponseCodes.Error, priceQuery.ToString());
+                    }
+                }
+                _logger.LogInformation($"Pre rounded amount {amount}{pair.Left}");
+                amount = pair.RoundToTradable(amount);
+                _logger.LogInformation($"About to place a {side.ToString().ToLower()} order for {amount}{pair.Left}.");
+
+                var trade = _client.PlaceOrder(pair.ToString(), side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
+                if (trade.Success) {
+                    _logger.LogInformation($"Order {trade.Data.OrderId} request succeeded! pending confirmation...");
+                    return WaitForOrderFilledConfirmation(pair, trade.Data.OrderId);      
+                }
+                else
+                {
+                    _logger.LogWarning($"Error while placing order: {trade.Error.Message}");
+                    correction -= 0.01M;
                 }
             }
-            _logger.LogInformation($"Pre rounded amount {amount}{pair.Right}");
-            amount = pair.RoundToTradable(amount);
-            _logger.LogInformation($"About to place a {side.ToString().ToLower()} order for {amount}{pair.Left}.");
-
-            var trade = _client.PlaceTestOrder("BNBETH", side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
-            if (trade.Success)
-                _logger.LogInformation($"Order {trade.Data.OrderId} request succeeded! pending confirmation...");
-            else
-            {
-                _logger.LogWarning($"Error while placing order: {trade.Error.Message}");
-                return new ResponseObject(ResponseCodes.Error, trade.Error.Message);
-            }
-
-            return WaitForOrderFilledConfirmation(pair, trade.Data.OrderId);            
+            return new ResponseObject(ResponseCodes.Error, $"Market order failed, even after underestimating wth a factor of {correction}");  
         }
 
         public override ResponseObject CancelOrder(CurrencyPair pair, long orderId)

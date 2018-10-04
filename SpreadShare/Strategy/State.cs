@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
+using SpreadShare.SupportServices;
 
 namespace SpreadShare.Strategy
 {
@@ -12,6 +13,8 @@ namespace SpreadShare.Strategy
         private StateManager _stateManager;
         protected ILogger Logger;
         protected AbstractTradingService TradingService;
+        protected AbstractUserService UserService;
+        protected SettingsService SettingsService;
 
         protected State()
         {
@@ -29,6 +32,8 @@ namespace SpreadShare.Strategy
             Context = context;
             _stateManager = stateManager;
             TradingService = stateManager.TradingService;
+            UserService = stateManager.UserService;
+            SettingsService = stateManager.SettingsService;
             Logger = loggerFactory.CreateLogger(GetType());
             ValidateContext();
         }
@@ -50,10 +55,6 @@ namespace SpreadShare.Strategy
 
         protected void SetTimer(long ms) {
             _stateManager.SetTimer(ms);
-        }
-
-        public virtual ResponseObject OnOrderUpdate(BinanceStreamOrderUpdate order) {
-            return new ResponseObject(ResponseCodes.NotDefined);
         }
 
         public virtual ResponseObject OnTimer() {
