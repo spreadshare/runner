@@ -14,9 +14,13 @@ namespace SpreadShare.Strategy
         
         public StateManager StateManager { get; private set; }
 
-        /// <summary>
-        /// Base constructor, provides an abstraction of general depencies.
+       
+        /// BaseConstrcutor: Provides dependencies required by the StateManager
         /// </summary>
+        /// <param name="loggerFactory">Provided logger creating capabilities</param>
+        /// <param name="tradingService">Provides trading capabilities</param>
+        /// <param name="userService">Provides user data fetching capabilities</param>
+        /// <param name="settingsService">Provides acces to global settings</param>
         protected BaseStrategy(ILoggerFactory loggerFactory,
             ITradingService tradingService, IUserService userService, ISettingsService settingsService)
         {
