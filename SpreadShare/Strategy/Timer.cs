@@ -3,13 +3,9 @@ using System.Threading;
 
 namespace SpreadShare.Strategy
 {
-    internal class Timer {
-        private readonly long _endTime;
-        private readonly Thread _thread;
-        private readonly Action _callback;
-        private bool _shouldStop;
-
-        public bool Valid => !_shouldStop && DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime;
+    internal class Timer 
+    {
+        private System.Threading.Timer _timer;
 
         /// <summary>
         /// Constructor: Startes waiting period
@@ -17,42 +13,34 @@ namespace SpreadShare.Strategy
         /// <param name="ms">Waiting time; can't be negative</param>
         /// <param name="callback">Callback to execute after wait; can't be null</param>
         public Timer(long ms, Action callback) {
-            if (ms < 0) throw new ArgumentException("Argument ms can't be negative.");
+            if (ms < 0) throw new ArgumentException("Argument 'ms' can't be negative.");
 
-            _callback = callback ?? throw new ArgumentException("Argument callback can't be null.");
-            _endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds() + ms;
-            _thread = new Thread(Wait);
-            _thread.Start();
+            int count = 0;
+            int targetCount = (int)(ms / 1000.0);
+            Action func = () => {
+                Console.WriteLine($"Hoi {count++} | {DateTime.UtcNow}");
+                if (count >= targetCount)
+                {
+                    _timer = new System.Threading.Timer(
+                        (_) => callback(),
+                        null,
+                        (int)(ms%1000),
+                        Timeout.Infinite
+                    );
+                }
+            };
+
+            _timer = new System.Threading.Timer(
+                (_) => func(),
+                null,
+                1000,
+                1000
+            );
         }
 
-        /// <summary>
-        /// Execute callback after the timer is finished or exit prematurely
-        /// </summary>
-        private void Wait() {
-            while(DateTimeOffset.Now.ToUnixTimeMilliseconds() < _endTime) {
-                if (_shouldStop)
-                    return;
-                Thread.Sleep(1);
-            }
-            _callback();
-        }
-
-        /// <summary>
-        /// Get remaining amount of time of the timer
-        /// </summary>
-        /// <returns>Remaining ms of the timer; -1 if finished</returns>
-        public long GetRemaining()
-        {
-            var remaining = _endTime - DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            return remaining < 0 ? -1 : remaining;
-        }
-
-        /// <summary>   
-        /// Stops the timer
-        /// </summary>
+        
         public void Stop() {
-            _shouldStop = true;
-            _thread.Join();
+            _timer.Change(Timeout.Infinite, Timeout.Infinite);
         }
     }
 }

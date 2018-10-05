@@ -93,7 +93,7 @@ namespace SpreadShare
             var settingsResult = settings.Start();
             if (!settingsResult.Success)
             {
-                logger.LogError("SettingsService failed to start, aborting other services");
+                logger.LogError($"SettingsService failed to start, aborting other services\n{settingsResult}");
             }
         }
     }

@@ -3,19 +3,33 @@
         "LocalConnection": "Server=db;Database=spreadshare;User ID=postgres;Password=password;Integrated Security=true;Pooling=true;"
     },
     "BinanceCredentials": {
-        "api-key": "api-key",
-        "api-secret": "api-secret"
+        "api-key": "keykey",
+        "api-secret": "secretsecret"
     },
     "BinanceClientSettings": {
-        "receiveWindow": 1000000,
+        "receiveWindow": 10000000,
         "tradingPairs": [
-            "bnbbtc",
-            "ethbtc"
+            "MTHETH",
+            "ADAETH",
+            "VETETH",
+            "QTUMETH",
+            "PIVXETH",
+            "XRPETH",
+            "IOTAETH",
+            "ONTETH",
+            "XMRETH",
+            "ZECETH",
+            "XLMETH",
+            "XVGETH",
+            "EOSETH"
+
         ]
     },
-    "SimpleBandWagonStrategy": {
-        "baseCurrency": "btc",
+    "SimpleBandwagonStrategy": {
+        "baseCurrency": "ETH",
+        "minimalRevertValue": "0.01",
+        "minimalGrowthPercentage": 7
         "checkTime": 18,
-        "holdTime": 12
+        "holdTime": 1
     } 
 }

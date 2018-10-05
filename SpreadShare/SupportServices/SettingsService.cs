@@ -26,6 +26,8 @@ namespace SpreadShare.SupportServices
         {
             try {
                 DownloadCurrencies();
+                ReadSimpleBandwagonSettings();
+                ReadBinanceSettings();
                 ReadTradingPairs();
                 ReadBinanceSettings();
             } catch(Exception e) {
@@ -46,6 +48,7 @@ namespace SpreadShare.SupportServices
                     _logger.LogInformation("Could not get exchange info");
                     throw new Exception("No connection to Binance!");
                 }
+                
                 foreach(var item in listQuery.Data.Symbols) {
                     decimal stepSize = 0;
 
@@ -79,6 +82,15 @@ namespace SpreadShare.SupportServices
             }
         }
 
+        private void ReadSimpleBandwagonSettings() {
+            Currency baseCurrency = new Currency(_configuration.GetValue<string>("SimpleBandwagonStrategy:baseCurrency"));
+            decimal minimalRevertValue = _configuration.GetValue<decimal>("SimpleBandwagonStrategy:minimalRevertValue");
+            decimal minimalGrowthPercentage = _configuration.GetValue<decimal>("SimpleBandwagonStrategy:minimalGrowthPercentage");
+            int holdTime = _configuration.GetValue<int>("SimpleBandwagonStrategy:holdTime");
+            int checkTime = _configuration.GetValue<int>("SimpleBandwagonStrategy:checkTime");
+            SimpleBandWagon = new SimpleBandWagonStrategySettings(baseCurrency, minimalRevertValue, minimalGrowthPercentage, checkTime, holdTime);
+        }
+
         private void ReadBinanceSettings() {
             string key = _configuration.GetValue<string>("BinanceCredentials:api-key");
             string secret = _configuration.GetValue<string>("BinanceCredentials:api-secret");
@@ -109,6 +121,8 @@ namespace SpreadShare.SupportServices
         /// <value></value>
         public List<CurrencyPair> ActiveTradingPairs { get; }
         public BinanceSettings BinanceSettings { get; private set; }
+
+        public SimpleBandWagonStrategySettings SimpleBandWagon { get; private set; }
     }
 
     public struct Authy {
@@ -128,6 +142,23 @@ namespace SpreadShare.SupportServices
         public BinanceSettings(Authy authy, long receiveWindow) {
             Credentials = authy;
             ReceiveWindow = receiveWindow;
+        }
+    }
+
+    internal class SimpleBandWagonStrategySettings {
+        public readonly Currency BaseCurrency;
+        public readonly decimal MinimalRevertValue;
+        public readonly decimal MinimalGrowthPercentage;
+        public readonly int CheckTime;
+        public readonly int HoldTime;
+        public SimpleBandWagonStrategySettings(Currency baseCurrency, decimal minimalRevertValue, decimal minimalGrowthPercentage,
+            int  checkTime, int holdTime)
+        {
+            this.BaseCurrency = baseCurrency;
+            this.MinimalRevertValue = minimalRevertValue;
+            this.MinimalGrowthPercentage = minimalGrowthPercentage;
+            this.CheckTime = checkTime;
+            this.HoldTime = holdTime;
         }
     }
 }
