@@ -49,6 +49,9 @@ namespace SpreadShare
 
             // Add MyService dependency
             services.AddSingleton<IDatabaseMigrationService, DatabaseMigrationService>();
+
+            // Configuration files globals
+            services.AddSingleton<ISettingsService, SettingsService>();
         }
 
         /// <summary>
@@ -68,9 +71,6 @@ namespace SpreadShare
 
             // ZeroMQ Service to interface with other programs
             services.AddSingleton<IZeroMqService, ZeroMqService>();
-
-            // Configuration files globals
-            services.AddSingleton<ISettingsService, SettingsService>();
         }
 
         /// <summary>
@@ -81,19 +81,19 @@ namespace SpreadShare
         {
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
 
-            // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
-            var service = serviceProvider.GetService<IDatabaseMigrationService>();
-            if (service.Migrate().Code == ResponseCodes.Success)
-            {
-                logger.LogError("Could not migrate database");
-            };
-
             // Setup Settings service
             var settings = serviceProvider.GetService<ISettingsService>();
             var settingsResult = settings.Start();
             if (!settingsResult.Success)
             {
                 logger.LogError($"SettingsService failed to start, aborting other services\n{settingsResult}");
+            }
+            
+            // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
+            var service = serviceProvider.GetService<IDatabaseMigrationService>();
+            if (service.Migrate().Code == ResponseCodes.Success)
+            {
+                logger.LogError("Could not migrate database");
             }
         }
     }

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Threading;
+using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.Strategy;
+using SpreadShare.SupportServices;
+using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
@@ -37,26 +40,95 @@ namespace SpreadShare
         private static void ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("ExecuteBusinessLogic");
-            
-            var trading = serviceProvider.GetService<ITradingService>();
-            var tradingResult = trading.Start();
+            SettingsService settings = (SettingsService)serviceProvider.GetService<ISettingsService>();
 
-            var user = serviceProvider.GetService<IUserService>();
-
-            var userResult = user.Start();
-
-            // Start strategy service
-            if (userResult.Success && tradingResult.Success)
+            // Start TradingService
+            ResponseObject tradingResult = null;
+            if (settings.EnabledServices.TradingService)
             {
-                var strategy = serviceProvider.GetService<IStrategy>();
-                var strategyResult = strategy.Start();
-                if (strategyResult.Code != ResponseCodes.Success) {
-                    logger.LogError($"Strategy failed to start, report: {strategyResult}");
+                var trading = serviceProvider.GetService<ITradingService>();
+                tradingResult = trading.Start();                
+            }
+            else
+            {
+                logger.LogInformation("TradingService has been disabled. If you want to enable the TradingService," +
+                                      "you must change this in appsettings.json");
+            }
+
+            
+            // Start UserService
+            ResponseObject userResult = null;
+            if (settings.EnabledServices.UserService)
+            {
+                if (!settings.EnabledServices.TradingService)
+                {
+                    logger.LogCritical("TradingService is not enabled. You must enable tradingService in " +
+                                       "appsettings.json if you want to use the UserService");
+                    throw new ArgumentException("UserService depends on TradingService, which is disabled");
                 }
-            } else {
-                logger.LogError("Strategy not started because not all needed service started");
-                logger.LogError($"User service report: {userResult}");
-                logger.LogError($"Trading Service report: {tradingResult}");
+                var user = serviceProvider.GetService<IUserService>();
+                userResult = user.Start();
+            }
+            else
+            {
+                logger.LogInformation("UserService has been disabled. If you want to enable the UserService," +
+                                      "you must change this in appsettings.json");
+            }
+            
+            
+            // Start StrategyService
+            if (settings.EnabledServices.StrategyService)
+            {
+                if (!settings.EnabledServices.TradingService)
+                {
+                    logger.LogCritical("TradingService is not enabled. You must enable tradingService in " +
+                                       "appsettings.json if you want to use the UserService");
+                    throw new ArgumentException("StrategyService depends on TradingService, which is disabled");
+                }
+                if (!settings.EnabledServices.UserService)
+                {
+                    logger.LogCritical("UserService is not enabled. You must enable userService in " +
+                                       "appsettings.json if you want to use the UserService");
+                    throw new ArgumentException("StrategyService depends on TradingService, which is disabled");
+                }
+
+                if (userResult.Success && tradingResult.Success)
+                {
+                    var strategy = serviceProvider.GetService<IStrategy>();
+                    var strategyResult = strategy.Start();
+                    if (strategyResult.Code != ResponseCodes.Success) {
+                        logger.LogError($"Strategy failed to start, report: {strategyResult}");
+                    }
+                } else {
+                    logger.LogError("Strategy not started because not all needed service started");
+                    logger.LogError($"User service report: {userResult}");
+                    logger.LogError($"Trading Service report: {tradingResult}");
+                }
+            }
+            else
+            {
+                logger.LogInformation("StrategyService has been disabled. If you want to enable the StrategyService," +
+                                      "you must change this in appsettings.json");
+            }
+            
+            // Start ZeroMQ command listener and broadcaster
+            if (settings.EnabledServices.ZeroMQService)
+            {
+                var zeroMq = serviceProvider.GetService<IZeroMqService>();
+                var zeroMqResult = zeroMq.Start();
+                if (zeroMqResult.Success)
+                {
+                    logger.LogInformation("ZeroMqService has started");
+                }
+                else
+                {
+                    logger.LogError($"ZeroMqService could not be started: {zeroMqResult.Message}");
+                }
+            }
+            else
+            {
+                logger.LogInformation("ZeroMqService has been disabled. If you want to enable the ZeroMqService," +
+                                      "you must change this in appsettings.json");
             }
         }
 

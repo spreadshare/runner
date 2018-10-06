@@ -31,5 +31,11 @@
         "minimalGrowthPercentage": 7
         "checkTime": 18,
         "holdTime": 1
-    } 
+    },
+     "EnableServices": {
+         "strategy": false,
+         "trading": false,
+         "user": false,
+         "zeroMq": false
+     }
 }
