@@ -33,6 +33,9 @@ msbuild.wrn
 # Visual Studio 2015
 .vs/
 
+# Rider
+.idea/
+
 # Postgres data
 postgres-data
 
