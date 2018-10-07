@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace SpreadShare.Strategy
 {
-    internal class Timer 
+    internal class Timer : IDisposable
     {
         private System.Threading.Timer _timer;
 
@@ -41,6 +41,20 @@ namespace SpreadShare.Strategy
         
         public void Stop() {
             _timer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _timer.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

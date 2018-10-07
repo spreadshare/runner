@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Net;
 using System.Threading;
 using Binance.Net;
@@ -9,7 +10,7 @@ using SpreadShare.SupportServices;
 
 namespace SpreadShare.BinanceServices.Implementations
 {
-    internal class BinanceTradingService : AbstractTradingService
+    internal class BinanceTradingService : AbstractTradingService, IDisposable
     {
         private readonly ILogger _logger;
         private readonly SettingsService _settings;
@@ -85,7 +86,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 }
                 _logger.LogInformation($"Pre rounded amount {amount}{pair.Left}");
                 amount = pair.RoundToTradable(amount);
-                _logger.LogInformation($"About to place a {side.ToString().ToLower()} order for {amount}{pair.Left}.");
+                _logger.LogInformation($"About to place a {side.ToString()} order for {amount}{pair.Left}.");
 
                 var trade = _client.PlaceOrder(pair.ToString(), side, OrderType.Market, amount, null, null, null, null, null, null, (int)_receiveWindow);
                 if (trade.Success) {
@@ -190,6 +191,21 @@ namespace SpreadShare.BinanceServices.Implementations
                 }
             }
             return new ResponseObject(ResponseCodes.Error, $"Trade was not filled or queried in time ({attempts} attempts), last state: {state}");
+        }
+        
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _client.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

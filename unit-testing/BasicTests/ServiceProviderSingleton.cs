@@ -21,13 +21,13 @@ namespace Tests
             // Configure services - Provide depencies for services
             Startup startup = new Startup();
             startup.ConfigureServices(services);
-            startup.ConfigureBusinessServices(services);
+            Startup.ConfigureBusinessServices(services);
 
             // Create service provider
             ServiceProvider = services.BuildServiceProvider();
 
             // Configure application
-            startup.Configure(ServiceProvider, (ILoggerFactory)ServiceProvider.GetService(typeof(ILoggerFactory)));
+            Startup.Configure(ServiceProvider, (ILoggerFactory)ServiceProvider.GetService(typeof(ILoggerFactory)));
         }
     }
 }

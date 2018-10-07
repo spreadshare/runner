@@ -6,7 +6,7 @@ using SpreadShare.Models;
 
 namespace SpreadShare.BinanceServices.Implementations
 {
-    internal class ListenKeyManager
+    internal class ListenKeyManager : IDisposable
     {
         private readonly BinanceClient _client;
         private readonly ILogger _logger;
@@ -112,6 +112,22 @@ namespace SpreadShare.BinanceServices.Implementations
 
             // Renewal succeeded
             _logger.LogInformation($"{DateTime.UtcNow} | Renewed listenKey: {_listenKey}");
+        }
+        
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _timer.Dispose();
+                _client.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

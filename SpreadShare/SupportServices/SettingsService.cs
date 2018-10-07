@@ -125,9 +125,9 @@ namespace SpreadShare.SupportServices
         public SimpleBandWagonStrategySettings SimpleBandWagon { get; private set; }
     }
 
-    public struct Authy {
-        public readonly string Key;
-        public readonly string Secret;
+    public class Authy {
+        public string Key  { get; }
+        public string Secret  { get; }
 
         public Authy(string key, string secret){
             Key = key;
@@ -135,9 +135,9 @@ namespace SpreadShare.SupportServices
         }
     }
 
-    public struct BinanceSettings {
-        public readonly long ReceiveWindow;
-        public readonly Authy Credentials;
+    public class BinanceSettings {
+        public long ReceiveWindow { get; }
+        public Authy Credentials { get; }
 
         public BinanceSettings(Authy authy, long receiveWindow) {
             Credentials = authy;

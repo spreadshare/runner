@@ -7,7 +7,7 @@ using SpreadShare.SupportServices;
 
 namespace SpreadShare.Strategy
 {
-    internal class StateManager
+    internal class StateManager : IDisposable
     {
         private State _activeState;
         private Timer _activeTimer;
@@ -82,6 +82,22 @@ namespace SpreadShare.Strategy
                     }   
                 }
             } );
+        }
+        
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _activeTimer.Dispose();
+                _loggerFactory.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

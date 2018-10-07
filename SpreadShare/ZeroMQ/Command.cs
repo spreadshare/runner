@@ -22,7 +22,7 @@ namespace SpreadShare.ZeroMQ
             {
                 jsonObject = JObject.Parse(json);
             }
-            catch (JsonReaderException e)
+            catch (JsonReaderException)
             {
                 throw new Exception("Provided json is not formatted properly.");
             }
@@ -77,7 +77,7 @@ namespace SpreadShare.ZeroMQ
                 {
                     Arguments[arg.Key] = jsonObject[arg.Key].ToString();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     throw new Exception($"Argument missing: {arg.Key}.");
                 }

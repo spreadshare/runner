@@ -72,7 +72,7 @@ namespace SpreadShare.ZeroMQ
                     {
                         message = server.ReceiveFrameString();
                     }
-                    catch (FiniteStateMachineException e)
+                    catch (FiniteStateMachineException)
                     {
                         _logger.LogError("NetMQ.FiniteStateMachineException occured");
                         continue;

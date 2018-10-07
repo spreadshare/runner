@@ -9,7 +9,7 @@ using SpreadShare.Strategy;
 
 namespace SpreadShare.BinanceServices.Implementations
 {
-    internal class BinanceUserService : AbstractUserService
+    internal class BinanceUserService : AbstractUserService, IDisposable
     {
         private BinanceClient _client;
         private BinanceSocketClient _socketclient;
@@ -99,6 +99,22 @@ namespace SpreadShare.BinanceServices.Implementations
                 return new ResponseObject<Assets>(ResponseCodes.Error);
             }
             return new ResponseObject<Assets>(ResponseCodes.Success, new Assets(accountInfo.Data.Balances));
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _client.Dispose();
+                _loggerFactory.Dispose();
+                _socketclient.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

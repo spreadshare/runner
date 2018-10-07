@@ -8,9 +8,9 @@ using SpreadShare.Strategy;
 
 namespace SpreadShare
 {
-    public class Program
+    public static class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             // Create service collection
             IServiceCollection services = new ServiceCollection();
@@ -18,14 +18,14 @@ namespace SpreadShare
             // Configure services - Provide depencies for services
             Startup startup = new Startup();
             startup.ConfigureServices(services);
-            startup.ConfigureBusinessServices(services);
+            Startup.ConfigureBusinessServices(services);
 
             // Create service provider
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
             // Configure application
             ILoggerFactory loggerFactory = (ILoggerFactory) serviceProvider.GetService(typeof(ILoggerFactory));
-            startup.Configure(serviceProvider, loggerFactory);
+            Startup.Configure(serviceProvider, loggerFactory);
 
             // --------------------------------------------------
             // Setup finished --> Execute business logic services

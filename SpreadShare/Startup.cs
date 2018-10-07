@@ -55,7 +55,7 @@ namespace SpreadShare
         /// Configure business logic services such as fetching exchange data
         /// </summary>
         /// <param name="services">Collection of services</param>
-        public void ConfigureBusinessServices(IServiceCollection services)
+        public static void ConfigureBusinessServices(IServiceCollection services)
         {
             // Add Binance Rest API dependency
             services.AddSingleton<ITradingService, BinanceTradingService>();
@@ -77,7 +77,7 @@ namespace SpreadShare
         /// Additional configuration after all have been configured
         /// </summary>
         /// <param name="serviceProvider">Provides access to configured services</param>
-        public void Configure(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+        public static void Configure(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
 
