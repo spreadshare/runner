@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Custom Rules for StyleCop.Analyzers" Description="Code analysis rules for StyleCop.Analyzers.csproj." ToolsVersion="14.0">
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <!--Ignored rule SA1101: Always using this for local variables-->
+    <Rule Id="SA1101" Action="None" />
+    <!--Ignored rule SA1200: Putting imports below namespace-->
+    <Rule Id="SA1200" Action="None" />
+    <!--Ignored rule SA1309: Fields must always begin with lower-case letter (assumes SA1401)-->
+    <Rule Id="SA1306" Action="None" />
+    <!--Ignored rule 1309: Fields must never begin with underscore-->
+    <Rule Id="SA1309" Action="None" />
+    <!--Ignored rule SA1401: Fields must always be private-->
+    <Rule Id="SA1401" Action="None" />
+    <!--Ignored rule CA1051: Fields must always be private-->
+    <Rule Id="CA1051" Action="None" />
+    <!--Ignored rule SA1633: Missing file header (for copyright purposes)-->
+    <Rule Id="SA1633" Action="None" />
+
+
+    <!-- CHANGED FROM WARNING TO INFORMATION-->
+    <!--Changed rule RCS1018: Missing access modifier-->
+    <Rule Id="RCS1018" Action="Warning" />
+    <!--Changed rule IDE0039: Use local function-->
+    <Rule Id="IDE0039" Action="Warning" />
+    <!--Changed rule RCS1141: Missing parameter documentation-->
+    <Rule Id="RCS1141" Action="Warning" />
+
+    <!--Changed rule RCS1001: Foreach statement spanning multiple lines requires braces-->
+    <Rule Id="RCS1001" Action="Warning" />
+    <!--Changed rule RCS1037: Remove trailing white-space-->
+    <Rule Id="RCS1037" Action="Warning" />
+  </Rules>
+</RuleSet>
