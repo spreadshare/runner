@@ -10,9 +10,9 @@ script:
  - dotnet restore SpreadShare/SpreadShare.csproj
  - dotnet build SpreadShare/SpreadShare.csproj > build.txt
  - cat build.txt
- - if ! [[ 'grep " 0 Warning(s)" build.txt' ]]; then exit 1; fi
+ - grep " 0 Warning(s)" build.txt && echo "Success"; exit 0; || echo "Fail"; exit 1;
  - dotnet restore unit-testing/BasicTests/Tests.csproj
  - dotnet build unit-testing/BasicTests/Tests.csproj > build.txt
  - cat build.txt
- - if ! [[ 'grep " 0 Warning(s)" build.txt' ]]; then exit 1; fi
+ - grep " 0 Warning(s)" build.txt && echo "Success"; exit 0; || echo "Fail"; exit 1;
  - dotnet test unit-testing/BasicTests/Tests.csproj
