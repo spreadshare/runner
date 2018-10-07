@@ -1,5 +1,4 @@
-# SpreadShare2
-[![Build Status](https://travis-ci.com/HugoPeters1024/SpreadShare2.svg?token=EzhgBYg4bqpNUB6Jq5aw&branch=master)](https://travis-ci.com/HugoPeters1024/SpreadShare2)
+# SpreadShare2 [![Build Status](https://travis-ci.com/HugoPeters1024/SpreadShare2.svg?token=EzhgBYg4bqpNUB6Jq5aw&branch=master)](https://travis-ci.com/HugoPeters1024/SpreadShare2)
 Using a simple bandwagon algorithm for cryptocurrency trading on Binance
 
 ## Setup
