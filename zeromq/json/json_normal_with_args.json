@@ -1,0 +1,4 @@
+{
+  "command": "command_add_tradingpair",
+  "arg_tradingpair" : "btc"
+}

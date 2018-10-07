@@ -30,6 +30,7 @@ namespace SpreadShare.SupportServices
                 ReadBinanceSettings();
                 ReadTradingPairs();
                 ReadBinanceSettings();
+                ReadEnableServices();
             } catch(Exception e) {
                 return new ResponseObject(ResponseCodes.Error, e.Message);
             }
@@ -101,6 +102,9 @@ namespace SpreadShare.SupportServices
 
         }
 
+        /// <summary>
+        /// Get the trading pairs specified in the appsettings
+        /// </summary>
         private void ReadTradingPairs() {
             var tradingPairs = _configuration.GetSection("BinanceClientSettings:tradingPairs").AsEnumerable().ToArray();
             foreach(var tradingPair in tradingPairs)
@@ -115,14 +119,26 @@ namespace SpreadShare.SupportServices
                 ActiveTradingPairs.Add(pair);
             }
         }
+
         /// <summary>
-        /// Get the trading pairs specified in the appsettings
+        /// Reads the enabled services from the Configuration
         /// </summary>
-        /// <value></value>
+        private void ReadEnableServices()
+        {
+            bool strategyServiceEnabled = _configuration.GetValue<bool>("EnableServices:strategy");
+            bool tradingServiceEnabled = _configuration.GetValue<bool>("EnableServices:trading");
+            bool userServiceEnabled = _configuration.GetValue<bool>("EnableServices:user");
+            bool zeroMqServiceEnabled = _configuration.GetValue<bool>("EnableServices:zeroMq");
+            
+            EnabledServices = new EnabledServices(strategyServiceEnabled, tradingServiceEnabled,
+                userServiceEnabled, zeroMqServiceEnabled);
+        }
+
         public List<CurrencyPair> ActiveTradingPairs { get; }
         public BinanceSettings BinanceSettings { get; private set; }
 
         public SimpleBandWagonStrategySettings SimpleBandWagon { get; private set; }
+        public EnabledServices EnabledServices { get; private set; }
     }
 
     public class Authy {
@@ -159,6 +175,28 @@ namespace SpreadShare.SupportServices
             this.MinimalGrowthPercentage = minimalGrowthPercentage;
             this.CheckTime = checkTime;
             this.HoldTime = holdTime;
+        }
+    }
+
+    internal class EnabledServices {
+        public readonly bool StrategyService;
+        public readonly bool TradingService;
+        public readonly bool UserService;
+        public readonly bool ZeroMQService;    
+
+        /// <summary>
+        /// Constructor: Create Settings object for service enabling
+        /// </summary>
+        /// <param name="strategyService">Whether strategy services should be enabled</param>
+        /// <param name="tradingService">Whether trading services should be enabled</param>
+        /// <param name="userService">Whether user services should be enabled</param>
+        /// <param name="zeroMqService">Whether ZeroMQ services should be enabled</param>
+        public EnabledServices(bool strategyService, bool tradingService, bool userService, bool zeroMqService)
+        {
+            StrategyService = strategyService;
+            TradingService = tradingService;
+            UserService = userService;
+            ZeroMQService = zeroMqService;
         }
     }
 }

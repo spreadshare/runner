@@ -40,7 +40,7 @@ namespace SpreadShare.ZeroMQ
         /// <summary>
         /// Start pub-sub publisher for broadcasting status and holdtime
         /// </summary>
-        public void StartBroadcastService()
+        private void StartBroadcastService()
         {
             using (var pubSocket = new PublisherSocket())
             {
@@ -59,7 +59,7 @@ namespace SpreadShare.ZeroMQ
         /// <summary>
         /// Start req-rep listener for commands
         /// </summary>
-        public void StartCommandReceiver()
+        private void StartCommandReceiver()
         {
             using (var server = new ResponseSocket())
             {
