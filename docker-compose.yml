@@ -1,6 +1,15 @@
 version: '3.4'
 
 services:
+  zeromq:
+    build:
+      context: zeromq
+      dockerfile: Dockerfile
+    entrypoint: python
+    command: -u zeromq.py
+    depends_on: 
+      - spreadshare
+
   spreadshare:
     image: ${DOCKER_REGISTRY}spreadshare
     build:
