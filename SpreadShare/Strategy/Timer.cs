@@ -81,7 +81,7 @@ namespace SpreadShare.Strategy
 
             if (_rest > 0)
             {
-                await Task.Delay(_rest);
+                await Task.Delay(_rest).ConfigureAwait(continueOnCapturedContext: false);
             }
 
             Console.WriteLine("Executing Callback");

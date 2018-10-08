@@ -20,8 +20,6 @@
 		<Rule Id="SA1501" Action="None" />
 		<!--Ignored rule SA1003: Generates many false positives.-->
 		<Rule Id="SA1003" Action="None" />
-		<!-- Ignored rule CA2007: Fix is impossible due to deprecation-->
-    <Rule Id="CA2007" Action="None" />
 
 
     <!--CHANGED FROM INFORMATION TO WARNING-->
