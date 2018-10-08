@@ -10,7 +10,7 @@ namespace SpreadShare.Tests.Adapters
     /// </summary>
     public class TimerTests : BaseTest
     {
-        private const int AllowedError = 50;
+        private const int AllowedError = 100;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TimerTests"/> class.
