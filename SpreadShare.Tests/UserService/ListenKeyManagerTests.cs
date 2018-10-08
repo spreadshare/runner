@@ -83,7 +83,7 @@ namespace SpreadShare.Tests.UserService
             // Sleep 10 seconds to autorenew three times
             Thread.Sleep(10000);
             var j = TestLoggingProvider.Messages.Count(message => message.Contains("Renewed listenKey", StringComparison.InvariantCulture));
-            if (j <= 2)
+            if (j < 2)
             {
                 Assert.True(false);
             }
