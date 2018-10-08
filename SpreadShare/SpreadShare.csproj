@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <CodeAnalysisRuleSet>CustomRuleset.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>../CustomRuleset.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   
   <ItemGroup>

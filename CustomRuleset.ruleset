@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="Custom Rules for StyleCop.Analyzers" Description="Code analysis rules for StyleCop.Analyzers.csproj." ToolsVersion="14.0">
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <!--CHANGED FROM WARNING TO NONE-->
     <!--Ignored rule SA1101: Always using this for local variables-->
     <Rule Id="SA1101" Action="None" />
     <!--Ignored rule SA1200: Putting imports below namespace-->
@@ -17,17 +18,32 @@
     <Rule Id="SA1633" Action="None" />
 
 
-    <!-- CHANGED FROM WARNING TO INFORMATION-->
-    <!--Changed rule RCS1018: Missing access modifier-->
-    <Rule Id="RCS1018" Action="Warning" />
+    <!--CHANGED FROM INFORMATION TO WARNING-->
+    <!--Changed rule IDE0005: Remove unused imports-->
+    <Rule Id="IDE0005" Action="Warning" />
     <!--Changed rule IDE0039: Use local function-->
     <Rule Id="IDE0039" Action="Warning" />
-    <!--Changed rule RCS1141: Missing parameter documentation-->
-    <Rule Id="RCS1141" Action="Warning" />
+    <!--Changed rule SA1500: Braces for multiLine statements must not share line-->
+    <Rule Id="SA1500" Action="Warning" />
 
     <!--Changed rule RCS1001: Foreach statement spanning multiple lines requires braces-->
     <Rule Id="RCS1001" Action="Warning" />
-    <!--Changed rule RCS1037: Remove trailing white-space-->
-    <Rule Id="RCS1037" Action="Warning" />
+    <!--Changed rule RCS1018: Missing access modifier-->
+    <Rule Id="RCS1018" Action="Warning" />
+    <!--Changed rule RCS1029: Format binary operator on next line-->
+    <Rule Id="RCS1029" Action="Warning" />
+    <!--Changed rule RCS1141: Missing parameter documentation-->
+    <Rule Id="RCS1141" Action="Warning" />
+
+    <!--DUPLICATE RULES-->
+    <!--Ignored rule RCS1036 ~ SA1501: Remove multiple blank lines-->
+    <Rule Id="RCS1036" Action="None" />
+    <!--Ignored rule RCS1037 ~ SA1028: Remove trailing whitespace-->
+    <Rule Id="RCS1037" Action="None" />
+    
+    
+    <!--Considered ignoring-->
+    <!--Changed rule SA1516: Elements must be separated by blank line-->
+    <Rule Id="SA1516" Action="Warning" />
   </Rules>
 </RuleSet>
