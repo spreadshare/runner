@@ -29,7 +29,7 @@ namespace SpreadShare.Tests.Adapters
         {
             bool flag = false;
             var timer = new Timer(0, () => flag = true);
-            long start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            long start = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             System.Threading.Thread.Sleep(AllowedError);
             Assert.True(flag, $"Callback was not called right away (+/- {AllowedError}ms)");
@@ -43,7 +43,7 @@ namespace SpreadShare.Tests.Adapters
         {
             bool flag = false;
             var timer = new Timer(1000, () => flag = true);
-            long start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            long start = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             while (GetPassedTime(start) < 1000 - AllowedError) { System.Threading.Thread.Sleep(1); }
             if (flag) { Assert.True(false, $"Callback was called before one second (+/- {AllowedError}ms)"); }
@@ -60,7 +60,7 @@ namespace SpreadShare.Tests.Adapters
         {
             bool flag = false;
             var timer = new Timer(1337, () => flag = true);
-            long start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            long start = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             while (GetPassedTime(start) < 1337 - AllowedError) { System.Threading.Thread.Sleep(1); }
             if (flag) { Assert.True(false, $"Callback was called before 1500 (+/-{AllowedError}) milliseconds"); }
@@ -76,7 +76,7 @@ namespace SpreadShare.Tests.Adapters
         /// <returns>Number of milliseconds since start</returns>
         private static long GetPassedTime(long start)
         {
-            return DateTimeOffset.Now.ToUnixTimeMilliseconds() - start;
+            return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - start;
         }
     }
 }
