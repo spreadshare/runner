@@ -10,9 +10,9 @@ script:
  - dotnet restore SpreadShare/SpreadShare.csproj
  - dotnet build SpreadShare/SpreadShare.csproj > build.txt
  - if ! grep " 0 Warning(s)" build.txt; then echo "Your build failed. Please fix the warnings"; cat build.txt; exit 1; fi
- - dotnet restore unit-testing/BasicTests/Tests.csproj
- - dotnet build unit-testing/BasicTests/Tests.csproj > build.txt
+ - dotnet restore SpreadShare.Tests/SpreadShare.Tests.csproj
+ - dotnet build SpreadShare.Tests/SpreadShare.Tests.csproj > build.txt
  - cat build.txt
  - if ! grep " 0 Warning(s)" build.txt; then echo "Your build failed. Please fix the warnings"; cat build.txt; exit 1; fi
  - cp SpreadShare/appsettings.json.example SpreadShare/appsettings.json
- - dotnet test unit-testing/BasicTests/Tests.csproj
+ - dotnet test SpreadShare.Tests/SpreadShare.Tests.csproj

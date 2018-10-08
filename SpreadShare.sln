@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpreadShare", "SpreadShare\
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{97112C31-65BE-4545-B75D-0EFAC2199299}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "unit-testing\BasicTests\Tests.csproj", "{EFCA8627-3068-4342-A09E-F7609F0098D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "SpreadShare.Tests\SpreadShare.Tests.csproj", "{EFCA8627-3068-4342-A09E-F7609F0098D5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
