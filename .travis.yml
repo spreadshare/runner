@@ -15,6 +15,6 @@ script:
  - cat build.txt
  - if ! grep " 0 Warning(s)" build.txt; then echo "\e[31mYour build failed. Please fix the warnings\e[0m"; cat build.txt; exit 1; fi
  - cp SpreadShare/appsettings.json.example SpreadShare/appsettings.json
- - sed -i 's/api_key/$API_READ_KEY/g' SpreadShare/appsettings.json
- - sed -i 's/api_secret/$API_READ_SECRET/g' SpreadShare/ appsettings.json
+ - sed -i 's/api_key/${API_READ_KEY}/g' SpreadShare/appsettings.json
+ - sed -i 's/api_secret/${API_READ_SECRET}/g' SpreadShare/ appsettings.json
  - dotnet test SpreadShare.Tests/SpreadShare.Tests.csproj
