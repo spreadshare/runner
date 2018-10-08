@@ -94,7 +94,7 @@ namespace SpreadShare.Tests.UserService
         /// </summary>
         /// <param name="interval">Autorenewal interval</param>
         /// <returns>Valid ListenKeyManager</returns>
-        private ListenKeyManager Setup(int interval)
+        private static ListenKeyManager Setup(int interval)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             var configuration = (IConfiguration)serviceProvider.GetService(typeof(IConfiguration));
@@ -116,7 +116,7 @@ namespace SpreadShare.Tests.UserService
         /// </summary>
         /// <param name="interval">Autorenewal interval</param>
         /// <returns>ListenKeyManager with incorrect credentials</returns>
-        private ListenKeyManager SetupInvalidCredentials(int interval)
+        private static ListenKeyManager SetupInvalidCredentials(int interval)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             var loggerFactory = (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory));
