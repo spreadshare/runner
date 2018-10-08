@@ -1,3 +1,6 @@
+ARG API_READ_KEY="key"
+ARG API_READ_SECRET="secret"
+
 FROM microsoft/dotnet:2.1-runtime AS base
 WORKDIR /app
 
