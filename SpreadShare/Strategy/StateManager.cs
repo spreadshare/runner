@@ -96,7 +96,7 @@ namespace SpreadShare.Strategy
         /// Creates new Timer object that waits and then executes callback
         /// </summary>
         /// <param name="ms">Time to wait</param>
-        public void SetTimer(long ms)
+        public void SetTimer(uint ms)
         {
             // Ensure the previous timer has gone out.
             _activeTimer?.Stop();
