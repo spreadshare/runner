@@ -11,6 +11,7 @@ namespace SpreadShare.Tests
     public class TestLoggingProvider : ILoggerProvider
     {
         private readonly ITestOutputHelper _outputHelper;
+        private object _lock = new object();
         private List<string> _messages;
 
         /// <summary>
@@ -26,7 +27,16 @@ namespace SpreadShare.Tests
         /// <summary>
         /// Gets list of output messages
         /// </summary>
-        public List<string> Messages => _messages;
+        public List<string> Messages
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _messages;
+                }
+            }
+        }
 
         /// <summary>
         /// Creates logger
@@ -35,7 +45,7 @@ namespace SpreadShare.Tests
         /// <returns>ILogger instance</returns>
         public ILogger CreateLogger(string categoryName)
         {
-            return new TestLogger(_outputHelper, ref _messages);
+            return new TestLogger(_outputHelper, ref _messages, ref _lock);
         }
 
         /// <inheritdoc/>
