@@ -1,18 +1,20 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare;
 
-namespace Tests
+namespace SpreadShare.Tests
 {
-    internal class ServiceProviderSingleton
+    /// <summary>
+    /// Singleton for ServiceProvider
+    /// </summary>
+    internal sealed class ServiceProviderSingleton
     {
-        private static readonly Lazy<ServiceProviderSingleton> lazy =
+        private static readonly Lazy<ServiceProviderSingleton> Lazy =
             new Lazy<ServiceProviderSingleton>(() => new ServiceProviderSingleton());
 
-        public static ServiceProviderSingleton Instance => lazy.Value;
-        public IServiceProvider ServiceProvider;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceProviderSingleton"/> class.
+        /// </summary>
         private ServiceProviderSingleton()
         {
             // Create service collection
@@ -29,5 +31,15 @@ namespace Tests
             // Configure application
             Startup.Configure(ServiceProvider, (ILoggerFactory)ServiceProvider.GetService(typeof(ILoggerFactory)));
         }
+
+        /// <summary>
+        /// Gets the instance of a ServiceProviderSingleton
+        /// </summary>
+        public static ServiceProviderSingleton Instance => Lazy.Value;
+
+        /// <summary>
+        /// Gets the ServiceProvider
+        /// </summary>
+        public IServiceProvider ServiceProvider { get; }
     }
 }

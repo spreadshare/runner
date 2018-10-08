@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using Binance.Net;
 using Microsoft.Extensions.Configuration;
@@ -7,11 +8,19 @@ using SpreadShare.BinanceServices.Implementations;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Tests
+namespace SpreadShare.Tests.UserService
 {
+    /// <summary>
+    /// Tests of the <ListenKeyManager cref="ListenKeyManager"/> class
+    /// </summary>
     public class ListenKeyManagerTests : BaseTest
     {
-        public ListenKeyManagerTests(ITestOutputHelper outputHelper) : base(outputHelper)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ListenKeyManagerTests"/> class.
+        /// </summary>
+        /// <param name="outputHelper">Output helper that writes to TestOutput</param>
+        public ListenKeyManagerTests(ITestOutputHelper outputHelper)
+            : base(outputHelper)
         {
         }
 
@@ -31,6 +40,7 @@ namespace Tests
                 Logger.LogError("Unable to obtain listenKey");
                 Assert.True(false);
             }
+
             var listenKey = response.Data;
             Logger.LogInformation($"ListenKey obtained: {listenKey}");
             Assert.True(listenKey != null & listenKey.Length > 10);
@@ -72,7 +82,7 @@ namespace Tests
 
             // Sleep 10 seconds to autorenew three times
             Thread.Sleep(10000);
-            var j = TestLoggingProvider.Messages.Count(message => message.Contains("Renewed listenKey"));
+            var j = TestLoggingProvider.Messages.Count(message => message.Contains("Renewed listenKey", StringComparison.InvariantCulture));
             if (j <= 2)
             {
                 Assert.True(false);
@@ -90,7 +100,7 @@ namespace Tests
             var configuration = (IConfiguration)serviceProvider.GetService(typeof(IConfiguration));
             var loggerFactory = (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory));
 
-            //Setup the clients
+            // Setup the clients
             var client = new BinanceClient();
 
             // Set credentials
@@ -110,13 +120,13 @@ namespace Tests
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             var loggerFactory = (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory));
-            
-            //Setup the clients
+
+            // Setup the clients
             var client = new BinanceClient();
 
             // Set credentials
-            string apikey = "myapikey";
-            string apisecret = "myapisecret";
+            const string apikey = "myapikey";
+            const string apisecret = "myapisecret";
             client.SetApiCredentials(apikey, apisecret);
 
             return new ListenKeyManager(loggerFactory, client, interval);

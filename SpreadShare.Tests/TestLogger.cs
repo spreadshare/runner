@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace Tests
+namespace SpreadShare.Tests
 {
-    class TestLogger : ILogger
+    /// <summary>
+    /// Object responsible for logging output to TestOutput
+    /// </summary>
+    internal class TestLogger : ILogger
     {
         private readonly ITestOutputHelper _outputHelper;
         private readonly List<string> _messages;
 
         /// <summary>
-        /// Constructor: Create TestLogger
+        /// Initializes a new instance of the <see cref="TestLogger"/> class.
         /// </summary>
         /// <param name="outputHelper">Helper that redirects to test output</param>
         /// <param name="messages">Collection containing all messages</param>
