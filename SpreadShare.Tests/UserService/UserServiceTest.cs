@@ -25,7 +25,7 @@ namespace SpreadShare.Tests.UserService
         /// <summary>
         /// Tests if user service stays alive for 1 hour
         /// </summary>
-        [Fact]
+        [Fact(Skip = "Tests take 1 hour")]
         public void TestMessage()
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;

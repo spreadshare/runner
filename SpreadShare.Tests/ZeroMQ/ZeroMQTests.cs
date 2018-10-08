@@ -30,7 +30,7 @@ namespace SpreadShare.Tests.ZeroMQ
         /// Tests the broadcasting functionality of the ZeroMQ services
         /// </summary>
         /// <param name="topics">Topics to subscribe to</param>
-        [Theory]
+        [Theory(Skip = "Test takes too long")]
         [InlineData("topic_status", "topic_holdtime")]
         public void BroadcastingAllTopicsTest(params string[] topics)
         {
