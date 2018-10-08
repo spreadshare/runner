@@ -52,6 +52,11 @@ namespace SpreadShare.Tests
                 // Ignored
                 // This occurs when another thread is trying to log and the test is already finished
             }
+            catch (InvalidOperationException)
+            {
+                // Ignored
+                // Read above
+            }
         }
 
         /// <summary>
