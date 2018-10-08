@@ -10,8 +10,8 @@ namespace SpreadShare.Tests.Adapters
     /// </summary>
     public class TimerTests : BaseTest
     {
-        private static readonly int _allowedError = 50;
-        
+        private const int AllowedError = 50;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TimerTests"/> class.
         /// </summary>
@@ -31,8 +31,8 @@ namespace SpreadShare.Tests.Adapters
             var timer = new Timer(0, () => flag = true);
             long start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-            System.Threading.Thread.Sleep(_allowedError);
-            Assert.True(flag, $"Callback was not called right away (+/- {_allowedError}ms)");
+            System.Threading.Thread.Sleep(AllowedError);
+            Assert.True(flag, $"Callback was not called right away (+/- {AllowedError}ms)");
         }
 
         /// <summary>
@@ -45,11 +45,11 @@ namespace SpreadShare.Tests.Adapters
             var timer = new Timer(1000, () => flag = true);
             long start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-            while (GetPassedTime(start) < 1000 - _allowedError) { System.Threading.Thread.Sleep(1); }
-            if (flag) { Assert.True(false, $"Callback was called before one second (+/- {_allowedError}ms)"); }
+            while (GetPassedTime(start) < 1000 - AllowedError) { System.Threading.Thread.Sleep(1); }
+            if (flag) { Assert.True(false, $"Callback was called before one second (+/- {AllowedError}ms)"); }
 
-            while (GetPassedTime(start) < 1000 + _allowedError) { System.Threading.Thread.Sleep(1); }
-            Assert.True(flag, $"Callback was not called after one second (+/- {_allowedError}ms)");
+            while (GetPassedTime(start) < 1000 + AllowedError) { System.Threading.Thread.Sleep(1); }
+            Assert.True(flag, $"Callback was not called after one second (+/- {AllowedError}ms)");
         }
 
         /// <summary>
@@ -62,11 +62,11 @@ namespace SpreadShare.Tests.Adapters
             var timer = new Timer(1337, () => flag = true);
             long start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-            while (GetPassedTime(start) < 1337 - _allowedError) { System.Threading.Thread.Sleep(1); }
-            if (flag) { Assert.True(false, $"Callback was called before 1500 (+/-{_allowedError}) milliseconds"); }
+            while (GetPassedTime(start) < 1337 - AllowedError) { System.Threading.Thread.Sleep(1); }
+            if (flag) { Assert.True(false, $"Callback was called before 1500 (+/-{AllowedError}) milliseconds"); }
 
-            while (GetPassedTime(start) < 1337 + _allowedError) { System.Threading.Thread.Sleep(1); }
-            Assert.True(flag, $"Callback was not called after 1500 (+/- {_allowedError}) milliseconds");
+            while (GetPassedTime(start) < 1337 + AllowedError) { System.Threading.Thread.Sleep(1); }
+            Assert.True(flag, $"Callback was not called after 1500 (+/- {AllowedError}) milliseconds");
         }
 
         /// <summary>
