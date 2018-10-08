@@ -1,32 +1,32 @@
 using System;
-using SpreadShare.BinanceServices;
-using SpreadShare.BinanceServices.Implementations;
-using Xunit;
-using Xunit.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SpreadShare.BinanceServices;
+using SpreadShare.BinanceServices.Implementations;
 using SpreadShare.Models;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.Binance
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Collection of tests for the Binance Trading Service
+    /// </summary>
     public class BinanceTradingServiceTest : BaseTest
     {
         private readonly BinanceTradingService _tradingService;
 
         /// <summary>
-        /// Constructor that fetches and starts the Binance Trading Service. This can
-        /// be done for the scope of the entire class because all its members are read-only,
-        /// rendering the service stateless and thus not violating any testing rules.
+        /// Initializes a new instance of the <see cref="BinanceTradingServiceTest"/> class.
         /// </summary>
         /// <param name="outputHelper">Output helper that writes to TestOutput</param>
-        public BinanceTradingServiceTest(ITestOutputHelper outputHelper) : base(outputHelper)
+        public BinanceTradingServiceTest(ITestOutputHelper outputHelper)
+            : base(outputHelper)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             _tradingService = (BinanceTradingService)serviceProvider.GetService<ITradingService>();
             _tradingService.Start();
         }
-        
 
         /// <summary>
         /// Checks if the price of an asset is fetched and the result is reasonable.
@@ -38,14 +38,17 @@ namespace SpreadShare.Tests.Binance
         [InlineData("IOTAETH")]
         [InlineData("ONTBTC")]
         public void GetPriceOfAsset(string asset)
-        {         
+        {
             var query = _tradingService.GetCurrentPrice(CurrencyPair.Parse(asset));
-            if (!query.Success) Assert.True(false, query.ToString());
+            if (!query.Success)
+            {
+                Assert.True(false, query.ToString());
+            }
+
             Logger.LogInformation($"The price of {asset} is {query.Data}");
             Assert.True(query.Data >= 0, $"Price is a non positive decimal: {query.Data}");
         }
 
-        
         /// <summary>
         /// Checks if the performance of an asset can be fetched.
         /// </summary>
@@ -56,13 +59,19 @@ namespace SpreadShare.Tests.Binance
         [InlineData(-1)]
         public void GetTopPerformance(int hoursBack)
         {
-            if (hoursBack <= 0) {
+            if (hoursBack <= 0)
+            {
                 Assert.Throws<ArgumentException>(() => _tradingService.GetTopPerformance(hoursBack, DateTime.UtcNow));
                 return;
             }
+
             var query = _tradingService.GetTopPerformance(hoursBack, DateTime.UtcNow);
-            if (!query.Success) Assert.True(false, query.ToString());
-            Logger.LogInformation($"Top performer is from the previous {hoursBack} hours is {query.Data.Item1} | ({query.Data.Item2*100-100}%)");
+            if (!query.Success)
+            {
+                Assert.True(false, query.ToString());
+            }
+
+            Logger.LogInformation($"Top performer is from the previous {hoursBack} hours is {query.Data.Item1} | ({(query.Data.Item2 * 100) - 100}%)");
         }
     }
 }
