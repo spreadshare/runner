@@ -13,12 +13,14 @@ using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
+    /// <summary>
+    /// Startup object for assigning and configuring all services
+    /// </summary>
     internal class Startup
     {
-        public IConfiguration Configuration { get; }
-
         /// <summary>
-        /// Constructor: Setting configuration
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// Sets configuration
         /// </summary>
         /// <param name="jsonfile">Filename of json file</param>
         public Startup(string jsonfile = "appsettings.json")
@@ -29,30 +31,9 @@ namespace SpreadShare
         }
 
         /// <summary>
-        /// Configure support services such as databases and logging
+        /// Gets the configuration of the application
         /// </summary>
-        /// <param name="services"></param>
-        public void ConfigureServices(IServiceCollection services)
-        {
-            // Add Database context dependency
-            services.AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>(opt
-                => opt.UseNpgsql(Configuration.GetConnectionString("LocalConnection")));
-            // TODO: Add layered timeout for unsuccesfully connecting to DB
-
-            // Add Logging dependency
-            services.AddLogging(loggingBuilder => loggingBuilder
-                .AddConsole(opt => opt.DisableColors = true)
-                .SetMinimumLevel(LogLevel.Information));
-
-            // Add Configuration dependency (provides access to appsettings.json)
-            services.AddSingleton(Configuration);
-
-            // Add MyService dependency
-            services.AddSingleton<IDatabaseMigrationService, DatabaseMigrationService>();
-
-            // Configuration files globals
-            services.AddSingleton<ISettingsService, SettingsService>();
-        }
+        public IConfiguration Configuration { get; }
 
         /// <summary>
         /// Configure business logic services such as fetching exchange data
@@ -77,6 +58,7 @@ namespace SpreadShare
         /// Additional configuration after all have been configured
         /// </summary>
         /// <param name="serviceProvider">Provides access to configured services</param>
+        /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
         public static void Configure(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
@@ -88,13 +70,40 @@ namespace SpreadShare
             {
                 logger.LogError($"SettingsService failed to start, aborting other services\n{settingsResult}");
             }
-            
+
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
             if (service.Migrate().Code == ResponseCodes.Success)
             {
                 logger.LogError("Could not migrate database");
             }
+        }
+
+        /// <summary>
+        /// Configure support services such as databases and logging
+        /// </summary>
+        /// <param name="services">Collection of services</param>
+        public void ConfigureServices(IServiceCollection services)
+        {
+            // Add Database context dependency
+            services.AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>(opt
+                => opt.UseNpgsql(Configuration.GetConnectionString("LocalConnection")));
+
+            // TODO: Add layered timeout for unsuccesfully connecting to DB
+
+            // Add Logging dependency
+            services.AddLogging(loggingBuilder => loggingBuilder
+                .AddConsole(opt => opt.DisableColors = true)
+                .SetMinimumLevel(LogLevel.Information));
+
+            // Add Configuration dependency (provides access to appsettings.json)
+            services.AddSingleton(Configuration);
+
+            // Add MyService dependency
+            services.AddSingleton<IDatabaseMigrationService, DatabaseMigrationService>();
+
+            // Configuration files globals
+            services.AddSingleton<ISettingsService, SettingsService>();
         }
     }
 }

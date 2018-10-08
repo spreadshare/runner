@@ -3,120 +3,93 @@ using Binance.Net.Objects;
 
 namespace SpreadShare.Models
 {
+    /// <summary>
+    /// Object representation of a candle
+    /// </summary>
+    /// TODO: Should we remove this unused class?
     internal class Candle
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Candle"/> class.
+        /// </summary>
         public Candle()
         {
         }
 
-        public Candle(DateTime openTime, DateTime closeTime, string symbol, decimal open, decimal close,
-            decimal high, decimal low, decimal volume, int tradeCount, bool final, decimal quoteAssetVolume,
-            decimal takerBuyBaseAssetVolume, decimal takerBuyQuoteAssetVolume)
-        {
-            OpenTime = openTime;
-            CloseTime = closeTime;
-            Symbol = symbol;
-            Open = open;
-            Close = close;
-            High = high;
-            Low = low;
-            Volume = volume;
-            TradeCount = tradeCount;
-            Final = final;
-            QuoteAssetVolume = quoteAssetVolume;
-            TakerBuyBaseAssetVolume = takerBuyBaseAssetVolume;
-            TakerBuyQuoteAssetVolume = takerBuyQuoteAssetVolume;
-        }
-
-        public Candle(BinanceStreamKline data)
-        {
-            OpenTime = data.OpenTime;
-            CloseTime = data.CloseTime;
-            Symbol = data.Symbol;
-            Open = data.Open;
-            Close = data.Close;
-            High = data.High;
-            Low = data.Low;
-            Volume = data.Volume;
-            TradeCount = data.TradeCount;
-            Final = data.Final;
-            QuoteAssetVolume = data.QuoteAssetVolume;
-            TakerBuyBaseAssetVolume = data.TakerBuyBaseAssetVolume;
-            TakerBuyQuoteAssetVolume = data.TakerBuyQuoteAssetVolume;
-        }
-
-
+        /// <summary>
+        /// Gets or sets the id of the candle
+        /// </summary>
         public int CandleId { get; set; }
 
         /// <summary>
-        /// The open time of this candlestick
+        /// Gets or sets the open time of this candle
         /// </summary>
         public DateTime OpenTime { get; set; }
 
         /// <summary>
-        /// The close time of this candlestick
+        /// Gets or sets the close time of this candle
         /// </summary>
         public DateTime CloseTime { get; set; }
 
         /// <summary>
-        /// The symbol this candlestick is for
+        /// Gets or sets the symbol this candle is for
         /// </summary>
         public string Symbol { get; set; }
 
         /// <summary>
-        /// The open price of this candlestick
+        /// Gets or sets the open price of this candle
         /// </summary>
         public decimal Open { get; set; }
 
         /// <summary>
-        /// The close price of this candlestick
+        /// Gets or sets the close price of this candle
         /// </summary>
         public decimal Close { get; set; }
 
         /// <summary>
-        /// The higest price of this candlestick
+        /// Gets or sets the higest price of this candle
         /// </summary>
         public decimal High { get; set; }
 
         /// <summary>
-        /// The lowest price of this candlestick
+        /// Gets or sets the lowest price of this candle
         /// </summary>
         public decimal Low { get; set; }
 
         /// <summary>
-        /// The volume traded during this candlestick
+        /// Gets or sets the volume traded during this candle
         /// </summary>
         public decimal Volume { get; set; }
 
         /// <summary>
-        /// The amount of trades in this candlestick
+        /// Gets or sets the amount of trades in this candle
         /// </summary>
         public int TradeCount { get; set; }
 
         /// <summary>
-        /// Boolean indicating whether this candlestick is closed
+        /// Gets or sets a value indicating whether boolean indicating whether this candle is closed
         /// </summary>
         public bool Final { get; set; }
 
         /// <summary>
-        /// The quote volume
+        /// Gets or sets the quote volume
         /// </summary>
         public decimal QuoteAssetVolume { get; set; }
 
         /// <summary>
-        /// The volume of active buy
+        /// Gets or sets the volume of active buy
         /// </summary>
         public decimal TakerBuyBaseAssetVolume { get; set; }
 
         /// <summary>
-        /// The quote volume of active buy
+        /// Gets or sets the quote volume of active buy
         /// </summary>
         public decimal TakerBuyQuoteAssetVolume { get; set; }
 
         /// <summary>
-        /// String format of Candle
+        /// Returns a string representation of the candle
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A string representation of the candle</returns>
         public override string ToString()
         {
             return $"OpenTime : {OpenTime}, " +

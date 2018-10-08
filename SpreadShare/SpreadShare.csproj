@@ -9,6 +9,7 @@
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>../CustomRuleset.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
   
   <ItemGroup>

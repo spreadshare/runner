@@ -6,6 +6,9 @@ using SpreadShare.Models;
 
 namespace SpreadShare.BinanceServices.Implementations
 {
+    /// <summary>
+    /// Object for obtaining and renewing listen keys for Binance
+    /// </summary>
     internal class ListenKeyManager : IDisposable
     {
         private readonly BinanceClient _client;
@@ -16,9 +19,9 @@ namespace SpreadShare.BinanceServices.Implementations
         private Timer _timer;
         private bool _isRetry;
 
-
         /// <summary>
-        /// Constructor: Create logger and set BinanceClient
+        /// Initializes a new instance of the <see cref="ListenKeyManager"/> class.
+        /// Create logger and sets BinanceClient
         /// </summary>
         /// <param name="loggerFactory">Creates logger</param>
         /// <param name="client">Creates BinanceClient</param>
@@ -46,12 +49,33 @@ namespace SpreadShare.BinanceServices.Implementations
                 _logger.LogCritical($"Unable to obtain ListenKey for Binance WebSocket: {getListenKey.Error.Message}");
                 return new ResponseObject<string>(ResponseCodes.Error);
             }
+
             _listenKey = getListenKey.Data.ListenKey;
 
             // Set timer every 30 min for autorenewal
             SetTimer();
 
             return new ResponseObject<string>(ResponseCodes.Success, _listenKey, "Successfully obtained listenKey");
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes the current object's resource
+        /// </summary>
+        /// <param name="disposing">Whether to dispose the resources of the object</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _timer.Dispose();
+                _client.Dispose();
+            }
         }
 
         /// <summary>
@@ -83,7 +107,7 @@ namespace SpreadShare.BinanceServices.Implementations
         /// <summary>
         /// Renew listenkey
         /// </summary>
-        /// <param name="stateInfo"></param>
+        /// <param name="stateInfo">Given context from the method starting the timer</param>
         private void Renew(object stateInfo)
         {
             _logger.LogInformation($"{DateTime.UtcNow} | Requesting renewal of listenKey: {_listenKey}");
@@ -112,22 +136,6 @@ namespace SpreadShare.BinanceServices.Implementations
 
             // Renewal succeeded
             _logger.LogInformation($"{DateTime.UtcNow} | Renewed listenKey: {_listenKey}");
-        }
-        
-        
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _timer.Dispose();
-                _client.Dispose();
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

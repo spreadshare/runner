@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
@@ -11,8 +10,14 @@ using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
+    /// <summary>
+    /// Entrypoint of the application
+    /// </summary>
     public static class Program
     {
+        /// <summary>
+        /// Entrypoint of the application
+        /// </summary>
         public static void Main()
         {
             // Create service collection
@@ -27,7 +32,7 @@ namespace SpreadShare
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
             // Configure application
-            ILoggerFactory loggerFactory = (ILoggerFactory) serviceProvider.GetService(typeof(ILoggerFactory));
+            ILoggerFactory loggerFactory = (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory));
             Startup.Configure(serviceProvider, loggerFactory);
 
             // --------------------------------------------------
@@ -37,6 +42,11 @@ namespace SpreadShare
             KeepRunningForever();
         }
 
+        /// <summary>
+        /// Start business services
+        /// </summary>
+        /// <param name="serviceProvider">Service provider</param>
+        /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
         private static void ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("ExecuteBusinessLogic");
@@ -47,7 +57,7 @@ namespace SpreadShare
             if (settings.EnabledServices.TradingService)
             {
                 var trading = serviceProvider.GetService<ITradingService>();
-                tradingResult = trading.Start();                
+                tradingResult = trading.Start();
             }
             else
             {
@@ -55,7 +65,6 @@ namespace SpreadShare
                                       "you must change this in appsettings.json");
             }
 
-            
             // Start UserService
             ResponseObject userResult = null;
             if (settings.EnabledServices.UserService)
@@ -66,6 +75,7 @@ namespace SpreadShare
                                        "appsettings.json if you want to use the UserService");
                     throw new ArgumentException("UserService depends on TradingService, which is disabled");
                 }
+
                 var user = serviceProvider.GetService<IUserService>();
                 userResult = user.Start();
             }
@@ -74,8 +84,7 @@ namespace SpreadShare
                 logger.LogInformation("UserService has been disabled. If you want to enable the UserService," +
                                       "you must change this in appsettings.json");
             }
-            
-            
+
             // Start StrategyService
             if (settings.EnabledServices.StrategyService)
             {
@@ -85,6 +94,7 @@ namespace SpreadShare
                                        "appsettings.json if you want to use the UserService");
                     throw new ArgumentException("StrategyService depends on TradingService, which is disabled");
                 }
+
                 if (!settings.EnabledServices.UserService)
                 {
                     logger.LogCritical("UserService is not enabled. You must enable userService in " +
@@ -96,10 +106,13 @@ namespace SpreadShare
                 {
                     var strategy = serviceProvider.GetService<IStrategy>();
                     var strategyResult = strategy.Start();
-                    if (strategyResult.Code != ResponseCodes.Success) {
+                    if (strategyResult.Code != ResponseCodes.Success)
+                    {
                         logger.LogError($"Strategy failed to start, report: {strategyResult}");
                     }
-                } else {
+                }
+                else
+                {
                     logger.LogError("Strategy not started because not all needed service started");
                     logger.LogError($"User service report: {userResult}");
                     logger.LogError($"Trading Service report: {tradingResult}");
@@ -110,9 +123,9 @@ namespace SpreadShare
                 logger.LogInformation("StrategyService has been disabled. If you want to enable the StrategyService," +
                                       "you must change this in appsettings.json");
             }
-            
+
             // Start ZeroMQ command listener and broadcaster
-            if (settings.EnabledServices.ZeroMQService)
+            if (settings.EnabledServices.ZeroMqService)
             {
                 var zeroMq = serviceProvider.GetService<IZeroMqService>();
                 var zeroMqResult = zeroMq.Start();
@@ -132,9 +145,18 @@ namespace SpreadShare
             }
         }
 
+        /// <summary>
+        /// Keep the application running
+        /// </summary>
         private static void KeepRunningForever()
         {
-            Thread t = new Thread(() => { while (true) { Thread.Sleep(1000); } });
+            Thread t = new Thread(() =>
+            {
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                }
+            });
             t.Start();
             t.Join();
         }
