@@ -7,15 +7,19 @@ using SpreadShare.Models;
 
 namespace SpreadShare.ZeroMQ
 {
+    /// <summary>
+    /// Service for receiving and sending ZeroMQ messages
+    /// </summary>
     internal class ZeroMqService : IZeroMqService
     {
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
 
         /// <summary>
-        /// Constructor: Provides loggers
+        /// Initializes a new instance of the <see cref="ZeroMqService"/> class.
+        /// Provides loggers to concrete commands
         /// </summary>
-        /// <param name="loggerFactory"></param>
+        /// <param name="loggerFactory">LoggerFactory for creating loggers</param>
         public ZeroMqService(ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
@@ -25,7 +29,7 @@ namespace SpreadShare.ZeroMQ
         /// <summary>
         /// Start both threads
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Whether the service started successfully</returns>
         public ResponseObject Start()
         {
             Thread broadcastService = new Thread(StartBroadcastService);
@@ -72,7 +76,7 @@ namespace SpreadShare.ZeroMQ
                     {
                         message = server.ReceiveFrameString();
                     }
-                    catch (FiniteStateMachineException e)
+                    catch (FiniteStateMachineException)
                     {
                         _logger.LogError("NetMQ.FiniteStateMachineException occured");
                         continue;
@@ -89,7 +93,7 @@ namespace SpreadShare.ZeroMQ
                     catch (Exception e)
                     {
                         _logger.LogCritical($"Exception occured: {e.Message}");
-                        server.SendFrame(new Response(Response.Type.failure, e.Message).ToJson());
+                        server.SendFrame(new Response(Response.Type.Failure, e.Message).ToJson());
                         continue;
                     }
 
@@ -100,11 +104,11 @@ namespace SpreadShare.ZeroMQ
                     }
                     catch (Exception e)
                     {
-                        server.SendFrame(new Response(Response.Type.error, $"Action errored: {e.Message}").ToJson());
+                        server.SendFrame(new Response(Response.Type.Error, $"Action errored: {e.Message}").ToJson());
                         continue;
                     }
 
-                    server.SendFrame(new Response(Response.Type.success, "Action completed successfully").ToJson());
+                    server.SendFrame(new Response(Response.Type.Success, "Action completed successfully").ToJson());
                 }
             }
         }

@@ -3,8 +3,8 @@
         "LocalConnection": "Server=db;Database=spreadshare;User ID=postgres;Password=password;Integrated Security=true;Pooling=true;"
     },
     "BinanceCredentials": {
-        "api-key": "keykey",
-        "api-secret": "secretsecret"
+        "api-key": "api_key",
+        "api-secret": "api_secret"
     },
     "BinanceClientSettings": {
         "receiveWindow": 10000000,
@@ -28,7 +28,7 @@
     "SimpleBandwagonStrategy": {
         "baseCurrency": "ETH",
         "minimalRevertValue": "0.01",
-        "minimalGrowthPercentage": 7
+        "minimalGrowthPercentage": 7,
         "checkTime": 18,
         "holdTime": 1
     },

@@ -7,20 +7,32 @@ using SpreadShare.ZeroMQ;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Tests.ZeroMQ
+namespace SpreadShare.Tests.ZeroMQ
 {
+    /// <summary>
+    /// Tests of the <ZeroMqService cref="ZeroMqService"/> class
+    /// </summary>
     public class ZeroMqTests : BaseTest
     {
-        public ZeroMqTests(ITestOutputHelper outputHelper) : base(outputHelper)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZeroMqTests"/> class.
+        /// </summary>
+        /// <param name="outputHelper">Output helper that writes to TestOutput</param>
+        public ZeroMqTests(ITestOutputHelper outputHelper)
+            : base(outputHelper)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             var zeroMqService = serviceProvider.GetService<IZeroMqService>();
             zeroMqService.Start();
         }
 
-        [Theory]
+        /// <summary>
+        /// Tests the broadcasting functionality of the ZeroMQ services
+        /// </summary>
+        /// <param name="topics">Topics to subscribe to</param>
+        [Theory(Skip = "Test takes too long")]
         [InlineData("topic_status", "topic_holdtime")]
-        public void BroadcastingAllTopicsTest(params string [] topics)
+        public void BroadcastingAllTopicsTest(params string[] topics)
         {
             var received = new bool[topics.Length];
             var failcount = 0;
@@ -47,10 +59,13 @@ namespace Tests.ZeroMQ
                         Assert.True(true, "Messages from all topics have been received.");
                         return;
                     }
-                    if (failcount <= 4) continue;
 
+                    if (failcount <= 4)
+                    {
+                        continue;
+                    }
 
-                    var notReceived = "";
+                    var notReceived = string.Empty;
                     for (var i = 0; i < received.Length; i++)
                     {
                         if (!received[i])
@@ -58,6 +73,7 @@ namespace Tests.ZeroMQ
                             notReceived += topics[i] + ", ";
                         }
                     }
+
                     Assert.True(false, $"Not all messages from all topics have been received. Missing topics: {notReceived}");
                 }
             }

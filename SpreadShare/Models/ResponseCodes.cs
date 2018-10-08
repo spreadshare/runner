@@ -1,55 +1,24 @@
 ﻿namespace SpreadShare.Models
 {
+    /// <summary>
+    /// Object representation of the code of the response to an action
+    /// </summary>
+    /// TODO: Should this not be called ResponseStatus?
     internal enum ResponseCodes
     {
+        /// <summary>
+        /// The action resulted in an error
+        /// </summary>
         Error,
+
+        /// <summary>
+        /// The action was not defined
+        /// </summary>
         NotDefined,
+
+        /// <summary>
+        /// The action was successful
+        /// </summary>
         Success
-    }
-
-    internal class ResponseObject<T> {
-        public ResponseCodes Code { get; }
-        public string Message { get; }
-        public T Data { get; }
-
-        public bool Success => Code == ResponseCodes.Success;
-
-
-        public ResponseObject(ResponseCodes code, ResponseObject flow) {
-            Code = code;
-            Message = flow.ToString();
-        }
-        public ResponseObject(ResponseCodes code, string msg) {
-            Code = code;
-            Message = msg;
-        }
-
-        public ResponseObject(ResponseCodes code, T data, string message = "") {
-            Code = code;
-            Data = data;
-            Message = message;
-        }
-
-        public ResponseObject(ResponseCodes code) {
-            Code = code;
-            Message = "";
-        }
-
-        public override string ToString()
-        {
-            return $"{Code} | data: {Data} | msg: {Message}";
-        }
-    }
-
-    internal class ResponseObject : ResponseObject<string>
-    {
-        public ResponseObject(ResponseCodes code, string data = "") : base(code, data)
-        {
-        }
-
-        public override string ToString()
-        {
-            return $"{Code} | msg: {Message}";
-        }
     }
 }

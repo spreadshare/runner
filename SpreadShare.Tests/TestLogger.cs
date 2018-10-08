@@ -3,22 +3,28 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace Tests
+namespace SpreadShare.Tests
 {
-    class TestLogger : ILogger
+    /// <summary>
+    /// Object responsible for logging output to TestOutput
+    /// </summary>
+    internal class TestLogger : ILogger
     {
         private readonly ITestOutputHelper _outputHelper;
         private readonly List<string> _messages;
+        private readonly object _lock;
 
         /// <summary>
-        /// Constructor: Create TestLogger
+        /// Initializes a new instance of the <see cref="TestLogger"/> class.
         /// </summary>
         /// <param name="outputHelper">Helper that redirects to test output</param>
         /// <param name="messages">Collection containing all messages</param>
-        public TestLogger(ITestOutputHelper outputHelper, ref List<string> messages)
+        /// <param name="lockObject">Lock object for locking messages</param>
+        public TestLogger(ITestOutputHelper outputHelper, ref List<string> messages, ref object lockObject)
         {
             _outputHelper = outputHelper;
             _messages = messages;
+            _lock = lockObject;
         }
 
         /// <summary>
@@ -32,8 +38,20 @@ namespace Tests
         /// <param name="formatter">Format of exception</param>
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            _messages.Add(state.ToString());
-            _outputHelper.WriteLine(state.ToString());
+            lock (_lock)
+            {
+                _messages.Add(state.ToString());
+            }
+
+            try
+            {
+                _outputHelper.WriteLine(state.ToString());
+            }
+            catch (AggregateException)
+            {
+                // Ignored
+                // This occurs when another thread is trying to log and the test is already finished
+            }
         }
 
         /// <summary>

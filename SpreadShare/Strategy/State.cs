@@ -1,32 +1,56 @@
-﻿using Binance.Net.Objects;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
 
 namespace SpreadShare.Strategy
 {
+    /// <summary>
+    /// Base class of a state of a strategy
+    /// </summary>
     internal abstract class State
     {
-        public Context Context { get; set; }
-
         private StateManager _stateManager;
-        protected ILogger Logger;
-        protected AbstractTradingService TradingService;
-        protected AbstractUserService UserService;
-        protected SettingsService SettingsService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="State"/> class.
+        /// </summary>
         protected State()
         {
             Context = new Context();
         }
 
         /// <summary>
+        /// Gets or sets the context of the state
+        /// </summary>
+        public Context Context { get; set; }
+
+        /// <summary>
+        /// Gets the logger of the state
+        /// </summary>
+        protected ILogger Logger { get; private set; }
+
+        /// <summary>
+        /// Gets a trading service instance
+        /// </summary>
+        protected AbstractTradingService TradingService { get; private set; }
+
+        /// <summary>
+        /// Gets a user service instance
+        /// </summary>
+        protected AbstractUserService UserService { get; private set; }
+
+        /// <summary>
+        /// Gets a setting service instance
+        /// </summary>
+        protected SettingsService SettingsService { get; private set; }
+
+        /// <summary>
         /// Initialise the state
         /// </summary>
         /// <param name="context">Set of objects that are required for the state to work</param>
-        /// <param name="stateManager"></param>
-        /// <param name="loggerFactory"></param>
+        /// <param name="stateManager">StateManager controlling this state</param>
+        /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
         public void Activate(Context context, StateManager stateManager, ILoggerFactory loggerFactory)
         {
             Context = context;
@@ -39,10 +63,10 @@ namespace SpreadShare.Strategy
         }
 
         /// <summary>
-        /// Validates if all the required parameters exist within the context
+        /// Callback when the timer elapses (fired by StateManager)
         /// </summary>
-        protected abstract void ValidateContext();
-
+        /// <returns>Whether the specified callback was successful</returns>
+        public virtual ResponseObject OnTimer() => new ResponseObject(ResponseCodes.NotDefined);
 
         /// <summary>
         /// Switching states
@@ -53,12 +77,19 @@ namespace SpreadShare.Strategy
             _stateManager.SwitchState(s);
         }
 
-        protected void SetTimer(long ms) {
-            _stateManager.SetTimer(ms);
-        }
+        /// <summary>
+        /// Validates if all the required parameters exist within the context
+        /// </summary>
+        /// TODO: The current name does not reflect what the method does
+        protected abstract void ValidateContext();
 
-        public virtual ResponseObject OnTimer() {
-            return new ResponseObject(ResponseCodes.NotDefined);
+        /// <summary>
+        /// Sets the timer in the StateManager
+        /// </summary>
+        /// <param name="ms">Timer duration</param>
+        protected void SetTimer(long ms)
+        {
+            _stateManager.SetTimer(ms);
         }
     }
 }
