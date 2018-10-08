@@ -27,8 +27,6 @@
     <Rule Id="IDE0039" Action="Warning" />
     <!--Changed rule SA1500: Braces for multiLine statements must not share line-->
     <Rule Id="SA1500" Action="Warning" />
-    <!--Ignored rule SA1003: Generates many false positives.-->
-    <Rule Id="SA1003" Action="None" />
 
     <!--Changed rule RCS1001: Foreach statement spanning multiple lines requires braces-->
     <Rule Id="RCS1001" Action="Warning" />
