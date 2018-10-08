@@ -20,39 +20,3 @@ The content of settings.json should then contain at least the following:
 ```
 
 If _.NET Core Test Explorer_ does not show tests, check if the test(s) compile by running `dotnet test` in the folder of the test project. Furthermore, try to open VSCode in the scope of the folder of the test project to eliminate the possibility of a faulty `settings.json`
-
-### Adding More Test Projects in VSCode
-1) Navigate to *unit-tests/*
-2) Run `mkdir <New Test Project>`
-3) Navigate to *New Test Project*
-4) Run `dot new xunit`
-5) Run `dotnet add reference ../../SpreadShare/SpreadShare.csproj`
-6) Navigate back to *unit-tests/*
-7) Run `dotnet sln add ./<New Test Project>/<New Test Project>.csproj` 
-8) Remove *UnitTest1.cs*
- Make a new *.cs* file using the example below.
-
-```csharp
-using Xunit;
-
-namespace UnitTests
-{
-	public class Test
-  {
-		//You are encouraged you to add objects from
-		//the SpreadShare.* namespace as private members 
-		//and initialize them in the constructor.
-		
-		public Test() { }
-
-		[Fact]
-		public void SuccessGuaranteed()
-		{
-			bool AreWeRichYet = true;
-			//Test passes if the first argument is true, 
-			//if not it will echo the second argument to the test logs.
-			Assert.True(AreWeRichYet, "Dude! You're poor!");
-		}
-  }
-}
-```
