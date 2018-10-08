@@ -45,7 +45,6 @@ namespace SpreadShare.Tests.Binance
                 Assert.True(false, query.ToString());
             }
 
-            Logger.LogInformation($"The price of {asset} is {query.Data}");
             Assert.True(query.Data >= 0, $"Price is a non positive decimal: {query.Data}");
         }
 
@@ -70,8 +69,6 @@ namespace SpreadShare.Tests.Binance
             {
                 Assert.True(false, query.ToString());
             }
-
-            Logger.LogInformation($"Top performer is from the previous {hoursBack} hours is {query.Data.Item1} | ({(query.Data.Item2 * 100) - 100}%)");
         }
     }
 }
