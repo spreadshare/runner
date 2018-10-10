@@ -17,13 +17,8 @@ namespace SpreadShare.Strategy
         /// </summary>
         protected State()
         {
-            Context = new Context();
-        }
 
-        /// <summary>
-        /// Gets or sets the context of the state
-        /// </summary>
-        public Context Context { get; set; }
+        }
 
         /// <summary>
         /// Gets the logger of the state
@@ -51,9 +46,8 @@ namespace SpreadShare.Strategy
         /// <param name="context">Set of objects that are required for the state to work</param>
         /// <param name="stateManager">StateManager controlling this state</param>
         /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        public void Activate(Context context, StateManager stateManager, ILoggerFactory loggerFactory)
+        public void Activate(StateManager stateManager, ILoggerFactory loggerFactory)
         {
-            Context = context;
             _stateManager = stateManager;
             TradingService = stateManager.TradingService;
             UserService = stateManager.UserService;
