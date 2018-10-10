@@ -6,3 +6,4 @@ services:
 before_install:
   - docker build -t tests --build-arg API_READ_KEY=${API_READ_KEY} --build-arg API_READ_SECRET=${API_READ_SECRET} .
   - docker run tests
+  - exit 0
