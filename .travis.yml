@@ -4,5 +4,5 @@ services:
   - docker
 
 before_install:
-  - docker build --build-arg API_READ_KEY=${API_READ_KEY} --build-arg API_READ_SECRET=${API_READ_SECRET} .
+  - docker build --build-arg API_READ_KEY=${API_READ_KEY} --build-arg API_READ_SECRET=${API_READ_SECRET} -f .travis.dockerfile
   - exit 0
