@@ -20,8 +20,8 @@ namespace SpreadShare.SupportServices
             Currency baseCurrency,
             decimal minimalRevertValue,
             decimal minimalGrowthPercentage,
-            int checkTime,
-            int holdTime)
+            uint checkTime,
+            uint holdTime)
         {
             BaseCurrency = baseCurrency;
             MinimalRevertValue = minimalRevertValue;
@@ -48,11 +48,11 @@ namespace SpreadShare.SupportServices
         /// <summary>
         /// Gets the amount of hours to look in the past
         /// </summary>
-        public int CheckTime { get; }
+        public uint CheckTime { get; }
 
         /// <summary>
         /// Gets the amount of hours to hold the currency
         /// </summary>
-        public int HoldTime { get; }
+        public uint HoldTime { get; }
     }
 }

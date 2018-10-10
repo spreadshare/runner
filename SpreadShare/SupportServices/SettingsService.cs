@@ -136,8 +136,8 @@ namespace SpreadShare.SupportServices
             Currency baseCurrency = new Currency(_configuration.GetValue<string>("SimpleBandwagonStrategy:baseCurrency"));
             decimal minimalRevertValue = _configuration.GetValue<decimal>("SimpleBandwagonStrategy:minimalRevertValue");
             decimal minimalGrowthPercentage = _configuration.GetValue<decimal>("SimpleBandwagonStrategy:minimalGrowthPercentage");
-            int holdTime = _configuration.GetValue<int>("SimpleBandwagonStrategy:holdTime");
-            int checkTime = _configuration.GetValue<int>("SimpleBandwagonStrategy:checkTime");
+            uint holdTime = _configuration.GetValue<uint>("SimpleBandwagonStrategy:holdTime");
+            uint checkTime = _configuration.GetValue<uint>("SimpleBandwagonStrategy:checkTime");
             SimpleBandWagonStrategySettings = new SimpleBandWagonStrategySettings(baseCurrency, minimalRevertValue, minimalGrowthPercentage, checkTime, holdTime);
         }
 

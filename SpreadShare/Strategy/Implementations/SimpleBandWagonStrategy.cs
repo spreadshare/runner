@@ -57,14 +57,14 @@ namespace SpreadShare.Strategy.Implementations
             {
                 // Retrieve global settings
                 Currency baseSymbol = SettingsService.SimpleBandWagonStrategySettings.BaseCurrency;
-                int checkTime = SettingsService.SimpleBandWagonStrategySettings.CheckTime;
+                uint checkTime = SettingsService.SimpleBandWagonStrategySettings.CheckTime;
 
                 // Try to get to top performer, if not try state again after 10 seconds
                 var winnerQuery = TradingService.GetTopPerformance(checkTime, DateTime.Now);
                 if (!winnerQuery.Success)
                 {
                     Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 10 seconds");
-                    Context.PutObject("TimerIdleTime", (long)(10 * 1000));
+                    Context.PutObject("TimerIdleTime", (uint)(10 * 1000));
                     Context.PutObject("TimerCallback", new CheckPositionValidity());
                     SwitchState(new TryAfterWaitState());
                     return;
@@ -88,7 +88,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (!assetsQuery.Success)
                 {
                     Logger.LogError($"Could not get portfolio!\n{assetsQuery}\ntrying again after 10 seconds");
-                    Context.PutObject("TimerIdleTime", (long)(10 * 1000));
+                    Context.PutObject("TimerIdleTime", (uint)(10 * 1000));
                     Context.PutObject("TimerCallback", new CheckPositionValidity());
                     SwitchState(new TryAfterWaitState());
                     return;
@@ -149,7 +149,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (!assetsQuery.Success)
                 {
                     Logger.LogWarning("Could not get portfolio, going idle for 10 seconds, then try again.");
-                    Context.PutObject("TimerIdleTime", (long)(10 * 1000));
+                    Context.PutObject("TimerIdleTime", (uint)(10 * 1000));
                     Context.PutObject("TimerCallback", new RevertToBaseState());
                     SwitchState(new TryAfterWaitState());
                     return;
@@ -222,7 +222,7 @@ else
             protected override void ValidateContext()
             {
                 // Retrieve globals from the settings.
-                int checkTime = SettingsService.SimpleBandWagonStrategySettings.CheckTime;
+                uint checkTime = SettingsService.SimpleBandWagonStrategySettings.CheckTime;
 
                 // Try to retrieve the top performer, using a tryAfterWait fallback in case of failure.
                 Logger.LogInformation($"Looking for the top performer from the previous {checkTime} hours");
@@ -231,10 +231,10 @@ else
                 {
                     Logger.LogInformation($"Top performer is {query.Data.Item1}");
                 }
-else
+                else
                 {
                     Logger.LogWarning($"Could not fetch top performer, {query}\nRetyring state after 10 seconds");
-                    Context.PutObject("TimerIdleTime", (long)(10 * 1000));
+                    Context.PutObject("TimerIdleTime", (uint)(10 * 1000));
                     Context.PutObject("TimerCallback", new BuyState());
                     SwitchState(new TryAfterWaitState());
                     return;
@@ -262,7 +262,7 @@ else
                 else
                 {
                     Logger.LogError($"Order has failed, retrying state in 10 seconds\n{response}");
-                    Context.PutObject("TimerIdleTime", (long)(10 * 1000));
+                    Context.PutObject("TimerIdleTime", (uint)(10 * 1000));
                     Context.PutObject("TimerCallback", new BuyState());
                     SwitchState(new TryAfterWaitState());
                 }
@@ -305,7 +305,7 @@ else
         /// </summary>
         internal class TryAfterWaitState : State
         {
-            private long _idleTime;
+            private uint _idleTime;
             private State _callback;
 
             /// <inheritdoc />
@@ -320,7 +320,7 @@ else
             {
                 try
                 {
-                    _idleTime = (long)Context.GetObject("TimerIdleTime");
+                    _idleTime = (uint)Context.GetObject("TimerIdleTime");
                     _callback = (State)Context.GetObject("TimerCallback");
                 }
                 catch (Exception e)
