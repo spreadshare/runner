@@ -87,7 +87,7 @@ namespace SpreadShare.Strategy
         /// Sets the timer in the StateManager
         /// </summary>
         /// <param name="ms">Timer duration</param>
-        protected void SetTimer(long ms)
+        protected void SetTimer(uint ms)
         {
             _stateManager.SetTimer(ms);
         }
