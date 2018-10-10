@@ -28,14 +28,14 @@ namespace SpreadShare.Models
         /// </summary>
         /// <param name="input">List of balances</param>
         /// TODO: Make the input independent of Binance
-        public Assets(List<BinanceBalance> input)
+        public Assets(List<ExchangeBalance> input)
             : this()
         {
             foreach (var balance in input)
             {
-                _free.Add(balance.Asset, balance.Free);
-                _locked.Add(balance.Asset, balance.Locked);
-                _total.Add(balance.Asset, balance.Total);
+                _free.Add(balance.Symbol, balance.Free);
+                _locked.Add(balance.Symbol, balance.Locked);
+                _total.Add(balance.Symbol, balance.Total);
             }
         }
 

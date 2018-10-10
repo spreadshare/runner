@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
+using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
@@ -68,8 +71,11 @@ namespace SpreadShare.BinanceServices.Implementations
                 _logger.LogCritical($"Could not get assets: {accountInfo.Error.Message}");
                 return new ResponseObject<Assets>(ResponseCodes.Error);
             }
+            
+            // Map to general ExchangeBalance datatype for parsing to assets object.
+            var values = accountInfo.Data.Balances.Select(x => new ExchangeBalance(x.Asset, x.Free, x.Locked)).ToList();
 
-            return new ResponseObject<Assets>(ResponseCodes.Success, new Assets(accountInfo.Data.Balances));
+            return new ResponseObject<Assets>(ResponseCodes.Success, new Assets(values));
         }
 
         /// <inheritdoc/>
