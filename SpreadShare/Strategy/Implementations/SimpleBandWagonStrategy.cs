@@ -9,8 +9,8 @@ using SpreadShare.SupportServices;
 namespace SpreadShare.Strategy.Implementations
 {
     /// <summary>
-    /// Simple bandwagon strategy
-    /// TODO: Add more detailed description
+    /// Simple bandwagon strategy. Contains all the states for the SimpleBandWagon
+    /// statemachine. 
     /// </summary>
     internal class SimpleBandWagonStrategy : BaseStrategy
     {
@@ -37,6 +37,7 @@ namespace SpreadShare.Strategy.Implementations
         /// Starting state of the strategy
         /// </summary>
         // TODO: This state seems entirely unnecessary?
+        // TODO^: Little effort and give a nice confirmation that all has started well.
         private class EntryState : State
         {
             /// <inheritdoc />

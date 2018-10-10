@@ -3,8 +3,7 @@ namespace SpreadShare.SupportServices
     /// <summary>
     /// Object containing the credentials for an exchange
     /// </summary>
-    /// TODO: Refactor this into a struct?
-    public class Authy
+    public struct Authy
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Authy"/> class.
