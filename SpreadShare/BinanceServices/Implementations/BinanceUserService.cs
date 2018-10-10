@@ -71,7 +71,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 _logger.LogCritical($"Could not get assets: {accountInfo.Error.Message}");
                 return new ResponseObject<Assets>(ResponseCodes.Error);
             }
-            
+
             // Map to general ExchangeBalance datatype for parsing to assets object.
             var values = accountInfo.Data.Balances.Select(x => new ExchangeBalance(x.Asset, x.Free, x.Locked)).ToList();
 
