@@ -16,8 +16,6 @@
     <Rule Id="CA1051" Action="None" />
     <!--Ignored rule SA1633: Missing file header (for copyright purposes)-->
     <Rule Id="SA1633" Action="None" />
-    <!--Ignored rule SA1501: Single line if statements are nice.-->
-    <Rule Id="SA1501" Action="None" />
 
 
     <!--CHANGED FROM INFORMATION TO WARNING-->
