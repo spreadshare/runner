@@ -137,7 +137,7 @@ namespace SpreadShare
                 {
                     logger.LogError($"ZeroMqService could not be started: {zeroMqResult.Message}");
                 }
-            }
+            }           
             else
             {
                 logger.LogInformation("ZeroMqService has been disabled. If you want to enable the ZeroMqService," +
