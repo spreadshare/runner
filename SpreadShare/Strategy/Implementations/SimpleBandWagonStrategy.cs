@@ -10,7 +10,7 @@ namespace SpreadShare.Strategy.Implementations
 {
     /// <summary>
     /// Simple bandwagon strategy. Contains all the states for the SimpleBandWagon
-    /// statemachine. 
+    /// statemachine.
     /// </summary>
     internal class SimpleBandWagonStrategy : BaseStrategy
     {
