@@ -3,7 +3,7 @@ namespace SpreadShare.SupportServices
     /// <summary>
     /// Object containing the credentials for an exchange
     /// </summary>
-    public struct Authy
+    public class Authy
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Authy"/> class.
