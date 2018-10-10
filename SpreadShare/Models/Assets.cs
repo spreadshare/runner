@@ -27,7 +27,6 @@ namespace SpreadShare.Models
         /// Initializes a new instance of the <see cref="Assets"/> class.
         /// </summary>
         /// <param name="input">List of balances</param>
-        /// TODO: Make the input independent of Binance
         public Assets(List<ExchangeBalance> input)
             : this()
         {
