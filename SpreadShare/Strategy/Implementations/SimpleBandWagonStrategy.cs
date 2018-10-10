@@ -20,7 +20,7 @@ namespace SpreadShare.Strategy.Implementations
         /// <param name="loggerFactory">Provided logger creating capabilities</param>
         /// <param name="tradingService">Provides trading capabilities</param>
         /// <param name="userService">Provides user data fetching capabilities</param>
-        /// <param name="settingsService">Provides acces to global settings</param>
+        /// <param name="settingsService">Provides access to global settings</param>
         public SimpleBandWagonStrategy(
             ILoggerFactory loggerFactory,
             ITradingService tradingService,
@@ -37,23 +37,23 @@ namespace SpreadShare.Strategy.Implementations
         /// Starting state of the strategy
         /// </summary>
         // TODO: This state seems entirely unnecessary?
-        internal class EntryState : State
+        private class EntryState : State
         {
             /// <inheritdoc />
-            protected override void ValidateContext()
+            protected override void Run()
             {
                 Logger.LogInformation("Started the simple bandwagon strategy");
-                SwitchState(new CheckPositionValidity());
+                SwitchState(new CheckPositionValidityState());
             }
         }
 
         /// <summary>
         /// Checks if the winner is not already the majority share of the portfolio.
         /// </summary>
-        internal class CheckPositionValidity : State
+        private class CheckPositionValidityState : State
         {
             /// <inheritdoc />
-            protected override void ValidateContext()
+            protected override void Run()
             {
                 // Retrieve global settings
                 Currency baseSymbol = SettingsService.SimpleBandWagonStrategySettings.BaseCurrency;
@@ -64,9 +64,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (!winnerQuery.Success)
                 {
                     Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 10 seconds");
-                    Context.PutObject("TimerIdleTime", (uint)(10 * 1000));
-                    Context.PutObject("TimerCallback", new CheckPositionValidity());
-                    SwitchState(new TryAfterWaitState());
+                    SwitchState(new TryAfterWaitState(10*1000, new CheckPositionValidityState()));
                     return;
                 }
 
@@ -79,7 +77,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (deltaPercentage < SettingsService.SimpleBandWagonStrategySettings.MinimalGrowthPercentage)
                 {
                     Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagonStrategySettings.MinimalGrowthPercentage}%, disregard.");
-                    SwitchState(new WaitHoldingState());
+                    SwitchState(new RevertToBaseState());
                     return;
                 }
 
@@ -88,9 +86,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (!assetsQuery.Success)
                 {
                     Logger.LogError($"Could not get portfolio!\n{assetsQuery}\ntrying again after 10 seconds");
-                    Context.PutObject("TimerIdleTime", (uint)(10 * 1000));
-                    Context.PutObject("TimerCallback", new CheckPositionValidity());
-                    SwitchState(new TryAfterWaitState());
+                    SwitchState(new TryAfterWaitState(10*1000, new CheckPositionValidityState()));
                     return;
                 }
 
@@ -135,10 +131,10 @@ namespace SpreadShare.Strategy.Implementations
         /// <summary>
         /// Trades in all relevant assets for the base currency.
         /// </summary>
-        internal class RevertToBaseState : State
+        private class RevertToBaseState : State
         {
             /// <inheritdoc />
-            protected override void ValidateContext()
+            protected override void Run()
             {
                 // Retrieve globals from the settings.
                 Currency baseSymbol = SettingsService.SimpleBandWagonStrategySettings.BaseCurrency;
@@ -149,9 +145,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (!assetsQuery.Success)
                 {
                     Logger.LogWarning("Could not get portfolio, going idle for 10 seconds, then try again.");
-                    Context.PutObject("TimerIdleTime", (uint)(10 * 1000));
-                    Context.PutObject("TimerCallback", new RevertToBaseState());
-                    SwitchState(new TryAfterWaitState());
+                    SwitchState(new TryAfterWaitState(10*1000, new RevertToBaseState()));
                     return;
                 }
 
@@ -200,7 +194,7 @@ namespace SpreadShare.Strategy.Implementations
                             Logger.LogWarning($"Reverting for {pair} failed! Is this pair trading on the exchange?");
                         }
                     }
-else
+                    else
                     {
                         Logger.LogInformation($"{pair} value not relevant ({value}{baseSymbol})");
                     }
@@ -216,10 +210,10 @@ else
         /// (This will execute a trade even if the coin is already the majority share,
         /// consider to run the CheckPositionValidityState first.)
         /// </summary>
-        internal class BuyState : State
+        private class BuyState : State
         {
             /// <inheritdoc />
-            protected override void ValidateContext()
+            protected override void Run()
             {
                 // Retrieve globals from the settings.
                 uint checkTime = SettingsService.SimpleBandWagonStrategySettings.CheckTime;
@@ -233,10 +227,8 @@ else
                 }
                 else
                 {
-                    Logger.LogWarning($"Could not fetch top performer, {query}\nRetyring state after 10 seconds");
-                    Context.PutObject("TimerIdleTime", (uint)(10 * 1000));
-                    Context.PutObject("TimerCallback", new BuyState());
-                    SwitchState(new TryAfterWaitState());
+                    Logger.LogWarning($"Could not fetch top performer, {query}\nRetrying state after 10 seconds");
+                    SwitchState(new TryAfterWaitState(10*1000, new BuyState()));
                     return;
                 }
 
@@ -262,9 +254,7 @@ else
                 else
                 {
                     Logger.LogError($"Order has failed, retrying state in 10 seconds\n{response}");
-                    Context.PutObject("TimerIdleTime", (uint)(10 * 1000));
-                    Context.PutObject("TimerCallback", new BuyState());
-                    SwitchState(new TryAfterWaitState());
+                    SwitchState(new TryAfterWaitState(10*1000, new BuyState()));
                 }
             }
         }
@@ -272,7 +262,7 @@ else
         /// <summary>
         /// What as many hours as the holdTime dictactes and then proceed to checking the position again.
         /// </summary>
-        internal class WaitHoldingState : State
+        private class WaitHoldingState : State
         {
             /// <inheritdoc />
             public override ResponseObject OnTimer()
@@ -280,14 +270,14 @@ else
                 Logger.LogInformation($"Waking up! ({DateTime.UtcNow})");
 
                 // First step after holding is verifying the current position.
-                SwitchState(new CheckPositionValidity());
+                SwitchState(new CheckPositionValidityState());
 
                 // TODO: Will this return statement fire before or after CheckPositionValidity has occured?
                 return new ResponseObject(ResponseCodes.Success);
             }
 
             /// <inheritdoc />
-            protected override void ValidateContext()
+            protected override void Run()
             {
                 Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagonStrategySettings.HoldTime} hours ({DateTime.UtcNow})");
 
@@ -300,13 +290,11 @@ else
         /// <summary>
         /// Helper state that enables 'try again after wait' solutions
         /// when exceptions pop up.
-        /// This state returns to the state under the "TimerCallback" key in the
-        /// Context after waiting for an amount of time specified under the "TimerIdleTime" key
         /// </summary>
-        internal class TryAfterWaitState : State
+        private class TryAfterWaitState : State
         {
-            private uint _idleTime;
-            private State _callback;
+            private readonly uint _idleTime;
+            private readonly State _callback;
 
             /// <inheritdoc />
             public override ResponseObject OnTimer()
@@ -315,22 +303,22 @@ else
                 return new ResponseObject(ResponseCodes.Success);
             }
 
-            /// <inheritdoc />
-            protected override void ValidateContext()
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Context"/> class.
+            /// </summary>
+            /// <param name="idleTime">The amount of milliseconds to wait</param>
+            /// <param name="callback">The state to which to return after the idleTime,
+            /// This will likely be a new instance of the state from which this state is
+            /// created.</param>
+            public TryAfterWaitState(uint idleTime, State callback)
             {
-                try
-                {
-                    _idleTime = (uint)Context.GetObject("TimerIdleTime");
-                    _callback = (State)Context.GetObject("TimerCallback");
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError($"TimerCallbackState could not validate the context\n{e.Message}");
-                    Logger.LogCritical("No rational options, restarting the strategy...");
-                    SwitchState(new EntryState());
-                    return;
-                }
+                _idleTime = idleTime;
+                _callback = callback;
+            }
 
+            /// <inheritdoc />
+            protected override void Run()
+            {
                 SetTimer(_idleTime);
             }
         }

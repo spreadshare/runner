@@ -59,7 +59,7 @@ namespace SpreadShare.Strategy
             UserService = stateManager.UserService;
             SettingsService = stateManager.SettingsService;
             Logger = loggerFactory.CreateLogger(GetType());
-            ValidateContext();
+            Run();
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace SpreadShare.Strategy
         /// Validates if all the required parameters exist within the context
         /// </summary>
         /// TODO: The current name does not reflect what the method does
-        protected abstract void ValidateContext();
+        protected abstract void Run();
 
         /// <summary>
         /// Sets the timer in the StateManager
