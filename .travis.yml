@@ -1,20 +1,9 @@
-language: csharp
-solution: SpreadShare.sln
-dotnet: 2.1
+language: minimal
 
-install:
-  - nuget restore SpreadShare.sln
-  - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
+sudo: required
+
+services:
+  - docker
 
 script:
- - dotnet restore SpreadShare/SpreadShare.csproj
- - dotnet build SpreadShare/SpreadShare.csproj > build.txt
- - if ! grep " 0 Warning(s)" build.txt; then echo "\e[31mYour build failed. Please fix the warnings\e[0m"; cat build.txt; exit 1; fi
- - dotnet restore SpreadShare.Tests/SpreadShare.Tests.csproj
- - dotnet build SpreadShare.Tests/SpreadShare.Tests.csproj > build.txt
- - cat build.txt
- - if ! grep " 0 Warning(s)" build.txt; then echo "\e[31mYour build failed. Please fix the warnings\e[0m"; cat build.txt; exit 1; fi
- - cp SpreadShare/appsettings.json.example SpreadShare/appsettings.json
- - sed -i "s/api_key/${API_READ_KEY}/g" SpreadShare/appsettings.json
- - sed -i "s/api_secret/${API_READ_SECRET}/g" SpreadShare/appsettings.json
- - dotnet test SpreadShare.Tests/SpreadShare.Tests.csproj
+  - docker build --build-arg API_READ_KEY=${API_READ_KEY} --build-arg API_READ_SECRET=${API_READ_SECRET} -f .travis.dockerfile .
