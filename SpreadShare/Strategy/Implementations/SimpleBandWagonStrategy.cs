@@ -64,7 +64,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (!winnerQuery.Success)
                 {
                     Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 10 seconds");
-                    SwitchState(new TryAfterWaitState(10*1000, new CheckPositionValidityState()));
+                    SwitchState(new TryAfterWaitState(10000, new CheckPositionValidityState()));
                     return;
                 }
 
@@ -86,7 +86,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (!assetsQuery.Success)
                 {
                     Logger.LogError($"Could not get portfolio!\n{assetsQuery}\ntrying again after 10 seconds");
-                    SwitchState(new TryAfterWaitState(10*1000, new CheckPositionValidityState()));
+                    SwitchState(new TryAfterWaitState(10000, new CheckPositionValidityState()));
                     return;
                 }
 
@@ -145,7 +145,7 @@ namespace SpreadShare.Strategy.Implementations
                 if (!assetsQuery.Success)
                 {
                     Logger.LogWarning("Could not get portfolio, going idle for 10 seconds, then try again.");
-                    SwitchState(new TryAfterWaitState(10*1000, new RevertToBaseState()));
+                    SwitchState(new TryAfterWaitState(10000, new RevertToBaseState()));
                     return;
                 }
 
@@ -228,7 +228,7 @@ namespace SpreadShare.Strategy.Implementations
                 else
                 {
                     Logger.LogWarning($"Could not fetch top performer, {query}\nRetrying state after 10 seconds");
-                    SwitchState(new TryAfterWaitState(10*1000, new BuyState()));
+                    SwitchState(new TryAfterWaitState(10000, new BuyState()));
                     return;
                 }
 
@@ -254,7 +254,7 @@ namespace SpreadShare.Strategy.Implementations
                 else
                 {
                     Logger.LogError($"Order has failed, retrying state in 10 seconds\n{response}");
-                    SwitchState(new TryAfterWaitState(10*1000, new BuyState()));
+                    SwitchState(new TryAfterWaitState(10000, new BuyState()));
                 }
             }
         }
@@ -296,15 +296,8 @@ namespace SpreadShare.Strategy.Implementations
             private readonly uint _idleTime;
             private readonly State _callback;
 
-            /// <inheritdoc />
-            public override ResponseObject OnTimer()
-            {
-                SwitchState(_callback);
-                return new ResponseObject(ResponseCodes.Success);
-            }
-
             /// <summary>
-            /// Initializes a new instance of the <see cref="Context"/> class.
+            /// Initializes a new instance of the <see cref="TryAfterWaitState"/> class.
             /// </summary>
             /// <param name="idleTime">The amount of milliseconds to wait</param>
             /// <param name="callback">The state to which to return after the idleTime,
@@ -314,6 +307,13 @@ namespace SpreadShare.Strategy.Implementations
             {
                 _idleTime = idleTime;
                 _callback = callback;
+            }
+
+            /// <inheritdoc />
+            public override ResponseObject OnTimer()
+            {
+                SwitchState(_callback);
+                return new ResponseObject(ResponseCodes.Success);
             }
 
             /// <inheritdoc />

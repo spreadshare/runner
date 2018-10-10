@@ -17,7 +17,6 @@ namespace SpreadShare.Strategy
         /// </summary>
         protected State()
         {
-
         }
 
         /// <summary>
@@ -43,7 +42,6 @@ namespace SpreadShare.Strategy
         /// <summary>
         /// Initialise the state
         /// </summary>
-        /// <param name="context">Set of objects that are required for the state to work</param>
         /// <param name="stateManager">StateManager controlling this state</param>
         /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
         public void Activate(StateManager stateManager, ILoggerFactory loggerFactory)
