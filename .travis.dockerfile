@@ -14,8 +14,8 @@ RUN sed -i "s/api_key/${API_READ_KEY}/g" SpreadShare/appsettings.json
 RUN sed -i "s/api_secret/${API_READ_SECRET}/g" SpreadShare/appsettings.json
 
 WORKDIR /src/SpreadShare
-RUN dotnet build SpreadShare.csproj -c Release -o /app
+RUN dotnet build SpreadShare.csproj -p:Configuration=Release /warnaserror
 
 WORKDIR /src/SpreadShare.Tests
-RUN dotnet build SpreadShare.Tests.csproj -c Release -o /app
+RUN dotnet build SpreadShare.Tests.csproj -p:Configuration=Release /warnaserror
 RUN dotnet test SpreadShare.Tests.csproj
