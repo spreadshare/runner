@@ -124,7 +124,10 @@ namespace SpreadShare.BinanceServices.Implementations
                 {
                     // TODO: Implement AccountInfoUpdate callback
                 },
-                OnOrderUpdate);
+                orderInfoUpdate =>
+                {
+                    // Information not currently used.
+                });
 
             // Set error handlers
             succesOrderBook.Data.Closed += () =>

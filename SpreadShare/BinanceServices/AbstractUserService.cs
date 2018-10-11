@@ -10,12 +10,6 @@ namespace SpreadShare.BinanceServices
     internal abstract class AbstractUserService : IUserService
     {
         /// <summary>
-        /// Event handler for order updates
-        /// </summary>
-        /// TODO: Make the order update independent of Binance
-        public EventHandler<BinanceStreamOrderUpdate> OrderUpdateHandler;
-
-        /// <summary>
         /// Start the user service
         /// </summary>
         /// <returns>Whether the service was started successfully</returns>
@@ -26,14 +20,5 @@ namespace SpreadShare.BinanceServices
         /// </summary>
         /// <returns>The portfolio</returns>
         public abstract ResponseObject<Assets> GetPortfolio();
-
-        /// <summary>
-        /// Invokes event handler on order updates
-        /// </summary>
-        /// <param name="e">OrderUpdate</param>
-        protected void OnOrderUpdate(BinanceStreamOrderUpdate e)
-        {
-             OrderUpdateHandler?.Invoke(this, e);
-        }
     }
 }
