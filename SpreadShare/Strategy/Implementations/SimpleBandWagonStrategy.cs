@@ -9,8 +9,12 @@ using SpreadShare.SupportServices;
 namespace SpreadShare.Strategy.Implementations
 {
     /// <summary>
-    /// Simple bandwagon strategy. Contains all the states for the SimpleBandWagon
-    /// statemachine.
+    /// Simple bandwagon strategy, works as follows.
+    /// Starting Condition: 100% holding base currency
+    /// Check most risen coin against base currency,
+    /// if it performs better that a minimal percentage,
+    /// fully change position to that asset and hold for the holdingTime before checking again.
+    /// If their is no winner, remain in baseCurrency and check again after waitTime.
     /// </summary>
     internal class SimpleBandWagonStrategy : BaseStrategy
     {

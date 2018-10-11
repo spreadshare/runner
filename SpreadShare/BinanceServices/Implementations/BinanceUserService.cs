@@ -126,7 +126,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 },
                 orderInfoUpdate =>
                 {
-                    // Information not currently used.
+                    // TODO: Information not currently used.
                 });
 
             // Set error handlers
