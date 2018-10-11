@@ -48,7 +48,7 @@ namespace SpreadShare.Strategy
 
                 // Setup initial state
                 _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
-                initial.Activate(new Context(), this, _loggerFactory);
+                initial.Activate(this, _loggerFactory);
             }
         }
 
@@ -87,9 +87,8 @@ namespace SpreadShare.Strategy
 
             _logger.LogInformation($"STATE SWITCH: {CurrentState} ---> {child.GetType().ToString().Split('+').Last()}");
 
-            var c = _activeState.Context;
             Interlocked.Exchange(ref _activeState, child);
-            child.Activate(c, this, _loggerFactory);
+            child.Activate(this, _loggerFactory);
         }
 
         /// <summary>
