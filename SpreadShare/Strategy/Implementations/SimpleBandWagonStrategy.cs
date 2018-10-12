@@ -105,7 +105,7 @@ namespace SpreadShare.Strategy.Implementations
                         {
                             return new AssetValue(x.Symbol, 0);
                         }
-                        var query = TradingService.GetCurrentPrice(pair);
+                        var query = TradingService.GetCurrentPriceLastTrade(pair);
 
                         // Use a value of zero for assets whose price retrievals fail.
                         return query.Success ? new AssetValue(x.Symbol, x.Value * query.Data) : new AssetValue(x.Symbol, 0);
@@ -172,7 +172,7 @@ namespace SpreadShare.Strategy.Implementations
                     }
 
                     // Get the price of pair (thus in terms of baseCurrency)
-                    var priceQuery = TradingService.GetCurrentPrice(pair);
+                    var priceQuery = TradingService.GetCurrentPriceLastTrade(pair);
 
                     // In case of failure, just skip
                     if (!priceQuery.Success)
