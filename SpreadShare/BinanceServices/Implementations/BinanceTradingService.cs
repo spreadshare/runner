@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using Binance.Net;
 using Binance.Net.Objects;
@@ -109,8 +107,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 // The amount should be expressed in the base pair.
                 if (side == OrderSide.Buy)
                 {
-                    // Find best price based on order book.
-                    var priceQuery = GetCurrentPriceTopAsk(pair);
+                    var priceQuery = GetCurrentPrice(pair);
                     if (priceQuery.Success)
                     {
                         // Ensure that the price stay valid for a short while.
@@ -151,44 +148,20 @@ namespace SpreadShare.BinanceServices.Implementations
             throw new NotImplementedException();
         }
 
-        /// <inheritdoc/>
-        public override ResponseObject<decimal> GetCurrentPriceLastTrade(CurrencyPair pair)
+        /// <summary>
+        /// Gets the current price of a currency pair
+        /// </summary>
+        /// <param name="pair">The currency pair</param>
+        /// <returns>The current price</returns>
+        public override ResponseObject<decimal> GetCurrentPrice(CurrencyPair pair)
         {
             var response = _client.GetPrice(pair.ToString());
-            if (!response.Success)
+            if (response.Success)
             {
-                _logger.LogWarning($"Could not fetch price for {pair} from binance");
-                return new ResponseObject<decimal>(ResponseCodes.Error);
+                return new ResponseObject<decimal>(ResponseCodes.Success, response.Data.Price);
             }
 
-            return new ResponseObject<decimal>(ResponseCodes.Success, response.Data.Price);
-        }
-
-        /// <inheritdoc/>
-        public override ResponseObject<decimal> GetCurrentPriceTopBid(CurrencyPair pair)
-        {
-            var response = _client.GetOrderBook(pair.ToString());
-            if (!response.Success)
-            {
-                _logger.LogWarning($"Could not fetch top bid for {pair} from binance");
-                return new ResponseObject<decimal>(ResponseCodes.Error);
-            }
-
-            decimal ret = response.Data.Bids.Max(x => x.Price);
-            return new ResponseObject<decimal>(ResponseCodes.Success, ret);
-        }
-
-        /// <inheritdoc/>
-        public override ResponseObject<decimal> GetCurrentPriceTopAsk(CurrencyPair pair)
-        {
-            var response = _client.GetOrderBook(pair.ToString());
-            if (!response.Success)
-            {
-                _logger.LogWarning($"Could not fetch top ask for {pair} from binance");
-                return new ResponseObject<decimal>(ResponseCodes.Error);
-            }
-
-            decimal ret = response.Data.Asks.Min(x => x.Price);
+            _logger.LogWarning($"Could not fetch price for {pair} from binance!");
             return new ResponseObject<decimal>(ResponseCodes.Error);
         }
 
