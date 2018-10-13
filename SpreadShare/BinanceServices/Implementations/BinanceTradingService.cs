@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using Binance.Net;
 using Binance.Net.Objects;
@@ -109,7 +108,6 @@ namespace SpreadShare.BinanceServices.Implementations
                 // The amount should be expressed in the base pair.
                 if (side == OrderSide.Buy)
                 {
-                    // Find best price based on order book.
                     var priceQuery = GetCurrentPriceTopAsk(pair);
                     if (priceQuery.Success)
                     {

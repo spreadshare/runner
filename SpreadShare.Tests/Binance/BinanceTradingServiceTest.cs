@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using SpreadShare.BinanceServices;
 using SpreadShare.BinanceServices.Implementations;
 using SpreadShare.Models;
-using SpreadShare.SupportServices;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -24,8 +23,6 @@ namespace SpreadShare.Tests.Binance
             : base(outputHelper)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
-            var settingsService = (SettingsService)serviceProvider.GetService<ISettingsService>();
-            settingsService.Start();
             _tradingService = (BinanceTradingService)serviceProvider.GetService<ITradingService>();
             _tradingService.Start();
         }
@@ -80,7 +77,7 @@ namespace SpreadShare.Tests.Binance
         /// <param name="symbol">The symbol of the trading pair</param>
         [Theory]
         [InlineData("XRPETH")]
-        public void HighestBidIsLowerThanHighestAsk(string symbol)
+        public void HighestBidIsLowerThanLowestAsk(string symbol)
         {
             CurrencyPair pair;
             try
