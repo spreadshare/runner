@@ -31,23 +31,8 @@ namespace SpreadShare.Strategy.Implementations
         }
 
         /// <inheritdoc />
-        public override State GetInitialState() => new TestState();
+        public override State GetInitialState() => new EntryState();
         
-        public class TestState : State
-        {
-            protected override void Run()
-            {
-                Logger.LogInformation("Setting a timer for one minute seconds");
-                SetTimer(1);
-            }
-
-            public override ResponseObject OnTimer()
-            {
-                Logger.LogCritical("WINNER");
-                return new ResponseObject(ResponseCodes.Success);
-            }
-        }
-
         /// <summary>
         /// Starting state of the strategy
         /// </summary>
