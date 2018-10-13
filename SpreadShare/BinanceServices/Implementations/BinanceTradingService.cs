@@ -188,8 +188,8 @@ namespace SpreadShare.BinanceServices.Implementations
                 return new ResponseObject<decimal>(ResponseCodes.Error);
             }
 
-            decimal ret = response.Data.Asks.Min(x => x.Price);
-            return new ResponseObject<decimal>(ResponseCodes.Error);
+            decimal ret = response.Data.Asks.Max(x => x.Price);
+            return new ResponseObject<decimal>(ResponseCodes.Success, ret);
         }
 
         /// <summary>

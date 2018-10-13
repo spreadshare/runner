@@ -1,7 +1,5 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using SpreadShare.BinanceServices;
 using SpreadShare.BinanceServices.Implementations;
 using SpreadShare.Models;
@@ -97,12 +95,12 @@ namespace SpreadShare.Tests.Binance
 
             var bidQuery = _tradingService.GetCurrentPriceTopBid(pair);
             var askQuery = _tradingService.GetCurrentPriceTopAsk(pair);
-            if (!bidQuery.Success || askQuery.Success)
+            if (!bidQuery.Success || !askQuery.Success)
             {
-                Assert.True(false, $"Could not get data for tests. \n{bidQuery}\n{bidQuery}");
+                Assert.True(false, $"Could not get data for tests. \n{bidQuery}\n{askQuery}");
             }
             
-            Assert.True(bidQuery.Data < askQuery.Data, $"{bidQuery.Data} (highest bid) is higher than highest bid: {bidQuery}");
+            Assert.True(bidQuery.Data < askQuery.Data, $"{bidQuery.Data} (highest bid) is higher than the lowest ask: {askQuery.Data}");
         }
     }
 }
