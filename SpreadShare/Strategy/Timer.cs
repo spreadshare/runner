@@ -59,6 +59,7 @@ namespace SpreadShare.Strategy
             if (disposing)
             {
                 _executed = true;
+                _cronDaemon.Stop();
             }
         }
 
