@@ -7,13 +7,14 @@ namespace SpreadShare.Strategy
 {
     /// <summary>
     /// A wrapper for the System.Thread.Timer class that doesn't fail on long waiting times.
+    /// WARNING: This timer has an inprecision of 60 seconds.
     /// </summary>
     internal class Timer : IDisposable
     {
         private readonly Action _callback;
         private readonly CronDaemon _cronDaemon = new CronDaemon();
-        private uint _counter = 0;
         private readonly uint _target;
+        private uint _counter = 0;
         private bool _executed = false;
 
         /// <summary>
@@ -28,7 +29,7 @@ namespace SpreadShare.Strategy
 
             _target = minutes;
 
-            //Create a Cron Deamon for every minute;
+            // Create a Cron Deamon that executes every minute;
             _cronDaemon.Add("* * * * *", Execute);
             _cronDaemon.Start();
         }
@@ -63,7 +64,7 @@ namespace SpreadShare.Strategy
         /// <summary>
         /// Wrapper function for the callback method.
         /// </summary>
-        private async void Execute()
+        private void Execute()
         {
             if (_executed)
             {

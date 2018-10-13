@@ -32,7 +32,7 @@ namespace SpreadShare.Strategy.Implementations
 
         /// <inheritdoc />
         public override State GetInitialState() => new EntryState();
-        
+
         /// <summary>
         /// Starting state of the strategy
         /// </summary>
