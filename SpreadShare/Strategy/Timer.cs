@@ -19,7 +19,8 @@ namespace SpreadShare.Strategy
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Timer"/> class.
-        /// The timer will be started right away.
+        /// The timer will be started right away and run for AT LEAST the amount
+        /// of minutes you give it.
         /// </summary>
         /// <param name="minutes">Waiting time in minutes</param>
         /// <param name="callback">Callback to execute after wait; can't be null</param>
