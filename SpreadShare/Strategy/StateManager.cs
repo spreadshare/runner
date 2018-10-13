@@ -94,12 +94,12 @@ namespace SpreadShare.Strategy
         /// <summary>
         /// Creates new Timer object that waits and then executes callback
         /// </summary>
-        /// <param name="ms">Time to wait</param>
-        public void SetTimer(uint ms)
+        /// <param name="minutes">Time to wait</param>
+        public void SetTimer(uint minutes)
         {
             // Ensure the previous timer has gone out.
             _activeTimer?.Stop();
-            _activeTimer = new Timer(ms, () =>
+            _activeTimer = new Timer(minutes, () =>
             {
                 // Callback returned after waiting period
                 lock (_lock)

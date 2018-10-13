@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Cron;
 
 namespace SpreadShare.Strategy
 {
@@ -10,28 +11,26 @@ namespace SpreadShare.Strategy
     internal class Timer : IDisposable
     {
         private readonly Action _callback;
-        private readonly System.Threading.Timer _timer;
-        private readonly uint _targetCount;
-        private readonly int _rest;
+        private readonly CronDaemon _cronDaemon = new CronDaemon();
         private uint _counter = 0;
+        private readonly uint _target;
         private bool _executed = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Timer"/> class.
         /// The timer will be started right away.
         /// </summary>
-        /// <param name="ms">Waiting time</param>
+        /// <param name="minutes">Waiting time in minutes</param>
         /// <param name="callback">Callback to execute after wait; can't be null</param>
-        public Timer(uint ms, Action callback)
+        public Timer(uint minutes, Action callback)
         {
             _callback = callback ?? throw new ArgumentException("Callback can't be null");
 
-            _targetCount = ms / 1000;
-            _rest = (int)(ms % 1000);
+            _target = minutes;
 
-            // As suggested by https://adrientorris.github.io/aspnet-core/how-to-implement-timer-netcoreapp1-0-netcoreapp1-1.html
-            var autoEvent = new AutoResetEvent(false);
-            _timer = new System.Threading.Timer(Execute, autoEvent, 0, 1000);
+            //Create a Cron Deamon for every minute;
+            _cronDaemon.Add("* * * * *", Execute);
+            _cronDaemon.Start();
         }
 
         /// <summary>
@@ -57,30 +56,24 @@ namespace SpreadShare.Strategy
         {
             if (disposing)
             {
-                _timer?.Dispose();
+                _executed = true;
             }
         }
 
         /// <summary>
         /// Wrapper function for the callback method.
         /// </summary>
-        /// <param name="stateInfo">Provided by the System EventHandler</param>
-        private async void Execute(object stateInfo)
+        private async void Execute()
         {
             if (_executed)
             {
                 return;
             }
 
-            if (_counter < _targetCount)
+            if (_counter < _target)
             {
                 Console.WriteLine($"Call #{_counter++}    {DateTime.UtcNow}");
                 return;
-            }
-
-            if (_rest > 0)
-            {
-                await Task.Delay(_rest).ConfigureAwait(continueOnCapturedContext: false);
             }
 
             Console.WriteLine("Executing Callback");
