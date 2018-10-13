@@ -72,7 +72,6 @@ namespace SpreadShare.Strategy
         /// <summary>
         /// Validates if all the required parameters exist within the context
         /// </summary>
-        /// TODO: The current name does not reflect what the method does
         protected abstract void Run();
 
         /// <summary>

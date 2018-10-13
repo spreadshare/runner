@@ -3,7 +3,6 @@ namespace SpreadShare.SupportServices
     /// <summary>
     /// Object containing the credentials for an exchange
     /// </summary>
-    /// TODO: Refactor this into a struct?
     public class Authy
     {
         /// <summary>
