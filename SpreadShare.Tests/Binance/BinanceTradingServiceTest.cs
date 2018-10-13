@@ -99,7 +99,7 @@ namespace SpreadShare.Tests.Binance
             {
                 Assert.True(false, $"Could not get data for tests. \n{bidQuery}\n{askQuery}");
             }
-            
+
             Assert.True(bidQuery.Data < askQuery.Data, $"{bidQuery.Data} (highest bid) is higher than the lowest ask: {askQuery.Data}");
         }
     }
