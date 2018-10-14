@@ -6,7 +6,7 @@ namespace SpreadShare.SupportServices.SettingsService
     /// <summary>
     /// Settings for the simple bandwagon strategy
     /// </summary>
-    internal class SimpleBandWagonStrategySettings
+    internal class SimpleBandWagonStrategySettings : StrategySettings
     {      
         /// <summary>
         /// Gets the list of active trading pairs

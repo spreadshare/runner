@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
@@ -36,10 +37,7 @@ namespace SpreadShare.Strategy
         /// </summary>
         protected AbstractUserService UserService { get; private set; }
 
-        /// <summary>
-        /// Gets a setting service instance
-        /// </summary>
-        protected SettingsService SettingsService { get; private set; }
+        protected T Parent { get; private set; }
 
         /// <summary>
         /// Initialise the state
@@ -51,8 +49,8 @@ namespace SpreadShare.Strategy
             _stateManager = stateManager;
             TradingService = stateManager.TradingService;
             UserService = stateManager.UserService;
-            SettingsService = stateManager.SettingsService;
             Logger = loggerFactory.CreateLogger(GetType());
+            Parent = _stateManager.Parent;
             Run();
         }
 
