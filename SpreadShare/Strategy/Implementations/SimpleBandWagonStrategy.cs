@@ -16,7 +16,7 @@ namespace SpreadShare.Strategy.Implementations
     /// fully change position to that asset and hold for the holdingTime before checking again.
     /// If their is no winner, remain in baseCurrency and check again after waitTime.
     /// </summary>
-    internal class SimpleBandWagonStrategy : BaseStrategy
+    internal class SimpleBandWagonStrategy : BaseStrategy<SimpleBandWagonStrategy>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SimpleBandWagonStrategy"/> class.
@@ -34,15 +34,29 @@ namespace SpreadShare.Strategy.Implementations
         {
         }
 
+        public override ResponseObject Start()
+        {
+            StateManager = new StateManager<SimpleBandWagonStrategy>(
+                this,
+                GetInitialState(),
+                _loggerFactory,
+                _tradingService,
+                _userService,
+                _settingsService);
+
+            return new ResponseObject(ResponseCodes.Success);
+        }
+
+
         /// <inheritdoc />
-        public override State GetInitialState() => new EntryState();
+        public override State<SimpleBandWagonStrategy> GetInitialState() => new EntryState();
 
         /// <summary>
         /// Starting state of the strategy
         /// </summary>
         // TODO: This state seems entirely unnecessary?
         // TODO^: Little effort and give a nice confirmation that all has started well.
-        private class EntryState : State
+        private class EntryState : State<SimpleBandWagonStrategy>
         {
             /// <inheritdoc />
             protected override void Run()
@@ -55,7 +69,7 @@ namespace SpreadShare.Strategy.Implementations
         /// <summary>
         /// Checks if the winner is not already the majority share of the portfolio.
         /// </summary>
-        private class CheckPositionValidityState : State
+        private class CheckPositionValidityState : State<SimpleBandWagonStrategy>
         {
             /// <inheritdoc />
             protected override void Run()
@@ -137,7 +151,7 @@ namespace SpreadShare.Strategy.Implementations
         /// <summary>
         /// Trades in all relevant assets for the base currency.
         /// </summary>
-        private class RevertToBaseState : State
+        private class RevertToBaseState : State<SimpleBandWagonStrategy>
         {
             /// <inheritdoc />
             protected override void Run()
@@ -216,7 +230,7 @@ namespace SpreadShare.Strategy.Implementations
         /// (This will execute a trade even if the coin is already the majority share,
         /// consider to run the CheckPositionValidityState first.)
         /// </summary>
-        private class BuyState : State
+        private class BuyState : State<SimpleBandWagonStrategy>
         {
             /// <inheritdoc />
             protected override void Run()
@@ -269,7 +283,7 @@ namespace SpreadShare.Strategy.Implementations
         /// <summary>
         /// What as many hours as the holdTime dictactes and then proceed to checking the position again.
         /// </summary>
-        private class WaitHoldingState : State
+        private class WaitHoldingState : State<SimpleBandWagonStrategy>
         {
             /// <inheritdoc />
             public override ResponseObject OnTimer()
@@ -298,10 +312,10 @@ namespace SpreadShare.Strategy.Implementations
         /// Helper state that enables 'try again after wait' solutions
         /// when exceptions pop up.
         /// </summary>
-        private class TryAfterWaitState : State
+        private class TryAfterWaitState : State<SimpleBandWagonStrategy>
         {
             private readonly uint _idleTime;
-            private readonly State _callback;
+            private readonly State<SimpleBandWagonStrategy> _callback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="TryAfterWaitState"/> class.
@@ -310,7 +324,7 @@ namespace SpreadShare.Strategy.Implementations
             /// <param name="callback">The state to which to return after the idleTime,
             /// This will likely be a new instance of the state from which this state is
             /// created.</param>
-            public TryAfterWaitState(uint idleTime, State callback)
+            public TryAfterWaitState(uint idleTime, State<SimpleBandWagonStrategy> callback)
             {
                 _idleTime = idleTime;
                 _callback = callback;

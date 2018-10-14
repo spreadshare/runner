@@ -9,9 +9,10 @@ namespace SpreadShare.Strategy
     /// <summary>
     /// Base class of a state of a strategy
     /// </summary>
-    internal abstract class State
+    internal abstract class State<T>
+        where T : BaseStrategy<T>
     {
-        private StateManager _stateManager;
+        private StateManager<T> _stateManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="State"/> class.
@@ -45,7 +46,7 @@ namespace SpreadShare.Strategy
         /// </summary>
         /// <param name="stateManager">StateManager controlling this state</param>
         /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        public void Activate(StateManager stateManager, ILoggerFactory loggerFactory)
+        public void Activate(StateManager<T> stateManager, ILoggerFactory loggerFactory)
         {
             _stateManager = stateManager;
             TradingService = stateManager.TradingService;
@@ -65,7 +66,7 @@ namespace SpreadShare.Strategy
         /// Switching states
         /// </summary>
         /// <param name="s">State to switch to</param>
-        protected void SwitchState(State s)
+        protected void SwitchState(State<T> s)
         {
             _stateManager.SwitchState(s);
         }

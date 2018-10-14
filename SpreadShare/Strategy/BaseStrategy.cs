@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
+using SpreadShare.Strategy.Implementations;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsService;
 
@@ -9,13 +10,14 @@ namespace SpreadShare.Strategy
     /// <summary>
     /// Base class for all strategies
     /// </summary>
-    internal abstract class BaseStrategy : IStrategy
+    internal abstract class BaseStrategy<T> : IStrategy
+       where T : BaseStrategy<T>
     {
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly ITradingService _tradingService;
-        private readonly IUserService _userService;
-        private readonly ISettingsService _settingsService;
-
+        protected readonly ILoggerFactory _loggerFactory;
+        protected readonly ITradingService _tradingService;
+        protected readonly IUserService _userService;
+        protected readonly ISettingsService _settingsService;
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseStrategy"/> class.
         /// Implements and provides dependencies required by the StateManager
@@ -39,28 +41,19 @@ namespace SpreadShare.Strategy
         /// <summary>
         /// Gets the StateManager
         /// </summary>
-        public StateManager StateManager { get; private set; }
+        public StateManager<T> StateManager { get; set; }
 
         /// <summary>
         /// Start strategy with the initial state using a StateManager
         /// </summary>
         /// <returns>Whether the stategy started succesfully</returns>
-        public ResponseObject Start()
-        {
-            StateManager = new StateManager(
-                GetInitialState(),
-                _loggerFactory,
-                _tradingService,
-                _userService,
-                _settingsService);
-
-            return new ResponseObject(ResponseCodes.Success);
-        }
-
+        public abstract ResponseObject Start();
+        
+        
         /// <summary>
         /// Gets the initial state of the strategy
         /// </summary>
         /// <returns>The initial state of the strategy</returns>
-        public abstract State GetInitialState();
+        public abstract State<T> GetInitialState();
     }
 }

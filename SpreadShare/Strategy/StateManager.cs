@@ -11,13 +11,15 @@ namespace SpreadShare.Strategy
     /// <summary>
     /// Object managing the active state and related resources
     /// </summary>
-    internal class StateManager : IDisposable 
+    internal class StateManager<T> : IDisposable 
+         where T : BaseStrategy<T>
     {
         private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
-
-        private State _activeState;
+        private readonly T _parent;
+        
+        private State<T> _activeState;
         private Timer _activeTimer;
 
         /// <summary>
@@ -30,7 +32,8 @@ namespace SpreadShare.Strategy
         /// <param name="userService">Instance of the user service</param>
         /// <param name="settingsService">Instance of the settings service</param>
         public StateManager(
-            State initial,
+            T parent,
+            State<T> initial,
             ILoggerFactory loggerFactory,
             ITradingService tradingService,
             IUserService userService,
@@ -51,6 +54,9 @@ namespace SpreadShare.Strategy
                 _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
                 initial.Activate(this, _loggerFactory);
             }
+            
+            // Link the parent strategy
+            parent = _parent;
         }
 
         /// <summary>
@@ -72,13 +78,19 @@ namespace SpreadShare.Strategy
         /// Gets an instance of the settings service
         /// </summary>
         public SettingsService SettingsService { get; }
+        
+        
+        /// <summary>
+        /// Refer to the parent strategy.
+        /// </summary>
+        public T Parent { get; }
 
         /// <summary>
         /// Switches the active state to the given state, only to be used by states
         /// </summary>
         /// <param name="child">State to switch to</param>
         /// <exception cref="Exception">Child can't be null</exception>
-        public void SwitchState(State child)
+        public void SwitchState(State<T> child)
         {
             // This function is safe because it is executed in the locked context of the OnX callback functions
             if (child == null)
