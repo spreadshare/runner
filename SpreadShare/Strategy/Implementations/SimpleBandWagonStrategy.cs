@@ -9,8 +9,12 @@ using SpreadShare.SupportServices;
 namespace SpreadShare.Strategy.Implementations
 {
     /// <summary>
-    /// Simple bandwagon strategy
-    /// TODO: Add more detailed description
+    /// Simple bandwagon strategy, works as follows.
+    /// Starting Condition: 100% holding base currency
+    /// Check most risen coin against base currency,
+    /// if it performs better that a minimal percentage,
+    /// fully change position to that asset and hold for the holdingTime before checking again.
+    /// If their is no winner, remain in baseCurrency and check again after waitTime.
     /// </summary>
     internal class SimpleBandWagonStrategy : BaseStrategy
     {
@@ -37,6 +41,7 @@ namespace SpreadShare.Strategy.Implementations
         /// Starting state of the strategy
         /// </summary>
         // TODO: This state seems entirely unnecessary?
+        // TODO^: Little effort and give a nice confirmation that all has started well.
         private class EntryState : State
         {
             /// <inheritdoc />
@@ -105,7 +110,7 @@ namespace SpreadShare.Strategy.Implementations
                         {
                             return new AssetValue(x.Symbol, 0);
                         }
-                        var query = TradingService.GetCurrentPrice(pair);
+                        var query = TradingService.GetCurrentPriceTopBid(pair);
 
                         // Use a value of zero for assets whose price retrievals fail.
                         return query.Success ? new AssetValue(x.Symbol, x.Value * query.Data) : new AssetValue(x.Symbol, 0);
@@ -172,7 +177,7 @@ namespace SpreadShare.Strategy.Implementations
                     }
 
                     // Get the price of pair (thus in terms of baseCurrency)
-                    var priceQuery = TradingService.GetCurrentPrice(pair);
+                    var priceQuery = TradingService.GetCurrentPriceTopBid(pair);
 
                     // In case of failure, just skip
                     if (!priceQuery.Success)

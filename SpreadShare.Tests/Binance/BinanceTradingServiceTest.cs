@@ -1,6 +1,5 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.BinanceServices.Implementations;
 using SpreadShare.Models;
@@ -39,7 +38,7 @@ namespace SpreadShare.Tests.Binance
         [InlineData("ONTBTC")]
         public void GetPriceOfAsset(string asset)
         {
-            var query = _tradingService.GetCurrentPrice(CurrencyPair.Parse(asset));
+            var query = _tradingService.GetCurrentPriceLastTrade(CurrencyPair.Parse(asset));
             if (!query.Success)
             {
                 Assert.True(false, query.ToString());
@@ -69,6 +68,36 @@ namespace SpreadShare.Tests.Binance
             {
                 Assert.True(false, query.ToString());
             }
+        }
+
+        /// <summary>
+        /// Check it the highest bid of the order book is lower than the lowest ask.
+        /// A violation of this invariant would mean a negative spread which is impossible.
+        /// </summary>
+        /// <param name="symbol">The symbol of the trading pair</param>
+        [Theory]
+        [InlineData("XRPETH")]
+        public void HighestBidIsLowerThanLowestAsk(string symbol)
+        {
+            CurrencyPair pair;
+            try
+            {
+                pair = CurrencyPair.Parse(symbol);
+            }
+            catch
+            {
+                Assert.True(false, $"Symbol could not be parsed (invalid test data)");
+                return;
+            }
+
+            var bidQuery = _tradingService.GetCurrentPriceTopBid(pair);
+            var askQuery = _tradingService.GetCurrentPriceTopAsk(pair);
+            if (!bidQuery.Success || !askQuery.Success)
+            {
+                Assert.True(false, $"Could not get data for tests. \n{bidQuery}\n{askQuery}");
+            }
+
+            Assert.True(bidQuery.Data < askQuery.Data, $"{bidQuery.Data} (highest bid) is higher than the lowest ask: {askQuery.Data}");
         }
     }
 }

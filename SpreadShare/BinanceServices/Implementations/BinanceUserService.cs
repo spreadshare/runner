@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
@@ -69,7 +70,10 @@ namespace SpreadShare.BinanceServices.Implementations
                 return new ResponseObject<Assets>(ResponseCodes.Error);
             }
 
-            return new ResponseObject<Assets>(ResponseCodes.Success, new Assets(accountInfo.Data.Balances));
+            // Map to general ExchangeBalance datatype for parsing to assets object.
+            var values = accountInfo.Data.Balances.Select(x => new ExchangeBalance(x.Asset, x.Free, x.Locked)).ToList();
+
+            return new ResponseObject<Assets>(ResponseCodes.Success, new Assets(values));
         }
 
         /// <inheritdoc/>
@@ -118,7 +122,10 @@ namespace SpreadShare.BinanceServices.Implementations
                 {
                     // TODO: Implement AccountInfoUpdate callback
                 },
-                OnOrderUpdate);
+                orderInfoUpdate =>
+                {
+                    // TODO: Information not currently used.
+                });
 
             // Set error handlers
             succesOrderBook.Data.Closed += () =>

@@ -31,7 +31,6 @@ namespace SpreadShare.Tests.UserService
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             var userService = (BinanceUserService)serviceProvider.GetService<IUserService>();
             userService.Start();
-            userService.OrderUpdateHandler += (_, update) => Console.WriteLine(update.Time);
             while (true)
             {
                 var x = userService.GetPortfolio();
