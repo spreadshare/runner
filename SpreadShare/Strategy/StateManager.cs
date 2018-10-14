@@ -4,13 +4,14 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsService;
 
 namespace SpreadShare.Strategy
 {
     /// <summary>
     /// Object managing the active state and related resources
     /// </summary>
-    internal class StateManager : IDisposable
+    internal class StateManager : IDisposable 
     {
         private readonly object _lock = new object();
         private readonly ILogger _logger;

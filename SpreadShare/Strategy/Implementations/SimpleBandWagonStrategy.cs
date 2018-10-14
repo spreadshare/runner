@@ -4,7 +4,7 @@ using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
-using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsService;
 
 namespace SpreadShare.Strategy.Implementations
 {
@@ -63,9 +63,10 @@ namespace SpreadShare.Strategy.Implementations
                 // Retrieve global settings
                 Currency baseSymbol = SettingsService.SimpleBandWagonStrategySettings.BaseCurrency;
                 uint checkTime = SettingsService.SimpleBandWagonStrategySettings.CheckTime;
+                var activeTradingPairs = SettingsService.SimpleBandWagonStrategySettings.ActiveTradingPairs;
 
                 // Try to get to top performer, if not try state again after 10 seconds
-                var winnerQuery = TradingService.GetTopPerformance(checkTime, DateTime.Now);
+                var winnerQuery = TradingService.GetTopPerformance(activeTradingPairs, checkTime, DateTime.Now);
                 if (!winnerQuery.Success)
                 {
                     Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 10 seconds");
@@ -222,10 +223,11 @@ namespace SpreadShare.Strategy.Implementations
             {
                 // Retrieve globals from the settings.
                 uint checkTime = SettingsService.SimpleBandWagonStrategySettings.CheckTime;
+                var activeTradingPairs = SettingsService.SimpleBandWagonStrategySettings.ActiveTradingPairs;
 
                 // Try to retrieve the top performer, using a tryAfterWait fallback in case of failure.
                 Logger.LogInformation($"Looking for the top performer from the previous {checkTime} hours");
-                var query = TradingService.GetTopPerformance(checkTime, DateTime.Now);
+                var query = TradingService.GetTopPerformance(activeTradingPairs, checkTime, DateTime.Now);
                 if (query.Success)
                 {
                     Logger.LogInformation($"Top performer is {query.Data.Item1}");

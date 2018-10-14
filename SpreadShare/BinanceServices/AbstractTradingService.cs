@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Binance.Net.Objects;
 using SpreadShare.Models;
 
@@ -104,6 +105,6 @@ namespace SpreadShare.BinanceServices
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>Top performing currency pair</returns>
-        public abstract ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(double hoursBack, DateTime endTime);
+        public abstract ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(List<CurrencyPair> pairs, double hoursBack, DateTime endTime);
     }
 }

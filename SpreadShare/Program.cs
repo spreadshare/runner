@@ -6,6 +6,7 @@ using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.Strategy;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsService;
 using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
@@ -54,7 +55,7 @@ namespace SpreadShare
 
             // Start TradingService
             ResponseObject tradingResult = null;
-            if (settings.EnabledServices.TradingService)
+            if (settings.EnabledServices.Trading)
             {
                 var trading = serviceProvider.GetService<ITradingService>();
                 tradingResult = trading.Start();
@@ -67,9 +68,9 @@ namespace SpreadShare
 
             // Start UserService
             ResponseObject userResult = null;
-            if (settings.EnabledServices.UserService)
+            if (settings.EnabledServices.User)
             {
-                if (!settings.EnabledServices.TradingService)
+                if (!settings.EnabledServices.Trading)
                 {
                     logger.LogCritical("TradingService is not enabled. You must enable tradingService in " +
                                        "appsettings.json if you want to use the UserService");
@@ -86,16 +87,16 @@ namespace SpreadShare
             }
 
             // Start StrategyService
-            if (settings.EnabledServices.StrategyService)
+            if (settings.EnabledServices.Strategy)
             {
-                if (!settings.EnabledServices.TradingService)
+                if (!settings.EnabledServices.Trading)
                 {
                     logger.LogCritical("TradingService is not enabled. You must enable tradingService in " +
                                        "appsettings.json if you want to use the UserService");
                     throw new ArgumentException("StrategyService depends on TradingService, which is disabled");
                 }
 
-                if (!settings.EnabledServices.UserService)
+                if (!settings.EnabledServices.User)
                 {
                     logger.LogCritical("UserService is not enabled. You must enable userService in " +
                                        "appsettings.json if you want to use the UserService");
@@ -125,7 +126,7 @@ namespace SpreadShare
             }
 
             // Start ZeroMQ command listener and broadcaster
-            if (settings.EnabledServices.ZeroMqService)
+            if (settings.EnabledServices.ZeroMq)
             {
                 var zeroMq = serviceProvider.GetService<IZeroMqService>();
                 var zeroMqResult = zeroMq.Start();

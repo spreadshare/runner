@@ -9,6 +9,7 @@ using SpreadShare.Models;
 using SpreadShare.Strategy;
 using SpreadShare.Strategy.Implementations;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsService;
 using SpreadShare.ZeroMQ;
 
 namespace SpreadShare

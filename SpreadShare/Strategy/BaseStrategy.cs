@@ -2,6 +2,7 @@
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsService;
 
 namespace SpreadShare.Strategy
 {
