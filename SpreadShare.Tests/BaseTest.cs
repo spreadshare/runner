@@ -16,8 +16,6 @@ namespace SpreadShare.Tests
         /// </summary>
         protected static readonly SettingsService SettingsService = (SettingsService)ServiceProviderSingleton.Instance.ServiceProvider.GetService<ISettingsService>();
 
-        private static bool settingsStarted = false;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseTest"/> class.
         /// </summary>
