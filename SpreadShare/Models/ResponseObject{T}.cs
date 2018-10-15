@@ -9,23 +9,23 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="ResponseObject{T}"/> class.
         /// </summary>
-        /// <param name="codes">Status of the response</param>
+        /// <param name="code">Status of the response</param>
         /// <param name="msg">Message concerning the status</param>
-        public ResponseObject(ResponseCodes codes, string msg)
+        public ResponseObject(ResponseCode code, string msg)
         {
-            Codes = codes;
+            Code = code;
             Message = msg;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ResponseObject{T}"/> class.
         /// </summary>
-        /// <param name="codes">Status of the response</param>
+        /// <param name="code">Status of the response</param>
         /// <param name="data">Data concerning the response</param>
         /// <param name="message">Message concerning the status</param>
-        public ResponseObject(ResponseCodes codes, T data, string message = "")
+        public ResponseObject(ResponseCode code, T data, string message = "")
         {
-            Codes = codes;
+            Code = code;
             Data = data;
             Message = message;
         }
@@ -33,17 +33,17 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="ResponseObject{T}"/> class.
         /// </summary>
-        /// <param name="codes">Status of the response</param>
-        public ResponseObject(ResponseCodes codes)
+        /// <param name="code">Status of the response</param>
+        public ResponseObject(ResponseCode code)
         {
-            Codes = codes;
+            Code = code;
             Message = string.Empty;
         }
 
         /// <summary>
         /// Gets the code of the response
         /// </summary>
-        public ResponseCodes Codes { get; }
+        public ResponseCode Code { get; }
 
         /// <summary>
         /// Gets the message of the response
@@ -58,9 +58,9 @@
         /// <summary>
         /// Gets a value indicating whether returns whether the response was a success
         /// </summary>
-        public bool Success => Codes == ResponseCodes.Success;
+        public bool Success => Code == ResponseCode.Success;
 
         /// <inheritdoc />
-        public override string ToString() => $"{Codes} | data: {Data} | msg: {Message}";
+        public override string ToString() => $"{Code} | data: {Data} | msg: {Message}";
     }
 }

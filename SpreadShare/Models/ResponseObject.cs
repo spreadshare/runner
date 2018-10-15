@@ -8,14 +8,14 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="ResponseObject"/> class.
         /// </summary>
-        /// <param name="codes">Status of the response</param>
+        /// <param name="code">Status of the response</param>
         /// <param name="data">Data concerning the response</param>
-        public ResponseObject(ResponseCodes codes, string data = "")
-            : base(codes, data)
+        public ResponseObject(ResponseCode code, string data = "")
+            : base(code, data)
         {
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"{Codes} | msg: {Message}";
+        public override string ToString() => $"{Code} | msg: {Message}";
     }
 }

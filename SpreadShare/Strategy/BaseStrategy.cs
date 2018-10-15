@@ -59,7 +59,7 @@ namespace SpreadShare.Strategy
                 _tradingService,
                 _userService);
 
-            return new ResponseObject(ResponseCodes.Success);
+            return new ResponseObject(ResponseCode.Success);
         }
 
         /// <summary>

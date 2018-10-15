@@ -58,10 +58,10 @@ namespace SpreadShare.SupportServices.SettingsServices
             catch (Exception e)
             {
                 _logger.LogError(e.ToString());
-                return new ResponseObject(ResponseCodes.Error, e.Message);
+                return new ResponseObject(ResponseCode.Error, e.Message);
             }
 
-            return new ResponseObject(ResponseCodes.Success);
+            return new ResponseObject(ResponseCode.Success);
         }
 
         /// <summary>

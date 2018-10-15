@@ -41,7 +41,7 @@ namespace SpreadShare.Strategy.Implementations
         protected override SimpleBandWagonStrategySettings Settings { get; }
 
         /// <inheritdoc />
-        public override State<SimpleBandWagonStrategySettings> GetInitialState() => new EntryState();
+        protected override State<SimpleBandWagonStrategySettings> GetInitialState() => new EntryState();
 
         /// <summary>
         /// Starting state of the strategy
@@ -284,7 +284,7 @@ namespace SpreadShare.Strategy.Implementations
                 SwitchState(new CheckPositionValidityState());
 
                 // TODO: Will this return statement fire before or after CheckPositionValidity has occured?
-                return new ResponseObject(ResponseCodes.Success);
+                return new ResponseObject(ResponseCode.Success);
             }
 
             /// <inheritdoc />
@@ -324,7 +324,7 @@ namespace SpreadShare.Strategy.Implementations
             public override ResponseObject OnTimer()
             {
                 SwitchState(_callback);
-                return new ResponseObject(ResponseCodes.Success);
+                return new ResponseObject(ResponseCode.Success);
             }
 
             /// <inheritdoc />
