@@ -32,7 +32,7 @@ namespace SpreadShare.Strategy.Implementations
             ISettingsService settingsService)
             : base(loggerFactory, tradingService, userService, settingsService)
         {
-            Settings = (settingsService as SettingsService).SimpleBandWagonStrategySettings;
+            Settings = SettingsService.SimpleBandWagonStrategySettings;
         }
 
         /// <summary>
@@ -46,9 +46,9 @@ namespace SpreadShare.Strategy.Implementations
             StateManager = new StateManager<SimpleBandWagonStrategySettings>(
                 Settings,
                 GetInitialState(),
-                _loggerFactory,
-                _tradingService,
-                _userService);
+                LoggerFactory,
+                TradingService,
+                UserService);
 
             return new ResponseObject(ResponseCodes.Success);
         }

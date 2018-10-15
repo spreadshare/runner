@@ -15,22 +15,22 @@ namespace SpreadShare.Strategy
         /// <summary>
         /// Used for creating logging output
         /// </summary>
-        protected readonly ILoggerFactory _loggerFactory;
+        protected readonly ILoggerFactory LoggerFactory;
 
         /// <summary>
         /// Used for trading
         /// </summary>
-        protected readonly ITradingService _tradingService;
+        protected readonly ITradingService TradingService;
 
         /// <summary>
         /// Used to get information about the specific account
         /// </summary>
-        protected readonly IUserService _userService;
+        protected readonly IUserService UserService;
 
         /// <summary>
         /// Used to get information from the appsettings.json
         /// </summary>
-        protected readonly ISettingsService _settingsService;
+        protected readonly SettingsService SettingsService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseStrategy{T}"/> class.
@@ -46,10 +46,10 @@ namespace SpreadShare.Strategy
             IUserService userService,
             ISettingsService settingsService)
         {
-            _loggerFactory = loggerFactory;
-            _tradingService = tradingService;
-            _userService = userService;
-            _settingsService = settingsService;
+            LoggerFactory = loggerFactory;
+            TradingService = tradingService;
+            UserService = userService;
+            SettingsService = settingsService as SettingsService;
         }
 
         /// <summary>
