@@ -16,7 +16,7 @@ namespace SpreadShare.Strategy.Implementations
     /// fully change position to that asset and hold for the holdingTime before checking again.
     /// If their is no winner, remain in baseCurrency and check again after waitTime.
     /// </summary>
-    internal class SimpleBandWagonStrategy : BaseStrategy<SimpleBandWagonStrategy>
+    internal class SimpleBandWagonStrategy : BaseStrategy<SimpleBandWagonStrategySettings>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SimpleBandWagonStrategy"/> class.
@@ -35,27 +35,23 @@ namespace SpreadShare.Strategy.Implementations
             Settings = (settingsService as SettingsService).SimpleBandWagonStrategySettings;
         }
 
-        /// <summary>
-        /// Gets the SimpleBandWagonSettings object.
-        /// </summary>
-        public SimpleBandWagonStrategySettings Settings { get; }
+        protected override SimpleBandWagonStrategySettings Settings { get; }
 
         /// <inheritdoc />
         public override ResponseObject Start()
         {
-            StateManager = new StateManager<SimpleBandWagonStrategy>(
-                this,
+            StateManager = new StateManager<SimpleBandWagonStrategySettings>(
+                Settings,
                 GetInitialState(),
                 _loggerFactory,
                 _tradingService,
-                _userService,
-                _settingsService);
+                _userService);
 
             return new ResponseObject(ResponseCodes.Success);
         }
 
         /// <inheritdoc />
-        public override State<SimpleBandWagonStrategy> GetInitialState() => new EntryState();
+        public override State<SimpleBandWagonStrategySettings> GetInitialState() => new EntryState();
     }
 
     /// <summary>
@@ -63,7 +59,7 @@ namespace SpreadShare.Strategy.Implementations
     /// </summary>
     // TODO: This state seems entirely unnecessary?
     // TODO^: Little effort and give a nice confirmation that all has started well.
-    internal class EntryState : State<SimpleBandWagonStrategy>
+    internal class EntryState : State<SimpleBandWagonStrategySettings>
     {
         /// <inheritdoc />
         protected override void Run()
@@ -76,15 +72,15 @@ namespace SpreadShare.Strategy.Implementations
     /// <summary>
     /// Checks if the winner is not already the majority share of the portfolio.
     /// </summary>
-    internal class CheckPositionValidityState : State<SimpleBandWagonStrategy>
+    internal class CheckPositionValidityState : State<SimpleBandWagonStrategySettings>
     {
         /// <inheritdoc />
         protected override void Run()
         {
             // Retrieve global settings
-            Currency baseSymbol = Parent.Settings.BaseCurrency;
-            uint checkTime = Parent.Settings.CheckTime;
-            var activeTradingPairs = Parent.Settings.ActiveTradingPairs;
+            Currency baseSymbol = StrategySettings.BaseCurrency;
+            uint checkTime = StrategySettings.CheckTime;
+            var activeTradingPairs = StrategySettings.ActiveTradingPairs;
 
             // Try to get to top performer, if not try state again after 10 seconds
             var winnerQuery = TradingService.GetTopPerformance(activeTradingPairs, checkTime, DateTime.Now);
@@ -101,9 +97,9 @@ namespace SpreadShare.Strategy.Implementations
             Logger.LogInformation($"Top performer from the past {checkTime} hours is {winnerPair} | {deltaPercentage}%");
 
             // Filter wether this 'winner' is gained enough growth to undertake action, otherwise just got the WaitHolding state again.
-            if (deltaPercentage < Parent.Settings.MinimalGrowthPercentage)
+            if (deltaPercentage < StrategySettings.MinimalGrowthPercentage)
             {
-                Logger.LogInformation($"Growth is less than {Parent.Settings.MinimalGrowthPercentage}%, disregard.");
+                Logger.LogInformation($"Growth is less than {StrategySettings.MinimalGrowthPercentage}%, disregard.");
                 SwitchState(new RevertToBaseState());
                 return;
             }
@@ -158,14 +154,14 @@ namespace SpreadShare.Strategy.Implementations
     /// <summary>
     /// Trades in all relevant assets for the base currency.
     /// </summary>
-    internal class RevertToBaseState : State<SimpleBandWagonStrategy>
+    internal class RevertToBaseState : State<SimpleBandWagonStrategySettings>
     {
         /// <inheritdoc />
         protected override void Run()
         {
             // Retrieve globals from the settings.
-            Currency baseSymbol = Parent.Settings.BaseCurrency;
-            decimal valueMinimum = Parent.Settings.MinimalRevertValue;
+            Currency baseSymbol = StrategySettings.BaseCurrency;
+            decimal valueMinimum = StrategySettings.MinimalRevertValue;
 
             // Retrieve the portfolio, using a fallback in case of failure.
             var assetsQuery = UserService.GetPortfolio();
@@ -237,14 +233,14 @@ namespace SpreadShare.Strategy.Implementations
     /// (This will execute a trade even if the coin is already the majority share,
     /// consider to run the CheckPositionValidityState first.)
     /// </summary>
-    internal class BuyState : State<SimpleBandWagonStrategy>
+    internal class BuyState : State<SimpleBandWagonStrategySettings>
     {
         /// <inheritdoc />
         protected override void Run()
         {
             // Retrieve globals from the settings.
-            uint checkTime = Parent.Settings.CheckTime;
-            var activeTradingPairs = Parent.Settings.ActiveTradingPairs;
+            uint checkTime = StrategySettings.CheckTime;
+            var activeTradingPairs = StrategySettings.ActiveTradingPairs;
 
             // Try to retrieve the top performer, using a tryAfterWait fallback in case of failure.
             Logger.LogInformation($"Looking for the top performer from the previous {checkTime} hours");
@@ -266,9 +262,9 @@ namespace SpreadShare.Strategy.Implementations
             Logger.LogInformation($"Top performer from the past {checkTime} hours is {winnerPair} | {deltaPercentage}%");
 
             // Filter wether this 'winner' is gained enough growth to undertake action, otherwise just got the WaitHolding state again.
-            if (deltaPercentage < Parent.Settings.MinimalGrowthPercentage)
+            if (deltaPercentage < StrategySettings.MinimalGrowthPercentage)
             {
-                Logger.LogInformation($"Growth is less than {Parent.Settings.MinimalGrowthPercentage}%, disregard.");
+                Logger.LogInformation($"Growth is less than {StrategySettings.MinimalGrowthPercentage}%, disregard.");
                 SwitchState(new WaitHoldingState());
                 return;
             }
@@ -290,7 +286,7 @@ namespace SpreadShare.Strategy.Implementations
     /// <summary>
     /// What as many hours as the holdTime dictactes and then proceed to checking the position again.
     /// </summary>
-    internal class WaitHoldingState : State<SimpleBandWagonStrategy>
+    internal class WaitHoldingState : State<SimpleBandWagonStrategySettings>
     {
         /// <inheritdoc />
         public override ResponseObject OnTimer()
@@ -307,11 +303,11 @@ namespace SpreadShare.Strategy.Implementations
         /// <inheritdoc />
         protected override void Run()
         {
-            Logger.LogInformation($"Going to sleep for {Parent.Settings.HoldTime} hours ({DateTime.UtcNow})");
+            Logger.LogInformation($"Going to sleep for {StrategySettings.HoldTime} hours ({DateTime.UtcNow})");
 
             // 1000 ms / s
             // 3600 s / h
-            SetTimer(1000 * 3600 * Parent.Settings.HoldTime);
+            SetTimer(1000 * 3600 * StrategySettings.HoldTime);
         }
     }
 
@@ -319,10 +315,10 @@ namespace SpreadShare.Strategy.Implementations
     /// Helper state that enables 'try again after wait' solutions
     /// when exceptions pop up.
     /// </summary>
-    internal class TryAfterWaitState : State<SimpleBandWagonStrategy>
+    internal class TryAfterWaitState : State<SimpleBandWagonStrategySettings>
     {
         private readonly uint _idleTime;
-        private readonly State<SimpleBandWagonStrategy> _callback;
+        private readonly State<SimpleBandWagonStrategySettings> _callback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TryAfterWaitState"/> class.
@@ -331,7 +327,7 @@ namespace SpreadShare.Strategy.Implementations
         /// <param name="callback">The state to which to return after the idleTime,
         /// This will likely be a new instance of the state from which this state is
         /// created.</param>
-        public TryAfterWaitState(uint idleTime, State<SimpleBandWagonStrategy> callback)
+        public TryAfterWaitState(uint idleTime, State<SimpleBandWagonStrategySettings> callback)
         {
             _idleTime = idleTime;
             _callback = callback;

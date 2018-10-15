@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
+using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Strategy
 {
@@ -9,7 +10,7 @@ namespace SpreadShare.Strategy
     /// </summary>
     /// <typeparam name="T">The type of the parent strategy</typeparam>
     internal abstract class State<T>
-        where T : BaseStrategy<T>
+        where T : StrategySettings
     {
         private StateManager<T> _stateManager;
 
@@ -31,7 +32,7 @@ namespace SpreadShare.Strategy
         /// <summary>
         /// Gets a link to the parent strategy
         /// </summary>
-        protected T Parent { get; private set; }
+        protected T StrategySettings { get; private set; }
 
         /// <summary>
         /// Initialise the state
@@ -44,7 +45,7 @@ namespace SpreadShare.Strategy
             TradingService = stateManager.TradingService;
             UserService = stateManager.UserService;
             Logger = loggerFactory.CreateLogger(GetType());
-            Parent = _stateManager.Parent;
+            StrategySettings = _stateManager.StrategySettings;
             Run();
         }
 

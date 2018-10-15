@@ -12,7 +12,7 @@ namespace SpreadShare.Strategy
     /// </summary>
     /// <typeparam name="T">The type of the parent strategy</typeparam>
     internal class StateManager<T> : IDisposable
-        where T : BaseStrategy<T>
+        where T : StrategySettings
     {
         private readonly object _lock = new object();
         private readonly ILogger _logger;
@@ -32,12 +32,11 @@ namespace SpreadShare.Strategy
         /// <param name="userService">Instance of the user service</param>
         /// <param name="settingsService">Instance of the settings service</param>
         public StateManager(
-            T parent,
+            T strategySettings,
             State<T> initial,
             ILoggerFactory loggerFactory,
             ITradingService tradingService,
-            IUserService userService,
-            ISettingsService settingsService)
+            IUserService userService)
         {
             // Setup logging
             _logger = loggerFactory.CreateLogger("StateManager");
@@ -45,15 +44,14 @@ namespace SpreadShare.Strategy
 
             // Setup trading services (gain access to abstract members)
             TradingService = tradingService as AbstractTradingService;
-            UserService = userService as AbstractUserService;
-            SettingsService = settingsService as SettingsService;
+            UserService = userService as AbstractUserService;    
+            
+            // Link the parent strategy setting
+            StrategySettings = strategySettings;
 
             // Setup initial state
             _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
             initial.Activate(this, _loggerFactory);
-
-            // Link the parent strategy
-            Parent = parent;
         }
 
         /// <summary>
@@ -72,14 +70,9 @@ namespace SpreadShare.Strategy
         public AbstractUserService UserService { get; }
 
         /// <summary>
-        /// Gets an instance of the settings service
-        /// </summary>
-        public SettingsService SettingsService { get; }
-
-        /// <summary>
         /// Gets a link to the parent strategy.
         /// </summary>
-        public T Parent { get; }
+        public T StrategySettings { get; }
 
         /// <summary>
         /// Switches the active state to the given state, only to be used by states

@@ -10,7 +10,7 @@ namespace SpreadShare.Strategy
     /// </summary>
     /// <typeparam name="T">The specific strategy that is associated with it</typeparam>
     internal abstract class BaseStrategy<T> : IStrategy
-       where T : BaseStrategy<T>
+       where T : StrategySettings
     {
         /// <summary>
         /// Used for creating logging output
@@ -31,6 +31,8 @@ namespace SpreadShare.Strategy
         /// Used to get information from the appsettings.json
         /// </summary>
         protected readonly ISettingsService _settingsService;
+
+        protected abstract T Settings { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseStrategy{T}"/> class.
