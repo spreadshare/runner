@@ -54,11 +54,6 @@ namespace SpreadShare.Strategy
         }
 
         /// <summary>
-        /// Gets the current active state
-        /// </summary>
-        public string CurrentState => _activeState.GetType().ToString().Split('+').Last();
-
-        /// <summary>
         /// Gets an instance of the trading service
         /// </summary>
         public AbstractTradingService TradingService { get; }
@@ -69,9 +64,14 @@ namespace SpreadShare.Strategy
         public AbstractUserService UserService { get; }
 
         /// <summary>
-        /// Gets a link to the parent strategy.
+        /// Gets a link to the strategy settings.
         /// </summary>
         public T StrategySettings { get; }
+
+        /// <summary>
+        /// Gets the current active state
+        /// </summary>
+        private string CurrentState => _activeState.GetType().ToString().Split('+').Last();
 
         /// <summary>
         /// Switches the active state to the given state, only to be used by states
