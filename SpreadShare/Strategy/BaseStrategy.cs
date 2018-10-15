@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reflection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
@@ -14,14 +12,14 @@ namespace SpreadShare.Strategy
     internal abstract class BaseStrategy<T> : IStrategy
        where T : StrategySettings
     {
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly ITradingService _tradingService;
-        private readonly IUserService _userService;
-
         /// <summary>
         /// Used to get information from the appsettings.json
         /// </summary>
         protected readonly SettingsService SettingsService;
+
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly ITradingService _tradingService;
+        private readonly IUserService _userService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseStrategy{T}"/> class.
@@ -49,17 +47,12 @@ namespace SpreadShare.Strategy
         protected abstract T Settings { get; }
 
         /// <summary>
-        /// Gets or sets the StateManager
-        /// </summary>
-        protected StateManager<T> StateManager { get; set; }
-
-        /// <summary>
         /// Start strategy with the initial state using a StateManager
         /// </summary>
         /// <returns>Whether the stategy started succesfully</returns>
         public virtual ResponseObject Start()
         {
-            StateManager = new StateManager<T>(
+            var stateManager = new StateManager<T>(
                 Settings,
                 GetInitialState(),
                 _loggerFactory,
@@ -73,6 +66,6 @@ namespace SpreadShare.Strategy
         /// Gets the initial state of the strategy
         /// </summary>
         /// <returns>The initial state of the strategy</returns>
-        public abstract State<T> GetInitialState();
+        protected abstract State<T> GetInitialState();
     }
 }
