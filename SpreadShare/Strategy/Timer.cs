@@ -1,5 +1,4 @@
 using System;
-using System.Security.Cryptography;
 using Cron;
 using Microsoft.Extensions.Logging;
 
@@ -31,7 +30,6 @@ namespace SpreadShare.Strategy
             _callback = callback ?? throw new ArgumentException("Callback can't be null");
 
             _logger = factory.CreateLogger<Timer>();
-
             _target = minutes;
 
             // Create a Cron Deamon that executes every minute;
@@ -83,7 +81,7 @@ namespace SpreadShare.Strategy
 
             if (_counter < _target)
             {
-                _logger.LogInformation($"Call #{_counter++}    {DateTime.UtcNow}");
+                _logger.LogInformation($"Call minute #{_counter++}/{_target}    {DateTime.UtcNow}");
                 return;
             }
 
