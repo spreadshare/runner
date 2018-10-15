@@ -1,4 +1,4 @@
-namespace SpreadShare.SupportServices.SettingsService
+namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
     /// Settings for the Binance exchange

@@ -1,4 +1,4 @@
-namespace SpreadShare.SupportServices.SettingsService
+namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
     /// Object containing the credentials for an exchange

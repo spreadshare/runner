@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.Strategy;
-using SpreadShare.SupportServices.SettingsService;
+using SpreadShare.SupportServices.SettingsServices;
 using SpreadShare.ZeroMQ;
 
 namespace SpreadShare

@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using SpreadShare.Models;
 
-namespace SpreadShare.SupportServices.SettingsService
+namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
     /// Settings for the simple bandwagon strategy
     /// </summary>
-    internal class SimpleBandWagonStrategySettings : StrategySettings
+    public class SimpleBandWagonStrategySettings : StrategySettings
     {
         /// <summary>
         /// Gets or sets the list of active trading pairs

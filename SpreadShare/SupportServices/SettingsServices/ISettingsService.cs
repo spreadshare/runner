@@ -1,6 +1,6 @@
 using SpreadShare.Models;
 
-namespace SpreadShare.SupportServices.SettingsService
+namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
     /// Service for managing settings

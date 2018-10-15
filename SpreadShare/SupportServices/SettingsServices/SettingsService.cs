@@ -8,12 +8,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
-namespace SpreadShare.SupportServices.SettingsService
+namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
     /// Service for managing settings
     /// </summary>
-    internal class SettingsService : ISettingsService
+    public class SettingsService : ISettingsService
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
@@ -57,6 +57,7 @@ namespace SpreadShare.SupportServices.SettingsService
             }
             catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return new ResponseObject(ResponseCode.Error, e.Message);
             }
 

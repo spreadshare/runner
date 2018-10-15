@@ -5,7 +5,7 @@ using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
-using SpreadShare.SupportServices.SettingsService;
+using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.BinanceServices.Implementations
 {

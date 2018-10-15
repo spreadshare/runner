@@ -1,9 +1,9 @@
-namespace SpreadShare.SupportServices.SettingsService
+namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
     /// Settings for enable status of services
     /// </summary>
-    internal class EnabledServices
+    public class EnabledServices
     {
         /// <summary>
         /// Gets or sets a value indicating whether strategy service is enabled

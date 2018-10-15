@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using SpreadShare.BinanceServices;
 using SpreadShare.BinanceServices.Implementations;
 using SpreadShare.Models;
-using SpreadShare.SupportServices.SettingsService;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -28,8 +27,6 @@ namespace SpreadShare.Tests.Binance
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             _tradingService = (BinanceTradingService)serviceProvider.GetService<ITradingService>();
             _tradingService.Start();
-            var settings = (SettingsService)serviceProvider.GetService<ISettingsService>();
-            settings.Start();
             _pairs = new List<CurrencyPair>()
             {
                 CurrencyPair.Parse("BNBETH"),
