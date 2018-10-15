@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
-namespace SpreadShare.SupportServices
+namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
     /// Service for managing settings
@@ -26,14 +26,8 @@ namespace SpreadShare.SupportServices
         public SettingsService(IConfiguration configuration, ILoggerFactory loggerFactory)
         {
             _configuration = configuration;
-            ActiveTradingPairs = new List<CurrencyPair>();
             _logger = loggerFactory.CreateLogger<SettingsService>();
         }
-
-        /// <summary>
-        /// Gets the list of active trading pairs
-        /// </summary>
-        public List<CurrencyPair> ActiveTradingPairs { get; }
 
         /// <summary>
         /// Gets the binance settings
@@ -55,19 +49,19 @@ namespace SpreadShare.SupportServices
         {
             try
             {
+                // Enables parsing functionality for currencies and should be called first.
                 DownloadCurrencies();
                 ParseSimpleBandwagonSettings();
-                ParseBinanceSettings();
-                ParseActiveTradingPairs();
-                ParseBinanceSettings();
-                ParseEnableServices();
+                BinanceSettings = _configuration.GetSection("BinanceClientSettings").Get<BinanceSettings>();
+                EnabledServices = _configuration.GetSection("EnabledServices").Get<EnabledServices>();
             }
             catch (Exception e)
             {
-                return new ResponseObject(ResponseCodes.Error, e.Message);
+                _logger.LogError(e.ToString());
+                return new ResponseObject(ResponseCode.Error, e.Message);
             }
 
-            return new ResponseObject(ResponseCodes.Success);
+            return new ResponseObject(ResponseCode.Success);
         }
 
         /// <summary>
@@ -133,65 +127,18 @@ namespace SpreadShare.SupportServices
         /// </summary>
         private void ParseSimpleBandwagonSettings()
         {
-            Currency baseCurrency = new Currency(_configuration.GetValue<string>("SimpleBandwagonStrategy:baseCurrency"));
-            decimal minimalRevertValue = _configuration.GetValue<decimal>("SimpleBandwagonStrategy:minimalRevertValue");
-            decimal minimalGrowthPercentage = _configuration.GetValue<decimal>("SimpleBandwagonStrategy:minimalGrowthPercentage");
-            uint holdTime = _configuration.GetValue<uint>("SimpleBandwagonStrategy:holdTime");
-            uint checkTime = _configuration.GetValue<uint>("SimpleBandwagonStrategy:checkTime");
-            SimpleBandWagonStrategySettings = new SimpleBandWagonStrategySettings(baseCurrency, minimalRevertValue, minimalGrowthPercentage, checkTime, holdTime);
-        }
+            SimpleBandWagonStrategySettings = _configuration.GetSection("SimpleBandwagonStrategy").Get<SimpleBandWagonStrategySettings>();
 
-        /// <summary>
-        /// Parse settings for Binance
-        /// </summary>
-        private void ParseBinanceSettings()
-        {
-            string key = _configuration.GetValue<string>("BinanceCredentials:api-key");
-            string secret = _configuration.GetValue<string>("BinanceCredentials:api-secret");
-            Authy authy = new Authy(key, secret);
+            // Get the ActiveTradingPairs as a seperate string list
+            var currencies = _configuration.GetSection("SimpleBandWagonStrategy:ActiveTradingPairs")
+                .Get<List<string>>();
 
-            long receiveWindow = _configuration.GetValue<long>("BinanceClientSettings:receiveWindow");
-            BinanceSettings = new BinanceSettings(authy, receiveWindow);
-        }
+            // Map the trading pairs to currencies by parsing and assign to the settings.
+            SimpleBandWagonStrategySettings.ActiveTradingPairs = currencies.Select(CurrencyPair.Parse).ToList();
 
-        /// <summary>
-        /// Parse the active trading pairs
-        /// </summary>
-        private void ParseActiveTradingPairs()
-        {
-            var tradingPairs = _configuration.GetSection("BinanceClientSettings:tradingPairs").AsEnumerable().ToArray();
-            foreach (var tradingPair in tradingPairs)
-            {
-                CurrencyPair pair;
-                try
-                {
-                    pair = CurrencyPair.Parse(tradingPair.Value);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogInformation(e.Message);
-                    continue;
-                }
-
-                ActiveTradingPairs.Add(pair);
-            }
-        }
-
-        /// <summary>
-        /// Parse the enabled services
-        /// </summary>
-        private void ParseEnableServices()
-        {
-            bool strategyServiceEnabled = _configuration.GetValue<bool>("EnableServices:strategy");
-            bool tradingServiceEnabled = _configuration.GetValue<bool>("EnableServices:trading");
-            bool userServiceEnabled = _configuration.GetValue<bool>("EnableServices:user");
-            bool zeroMqServiceEnabled = _configuration.GetValue<bool>("EnableServices:zeroMq");
-
-            EnabledServices = new EnabledServices(
-                strategyServiceEnabled,
-                tradingServiceEnabled,
-                userServiceEnabled,
-                zeroMqServiceEnabled);
+            // Parse the base currency string to a Currency type
+            var baseStr = _configuration.GetSection("SimpleBandWagonStrategy:BaseCurrency").Get<string>();
+            SimpleBandWagonStrategySettings.BaseCurrency = new Currency(baseStr);
         }
     }
 }

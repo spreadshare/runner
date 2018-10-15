@@ -3,9 +3,9 @@ using System.Linq;
 using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
+using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.BinanceServices.Implementations
 {
@@ -14,7 +14,7 @@ namespace SpreadShare.BinanceServices.Implementations
     /// </summary>
     internal class BinanceUserService : AbstractUserService, IDisposable
     {
-        private readonly IConfiguration _configuration;
+        private readonly BinanceCredentials _credentials;
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
 
@@ -26,12 +26,12 @@ namespace SpreadShare.BinanceServices.Implementations
         /// Initializes a new instance of the <see cref="BinanceUserService"/> class.
         /// </summary>
         /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        /// <param name="configuration">Configuration of the activity</param>
-        public BinanceUserService(ILoggerFactory loggerFactory, IConfiguration configuration)
+        /// <param name="settingsService">Settings for extracting authentication variables</param>
+        public BinanceUserService(ILoggerFactory loggerFactory, ISettingsService settingsService)
         {
             _loggerFactory = loggerFactory;
             _logger = _loggerFactory.CreateLogger(GetType());
-            _configuration = configuration;
+            _credentials = (settingsService as SettingsService).BinanceSettings.Credentials;
         }
 
         /// <summary>
@@ -46,9 +46,7 @@ namespace SpreadShare.BinanceServices.Implementations
             _socketclient = new BinanceSocketClient(options);
 
             // Set credentials
-            string apikey = _configuration.GetValue<string>("BinanceCredentials:api-key");
-            string apisecret = _configuration.GetValue<string>("BinanceCredentials:api-secret");
-            _client.SetApiCredentials(apikey, apisecret);
+            _client.SetApiCredentials(_credentials.Key, _credentials.Secret);
 
             // Setup ListenKeyManager
             _listenKeyManager = new ListenKeyManager(_loggerFactory, _client);
@@ -67,13 +65,13 @@ namespace SpreadShare.BinanceServices.Implementations
             if (!accountInfo.Success)
             {
                 _logger.LogCritical($"Could not get assets: {accountInfo.Error.Message}");
-                return new ResponseObject<Assets>(ResponseCodes.Error);
+                return new ResponseObject<Assets>(ResponseCode.Error);
             }
 
             // Map to general ExchangeBalance datatype for parsing to assets object.
             var values = accountInfo.Data.Balances.Select(x => new ExchangeBalance(x.Asset, x.Free, x.Locked)).ToList();
 
-            return new ResponseObject<Assets>(ResponseCodes.Success, new Assets(values));
+            return new ResponseObject<Assets>(ResponseCode.Success, new Assets(values));
         }
 
         /// <inheritdoc/>
@@ -110,7 +108,7 @@ namespace SpreadShare.BinanceServices.Implementations
             if (!response.Success)
             {
                 _logger.LogError("Unable to obtain listenKey");
-                return new ResponseObject(ResponseCodes.Error);
+                return new ResponseObject(ResponseCode.Error);
             }
 
             var listenKey = response.Data;
@@ -140,7 +138,7 @@ namespace SpreadShare.BinanceServices.Implementations
             };
 
             _logger.LogInformation("Binance User Service was successfully started!");
-            return new ResponseObject(ResponseCodes.Success);
+            return new ResponseObject(ResponseCode.Success);
         }
     }
 }

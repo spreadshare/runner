@@ -1,28 +1,34 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
-using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Strategy
 {
     /// <summary>
     /// Base class for all strategies
     /// </summary>
-    internal abstract class BaseStrategy : IStrategy
+    /// <typeparam name="T">The specific strategy that is associated with it</typeparam>
+    internal abstract class BaseStrategy<T> : IStrategy
+       where T : StrategySettings
     {
+        /// <summary>
+        /// Used to get information from the appsettings.json
+        /// </summary>
+        protected readonly SettingsService SettingsService;
+
         private readonly ILoggerFactory _loggerFactory;
         private readonly ITradingService _tradingService;
         private readonly IUserService _userService;
-        private readonly ISettingsService _settingsService;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BaseStrategy"/> class.
+        /// Initializes a new instance of the <see cref="BaseStrategy{T}"/> class.
         /// Implements and provides dependencies required by the StateManager
         /// </summary>
         /// <param name="loggerFactory">Provided logger creating capabilities</param>
         /// <param name="tradingService">Provides trading capabilities</param>
         /// <param name="userService">Provides user data fetching capabilities</param>
-        /// <param name="settingsService">Provides acces to global settings</param>
+        /// <param name="settingsService">Provides access to global settings</param>
         protected BaseStrategy(
             ILoggerFactory loggerFactory,
             ITradingService tradingService,
@@ -32,34 +38,34 @@ namespace SpreadShare.Strategy
             _loggerFactory = loggerFactory;
             _tradingService = tradingService;
             _userService = userService;
-            _settingsService = settingsService;
+            SettingsService = settingsService as SettingsService;
         }
 
         /// <summary>
-        /// Gets the StateManager
+        /// Gets the strategy's settings.
         /// </summary>
-        public StateManager StateManager { get; private set; }
+        protected abstract T Settings { get; }
 
         /// <summary>
         /// Start strategy with the initial state using a StateManager
         /// </summary>
         /// <returns>Whether the stategy started succesfully</returns>
-        public ResponseObject Start()
+        public virtual ResponseObject Start()
         {
-            StateManager = new StateManager(
+            var stateManager = new StateManager<T>(
+                Settings,
                 GetInitialState(),
                 _loggerFactory,
                 _tradingService,
-                _userService,
-                _settingsService);
+                _userService);
 
-            return new ResponseObject(ResponseCodes.Success);
+            return new ResponseObject(ResponseCode.Success);
         }
 
         /// <summary>
         /// Gets the initial state of the strategy
         /// </summary>
         /// <returns>The initial state of the strategy</returns>
-        public abstract State GetInitialState();
+        protected abstract State<T> GetInitialState();
     }
 }

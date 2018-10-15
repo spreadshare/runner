@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading;
 using Binance.Net;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices.Implementations;
 using Xunit;
@@ -97,15 +97,14 @@ namespace SpreadShare.Tests.UserService
         private static ListenKeyManager Setup(int interval)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
-            var configuration = (IConfiguration)serviceProvider.GetService(typeof(IConfiguration));
-            var loggerFactory = (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory));
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
 
             // Setup the clients
             var client = new BinanceClient();
 
             // Set credentials
-            string apikey = configuration.GetValue<string>("BinanceCredentials:api-key");
-            string apisecret = configuration.GetValue<string>("BinanceCredentials:api-secret");
+            string apikey = SettingsService.BinanceSettings.Credentials.Key;
+            string apisecret = SettingsService.BinanceSettings.Credentials.Secret;
             client.SetApiCredentials(apikey, apisecret);
 
             return new ListenKeyManager(loggerFactory, client, interval);

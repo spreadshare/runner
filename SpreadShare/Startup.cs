@@ -9,6 +9,7 @@ using SpreadShare.Models;
 using SpreadShare.Strategy;
 using SpreadShare.Strategy.Implementations;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsServices;
 using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
@@ -73,7 +74,7 @@ namespace SpreadShare
 
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
-            if (service.Migrate().Code == ResponseCodes.Success)
+            if (service.Migrate().Code == ResponseCode.Success)
             {
                 logger.LogError("Could not migrate database");
             }
