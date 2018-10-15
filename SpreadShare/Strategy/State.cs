@@ -1,23 +1,18 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
-using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Strategy
 {
     /// <summary>
     /// Base class of a state of a strategy
     /// </summary>
-    internal abstract class State
+    /// <typeparam name="T">The type of the parent strategy</typeparam>
+    internal abstract class State<T>
+        where T : StrategySettings
     {
-        private StateManager _stateManager;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="State"/> class.
-        /// </summary>
-        protected State()
-        {
-        }
+        private StateManager<T> _stateManager;
 
         /// <summary>
         /// Gets the logger of the state
@@ -35,22 +30,22 @@ namespace SpreadShare.Strategy
         protected AbstractUserService UserService { get; private set; }
 
         /// <summary>
-        /// Gets a setting service instance
+        /// Gets a link to the parent strategy
         /// </summary>
-        protected SettingsService SettingsService { get; private set; }
+        protected T StrategySettings { get; private set; }
 
         /// <summary>
         /// Initialise the state
         /// </summary>
         /// <param name="stateManager">StateManager controlling this state</param>
         /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        public void Activate(StateManager stateManager, ILoggerFactory loggerFactory)
+        public void Activate(StateManager<T> stateManager, ILoggerFactory loggerFactory)
         {
             _stateManager = stateManager;
             TradingService = stateManager.TradingService;
             UserService = stateManager.UserService;
-            SettingsService = stateManager.SettingsService;
             Logger = loggerFactory.CreateLogger(GetType());
+            StrategySettings = _stateManager.StrategySettings;
             Run();
         }
 
@@ -58,13 +53,13 @@ namespace SpreadShare.Strategy
         /// Callback when the timer elapses (fired by StateManager)
         /// </summary>
         /// <returns>Whether the specified callback was successful</returns>
-        public virtual ResponseObject OnTimer() => new ResponseObject(ResponseCodes.NotDefined);
+        public virtual ResponseObject OnTimer() => new ResponseObject(ResponseCode.NotDefined);
 
         /// <summary>
         /// Switching states
         /// </summary>
         /// <param name="s">State to switch to</param>
-        protected void SwitchState(State s)
+        protected void SwitchState(State<T> s)
         {
             _stateManager.SwitchState(s);
         }

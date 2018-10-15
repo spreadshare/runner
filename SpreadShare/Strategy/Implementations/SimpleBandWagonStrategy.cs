@@ -4,7 +4,7 @@ using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
-using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Strategy.Implementations
 {
@@ -16,7 +16,7 @@ namespace SpreadShare.Strategy.Implementations
     /// fully change position to that asset and hold for the holdingTime before checking again.
     /// If their is no winner, remain in baseCurrency and check again after waitTime.
     /// </summary>
-    internal class SimpleBandWagonStrategy : BaseStrategy
+    internal class SimpleBandWagonStrategy : BaseStrategy<SimpleBandWagonStrategySettings>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SimpleBandWagonStrategy"/> class.
@@ -32,17 +32,21 @@ namespace SpreadShare.Strategy.Implementations
             ISettingsService settingsService)
             : base(loggerFactory, tradingService, userService, settingsService)
         {
+            Settings = SettingsService.SimpleBandWagonStrategySettings;
         }
 
+        /// <summary>
+        /// Gets the strategy's settings
+        /// </summary>
+        protected override SimpleBandWagonStrategySettings Settings { get; }
+
         /// <inheritdoc />
-        public override State GetInitialState() => new EntryState();
+        protected override State<SimpleBandWagonStrategySettings> GetInitialState() => new EntryState();
 
         /// <summary>
         /// Starting state of the strategy
         /// </summary>
-        // TODO: This state seems entirely unnecessary?
-        // TODO^: Little effort and give a nice confirmation that all has started well.
-        private class EntryState : State
+        private class EntryState : State<SimpleBandWagonStrategySettings>
         {
             /// <inheritdoc />
             protected override void Run()
@@ -55,17 +59,18 @@ namespace SpreadShare.Strategy.Implementations
         /// <summary>
         /// Checks if the winner is not already the majority share of the portfolio.
         /// </summary>
-        private class CheckPositionValidityState : State
+        private class CheckPositionValidityState : State<SimpleBandWagonStrategySettings>
         {
             /// <inheritdoc />
             protected override void Run()
             {
                 // Retrieve global settings
-                Currency baseSymbol = SettingsService.SimpleBandWagonStrategySettings.BaseCurrency;
-                uint checkTime = SettingsService.SimpleBandWagonStrategySettings.CheckTime;
+                Currency baseSymbol = StrategySettings.BaseCurrency;
+                uint checkTime = StrategySettings.CheckTime;
+                var activeTradingPairs = StrategySettings.ActiveTradingPairs;
 
                 // Try to get to top performer, if not try state again after 10 seconds
-                var winnerQuery = TradingService.GetTopPerformance(checkTime, DateTime.Now);
+                var winnerQuery = TradingService.GetTopPerformance(activeTradingPairs, checkTime, DateTime.Now);
                 if (!winnerQuery.Success)
                 {
                     Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 10 seconds");
@@ -79,9 +84,9 @@ namespace SpreadShare.Strategy.Implementations
                 Logger.LogInformation($"Top performer from the past {checkTime} hours is {winnerPair} | {deltaPercentage}%");
 
                 // Filter wether this 'winner' is gained enough growth to undertake action, otherwise just got the WaitHolding state again.
-                if (deltaPercentage < SettingsService.SimpleBandWagonStrategySettings.MinimalGrowthPercentage)
+                if (deltaPercentage < StrategySettings.MinimalGrowthPercentage)
                 {
-                    Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagonStrategySettings.MinimalGrowthPercentage}%, disregard.");
+                    Logger.LogInformation($"Growth is less than {StrategySettings.MinimalGrowthPercentage}%, disregard.");
                     SwitchState(new RevertToBaseState());
                     return;
                 }
@@ -97,24 +102,24 @@ namespace SpreadShare.Strategy.Implementations
 
                 var assets = assetsQuery.Data.GetAllFreeBalances();
 
-                // 1. Map the assets values to their respective baseSymbol values
+                // 1. Map the assets values to their respective pairs using baseSymbol values
                 // 2. Order by this newgained value, making the last element the most valuable.
                 var sorted = assets.ToArray().Select(x =>
+                {
+                    CurrencyPair pair;
+                    try
                     {
-                        CurrencyPair pair;
-                        try
-                        {
-                            pair = CurrencyPair.Parse($"{x.Symbol}{baseSymbol}");
-                        }
-                        catch
-                        {
-                            return new AssetValue(x.Symbol, 0);
-                        }
-                        var query = TradingService.GetCurrentPriceTopBid(pair);
+                        pair = CurrencyPair.Parse($"{x.Symbol}{baseSymbol}");
+                    }
+                    catch
+                    {
+                        return new AssetValue(x.Symbol, 0);
+                    }
+                    var query = TradingService.GetCurrentPriceTopBid(pair);
 
-                        // Use a value of zero for assets whose price retrievals fail.
-                        return query.Success ? new AssetValue(x.Symbol, x.Value * query.Data) : new AssetValue(x.Symbol, 0);
-                    }).OrderBy(x => x.Value);
+                    // Use a value of zero for assets whose price retrievals fail.
+                    return query.Success ? new AssetValue(x.Symbol, x.Value * query.Data) : new AssetValue(x.Symbol, 0);
+                }).OrderBy(x => x.Value);
                 Logger.LogInformation($"Most valuable asset in portfolio: {sorted.Last().Symbol}");
 
                 // Construct the most valueble asset as a currency
@@ -136,14 +141,14 @@ namespace SpreadShare.Strategy.Implementations
         /// <summary>
         /// Trades in all relevant assets for the base currency.
         /// </summary>
-        private class RevertToBaseState : State
+        private class RevertToBaseState : State<SimpleBandWagonStrategySettings>
         {
             /// <inheritdoc />
             protected override void Run()
             {
                 // Retrieve globals from the settings.
-                Currency baseSymbol = SettingsService.SimpleBandWagonStrategySettings.BaseCurrency;
-                decimal valueMinimum = SettingsService.SimpleBandWagonStrategySettings.MinimalRevertValue;
+                Currency baseSymbol = StrategySettings.BaseCurrency;
+                decimal valueMinimum = StrategySettings.MinimalRevertValue;
 
                 // Retrieve the portfolio, using a fallback in case of failure.
                 var assetsQuery = UserService.GetPortfolio();
@@ -215,17 +220,18 @@ namespace SpreadShare.Strategy.Implementations
         /// (This will execute a trade even if the coin is already the majority share,
         /// consider to run the CheckPositionValidityState first.)
         /// </summary>
-        private class BuyState : State
+        private class BuyState : State<SimpleBandWagonStrategySettings>
         {
             /// <inheritdoc />
             protected override void Run()
             {
                 // Retrieve globals from the settings.
-                uint checkTime = SettingsService.SimpleBandWagonStrategySettings.CheckTime;
+                uint checkTime = StrategySettings.CheckTime;
+                var activeTradingPairs = StrategySettings.ActiveTradingPairs;
 
                 // Try to retrieve the top performer, using a tryAfterWait fallback in case of failure.
                 Logger.LogInformation($"Looking for the top performer from the previous {checkTime} hours");
-                var query = TradingService.GetTopPerformance(checkTime, DateTime.Now);
+                var query = TradingService.GetTopPerformance(activeTradingPairs, checkTime, DateTime.Now);
                 if (query.Success)
                 {
                     Logger.LogInformation($"Top performer is {query.Data.Item1}");
@@ -243,9 +249,9 @@ namespace SpreadShare.Strategy.Implementations
                 Logger.LogInformation($"Top performer from the past {checkTime} hours is {winnerPair} | {deltaPercentage}%");
 
                 // Filter wether this 'winner' is gained enough growth to undertake action, otherwise just got the WaitHolding state again.
-                if (deltaPercentage < SettingsService.SimpleBandWagonStrategySettings.MinimalGrowthPercentage)
+                if (deltaPercentage < StrategySettings.MinimalGrowthPercentage)
                 {
-                    Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagonStrategySettings.MinimalGrowthPercentage}%, disregard.");
+                    Logger.LogInformation($"Growth is less than {StrategySettings.MinimalGrowthPercentage}%, disregard.");
                     SwitchState(new WaitHoldingState());
                     return;
                 }
@@ -267,7 +273,7 @@ namespace SpreadShare.Strategy.Implementations
         /// <summary>
         /// What as many hours as the holdTime dictactes and then proceed to checking the position again.
         /// </summary>
-        private class WaitHoldingState : State
+        private class WaitHoldingState : State<SimpleBandWagonStrategySettings>
         {
             /// <inheritdoc />
             public override ResponseObject OnTimer()
@@ -278,17 +284,17 @@ namespace SpreadShare.Strategy.Implementations
                 SwitchState(new CheckPositionValidityState());
 
                 // TODO: Will this return statement fire before or after CheckPositionValidity has occured?
-                return new ResponseObject(ResponseCodes.Success);
+                return new ResponseObject(ResponseCode.Success);
             }
 
             /// <inheritdoc />
             protected override void Run()
             {
-                Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagonStrategySettings.HoldTime} hours ({DateTime.UtcNow})");
+                Logger.LogInformation($"Going to sleep for {StrategySettings.HoldTime} hours ({DateTime.UtcNow})");
 
                 // 1000 ms / s
                 // 3600 s / h
-                SetTimer(1000 * 3600 * SettingsService.SimpleBandWagonStrategySettings.HoldTime);
+                SetTimer(1000 * 3600 * StrategySettings.HoldTime);
             }
         }
 
@@ -296,10 +302,10 @@ namespace SpreadShare.Strategy.Implementations
         /// Helper state that enables 'try again after wait' solutions
         /// when exceptions pop up.
         /// </summary>
-        private class TryAfterWaitState : State
+        private class TryAfterWaitState : State<SimpleBandWagonStrategySettings>
         {
             private readonly uint _idleTime;
-            private readonly State _callback;
+            private readonly State<SimpleBandWagonStrategySettings> _callback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="TryAfterWaitState"/> class.
@@ -308,7 +314,7 @@ namespace SpreadShare.Strategy.Implementations
             /// <param name="callback">The state to which to return after the idleTime,
             /// This will likely be a new instance of the state from which this state is
             /// created.</param>
-            public TryAfterWaitState(uint idleTime, State callback)
+            public TryAfterWaitState(uint idleTime, State<SimpleBandWagonStrategySettings> callback)
             {
                 _idleTime = idleTime;
                 _callback = callback;
@@ -318,7 +324,7 @@ namespace SpreadShare.Strategy.Implementations
             public override ResponseObject OnTimer()
             {
                 SwitchState(_callback);
-                return new ResponseObject(ResponseCodes.Success);
+                return new ResponseObject(ResponseCode.Success);
             }
 
             /// <inheritdoc />

@@ -3,59 +3,55 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
-using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Strategy
 {
     /// <summary>
     /// Object managing the active state and related resources
     /// </summary>
-    internal class StateManager : IDisposable
+    /// <typeparam name="T">The type of the parent strategy settings</typeparam>
+    internal class StateManager<T> : IDisposable
+        where T : StrategySettings
     {
         private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
 
-        private State _activeState;
+        private State<T> _activeState;
         private Timer _activeTimer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateManager"/> class.
+        /// Initializes a new instance of the <see cref="StateManager{T}"/> class.
         /// Sets active state with an initial state and sets basic settings
         /// </summary>
+        /// <param name="strategySettings">The settings of the strategy settings</param>
         /// <param name="initial">Initial state of the strategy</param>
         /// <param name="loggerFactory">LoggerFactory for creating loggers</param>
         /// <param name="tradingService">Instance of the trading service</param>
         /// <param name="userService">Instance of the user service</param>
-        /// <param name="settingsService">Instance of the settings service</param>
         public StateManager(
-            State initial,
+            T strategySettings,
+            State<T> initial,
             ILoggerFactory loggerFactory,
             ITradingService tradingService,
-            IUserService userService,
-            ISettingsService settingsService)
+            IUserService userService)
         {
-            lock (_lock)
-            {
-                // Setup logging
-                _logger = loggerFactory.CreateLogger("StateManager");
-                _loggerFactory = loggerFactory;
+            // Setup logging
+            _logger = loggerFactory.CreateLogger("StateManager");
+            _loggerFactory = loggerFactory;
 
-                // Setup trading services (gain access to abstract members)
-                TradingService = tradingService as AbstractTradingService;
-                UserService = userService as AbstractUserService;
-                SettingsService = settingsService as SettingsService;
+            // Setup trading services (gain access to abstract members)
+            TradingService = tradingService as AbstractTradingService;
+            UserService = userService as AbstractUserService;
 
-                // Setup initial state
-                _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
-                initial.Activate(this, _loggerFactory);
-            }
+            // Link the parent strategy setting
+            StrategySettings = strategySettings;
+
+            // Setup initial state
+            _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
+            initial.Activate(this, _loggerFactory);
         }
-
-        /// <summary>
-        /// Gets the current active state
-        /// </summary>
-        public string CurrentState => _activeState.GetType().ToString().Split('+').Last();
 
         /// <summary>
         /// Gets an instance of the trading service
@@ -68,16 +64,21 @@ namespace SpreadShare.Strategy
         public AbstractUserService UserService { get; }
 
         /// <summary>
-        /// Gets an instance of the settings service
+        /// Gets a link to the strategy settings.
         /// </summary>
-        public SettingsService SettingsService { get; }
+        public T StrategySettings { get; }
+
+        /// <summary>
+        /// Gets the current active state
+        /// </summary>
+        private string CurrentState => _activeState.GetType().ToString().Split('+').Last();
 
         /// <summary>
         /// Switches the active state to the given state, only to be used by states
         /// </summary>
         /// <param name="child">State to switch to</param>
         /// <exception cref="Exception">Child can't be null</exception>
-        public void SwitchState(State child)
+        public void SwitchState(State<T> child)
         {
             // This function is safe because it is executed in the locked context of the OnX callback functions
             if (child == null)

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using SpreadShare.BinanceServices;
 using SpreadShare.BinanceServices.Implementations;
@@ -14,6 +15,7 @@ namespace SpreadShare.Tests.Binance
     public class BinanceTradingServiceTest : BaseTest
     {
         private readonly BinanceTradingService _tradingService;
+        private readonly List<CurrencyPair> _pairs;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceTradingServiceTest"/> class.
@@ -25,6 +27,12 @@ namespace SpreadShare.Tests.Binance
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             _tradingService = (BinanceTradingService)serviceProvider.GetService<ITradingService>();
             _tradingService.Start();
+            _pairs = new List<CurrencyPair>()
+            {
+                CurrencyPair.Parse("BNBETH"),
+                CurrencyPair.Parse("ZRXETH"),
+                CurrencyPair.Parse("PIVXBTC")
+            };
         }
 
         /// <summary>
@@ -59,11 +67,11 @@ namespace SpreadShare.Tests.Binance
         {
             if (hoursBack <= 0)
             {
-                Assert.Throws<ArgumentException>(() => _tradingService.GetTopPerformance(hoursBack, DateTime.UtcNow));
+                Assert.Throws<ArgumentException>(() => _tradingService.GetTopPerformance(_pairs, hoursBack, DateTime.UtcNow));
                 return;
             }
 
-            var query = _tradingService.GetTopPerformance(hoursBack, DateTime.UtcNow);
+            var query = _tradingService.GetTopPerformance(_pairs, hoursBack, DateTime.UtcNow);
             if (!query.Success)
             {
                 Assert.True(false, query.ToString());
@@ -77,6 +85,7 @@ namespace SpreadShare.Tests.Binance
         /// <param name="symbol">The symbol of the trading pair</param>
         [Theory]
         [InlineData("XRPETH")]
+        [InlineData("ZRXBTC")]
         public void HighestBidIsLowerThanLowestAsk(string symbol)
         {
             CurrencyPair pair;
