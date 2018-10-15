@@ -35,6 +35,9 @@ namespace SpreadShare.Strategy.Implementations
             Settings = (settingsService as SettingsService).SimpleBandWagonStrategySettings;
         }
 
+        /// <summary>
+        /// Gets the strategy's settings
+        /// </summary>
         protected override SimpleBandWagonStrategySettings Settings { get; }
 
         /// <inheritdoc />

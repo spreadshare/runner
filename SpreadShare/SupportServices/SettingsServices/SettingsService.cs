@@ -135,7 +135,7 @@ namespace SpreadShare.SupportServices.SettingsServices
 
             // Map the trading pairs to currencies by parsing and assign to the settings.
             SimpleBandWagonStrategySettings.ActiveTradingPairs = currencies.Select(CurrencyPair.Parse).ToList();
-            
+
             // Parse the base currency string to a Currency type
             var baseStr = _configuration.GetSection("SimpleBandWagonStrategy:BaseCurrency").Get<string>();
             SimpleBandWagonStrategySettings.BaseCurrency = new Currency(baseStr);

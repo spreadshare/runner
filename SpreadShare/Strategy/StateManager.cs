@@ -10,7 +10,7 @@ namespace SpreadShare.Strategy
     /// <summary>
     /// Object managing the active state and related resources
     /// </summary>
-    /// <typeparam name="T">The type of the parent strategy</typeparam>
+    /// <typeparam name="T">The type of the parent strategy settings</typeparam>
     internal class StateManager<T> : IDisposable
         where T : StrategySettings
     {
@@ -25,12 +25,11 @@ namespace SpreadShare.Strategy
         /// Initializes a new instance of the <see cref="StateManager{T}"/> class.
         /// Sets active state with an initial state and sets basic settings
         /// </summary>
-        /// <param name="parent">The strategy instance related that is in control and whose settings are exposed</param>
+        /// <param name="strategySettings">The settings of the strategy settings</param>
         /// <param name="initial">Initial state of the strategy</param>
         /// <param name="loggerFactory">LoggerFactory for creating loggers</param>
         /// <param name="tradingService">Instance of the trading service</param>
         /// <param name="userService">Instance of the user service</param>
-        /// <param name="settingsService">Instance of the settings service</param>
         public StateManager(
             T strategySettings,
             State<T> initial,
@@ -44,8 +43,8 @@ namespace SpreadShare.Strategy
 
             // Setup trading services (gain access to abstract members)
             TradingService = tradingService as AbstractTradingService;
-            UserService = userService as AbstractUserService;    
-            
+            UserService = userService as AbstractUserService;
+
             // Link the parent strategy setting
             StrategySettings = strategySettings;
 

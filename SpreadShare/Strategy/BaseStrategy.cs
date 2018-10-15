@@ -32,8 +32,6 @@ namespace SpreadShare.Strategy
         /// </summary>
         protected readonly ISettingsService _settingsService;
 
-        protected abstract T Settings { get; }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseStrategy{T}"/> class.
         /// Implements and provides dependencies required by the StateManager
@@ -41,7 +39,7 @@ namespace SpreadShare.Strategy
         /// <param name="loggerFactory">Provided logger creating capabilities</param>
         /// <param name="tradingService">Provides trading capabilities</param>
         /// <param name="userService">Provides user data fetching capabilities</param>
-        /// <param name="settingsService">Provides acces to global settings</param>
+        /// <param name="settingsService">Provides access to global settings</param>
         protected BaseStrategy(
             ILoggerFactory loggerFactory,
             ITradingService tradingService,
@@ -53,6 +51,11 @@ namespace SpreadShare.Strategy
             _userService = userService;
             _settingsService = settingsService;
         }
+
+        /// <summary>
+        /// Gets the strategy's settings.
+        /// </summary>
+        protected abstract T Settings { get; }
 
         /// <summary>
         /// Gets or sets the StateManager
