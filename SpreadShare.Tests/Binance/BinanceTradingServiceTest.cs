@@ -28,6 +28,8 @@ namespace SpreadShare.Tests.Binance
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             _tradingService = (BinanceTradingService)serviceProvider.GetService<ITradingService>();
             _tradingService.Start();
+            var settings = (SettingsService) serviceProvider.GetService<ISettingsService>();
+            settings.Start();
             _pairs = new List<CurrencyPair>()
             {
                 CurrencyPair.Parse("BNBETH"),
