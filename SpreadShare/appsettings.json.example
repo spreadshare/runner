@@ -2,13 +2,20 @@
     "ConnectionStrings": {
         "LocalConnection": "Server=db;Database=spreadshare;User ID=postgres;Password=password;Integrated Security=true;Pooling=true;"
     },
-    "BinanceCredentials": {
-        "api-key": "api_key",
-        "api-secret": "api_secret"
-    },
     "BinanceClientSettings": {
-        "receiveWindow": 10000000,
-        "tradingPairs": [
+        "ReceiveWindow": 10000000,
+				"Credentials": {
+						"Key": "api_key",
+						"Secret": "api_key",
+				}
+    },
+    "SimpleBandwagonStrategy": {
+        "BaseCurrency": "ETH",
+        "MinimalRevertValue": "0.01",
+        "MinimalGrowthPercentage" : 7,
+        "CheckTime": 18,
+        "HoldTime": 1,
+        "activeTradingPairs": [
             "MTHETH",
             "ADAETH",
             "VETETH",
@@ -22,20 +29,12 @@
             "XLMETH",
             "XVGETH",
             "EOSETH"
-
-        ]
-    },
-    "SimpleBandwagonStrategy": {
-        "baseCurrency": "ETH",
-        "minimalRevertValue": "0.01",
-        "minimalGrowthPercentage": 7,
-        "checkTime": 18,
-        "holdTime": 1
-    },
-     "EnableServices": {
-         "strategy": false,
-         "trading": false,
-         "user": false,
-         "zeroMq": false
-     }
+				]
+    }, 
+	 "EnabledServices": {
+			 "Strategy": false,
+			 "Trading": false,
+			 "User": false,
+			 "ZeroMq": false 
+	 }
 }
