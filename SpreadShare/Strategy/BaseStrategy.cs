@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Reflection;
+using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
@@ -66,7 +68,17 @@ namespace SpreadShare.Strategy
         /// Start strategy with the initial state using a StateManager
         /// </summary>
         /// <returns>Whether the stategy started succesfully</returns>
-        public abstract ResponseObject Start();
+        public virtual ResponseObject Start()
+        {
+            StateManager = new StateManager<T>(
+                Settings,
+                GetInitialState(),
+                LoggerFactory,
+                TradingService,
+                UserService);
+
+            return new ResponseObject(ResponseCodes.Success);
+        }
 
         /// <summary>
         /// Gets the initial state of the strategy

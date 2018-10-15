@@ -41,19 +41,6 @@ namespace SpreadShare.Strategy.Implementations
         protected override SimpleBandWagonStrategySettings Settings { get; }
 
         /// <inheritdoc />
-        public override ResponseObject Start()
-        {
-            StateManager = new StateManager<SimpleBandWagonStrategySettings>(
-                Settings,
-                GetInitialState(),
-                LoggerFactory,
-                TradingService,
-                UserService);
-
-            return new ResponseObject(ResponseCodes.Success);
-        }
-
-        /// <inheritdoc />
         public override State<SimpleBandWagonStrategySettings> GetInitialState() => new EntryState();
 
         /// <summary>
