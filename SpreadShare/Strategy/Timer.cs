@@ -1,7 +1,7 @@
 using System;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Security.Cryptography;
 using Cron;
+using Microsoft.Extensions.Logging;
 
 namespace SpreadShare.Strategy
 {
@@ -11,6 +11,7 @@ namespace SpreadShare.Strategy
     /// </summary>
     internal class Timer : IDisposable
     {
+        private readonly ILogger _logger;
         private readonly Action _callback;
         private readonly CronDaemon _cronDaemon = new CronDaemon();
         private readonly uint _target;
@@ -23,10 +24,13 @@ namespace SpreadShare.Strategy
         /// of minutes you give it.
         /// </summary>
         /// <param name="minutes">Waiting time in minutes</param>
+        /// <param name="factory">LoggerFactory for creating logging output</param>
         /// <param name="callback">Callback to execute after wait; can't be null</param>
-        public Timer(uint minutes, Action callback)
+        public Timer(uint minutes, ILoggerFactory factory, Action callback)
         {
             _callback = callback ?? throw new ArgumentException("Callback can't be null");
+
+            _logger = factory.CreateLogger<Timer>();
 
             _target = minutes;
 
@@ -41,6 +45,10 @@ namespace SpreadShare.Strategy
         public void Stop()
         {
             _executed = true;
+            if (!_executed)
+            {
+                _logger.LogInformation("Stopped");
+            }
         }
 
         /// <inheritdoc />
@@ -75,11 +83,11 @@ namespace SpreadShare.Strategy
 
             if (_counter < _target)
             {
-                Console.WriteLine($"Call #{_counter++}    {DateTime.UtcNow}");
+                _logger.LogInformation($"Call #{_counter++}    {DateTime.UtcNow}");
                 return;
             }
 
-            Console.WriteLine("Executing Callback");
+            _logger.LogInformation("Executing Callback");
             _executed = true;
             _callback();
         }

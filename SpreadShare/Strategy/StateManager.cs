@@ -99,7 +99,7 @@ namespace SpreadShare.Strategy
         {
             // Ensure the previous timer has gone out.
             _activeTimer?.Stop();
-            _activeTimer = new Timer(minutes, () =>
+            _activeTimer = new Timer(minutes, _loggerFactory, () =>
             {
                 // Callback returned after waiting period
                 lock (_lock)
