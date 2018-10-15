@@ -4,10 +4,10 @@
     },
     "BinanceClientSettings": {
         "ReceiveWindow": 10000000,
-				"Credentials": {
-						"Key": "api_key",
-						"Secret": "api_key",
-				}
+		"Credentials": {
+			"Key": "api_key",
+			"Secret": "api_key"
+		}
     },
     "SimpleBandwagonStrategy": {
         "BaseCurrency": "ETH",
