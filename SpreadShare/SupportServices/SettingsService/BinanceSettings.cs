@@ -6,12 +6,12 @@ namespace SpreadShare.SupportServices.SettingsService
     public class BinanceSettings
     {
         /// <summary>
-        /// Gets the credentials for Binance
+        /// Gets or sets the credentials for Binance
         /// </summary>
         public BinanceCredentials Credentials { get; set; }
 
         /// <summary>
-        /// Gets the receive window for Binance
+        /// Gets or sets the receive window for Binance
         /// </summary>
         public long ReceiveWindow { get; set; }
     }

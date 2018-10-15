@@ -6,22 +6,22 @@ namespace SpreadShare.SupportServices.SettingsService
     internal class EnabledServices
     {
         /// <summary>
-        /// Gets a value indicating whether strategy service is enabled
+        /// Gets or sets a value indicating whether strategy service is enabled
         /// </summary>
         public bool Strategy { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether trading service is enabled
+        /// Gets or sets a value indicating whether trading service is enabled
         /// </summary>
         public bool Trading { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether user service is enabled
+        /// Gets or sets a value indicating whether user service is enabled
         /// </summary>
         public bool User { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether ZeroMQ service is enabled
+        /// Gets or sets a value indicating whether ZeroMQ service is enabled
         /// </summary>
         public bool ZeroMq { get; set; }
     }

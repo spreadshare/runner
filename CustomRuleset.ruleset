@@ -16,6 +16,8 @@
     <Rule Id="CA1051" Action="None" />
     <!--Ignored rule SA1633: Missing file header (for copyright purposes)-->
     <Rule Id="SA1633" Action="None" />
+		<!--Ignored rul SA1402: Only one class per file, inconvient for statemachine-->
+		<Rule Id="SA1402" Action="None" />
 
 
     <!--CHANGED FROM INFORMATION TO WARNING-->

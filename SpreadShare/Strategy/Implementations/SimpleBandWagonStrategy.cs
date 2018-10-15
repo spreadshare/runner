@@ -18,8 +18,6 @@ namespace SpreadShare.Strategy.Implementations
     /// </summary>
     internal class SimpleBandWagonStrategy : BaseStrategy<SimpleBandWagonStrategy>
     {
-        private SimpleBandWagonStrategySettings _settings;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="SimpleBandWagonStrategy"/> class.
         /// </summary>
@@ -34,11 +32,15 @@ namespace SpreadShare.Strategy.Implementations
             ISettingsService settingsService)
             : base(loggerFactory, tradingService, userService, settingsService)
         {
-            _settings = (settingsService as SettingsService).SimpleBandWagonStrategySettings;
+            Settings = (settingsService as SettingsService).SimpleBandWagonStrategySettings;
         }
 
-        public SimpleBandWagonStrategySettings Settings => _settings;
+        /// <summary>
+        /// Gets the SimpleBandWagonSettings object.
+        /// </summary>
+        public SimpleBandWagonStrategySettings Settings { get; }
 
+        /// <inheritdoc />
         public override ResponseObject Start()
         {
             StateManager = new StateManager<SimpleBandWagonStrategy>(
@@ -55,13 +57,13 @@ namespace SpreadShare.Strategy.Implementations
         /// <inheritdoc />
         public override State<SimpleBandWagonStrategy> GetInitialState() => new EntryState();
     }
-    
+
     /// <summary>
     /// Starting state of the strategy
     /// </summary>
     // TODO: This state seems entirely unnecessary?
     // TODO^: Little effort and give a nice confirmation that all has started well.
-    class EntryState : State<SimpleBandWagonStrategy>
+    internal class EntryState : State<SimpleBandWagonStrategy>
     {
         /// <inheritdoc />
         protected override void Run()
@@ -74,7 +76,7 @@ namespace SpreadShare.Strategy.Implementations
     /// <summary>
     /// Checks if the winner is not already the majority share of the portfolio.
     /// </summary>
-    class CheckPositionValidityState : State<SimpleBandWagonStrategy>
+    internal class CheckPositionValidityState : State<SimpleBandWagonStrategy>
     {
         /// <inheritdoc />
         protected override void Run()
@@ -117,7 +119,7 @@ namespace SpreadShare.Strategy.Implementations
 
             var assets = assetsQuery.Data.GetAllFreeBalances();
 
-            // 1. Map the assets values to their respective baseSymbol values
+            // 1. Map the assets values to their respective pairs using baseSymbol values
             // 2. Order by this newgained value, making the last element the most valuable.
             var sorted = assets.ToArray().Select(x =>
                 {
@@ -156,7 +158,7 @@ namespace SpreadShare.Strategy.Implementations
     /// <summary>
     /// Trades in all relevant assets for the base currency.
     /// </summary>
-    class RevertToBaseState : State<SimpleBandWagonStrategy>
+    internal class RevertToBaseState : State<SimpleBandWagonStrategy>
     {
         /// <inheritdoc />
         protected override void Run()
@@ -235,7 +237,7 @@ namespace SpreadShare.Strategy.Implementations
     /// (This will execute a trade even if the coin is already the majority share,
     /// consider to run the CheckPositionValidityState first.)
     /// </summary>
-    class BuyState : State<SimpleBandWagonStrategy>
+    internal class BuyState : State<SimpleBandWagonStrategy>
     {
         /// <inheritdoc />
         protected override void Run()
@@ -288,7 +290,7 @@ namespace SpreadShare.Strategy.Implementations
     /// <summary>
     /// What as many hours as the holdTime dictactes and then proceed to checking the position again.
     /// </summary>
-    class WaitHoldingState : State<SimpleBandWagonStrategy>
+    internal class WaitHoldingState : State<SimpleBandWagonStrategy>
     {
         /// <inheritdoc />
         public override ResponseObject OnTimer()
@@ -317,7 +319,7 @@ namespace SpreadShare.Strategy.Implementations
     /// Helper state that enables 'try again after wait' solutions
     /// when exceptions pop up.
     /// </summary>
-    class TryAfterWaitState : State<SimpleBandWagonStrategy>
+    internal class TryAfterWaitState : State<SimpleBandWagonStrategy>
     {
         private readonly uint _idleTime;
         private readonly State<SimpleBandWagonStrategy> _callback;

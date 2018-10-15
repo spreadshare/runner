@@ -3,7 +3,6 @@ using System.Linq;
 using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsService;

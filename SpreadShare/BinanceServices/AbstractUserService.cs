@@ -1,5 +1,3 @@
-using System;
-using Binance.Net.Objects;
 using SpreadShare.Models;
 
 namespace SpreadShare.BinanceServices

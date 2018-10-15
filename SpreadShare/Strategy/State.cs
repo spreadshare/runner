@@ -1,26 +1,17 @@
-﻿using System;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
 using SpreadShare.Models;
-using SpreadShare.SupportServices;
-using SpreadShare.SupportServices.SettingsService;
 
 namespace SpreadShare.Strategy
 {
     /// <summary>
     /// Base class of a state of a strategy
     /// </summary>
+    /// <typeparam name="T">The type of the parent strategy</typeparam>
     internal abstract class State<T>
         where T : BaseStrategy<T>
     {
         private StateManager<T> _stateManager;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="State"/> class.
-        /// </summary>
-        protected State()
-        {
-        }
 
         /// <summary>
         /// Gets the logger of the state
@@ -37,6 +28,9 @@ namespace SpreadShare.Strategy
         /// </summary>
         protected AbstractUserService UserService { get; private set; }
 
+        /// <summary>
+        /// Gets a link to the parent strategy
+        /// </summary>
         protected T Parent { get; private set; }
 
         /// <summary>

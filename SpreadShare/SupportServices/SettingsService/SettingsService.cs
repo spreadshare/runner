@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Binance.Net;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
@@ -29,7 +28,7 @@ namespace SpreadShare.SupportServices.SettingsService
             _configuration = configuration;
             _logger = loggerFactory.CreateLogger<SettingsService>();
         }
-        
+
         /// <summary>
         /// Gets the binance settings
         /// </summary>
@@ -127,15 +126,14 @@ namespace SpreadShare.SupportServices.SettingsService
         /// </summary>
         private void ParseSimpleBandwagonSettings()
         {
-            var simpleBandWagonStrategySettings = _configuration.GetSection("SimpleBandwagonStrategy").Get<SimpleBandWagonStrategySettings>();
-            
-            //Get the ActiveTradingPairs as a seperate string list
+            SimpleBandWagonStrategySettings = _configuration.GetSection("SimpleBandwagonStrategy").Get<SimpleBandWagonStrategySettings>();
+
+            // Get the ActiveTradingPairs as a seperate string list
             var currencies = _configuration.GetSection("SimpleBandWagonStrategy:ActiveTradingPairs")
                 .Get<List<string>>();
-            
-            //Map the trading pairs to currencies by parsing and assign to the settings.
-            simpleBandWagonStrategySettings.ActiveTradingPairs = currencies.Select(CurrencyPair.Parse).ToList();
-            _logger.LogInformation(simpleBandWagonStrategySettings.ActiveTradingPairs[0].ToString());
+
+            // Map the trading pairs to currencies by parsing and assign to the settings.
+            SimpleBandWagonStrategySettings.ActiveTradingPairs = currencies.Select(CurrencyPair.Parse).ToList();
         }
     }
 }

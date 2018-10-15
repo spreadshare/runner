@@ -6,12 +6,12 @@ namespace SpreadShare.SupportServices.SettingsService
     public class BinanceCredentials
     {
         /// <summary>
-        /// Gets the API key
+        /// Gets or sets the API key
         /// </summary>
-        public string Key { get; set;}
+        public string Key { get; set; }
 
         /// <summary>
-        /// Gets the API secret
+        /// Gets or sets the API secret
         /// </summary>
         public string Secret { get; set; }
     }

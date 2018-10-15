@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using SpreadShare.BinanceServices;
-using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsService;
 
 namespace SpreadShare.Strategy
@@ -11,21 +10,22 @@ namespace SpreadShare.Strategy
     /// <summary>
     /// Object managing the active state and related resources
     /// </summary>
-    internal class StateManager<T> : IDisposable 
-         where T : BaseStrategy<T>
+    /// <typeparam name="T">The type of the parent strategy</typeparam>
+    internal class StateManager<T> : IDisposable
+        where T : BaseStrategy<T>
     {
         private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly T _parent;
-        
+
         private State<T> _activeState;
         private Timer _activeTimer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateManager"/> class.
+        /// Initializes a new instance of the <see cref="StateManager{T}"/> class.
         /// Sets active state with an initial state and sets basic settings
         /// </summary>
+        /// <param name="parent">The strategy instance related that is in control and whose settings are exposed</param>
         /// <param name="initial">Initial state of the strategy</param>
         /// <param name="loggerFactory">LoggerFactory for creating loggers</param>
         /// <param name="tradingService">Instance of the trading service</param>
@@ -39,24 +39,21 @@ namespace SpreadShare.Strategy
             IUserService userService,
             ISettingsService settingsService)
         {
-            lock (_lock)
-            {
-                // Setup logging
-                _logger = loggerFactory.CreateLogger("StateManager");
-                _loggerFactory = loggerFactory;
+            // Setup logging
+            _logger = loggerFactory.CreateLogger("StateManager");
+            _loggerFactory = loggerFactory;
 
-                // Setup trading services (gain access to abstract members)
-                TradingService = tradingService as AbstractTradingService;
-                UserService = userService as AbstractUserService;
-                SettingsService = settingsService as SettingsService;
+            // Setup trading services (gain access to abstract members)
+            TradingService = tradingService as AbstractTradingService;
+            UserService = userService as AbstractUserService;
+            SettingsService = settingsService as SettingsService;
 
-                // Setup initial state
-                _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
-                initial.Activate(this, _loggerFactory);
-            }
-            
+            // Setup initial state
+            _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
+            initial.Activate(this, _loggerFactory);
+
             // Link the parent strategy
-            parent = _parent;
+            Parent = parent;
         }
 
         /// <summary>
@@ -78,10 +75,9 @@ namespace SpreadShare.Strategy
         /// Gets an instance of the settings service
         /// </summary>
         public SettingsService SettingsService { get; }
-        
-        
+
         /// <summary>
-        /// Refer to the parent strategy.
+        /// Gets a link to the parent strategy.
         /// </summary>
         public T Parent { get; }
 

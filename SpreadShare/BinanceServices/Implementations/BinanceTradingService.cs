@@ -7,7 +7,6 @@ using Binance.Net;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
-using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsService;
 
 namespace SpreadShare.BinanceServices.Implementations
@@ -225,6 +224,7 @@ namespace SpreadShare.BinanceServices.Implementations
         /// <summary>
         /// Gets the top performing currency pair
         /// </summary>
+        /// <param name="pairs">A list of trading pairs to evaluate</param>
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>Top performing currency pair</returns>

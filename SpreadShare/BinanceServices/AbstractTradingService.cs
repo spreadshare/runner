@@ -102,6 +102,7 @@ namespace SpreadShare.BinanceServices
         /// <summary>
         /// Gets the top performing currency pair
         /// </summary>
+        /// <param name="pairs">A list of trading pairs to evaluate</param>
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>Top performing currency pair</returns>
