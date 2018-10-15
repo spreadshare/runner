@@ -5,7 +5,7 @@ namespace SpreadShare.SupportServices.SettingsService
     /// <summary>
     /// Service for managing settings
     /// </summary>
-    internal interface ISettingsService
+    public interface ISettingsService
     {
         /// <summary>
         /// Start the service

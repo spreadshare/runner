@@ -38,7 +38,7 @@ namespace SpreadShare.ZeroMQ
             Thread commandReceiver = new Thread(StartCommandReceiver);
             commandReceiver.Start();
 
-            return new ResponseObject(ResponseCodes.Success);
+            return new ResponseObject(ResponseCode.Success);
         }
 
         /// <summary>

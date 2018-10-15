@@ -3,14 +3,14 @@
     /// <summary>
     /// ResponseObject with string data
     /// </summary>
-    internal class ResponseObject : ResponseObject<string>
+    public class ResponseObject : ResponseObject<string>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResponseObject"/> class.
         /// </summary>
         /// <param name="code">Status of the response</param>
         /// <param name="data">Data concerning the response</param>
-        public ResponseObject(ResponseCodes code, string data = "")
+        public ResponseObject(ResponseCode code, string data = "")
             : base(code, data)
         {
         }

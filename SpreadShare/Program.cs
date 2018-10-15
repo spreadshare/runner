@@ -106,7 +106,7 @@ namespace SpreadShare
                 {
                     var strategy = serviceProvider.GetService<IStrategy>();
                     var strategyResult = strategy.Start();
-                    if (strategyResult.Code != ResponseCodes.Success)
+                    if (strategyResult.Code != ResponseCode.Success)
                     {
                         logger.LogError($"Strategy failed to start, report: {strategyResult}");
                     }
