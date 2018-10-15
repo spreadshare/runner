@@ -4,7 +4,7 @@
     /// Object representation of the code of the response to an action
     /// </summary>
     /// TODO: Should this not be called ResponseStatus?
-    public enum ResponseCode
+    internal enum ResponseCodes
     {
         /// <summary>
         /// The action resulted in an error

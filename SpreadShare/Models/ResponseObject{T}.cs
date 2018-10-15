@@ -4,28 +4,28 @@
     /// Object representing the response of a performed action
     /// </summary>
     /// <typeparam name="T">Type of the response data</typeparam>
-    public class ResponseObject<T>
+    internal class ResponseObject<T>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResponseObject{T}"/> class.
         /// </summary>
-        /// <param name="code">Status of the response</param>
+        /// <param name="codes">Status of the response</param>
         /// <param name="msg">Message concerning the status</param>
-        public ResponseObject(ResponseCode code, string msg)
+        public ResponseObject(ResponseCodes codes, string msg)
         {
-            Code = code;
+            Codes = codes;
             Message = msg;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ResponseObject{T}"/> class.
         /// </summary>
-        /// <param name="code">Status of the response</param>
+        /// <param name="codes">Status of the response</param>
         /// <param name="data">Data concerning the response</param>
         /// <param name="message">Message concerning the status</param>
-        public ResponseObject(ResponseCode code, T data, string message = "")
+        public ResponseObject(ResponseCodes codes, T data, string message = "")
         {
-            Code = code;
+            Codes = codes;
             Data = data;
             Message = message;
         }
@@ -33,17 +33,17 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="ResponseObject{T}"/> class.
         /// </summary>
-        /// <param name="code">Status of the response</param>
-        public ResponseObject(ResponseCode code)
+        /// <param name="codes">Status of the response</param>
+        public ResponseObject(ResponseCodes codes)
         {
-            Code = code;
+            Codes = codes;
             Message = string.Empty;
         }
 
         /// <summary>
         /// Gets the code of the response
         /// </summary>
-        public ResponseCode Code { get; }
+        public ResponseCodes Codes { get; }
 
         /// <summary>
         /// Gets the message of the response
@@ -58,9 +58,9 @@
         /// <summary>
         /// Gets a value indicating whether returns whether the response was a success
         /// </summary>
-        public bool Success => Code == ResponseCode.Success;
+        public bool Success => Codes == ResponseCodes.Success;
 
         /// <inheritdoc />
-        public override string ToString() => $"{Code} | data: {Data} | msg: {Message}";
+        public override string ToString() => $"{Codes} | data: {Data} | msg: {Message}";
     }
 }

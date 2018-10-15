@@ -13,7 +13,7 @@ namespace SpreadShare.SupportServices.SettingsServices
     /// <summary>
     /// Service for managing settings
     /// </summary>
-    public class SettingsService : ISettingsService
+    internal class SettingsService : ISettingsService
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
@@ -58,10 +58,10 @@ namespace SpreadShare.SupportServices.SettingsServices
             catch (Exception e)
             {
                 _logger.LogError(e.ToString());
-                return new ResponseObject(ResponseCode.Error, e.Message);
+                return new ResponseObject(ResponseCodes.Error, e.Message);
             }
 
-            return new ResponseObject(ResponseCode.Success);
+            return new ResponseObject(ResponseCodes.Success);
         }
 
         /// <summary>

@@ -3,19 +3,19 @@
     /// <summary>
     /// ResponseObject with string data
     /// </summary>
-    public class ResponseObject : ResponseObject<string>
+    internal class ResponseObject : ResponseObject<string>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResponseObject"/> class.
         /// </summary>
-        /// <param name="code">Status of the response</param>
+        /// <param name="codes">Status of the response</param>
         /// <param name="data">Data concerning the response</param>
-        public ResponseObject(ResponseCode code, string data = "")
-            : base(code, data)
+        public ResponseObject(ResponseCodes codes, string data = "")
+            : base(codes, data)
         {
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"{Code} | msg: {Message}";
+        public override string ToString() => $"{Codes} | msg: {Message}";
     }
 }

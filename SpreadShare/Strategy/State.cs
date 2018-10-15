@@ -52,7 +52,7 @@ namespace SpreadShare.Strategy
         /// Callback when the timer elapses (fired by StateManager)
         /// </summary>
         /// <returns>Whether the specified callback was successful</returns>
-        public virtual ResponseObject OnTimer() => new ResponseObject(ResponseCode.NotDefined);
+        public virtual ResponseObject OnTimer() => new ResponseObject(ResponseCodes.NotDefined);
 
         /// <summary>
         /// Switching states

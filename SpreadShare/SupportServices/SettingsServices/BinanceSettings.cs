@@ -3,7 +3,7 @@ namespace SpreadShare.SupportServices.SettingsServices
     /// <summary>
     /// Settings for the Binance exchange
     /// </summary>
-    public class BinanceSettings
+    internal class BinanceSettings
     {
         /// <summary>
         /// Gets or sets the credentials for Binance

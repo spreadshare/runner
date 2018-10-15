@@ -35,7 +35,7 @@ namespace SpreadShare.Tests.UserService
             {
                 var x = userService.GetPortfolio();
                 Console.WriteLine(x.Success);
-                Console.WriteLine(x.Code);
+                Console.WriteLine(x.Codes);
                 Thread.Sleep(3600000);
             }
         }

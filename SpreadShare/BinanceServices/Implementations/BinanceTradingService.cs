@@ -80,10 +80,10 @@ namespace SpreadShare.BinanceServices.Implementations
                     }
                 }
 
-                return new ResponseObject(ResponseCode.Success);
+                return new ResponseObject(ResponseCodes.Success);
             }
 
-            return new ResponseObject(ResponseCode.Error, $"Authenticated Binance request failed: {result.Error.Message}");
+            return new ResponseObject(ResponseCodes.Error, $"Authenticated Binance request failed: {result.Error.Message}");
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace SpreadShare.BinanceServices.Implementations
             var query = _userService.GetPortfolio();
             if (!query.Success)
             {
-                return new ResponseObject(ResponseCode.Error, "Could not retrieve assets");
+                return new ResponseObject(ResponseCodes.Error, "Could not retrieve assets");
             }
 
             decimal correction = 1.0M;
@@ -118,7 +118,7 @@ namespace SpreadShare.BinanceServices.Implementations
                     }
                     else
                     {
-                        return new ResponseObject(ResponseCode.Error, priceQuery.ToString());
+                        return new ResponseObject(ResponseCodes.Error, priceQuery.ToString());
                     }
                 }
 
@@ -137,7 +137,7 @@ namespace SpreadShare.BinanceServices.Implementations
                 correction -= 0.01M;
             }
 
-            return new ResponseObject(ResponseCode.Error, $"Market order failed, even after underestimating wth a factor of {correction}");
+            return new ResponseObject(ResponseCodes.Error, $"Market order failed, even after underestimating wth a factor of {correction}");
         }
 
         /// <summary>
@@ -157,10 +157,10 @@ namespace SpreadShare.BinanceServices.Implementations
             if (!response.Success)
             {
                 _logger.LogWarning($"Could not fetch price for {pair} from binance");
-                return new ResponseObject<decimal>(ResponseCode.Error);
+                return new ResponseObject<decimal>(ResponseCodes.Error);
             }
 
-            return new ResponseObject<decimal>(ResponseCode.Success, response.Data.Price);
+            return new ResponseObject<decimal>(ResponseCodes.Success, response.Data.Price);
         }
 
         /// <inheritdoc/>
@@ -170,11 +170,11 @@ namespace SpreadShare.BinanceServices.Implementations
             if (!response.Success)
             {
                 _logger.LogWarning($"Could not fetch top bid for {pair} from binance");
-                return new ResponseObject<decimal>(ResponseCode.Error);
+                return new ResponseObject<decimal>(ResponseCodes.Error);
             }
 
             decimal ret = response.Data.Bids.Max(x => x.Price);
-            return new ResponseObject<decimal>(ResponseCode.Success, ret);
+            return new ResponseObject<decimal>(ResponseCodes.Success, ret);
         }
 
         /// <inheritdoc/>
@@ -184,11 +184,11 @@ namespace SpreadShare.BinanceServices.Implementations
             if (!response.Success)
             {
                 _logger.LogWarning($"Could not fetch top ask for {pair} from binance");
-                return new ResponseObject<decimal>(ResponseCode.Error);
+                return new ResponseObject<decimal>(ResponseCodes.Error);
             }
 
             decimal ret = response.Data.Asks.Max(x => x.Price);
-            return new ResponseObject<decimal>(ResponseCode.Success, ret);
+            return new ResponseObject<decimal>(ResponseCodes.Success, ret);
         }
 
         /// <summary>
@@ -213,12 +213,12 @@ namespace SpreadShare.BinanceServices.Implementations
                 var length = response.Data.Length;
                 var first = response.Data[0].Open;
                 var last = response.Data[length - 1].Close;
-                return new ResponseObject<decimal>(ResponseCode.Success, last / first);
+                return new ResponseObject<decimal>(ResponseCodes.Success, last / first);
             }
 
             _logger.LogCritical(response.Error.Message);
             _logger.LogWarning($"Could not fetch price for {pair} from binance!");
-            return new ResponseObject<decimal>(ResponseCode.Error);
+            return new ResponseObject<decimal>(ResponseCodes.Error);
         }
 
         /// <summary>
@@ -242,14 +242,14 @@ namespace SpreadShare.BinanceServices.Implementations
             {
                 var performanceQuery = GetPerformancePastHours(tradingPair, hoursBack, endTime);
                 decimal performance;
-                if (performanceQuery.Code == ResponseCode.Success)
+                if (performanceQuery.Codes == ResponseCodes.Success)
                 {
                     performance = performanceQuery.Data;
                 }
 else
                 {
                     _logger.LogWarning($"Error fetching performance data: {performanceQuery}");
-                    return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCode.Error, performanceQuery.ToString());
+                    return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Error, performanceQuery.ToString());
                 }
 
                 if (max < performance)
@@ -261,10 +261,10 @@ else
 
             if (maxTradingPair == null)
             {
-                return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCode.Error, "No trading pairs defined");
+                return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Error, "No trading pairs defined");
             }
 
-            return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCode.Success, new Tuple<CurrencyPair, decimal>(maxTradingPair, max));
+            return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCodes.Success, new Tuple<CurrencyPair, decimal>(maxTradingPair, max));
         }
 
         /// <inheritdoc />
@@ -306,7 +306,7 @@ else
                     state = orderQuery.Data.Status;
                     if (state == OrderStatus.Filled)
                     {
-                        return new ResponseObject(ResponseCode.Success);
+                        return new ResponseObject(ResponseCodes.Success);
                     }
                 }
 
@@ -321,7 +321,7 @@ else
                 }
             }
 
-            return new ResponseObject(ResponseCode.Error, $"Trade was not filled or queried in time ({attempts} attempts), last state: {state}");
+            return new ResponseObject(ResponseCodes.Error, $"Trade was not filled or queried in time ({attempts} attempts), last state: {state}");
         }
     }
 }

@@ -65,13 +65,13 @@ namespace SpreadShare.BinanceServices.Implementations
             if (!accountInfo.Success)
             {
                 _logger.LogCritical($"Could not get assets: {accountInfo.Error.Message}");
-                return new ResponseObject<Assets>(ResponseCode.Error);
+                return new ResponseObject<Assets>(ResponseCodes.Error);
             }
 
             // Map to general ExchangeBalance datatype for parsing to assets object.
             var values = accountInfo.Data.Balances.Select(x => new ExchangeBalance(x.Asset, x.Free, x.Locked)).ToList();
 
-            return new ResponseObject<Assets>(ResponseCode.Success, new Assets(values));
+            return new ResponseObject<Assets>(ResponseCodes.Success, new Assets(values));
         }
 
         /// <inheritdoc/>
@@ -108,7 +108,7 @@ namespace SpreadShare.BinanceServices.Implementations
             if (!response.Success)
             {
                 _logger.LogError("Unable to obtain listenKey");
-                return new ResponseObject(ResponseCode.Error);
+                return new ResponseObject(ResponseCodes.Error);
             }
 
             var listenKey = response.Data;
@@ -138,7 +138,7 @@ namespace SpreadShare.BinanceServices.Implementations
             };
 
             _logger.LogInformation("Binance User Service was successfully started!");
-            return new ResponseObject(ResponseCode.Success);
+            return new ResponseObject(ResponseCodes.Success);
         }
     }
 }

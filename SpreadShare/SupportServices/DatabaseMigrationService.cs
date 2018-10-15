@@ -28,11 +28,11 @@ namespace SpreadShare.SupportServices
             try
             {
                 _dbContext.Database.Migrate();
-                return new ResponseObject(ResponseCode.Success);
+                return new ResponseObject(ResponseCodes.Success);
             }
             catch (System.Net.Sockets.SocketException e)
             {
-                return new ResponseObject(ResponseCode.Error, e.Message);
+                return new ResponseObject(ResponseCodes.Error, e.Message);
             }
         }
     }

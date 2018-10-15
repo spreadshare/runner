@@ -47,7 +47,7 @@ namespace SpreadShare.BinanceServices.Implementations
             if (!getListenKey.Success)
             {
                 _logger.LogCritical($"Unable to obtain ListenKey for Binance WebSocket: {getListenKey.Error.Message}");
-                return new ResponseObject<string>(ResponseCode.Error);
+                return new ResponseObject<string>(ResponseCodes.Error);
             }
 
             _listenKey = getListenKey.Data.ListenKey;
@@ -55,7 +55,7 @@ namespace SpreadShare.BinanceServices.Implementations
             // Set timer every 30 min for autorenewal
             SetTimer();
 
-            return new ResponseObject<string>(ResponseCode.Success, _listenKey, "Successfully obtained listenKey");
+            return new ResponseObject<string>(ResponseCodes.Success, _listenKey, "Successfully obtained listenKey");
         }
 
         /// <inheritdoc/>

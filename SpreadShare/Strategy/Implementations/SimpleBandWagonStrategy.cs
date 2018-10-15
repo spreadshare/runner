@@ -51,7 +51,7 @@ namespace SpreadShare.Strategy.Implementations
                 _userService,
                 _settingsService);
 
-            return new ResponseObject(ResponseCode.Success);
+            return new ResponseObject(ResponseCodes.Success);
         }
 
         /// <inheritdoc />
@@ -301,7 +301,7 @@ namespace SpreadShare.Strategy.Implementations
             SwitchState(new CheckPositionValidityState());
 
             // TODO: Will this return statement fire before or after CheckPositionValidity has occured?
-            return new ResponseObject(ResponseCode.Success);
+            return new ResponseObject(ResponseCodes.Success);
         }
 
         /// <inheritdoc />
@@ -341,7 +341,7 @@ namespace SpreadShare.Strategy.Implementations
         public override ResponseObject OnTimer()
         {
             SwitchState(_callback);
-            return new ResponseObject(ResponseCode.Success);
+            return new ResponseObject(ResponseCodes.Success);
         }
 
         /// <inheritdoc />
