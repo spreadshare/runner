@@ -18,8 +18,6 @@
     <Rule Id="SA1633" Action="None" />
     <!--Ignored rule SA1402: Only one class per file, inconvient for statemachine-->
     <Rule Id="SA1402" Action="None" />
-    <!--Ignored rule CA2227: False positive in test assembly-->
-    <Rule Id="CA2227" Action="None" />
 
 
     <!--CHANGED FROM INFORMATION TO WARNING-->
