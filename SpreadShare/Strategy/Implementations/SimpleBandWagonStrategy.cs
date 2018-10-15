@@ -82,7 +82,7 @@ namespace SpreadShare.Strategy.Implementations
             // Retrieve global settings
             Currency baseSymbol = Parent.Settings.BaseCurrency;
             uint checkTime = Parent.Settings.CheckTime;
-            var activeTradingPairs = SettingsService.SimpleBandWagonStrategySettings.ActiveTradingPairs;
+            var activeTradingPairs = Parent.Settings.ActiveTradingPairs;
 
             // Try to get to top performer, if not try state again after 10 seconds
             var winnerQuery = TradingService.GetTopPerformance(activeTradingPairs, checkTime, DateTime.Now);
@@ -99,9 +99,9 @@ namespace SpreadShare.Strategy.Implementations
             Logger.LogInformation($"Top performer from the past {checkTime} hours is {winnerPair} | {deltaPercentage}%");
 
             // Filter wether this 'winner' is gained enough growth to undertake action, otherwise just got the WaitHolding state again.
-            if (deltaPercentage < SettingsService.SimpleBandWagonStrategySettings.MinimalGrowthPercentage)
+            if (deltaPercentage < Parent.Settings.MinimalGrowthPercentage)
             {
-                Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagonStrategySettings.MinimalGrowthPercentage}%, disregard.");
+                Logger.LogInformation($"Growth is less than {Parent.Settings.MinimalGrowthPercentage}%, disregard.");
                 SwitchState(new RevertToBaseState());
                 return;
             }
@@ -162,8 +162,8 @@ namespace SpreadShare.Strategy.Implementations
         protected override void Run()
         {
             // Retrieve globals from the settings.
-            Currency baseSymbol = SettingsService.SimpleBandWagonStrategySettings.BaseCurrency;
-            decimal valueMinimum = SettingsService.SimpleBandWagonStrategySettings.MinimalRevertValue;
+            Currency baseSymbol = Parent.Settings.BaseCurrency;
+            decimal valueMinimum = Parent.Settings.MinimalRevertValue;
 
             // Retrieve the portfolio, using a fallback in case of failure.
             var assetsQuery = UserService.GetPortfolio();
@@ -241,8 +241,8 @@ namespace SpreadShare.Strategy.Implementations
         protected override void Run()
         {
             // Retrieve globals from the settings.
-            uint checkTime = SettingsService.SimpleBandWagonStrategySettings.CheckTime;
-            var activeTradingPairs = SettingsService.SimpleBandWagonStrategySettings.ActiveTradingPairs;
+            uint checkTime = Parent.Settings.CheckTime;
+            var activeTradingPairs = Parent.Settings.ActiveTradingPairs;
 
             // Try to retrieve the top performer, using a tryAfterWait fallback in case of failure.
             Logger.LogInformation($"Looking for the top performer from the previous {checkTime} hours");
@@ -264,9 +264,9 @@ namespace SpreadShare.Strategy.Implementations
             Logger.LogInformation($"Top performer from the past {checkTime} hours is {winnerPair} | {deltaPercentage}%");
 
             // Filter wether this 'winner' is gained enough growth to undertake action, otherwise just got the WaitHolding state again.
-            if (deltaPercentage < SettingsService.SimpleBandWagonStrategySettings.MinimalGrowthPercentage)
+            if (deltaPercentage < Parent.Settings.MinimalGrowthPercentage)
             {
-                Logger.LogInformation($"Growth is less than {SettingsService.SimpleBandWagonStrategySettings.MinimalGrowthPercentage}%, disregard.");
+                Logger.LogInformation($"Growth is less than {Parent.Settings.MinimalGrowthPercentage}%, disregard.");
                 SwitchState(new WaitHoldingState());
                 return;
             }
@@ -305,11 +305,11 @@ namespace SpreadShare.Strategy.Implementations
         /// <inheritdoc />
         protected override void Run()
         {
-            Logger.LogInformation($"Going to sleep for {SettingsService.SimpleBandWagonStrategySettings.HoldTime} hours ({DateTime.UtcNow})");
+            Logger.LogInformation($"Going to sleep for {Parent.Settings.HoldTime} hours ({DateTime.UtcNow})");
 
             // 1000 ms / s
             // 3600 s / h
-            SetTimer(1000 * 3600 * SettingsService.SimpleBandWagonStrategySettings.HoldTime);
+            SetTimer(1000 * 3600 * Parent.Settings.HoldTime);
         }
     }
 
