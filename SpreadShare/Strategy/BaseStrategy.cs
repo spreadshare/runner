@@ -14,20 +14,9 @@ namespace SpreadShare.Strategy
     internal abstract class BaseStrategy<T> : IStrategy
        where T : StrategySettings
     {
-        /// <summary>
-        /// Used for creating logging output
-        /// </summary>
-        protected readonly ILoggerFactory LoggerFactory;
-
-        /// <summary>
-        /// Used for trading
-        /// </summary>
-        protected readonly ITradingService TradingService;
-
-        /// <summary>
-        /// Used to get information about the specific account
-        /// </summary>
-        protected readonly IUserService UserService;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly ITradingService _tradingService;
+        private readonly IUserService _userService;
 
         /// <summary>
         /// Used to get information from the appsettings.json
@@ -48,9 +37,9 @@ namespace SpreadShare.Strategy
             IUserService userService,
             ISettingsService settingsService)
         {
-            LoggerFactory = loggerFactory;
-            TradingService = tradingService;
-            UserService = userService;
+            _loggerFactory = loggerFactory;
+            _tradingService = tradingService;
+            _userService = userService;
             SettingsService = settingsService as SettingsService;
         }
 
@@ -73,9 +62,9 @@ namespace SpreadShare.Strategy
             StateManager = new StateManager<T>(
                 Settings,
                 GetInitialState(),
-                LoggerFactory,
-                TradingService,
-                UserService);
+                _loggerFactory,
+                _tradingService,
+                _userService);
 
             return new ResponseObject(ResponseCodes.Success);
         }
