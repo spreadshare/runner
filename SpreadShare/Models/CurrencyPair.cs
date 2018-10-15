@@ -7,7 +7,7 @@ namespace SpreadShare.Models
     /// Object representation of a currency pair
     /// </summary>
     /// TODO: Should this not be called trading pair?
-    public class CurrencyPair
+    internal class CurrencyPair
     {
         private static readonly Dictionary<string, CurrencyPair> Table = new Dictionary<string, CurrencyPair>();
         private readonly int _decimals;

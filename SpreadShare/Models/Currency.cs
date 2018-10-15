@@ -3,7 +3,7 @@ namespace SpreadShare.Models
     /// <summary>
     /// Object representation of a currency
     /// </summary>
-    public class Currency
+    internal class Currency
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Currency"/> class.
