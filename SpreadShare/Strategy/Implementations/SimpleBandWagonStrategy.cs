@@ -60,8 +60,6 @@ namespace SpreadShare.Strategy.Implementations
     /// <summary>
     /// Starting state of the strategy
     /// </summary>
-    // TODO: This state seems entirely unnecessary?
-    // TODO^: Little effort and give a nice confirmation that all has started well.
     internal class EntryState : State<SimpleBandWagonStrategySettings>
     {
         /// <inheritdoc />
