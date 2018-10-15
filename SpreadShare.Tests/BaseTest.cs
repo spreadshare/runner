@@ -29,11 +29,6 @@ namespace SpreadShare.Tests
             TestLoggingProvider = new TestLoggingProvider(outputHelper);
             loggerFactory.AddProvider(TestLoggingProvider);
             Logger = loggerFactory.CreateLogger(GetType());
-            if (!settingsStarted)
-            {
-                SettingsService.Start();
-                settingsStarted = true;
-            }
         }
 
         /// <summary>
