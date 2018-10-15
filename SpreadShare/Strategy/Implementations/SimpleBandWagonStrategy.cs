@@ -73,8 +73,8 @@ namespace SpreadShare.Strategy.Implementations
                 var winnerQuery = TradingService.GetTopPerformance(activeTradingPairs, checkTime, DateTime.Now);
                 if (!winnerQuery.Success)
                 {
-                    Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 10 seconds");
-                    SwitchState(new TryAfterWaitState(10000, new CheckPositionValidityState()));
+                    Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 1 minute");
+                    SwitchState(new TryAfterWaitState(1, new CheckPositionValidityState()));
                     return;
                 }
 
@@ -95,8 +95,8 @@ namespace SpreadShare.Strategy.Implementations
                 var assetsQuery = UserService.GetPortfolio();
                 if (!assetsQuery.Success)
                 {
-                    Logger.LogError($"Could not get portfolio!\n{assetsQuery}\ntrying again after 10 seconds");
-                    SwitchState(new TryAfterWaitState(10000, new CheckPositionValidityState()));
+                    Logger.LogError($"Could not get portfolio!\n{assetsQuery}\ntrying again after 1 minute");
+                    SwitchState(new TryAfterWaitState(1, new CheckPositionValidityState()));
                     return;
                 }
 
@@ -154,8 +154,8 @@ namespace SpreadShare.Strategy.Implementations
                 var assetsQuery = UserService.GetPortfolio();
                 if (!assetsQuery.Success)
                 {
-                    Logger.LogWarning("Could not get portfolio, going idle for 10 seconds, then try again.");
-                    SwitchState(new TryAfterWaitState(10000, new RevertToBaseState()));
+                    Logger.LogWarning("Could not get portfolio, going idle for 1 minute, then try again.");
+                    SwitchState(new TryAfterWaitState(1, new RevertToBaseState()));
                     return;
                 }
 
@@ -238,8 +238,8 @@ namespace SpreadShare.Strategy.Implementations
                 }
                 else
                 {
-                    Logger.LogWarning($"Could not fetch top performer, {query}\nRetrying state after 10 seconds");
-                    SwitchState(new TryAfterWaitState(10000, new BuyState()));
+                    Logger.LogWarning($"Could not fetch top performer, {query}\nRetrying state after 1 minute");
+                    SwitchState(new TryAfterWaitState(1, new BuyState()));
                     return;
                 }
 
@@ -264,8 +264,8 @@ namespace SpreadShare.Strategy.Implementations
                 }
                 else
                 {
-                    Logger.LogError($"Order has failed, retrying state in 10 seconds\n{response}");
-                    SwitchState(new TryAfterWaitState(10000, new BuyState()));
+                    Logger.LogError($"Order has failed, retrying state in 1 minute\n{response}");
+                    SwitchState(new TryAfterWaitState(1, new BuyState()));
                 }
             }
         }
@@ -292,8 +292,6 @@ namespace SpreadShare.Strategy.Implementations
             {
                 Logger.LogInformation($"Going to sleep for {StrategySettings.HoldTime} hours ({DateTime.UtcNow})");
 
-                // 1000 ms / s
-                // 3600 s / h
                 SetTimer(1000 * 3600 * StrategySettings.HoldTime);
             }
         }
@@ -310,7 +308,7 @@ namespace SpreadShare.Strategy.Implementations
             /// <summary>
             /// Initializes a new instance of the <see cref="TryAfterWaitState"/> class.
             /// </summary>
-            /// <param name="idleTime">The amount of milliseconds to wait</param>
+            /// <param name="idleTime">The number of minutes to wait.</param>
             /// <param name="callback">The state to which to return after the idleTime,
             /// This will likely be a new instance of the state from which this state is
             /// created.</param>
