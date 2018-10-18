@@ -1,6 +1,6 @@
 ﻿using SpreadShare.Models;
 
-namespace SpreadShare.Algorithms.Common
+namespace SpreadShare.Algorithms
 {
     /// <summary>
     /// Interface for all algorithms

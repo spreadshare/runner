@@ -3,7 +3,7 @@ using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
 
-namespace SpreadShare.Algorithms.Common
+namespace SpreadShare.Algorithms
 {
     /// <summary>
     /// Base class for all algorithms
