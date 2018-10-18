@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices
+namespace SpreadShare.ExchangeServices.Allocation
 {
     /// <summary>
     /// This class provides allocation management for multiple strategies.
