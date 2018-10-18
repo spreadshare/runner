@@ -8,7 +8,7 @@ namespace SpreadShare.ExchangeServices.Allocation
     /// <summary>
     /// This class provides allocation management for multiple strategies.
     /// </summary>
-    internal class AllocationManager
+    internal class AllocationManager : TradeObserver
     {
         // TODO: Is the DustThreshold different per currency?
         private const decimal DustThreshold = 0.01M;
@@ -101,15 +101,19 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <summary>
-        /// Get weakened version of allocation manager for the trading provider
+        /// Get weakened version of allocation manager for the trading provider.
         /// </summary>
         /// <returns>Weakened version of allocation manager</returns>
         public WeakAllocationManager GetWeakAllocationManager() => new WeakAllocationManager(this);
 
+        /// <inheritdoc />
+        public override void Update(Type algorithm) => UpdatePortfolio(algorithm);
+
         /// <summary>
         /// Update portfolio after trade.
         /// </summary>
-        private void UpdatePortfolio()
+        /// <param name="algorithm">Algorithm that has traded</param>
+        private void UpdatePortfolio(Type algorithm)
         {
             throw new NotImplementedException("Waiting for PortfolioFetcherService to be implemented");
         }
