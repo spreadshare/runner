@@ -2,9 +2,10 @@
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SpreadShare.Algorithms;
+using SpreadShare.Algorithms.Common;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
-using SpreadShare.Strategy;
 using SpreadShare.SupportServices.SettingsServices;
 using SpreadShare.ZeroMQ;
 

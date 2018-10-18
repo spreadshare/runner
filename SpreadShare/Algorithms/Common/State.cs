@@ -3,7 +3,7 @@ using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
 
-namespace SpreadShare.Strategy
+namespace SpreadShare.Algorithms.Common
 {
     /// <summary>
     /// Base class of a state of a strategy

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.SupportServices.SettingsServices;
 
-namespace SpreadShare.Strategy
+namespace SpreadShare.Algorithms.Common
 {
     /// <summary>
     /// Object managing the active state and related resources

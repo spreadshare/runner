@@ -1,6 +1,6 @@
 ﻿using SpreadShare.Models;
 
-namespace SpreadShare.Strategy
+namespace SpreadShare.Algorithms.Common
 {
     /// <summary>
     /// Interface for all strategies
