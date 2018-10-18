@@ -6,7 +6,7 @@ namespace SpreadShare.ExchangeServices
     /// <summary>
     /// Exchange implementation of the TimerProvider
     /// </summary>
-    internal class ExchangeTimerProvider : TimerProvider
+    internal class ExchangeTimerProvider : ITimerProvider
     {
         private CronDaemon _daemon;
         private Action _callback;
@@ -27,7 +27,7 @@ namespace SpreadShare.ExchangeServices
         /// </summary>
         /// <param name="minutes">the minimum amount of minutes to wait</param>
         /// <param name="callback">the method to execute after given time</param>
-        public override void SetTimer(uint minutes, Action callback)
+        public void SetTimer(uint minutes, Action callback)
         {
             _callback = callback ?? throw new ArgumentException("Callback can't be null");
 
@@ -42,7 +42,7 @@ namespace SpreadShare.ExchangeServices
         }
 
         /// <inheritdoc />
-        public override void StopTimer()
+        public void StopTimer()
         {
             _daemon.Stop();
         }
