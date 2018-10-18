@@ -101,6 +101,12 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <summary>
+        /// Get weakened version of allocation manager for the trading provider
+        /// </summary>
+        /// <returns>Weakened version of allocation manager</returns>
+        public WeakAllocationManager GetWeakAllocationManager() => new WeakAllocationManager(this);
+
+        /// <summary>
         /// Update portfolio after trade.
         /// </summary>
         private void UpdatePortfolio()
