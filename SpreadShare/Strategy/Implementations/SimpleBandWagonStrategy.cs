@@ -292,7 +292,7 @@ namespace SpreadShare.Strategy.Implementations
             {
                 Logger.LogInformation($"Going to sleep for {StrategySettings.HoldTime} hours ({DateTime.UtcNow})");
 
-                SetTimer(1000 * 3600 * StrategySettings.HoldTime);
+                SetTimer(60 * StrategySettings.HoldTime);
             }
         }
 
