@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Binance.Net.Objects;
 using SpreadShare.Models;
 
-namespace SpreadShare.BinanceServices
+namespace SpreadShare.ExchangeServices
 {
     /// <summary>
     /// Service responsible for trading on an exchange

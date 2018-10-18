@@ -2,7 +2,7 @@
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.BinanceServices;
+using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.Strategy;
 using SpreadShare.SupportServices.SettingsServices;

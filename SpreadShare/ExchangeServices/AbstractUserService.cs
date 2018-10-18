@@ -1,6 +1,6 @@
 using SpreadShare.Models;
 
-namespace SpreadShare.BinanceServices
+namespace SpreadShare.ExchangeServices
 {
     /// <summary>
     /// Service responsible for fetching the portfolio and watching orders

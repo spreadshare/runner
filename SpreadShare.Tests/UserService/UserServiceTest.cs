@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
-using SpreadShare.BinanceServices;
-using SpreadShare.BinanceServices.Implementations;
+using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Binance;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -1,6 +1,6 @@
 ﻿using SpreadShare.Models;
 
-namespace SpreadShare.BinanceServices
+namespace SpreadShare.ExchangeServices
 {
     /// <summary>
     /// Interface for obtaining user information from an exchange
