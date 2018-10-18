@@ -105,11 +105,11 @@ namespace SpreadShare
 
                 if (userResult.Success && tradingResult.Success)
                 {
-                    var strategy = serviceProvider.GetService<IStrategy>();
-                    var strategyResult = strategy.Start();
-                    if (strategyResult.Code != ResponseCode.Success)
+                    var algorithm = serviceProvider.GetService<IStrategy>();
+                    var algorithmResponse = algorithm.Start();
+                    if (algorithmResponse.Code != ResponseCode.Success)
                     {
-                        logger.LogError($"Strategy failed to start, report: {strategyResult}");
+                        logger.LogError($"algorithm failed to start, report: {algorithmResponse}");
                     }
                 }
                 else

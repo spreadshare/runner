@@ -3,14 +3,14 @@
 namespace SpreadShare.Algorithms.Common
 {
     /// <summary>
-    /// Interface for all strategies
+    /// Interface for all algorithms
     /// </summary>
     internal interface IStrategy
     {
         /// <summary>
-        /// Starts the strategy
+        /// Starts the algorithm
         /// </summary>
-        /// <returns>Whether the strategy was started succesfully</returns>
+        /// <returns>Whether the algorithm was started succesfully</returns>
         ResponseObject Start();
     }
 }

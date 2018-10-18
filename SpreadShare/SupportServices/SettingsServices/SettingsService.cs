@@ -35,9 +35,9 @@ namespace SpreadShare.SupportServices.SettingsServices
         public BinanceSettings BinanceSettings { get; private set; }
 
         /// <summary>
-        /// Gets the settings for the simple bandwagon strategy
+        /// Gets the settings for the simple bandwagon algorithm
         /// </summary>
-        public SimpleBandWagonStrategySettings SimpleBandWagonStrategySettings { get; private set; }
+        public SimpleBandWagonAlgorithmSettings SimpleBandWagonAlgorithmSettings { get; private set; }
 
         /// <summary>
         /// Gets the (en/dis)able settings of services
@@ -123,22 +123,22 @@ namespace SpreadShare.SupportServices.SettingsServices
         }
 
         /// <summary>
-        /// Parse settings for the simple bandwagon strategy
+        /// Parse settings for the simple bandwagon algorithm.
         /// </summary>
         private void ParseSimpleBandwagonSettings()
         {
-            SimpleBandWagonStrategySettings = _configuration.GetSection("SimpleBandwagonStrategy").Get<SimpleBandWagonStrategySettings>();
+            SimpleBandWagonAlgorithmSettings = _configuration.GetSection("SimpleBandwagonStrategy").Get<SimpleBandWagonAlgorithmSettings>();
 
             // Get the ActiveTradingPairs as a seperate string list
             var currencies = _configuration.GetSection("SimpleBandWagonStrategy:ActiveTradingPairs")
                 .Get<List<string>>();
 
             // Map the trading pairs to currencies by parsing and assign to the settings.
-            SimpleBandWagonStrategySettings.ActiveTradingPairs = currencies.Select(CurrencyPair.Parse).ToList();
+            SimpleBandWagonAlgorithmSettings.ActiveTradingPairs = currencies.Select(CurrencyPair.Parse).ToList();
 
             // Parse the base currency string to a Currency type
             var baseStr = _configuration.GetSection("SimpleBandWagonStrategy:BaseCurrency").Get<string>();
-            SimpleBandWagonStrategySettings.BaseCurrency = new Currency(baseStr);
+            SimpleBandWagonAlgorithmSettings.BaseCurrency = new Currency(baseStr);
         }
     }
 }

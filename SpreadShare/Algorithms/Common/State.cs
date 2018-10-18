@@ -6,11 +6,11 @@ using SpreadShare.SupportServices.SettingsServices;
 namespace SpreadShare.Algorithms.Common
 {
     /// <summary>
-    /// Base class of a state of a strategy
+    /// Base class of a state of a algorithm
     /// </summary>
-    /// <typeparam name="T">The type of the parent strategy</typeparam>
+    /// <typeparam name="T">The type of the parent algorithm</typeparam>
     internal abstract class State<T>
-        where T : StrategySettings
+        where T : AlgorithmSettings
     {
         private StateManager<T> _stateManager;
 
@@ -30,9 +30,9 @@ namespace SpreadShare.Algorithms.Common
         protected AbstractUserService UserService { get; private set; }
 
         /// <summary>
-        /// Gets a link to the parent strategy
+        /// Gets a link to the parent algorithm settings
         /// </summary>
-        protected T StrategySettings { get; private set; }
+        protected T AlgorithmSettings { get; private set; }
 
         /// <summary>
         /// Initialise the state
@@ -45,7 +45,7 @@ namespace SpreadShare.Algorithms.Common
             TradingService = stateManager.TradingService;
             UserService = stateManager.UserService;
             Logger = loggerFactory.CreateLogger(GetType());
-            StrategySettings = _stateManager.StrategySettings;
+            AlgorithmSettings = _stateManager.AlgorithmSettings;
             Run();
         }
 

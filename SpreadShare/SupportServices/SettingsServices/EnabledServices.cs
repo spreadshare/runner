@@ -6,7 +6,7 @@ namespace SpreadShare.SupportServices.SettingsServices
     internal class EnabledServices
     {
         /// <summary>
-        /// Gets or sets a value indicating whether strategy service is enabled
+        /// Gets or sets a value indicating whether algorithm service is enabled
         /// </summary>
         public bool Strategy { get; set; }
 

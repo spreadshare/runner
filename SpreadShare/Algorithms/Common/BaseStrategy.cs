@@ -6,11 +6,11 @@ using SpreadShare.SupportServices.SettingsServices;
 namespace SpreadShare.Algorithms.Common
 {
     /// <summary>
-    /// Base class for all strategies
+    /// Base class for all algorithms
     /// </summary>
-    /// <typeparam name="T">The specific strategy that is associated with it</typeparam>
+    /// <typeparam name="T">The specific algorithm that is associated with it</typeparam>
     internal abstract class BaseStrategy<T> : IStrategy
-       where T : StrategySettings
+       where T : AlgorithmSettings
     {
         /// <summary>
         /// Used to get information from the appsettings.json
@@ -42,14 +42,14 @@ namespace SpreadShare.Algorithms.Common
         }
 
         /// <summary>
-        /// Gets the strategy's settings.
+        /// Gets the algorithm's settings.
         /// </summary>
         protected abstract T Settings { get; }
 
         /// <summary>
-        /// Start strategy with the initial state using a StateManager
+        /// Start algorithm with the initial state using a StateManager
         /// </summary>
-        /// <returns>Whether the stategy started succesfully</returns>
+        /// <returns>Whether the algorithm started succesfully</returns>
         public virtual ResponseObject Start()
         {
             var stateManager = new StateManager<T>(
@@ -63,9 +63,9 @@ namespace SpreadShare.Algorithms.Common
         }
 
         /// <summary>
-        /// Gets the initial state of the strategy
+        /// Gets the initial state of the algorithm
         /// </summary>
-        /// <returns>The initial state of the strategy</returns>
+        /// <returns>The initial state of the algorithm</returns>
         protected abstract State<T> GetInitialState();
     }
 }
