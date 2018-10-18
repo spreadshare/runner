@@ -14,5 +14,10 @@ namespace SpreadShare.ExchangeServices
         /// <param name="minutes">The amount of minutes to wait</param>
         /// <param name="callback">The method to execute after given time</param>
         public abstract void SetTimer(uint minutes, Action callback);
+
+        /// <summary>
+        /// Stop the timer
+        /// </summary>
+        public abstract void StopTimer();
     }
 }

@@ -41,6 +41,12 @@ namespace SpreadShare.ExchangeServices
             _daemon.Start();
         }
 
+        /// <inheritdoc />
+        public override void StopTimer()
+        {
+            _daemon.Stop();
+        }
+
         private void Execute()
         {
             if (_count++ > _targetCount)
