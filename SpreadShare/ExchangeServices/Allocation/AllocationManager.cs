@@ -6,7 +6,7 @@ using SpreadShare.Models;
 namespace SpreadShare.ExchangeServices.Allocation
 {
     /// <summary>
-    /// This class provides allocation management for multiple strategies.
+    /// This class provides allocation management for multiple algorithms.
     /// </summary>
     internal class AllocationManager : TradeObserver
     {
