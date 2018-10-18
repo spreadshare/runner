@@ -1,81 +1,65 @@
-﻿using System;
-using System.Linq;
+using System;
 using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
+using SpreadShare.ExchangeServices.Binance;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
 
-namespace SpreadShare.ExchangeServices.Binance
+namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 {
     /// <summary>
-    /// Service responsible for fetching the portfolio and watching orders
+    /// Binance implementantion of the communication service.
     /// </summary>
-    internal class BinanceUserService : AbstractUserService, IDisposable
+    internal class BinanceCommunicationsService : IExchangeCommunicationService, IDisposable
     {
-        private readonly BinanceCredentials _credentials;
+        private readonly BinanceCredentials _authy;
+        private readonly BinanceSettings _settings;
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
 
-        private BinanceClient _client;
-        private BinanceSocketClient _socketclient;
         private ListenKeyManager _listenKeyManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BinanceUserService"/> class.
+        /// Initializes a new instance of the <see cref="BinanceCommunicationsService"/> class.
         /// </summary>
-        /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        /// <param name="settingsService">Settings for extracting authentication variables</param>
-        public BinanceUserService(ILoggerFactory loggerFactory, ISettingsService settingsService)
+        /// <param name="loggerFactory">Used to create a logger to create output</param>
+        /// <param name="settings">Used to extract the binance settings</param>
+        public BinanceCommunicationsService(ILoggerFactory loggerFactory, ISettingsService settings)
         {
             _loggerFactory = loggerFactory;
             _logger = _loggerFactory.CreateLogger(GetType());
-            _credentials = (settingsService as SettingsService).BinanceSettings.Credentials;
+            _settings = ((SettingsService)settings).BinanceSettings;
+            _authy = _settings.Credentials;
         }
 
         /// <summary>
-        /// Start the BinanceUserService, will configure callback functions.
+        /// Gets the instance of the binance client
         /// </summary>
-        /// <returns>Whether the service was started successfully</returns>
-        public override ResponseObject Start()
-        {
-            // Setup the clients
-            _client = new BinanceClient();
-            var options = new BinanceSocketClientOptions { LogVerbosity = LogVerbosity.Debug };
-            _socketclient = new BinanceSocketClient(options);
+        public BinanceClient Client { get; private set; }
 
-            // Set credentials
-            _client.SetApiCredentials(_credentials.Key, _credentials.Secret);
+        /// <summary>
+        /// Gets the instance of the binance user socket
+        /// </summary>
+        public BinanceSocketClient Socket { get; private set; }
+
+        /// <inheritdoc />
+        public ResponseObject Start()
+        {
+            Client = new BinanceClient();
+            Client.SetApiCredentials(_authy.Key, _authy.Secret);
+
+            var options = new BinanceSocketClientOptions { LogVerbosity = LogVerbosity.Debug };
+            Socket = new BinanceSocketClient(options);
 
             // Setup ListenKeyManager
-            _listenKeyManager = new ListenKeyManager(_loggerFactory, _client);
+            _listenKeyManager = new ListenKeyManager(_loggerFactory, Client);
 
-            // Setup streams
             return EnableStreams();
         }
 
-        /// <summary>
-        /// Gets the portfolio of the user
-        /// </summary>
-        /// <returns>The portfolio</returns>
-        public override ResponseObject<Assets> GetPortfolio()
-        {
-            var accountInfo = _client.GetAccountInfo();
-            if (!accountInfo.Success)
-            {
-                _logger.LogCritical($"Could not get assets: {accountInfo.Error.Message}");
-                return new ResponseObject<Assets>(ResponseCode.Error);
-            }
-
-            // Map to general ExchangeBalance datatype for parsing to assets object.
-            var values = accountInfo.Data.Balances.Select(x => new ExchangeBalance(x.Asset, x.Free, x.Locked)).ToList();
-
-            return new ResponseObject<Assets>(ResponseCode.Success, new Assets(values));
-        }
-
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);
@@ -90,9 +74,9 @@ namespace SpreadShare.ExchangeServices.Binance
         {
             if (disposing)
             {
-                _client.Dispose();
-                _loggerFactory.Dispose();
-                _socketclient.Dispose();
+                _listenKeyManager?.Dispose();
+                Client?.Dispose();
+                Socket?.Dispose();
             }
         }
 
@@ -115,7 +99,7 @@ namespace SpreadShare.ExchangeServices.Binance
             var listenKey = response.Data;
 
             // Start socket connection
-            var succesOrderBook = _socketclient.SubscribeToUserStream(
+            var succesOrderBook = Socket.SubscribeToUserStream(
                 listenKey,
                 accountInfoUpdate =>
                 {

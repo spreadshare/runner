@@ -4,7 +4,7 @@ using Binance.Net;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Binance
+namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 {
     /// <summary>
     /// Object for obtaining and renewing listen keys for Binance
