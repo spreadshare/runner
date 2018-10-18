@@ -49,7 +49,7 @@ namespace SpreadShare.ExchangeServices
 
         private void Execute()
         {
-            if (_count++ > _targetCount)
+            if (_count++ < _targetCount)
             {
                 return;
             }
