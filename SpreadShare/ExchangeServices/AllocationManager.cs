@@ -27,7 +27,7 @@ namespace SpreadShare.ExchangeServices
         }
 
         /// <summary>
-        /// Sets initial configuration of allocations per algorithm
+        /// Sets initial configuration of allocations per algorithm.
         /// </summary>
         /// <param name="allocations">Initial set of allocations</param>
         public void SetInitialConfiguration(Dictionary<Type, Dictionary<Currency, decimal>> allocations)
@@ -69,7 +69,7 @@ namespace SpreadShare.ExchangeServices
         }
 
         /// <summary>
-        /// Get available funds for a given algorithm and currency
+        /// Get available funds for a given algorithm and currency.
         /// </summary>
         /// <param name="algorithm">Algorithm to get funds for</param>
         /// <param name="currency">Currency to get funds for</param>
@@ -98,6 +98,14 @@ namespace SpreadShare.ExchangeServices
             }
 
             return _allocations[algorithm][currency];
+        }
+
+        /// <summary>
+        /// Update portfolio after trade.
+        /// </summary>
+        private void UpdatePortfolio()
+        {
+            throw new NotImplementedException("Waiting for PortfolioFetcherService to be implemented");
         }
     }
 }
