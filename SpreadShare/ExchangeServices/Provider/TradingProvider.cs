@@ -1,7 +1,7 @@
 ﻿using Binance.Net.Objects;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices
+namespace SpreadShare.ExchangeServices.Provider
 {
     /// <summary>
     /// Provides trading capabilities.

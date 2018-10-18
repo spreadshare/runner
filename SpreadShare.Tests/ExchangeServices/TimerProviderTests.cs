@@ -1,7 +1,5 @@
 using System;
-using System.Threading;
-using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Provider;
 using Xunit;
 using Xunit.Abstractions;
 

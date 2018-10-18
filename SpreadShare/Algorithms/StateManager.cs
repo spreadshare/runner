@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms
