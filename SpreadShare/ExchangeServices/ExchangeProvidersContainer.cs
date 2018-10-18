@@ -19,19 +19,18 @@
         }
 
         /// <summary>
-        /// Provides data gathering capabilities.
+        /// Gets the provider for data gathering capabilities.
         /// </summary>
         public IDataProvider DataProvider { get; }
 
         /// <summary>
-        /// Provides timer and scheduling capabilities.
+        /// Gets the provider for timer and scheduling capabilities.
         /// </summary>
         public ITimerProvider TimerProvider { get; }
 
         /// <summary>
-        /// Provides trading capabilities.
+        /// Gets the provider for trading capabilities.
         /// </summary>
         public ITradingProvider TradingProvider { get; }
-
     }
 }
