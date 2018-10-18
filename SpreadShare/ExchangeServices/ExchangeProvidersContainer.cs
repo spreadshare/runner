@@ -1,4 +1,6 @@
-﻿namespace SpreadShare.ExchangeServices
+﻿using SpreadShare.ExchangeServices.Provider;
+
+namespace SpreadShare.ExchangeServices
 {
     /// <summary>
     /// Container that provides algorithms with the data gathering, timers and trading capabilities.

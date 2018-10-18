@@ -1,7 +1,7 @@
 using System;
 using Cron;
 
-namespace SpreadShare.ExchangeServices
+namespace SpreadShare.ExchangeServices.Provider
 {
     /// <summary>
     /// Exchange implementation of the TimerProvider

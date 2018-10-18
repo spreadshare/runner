@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
-using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Binance;
+using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 using Xunit;
 using Xunit.Abstractions;

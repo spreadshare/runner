@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 
 namespace SpreadShare.ExchangeServices.Binance

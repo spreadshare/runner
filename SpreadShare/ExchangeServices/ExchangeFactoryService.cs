@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Binance;
+using SpreadShare.ExchangeServices.Provider;
 
 namespace SpreadShare.ExchangeServices
 {
