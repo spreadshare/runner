@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
 
-namespace SpreadShare.BinanceServices.Implementations
+namespace SpreadShare.ExchangeServices.Binance
 {
     /// <summary>
     /// Service responsible for trading in Binance
