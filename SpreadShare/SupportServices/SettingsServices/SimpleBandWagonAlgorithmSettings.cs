@@ -4,9 +4,9 @@ using SpreadShare.Models;
 namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
-    /// Settings for the simple bandwagon strategy
+    /// Settings for the simple bandwagon algorithm
     /// </summary>
-    internal class SimpleBandWagonStrategySettings : StrategySettings
+    internal class SimpleBandWagonAlgorithmSettings : AlgorithmSettings
     {
         /// <summary>
         /// Gets or sets the list of active trading pairs

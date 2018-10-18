@@ -1,9 +1,9 @@
 namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
-    /// Abstract wrapper for strategy settings.
+    /// Abstract wrapper for algorithm settings.
     /// </summary>
-    public abstract class StrategySettings
+    public abstract class AlgorithmSettings
     {
     }
 }

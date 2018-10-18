@@ -2,7 +2,7 @@ using System;
 using Cron;
 using Microsoft.Extensions.Logging;
 
-namespace SpreadShare.Strategy
+namespace SpreadShare.Algorithms
 {
     /// <summary>
     /// A wrapper for the System.Thread.Timer class that doesn't fail on long waiting times.

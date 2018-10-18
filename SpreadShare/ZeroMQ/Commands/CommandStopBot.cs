@@ -1,7 +1,7 @@
 ﻿namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to stop the strategy execution
+    /// Command to stop the algorithm execution
     /// </summary>
     internal class CommandStopBot : Command
     {
