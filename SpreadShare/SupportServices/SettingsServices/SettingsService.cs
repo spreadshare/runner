@@ -130,14 +130,14 @@ namespace SpreadShare.SupportServices.SettingsServices
             SimpleBandWagonAlgorithmSettings = _configuration.GetSection("SimpleBandwagonStrategy").Get<SimpleBandWagonAlgorithmSettings>();
 
             // Get the ActiveTradingPairs as a seperate string list
-            var currencies = _configuration.GetSection("SimpleBandWagonStrategy:ActiveTradingPairs")
+            var currencies = _configuration.GetSection("SimpleBandWagonAlgorithm:ActiveTradingPairs")
                 .Get<List<string>>();
 
             // Map the trading pairs to currencies by parsing and assign to the settings.
             SimpleBandWagonAlgorithmSettings.ActiveTradingPairs = currencies.Select(CurrencyPair.Parse).ToList();
 
             // Parse the base currency string to a Currency type
-            var baseStr = _configuration.GetSection("SimpleBandWagonStrategy:BaseCurrency").Get<string>();
+            var baseStr = _configuration.GetSection("SimpleBandWagonAlgorithm:BaseCurrency").Get<string>();
             SimpleBandWagonAlgorithmSettings.BaseCurrency = new Currency(baseStr);
         }
     }

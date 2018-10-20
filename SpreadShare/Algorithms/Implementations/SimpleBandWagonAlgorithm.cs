@@ -17,16 +17,16 @@ namespace SpreadShare.Algorithms.Implementations
     /// fully change position to that asset and hold for the holdingTime before checking again.
     /// If their is no winner, remain in baseCurrency and check again after waitTime.
     /// </summary>
-    internal class SimpleBandWagonStrategy : BaseStrategy<SimpleBandWagonAlgorithmSettings>
+    internal class SimpleBandWagonAlgorithm : BaseAlgorithm<SimpleBandWagonAlgorithmSettings>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SimpleBandWagonStrategy"/> class.
+        /// Initializes a new instance of the <see cref="SimpleBandWagonAlgorithm"/> class.
         /// </summary>
         /// <param name="loggerFactory">Provided logger creating capabilities</param>
         /// <param name="tradingService">Provides trading capabilities</param>
         /// <param name="userService">Provides user data fetching capabilities</param>
         /// <param name="settingsService">Provides access to global settings</param>
-        public SimpleBandWagonStrategy(
+        public SimpleBandWagonAlgorithm(
             ILoggerFactory loggerFactory,
             ITradingService tradingService,
             IUserService userService,
