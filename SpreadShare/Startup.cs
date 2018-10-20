@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Binance;
 using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
@@ -106,6 +107,9 @@ namespace SpreadShare
 
             // Configuration files globals
             services.AddSingleton<ISettingsService, SettingsService>();
+
+            // Add Portfolio fetching
+            services.AddSingleton<IPortfolioFetcherService, PortfolioFetcherService>();
         }
     }
 }

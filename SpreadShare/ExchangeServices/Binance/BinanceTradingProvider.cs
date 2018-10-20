@@ -8,7 +8,7 @@ namespace SpreadShare.ExchangeServices.Binance
     /// <summary>
     /// Provides trading capabilities for Binance.
     /// </summary>
-    internal class BinanceTradingProvider : ITradingProvider
+    internal class BinanceTradingProvider : ITradingProvider, IExchangeSpecification
     {
         /// <inheritdoc />
         public ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
@@ -21,5 +21,8 @@ namespace SpreadShare.ExchangeServices.Binance
         {
             throw new NotImplementedException();
         }
+
+        /// <inheritdoc />
+        public Exchange GetExchangeType() => Exchange.Binance;
     }
 }

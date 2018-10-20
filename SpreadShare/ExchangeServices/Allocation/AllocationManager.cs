@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using SpreadShare.Algorithms;
+using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
+using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.ExchangeServices.Allocation
 {
@@ -110,15 +113,17 @@ namespace SpreadShare.ExchangeServices.Allocation
         public WeakAllocationManager GetWeakAllocationManager() => new WeakAllocationManager(this);
 
         /// <inheritdoc />
-        public override void Update(Type algorithm) => UpdatePortfolio(algorithm);
+        public override void Update(Type algorithm, IExchangeSpecification exchangeSpecification)
+            => UpdatePortfolio(algorithm, exchangeSpecification);
 
         /// <summary>
         /// Update portfolio after trade.
         /// </summary>
         /// <param name="algorithm">Algorithm that has traded</param>
-        private void UpdatePortfolio(Type algorithm)
+        /// <param name="exchangeSpecification">Specifies which exchange is used</param>
+        private void UpdatePortfolio(Type algorithm, IExchangeSpecification exchangeSpecification)
         {
-            _portfolioFetcherService.GetPortfolio();
+            _portfolioFetcherService.GetPortfolio(exchangeSpecification);
         }
     }
 }

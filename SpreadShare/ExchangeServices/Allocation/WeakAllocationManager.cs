@@ -1,4 +1,5 @@
 ﻿using System;
+using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 
 namespace SpreadShare.ExchangeServices.Allocation
@@ -42,6 +43,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// Trigger a portfolio update in the AllocationManager.
         /// </summary>
         /// <param name="algorithm">Algorithm that has traded</param>
-        public void Update(Type algorithm) => _allocationManager.Update(algorithm);
+        /// <param name="exchangeSpecification">Specifies which exchange is used</param>
+        public void Update(Type algorithm, IExchangeSpecification exchangeSpecification)
+            => _allocationManager.Update(algorithm, exchangeSpecification);
     }
 }
