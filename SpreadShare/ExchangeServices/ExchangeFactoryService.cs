@@ -10,6 +10,7 @@ namespace SpreadShare.ExchangeServices
     internal class ExchangeFactoryService
     {
         private readonly ILogger _logger;
+        private readonly ILoggerFactory _loggerFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExchangeFactoryService"/> class.
@@ -18,6 +19,7 @@ namespace SpreadShare.ExchangeServices
         public ExchangeFactoryService(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<ExchangeFactoryService>();
+            _loggerFactory = loggerFactory;
         }
 
         /// <summary>
@@ -26,8 +28,8 @@ namespace SpreadShare.ExchangeServices
         /// <returns>Binance container with providers</returns>
         public ExchangeProvidersContainer BuildContainer()
         {
-            var dataProviderImplementation = new BinanceDataProvider();
-            var tradingProviderImplementation = new BinanceTradingProvider();
+            var dataProviderImplementation = new BinanceDataProvider(_loggerFactory);
+            var tradingProviderImplementation = new BinanceTradingProvider(_loggerFactory);
 
             return new ExchangeProvidersContainer(
                 new DataProvider(dataProviderImplementation),
