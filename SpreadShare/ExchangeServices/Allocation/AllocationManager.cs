@@ -14,15 +14,18 @@ namespace SpreadShare.ExchangeServices.Allocation
         private const decimal DustThreshold = 0.01M;
 
         private readonly ILogger _logger;
+        private readonly IPortfolioFetcherService _portfolioFetcherService;
         private Dictionary<Type, Dictionary<Currency, decimal>> _allocations;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AllocationManager"/> class.
         /// </summary>
         /// <param name="loggerFactory">Provides logger instance</param>
-        public AllocationManager(ILoggerFactory loggerFactory)
+        /// <param name="portfolioFetcherService">Provides portfolio fetching capabilities</param>
+        public AllocationManager(ILoggerFactory loggerFactory, IPortfolioFetcherService portfolioFetcherService)
         {
             _logger = loggerFactory.CreateLogger<AllocationManager>();
+            _portfolioFetcherService = portfolioFetcherService;
             _allocations = null;
         }
 
@@ -115,7 +118,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="algorithm">Algorithm that has traded</param>
         private void UpdatePortfolio(Type algorithm)
         {
-            throw new NotImplementedException("Waiting for PortfolioFetcherService to be implemented");
+            _portfolioFetcherService.GetPortfolio();
         }
     }
 }
