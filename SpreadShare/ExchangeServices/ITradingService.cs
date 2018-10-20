@@ -1,6 +1,6 @@
 ﻿using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Provider
+namespace SpreadShare.ExchangeServices
 {
     /// <summary>
     /// Interface for trading with an exchange
