@@ -127,7 +127,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// </summary>
         private void ParseSimpleBandwagonSettings()
         {
-            SimpleBandWagonAlgorithmSettings = _configuration.GetSection("SimpleBandwagonStrategy").Get<SimpleBandWagonAlgorithmSettings>();
+            SimpleBandWagonAlgorithmSettings = _configuration.GetSection("SimpleBandWagonAlgorithm").Get<SimpleBandWagonAlgorithmSettings>();
 
             // Get the ActiveTradingPairs as a seperate string list
             var currencies = _configuration.GetSection("SimpleBandWagonAlgorithm:ActiveTradingPairs")

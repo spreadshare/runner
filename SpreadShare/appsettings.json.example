@@ -6,7 +6,7 @@
         "ReceiveWindow": 10000000,
         "Credentials": {
           "Key": "api_key",
-          "Secret": "api_key"
+          "Secret": "api_secret"
         }
     },
     "SimpleBandwagonAlgorithm": {
