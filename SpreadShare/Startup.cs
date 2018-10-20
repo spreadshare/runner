@@ -49,8 +49,8 @@ namespace SpreadShare
             // Add Binance User Websocket dependency
             services.AddSingleton<IUserService, BinanceUserService>();
 
-            // Strategy to be executed
-            services.AddSingleton<IStrategy, SimpleBandWagonStrategy>();
+            // Algorithm to be executed
+            services.AddSingleton<IAlgorithm, SimpleBandWagonAlgorithm>();
 
             // ZeroMQ Service to interface with other programs
             services.AddSingleton<IZeroMqService, ZeroMqService>();

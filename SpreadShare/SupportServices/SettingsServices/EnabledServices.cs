@@ -8,7 +8,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// <summary>
         /// Gets or sets a value indicating whether algorithm service is enabled
         /// </summary>
-        public bool Strategy { get; set; }
+        public bool Algorithm { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether trading service is enabled

@@ -10,7 +10,7 @@ namespace SpreadShare.Algorithms
     /// Base class for all algorithms
     /// </summary>
     /// <typeparam name="T">The specific algorithm that is associated with it</typeparam>
-    internal abstract class BaseStrategy<T> : IStrategy
+    internal abstract class BaseAlgorithm<T> : IAlgorithm
        where T : AlgorithmSettings
     {
         /// <summary>
@@ -23,14 +23,14 @@ namespace SpreadShare.Algorithms
         private readonly IUserService _userService;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BaseStrategy{T}"/> class.
+        /// Initializes a new instance of the <see cref="BaseAlgorithm{T}"/> class.
         /// Implements and provides dependencies required by the StateManager
         /// </summary>
         /// <param name="loggerFactory">Provided logger creating capabilities</param>
         /// <param name="tradingService">Provides trading capabilities</param>
         /// <param name="userService">Provides user data fetching capabilities</param>
         /// <param name="settingsService">Provides access to global settings</param>
-        protected BaseStrategy(
+        protected BaseAlgorithm(
             ILoggerFactory loggerFactory,
             ITradingService tradingService,
             IUserService userService,

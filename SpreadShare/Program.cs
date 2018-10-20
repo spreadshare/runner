@@ -87,7 +87,7 @@ namespace SpreadShare
             }
 
             // Start StrategyService
-            if (settings.EnabledServices.Strategy)
+            if (settings.EnabledServices.Algorithm)
             {
                 if (!settings.EnabledServices.Trading)
                 {
@@ -105,7 +105,7 @@ namespace SpreadShare
 
                 if (userResult.Success && tradingResult.Success)
                 {
-                    var algorithm = serviceProvider.GetService<IStrategy>();
+                    var algorithm = serviceProvider.GetService<IAlgorithm>();
                     var algorithmResponse = algorithm.Start();
                     if (algorithmResponse.Code != ResponseCode.Success)
                     {
@@ -114,7 +114,7 @@ namespace SpreadShare
                 }
                 else
                 {
-                    logger.LogError("Strategy not started because not all needed service started");
+                    logger.LogError("Algorithm not started because not all needed service started");
                     logger.LogError($"User service report: {userResult}");
                     logger.LogError($"Trading Service report: {tradingResult}");
                 }
