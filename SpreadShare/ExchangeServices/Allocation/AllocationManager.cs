@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
-using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.ExchangeServices.Allocation
 {
