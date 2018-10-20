@@ -4,10 +4,10 @@
     },
     "BinanceClientSettings": {
         "ReceiveWindow": 10000000,
-		"Credentials": {
-			"Key": "api_key",
-			"Secret": "api_key"
-		}
+        "Credentials": {
+          "Key": "api_key",
+          "Secret": "api_key"
+        }
     },
     "SimpleBandwagonAlgorithm": {
         "BaseCurrency": "ETH",
@@ -29,12 +29,12 @@
             "XLMETH",
             "XVGETH",
             "EOSETH"
-				]
+        ]
     }, 
-	 "EnabledServices": {
-			 "Algorithm": false,
-			 "Trading": false,
-			 "User": false,
-			 "ZeroMq": false 
-	 }
+   "EnabledServices": {
+       "Algorithm": false,
+       "Trading": false,
+       "User": false,
+       "ZeroMq": false 
+   }
 }
