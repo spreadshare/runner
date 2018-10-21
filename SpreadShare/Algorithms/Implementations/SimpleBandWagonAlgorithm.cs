@@ -117,12 +117,12 @@ namespace SpreadShare.Algorithms.Implementations
                     var query = DataProvider.GetCurrentPriceTopBid(pair);
 
                     // Use a value of zero for assets whose price retrievals fail.
-                    return query.Success ? new AssetValue(x.Symbol, x.Value * query.Data) : new AssetValue(x.Symbol, 0);
-                }).OrderBy(x => x.Value);
+                    return query.Success ? new AssetValue(x.Symbol, x.Amount * query.Data) : new AssetValue(x.Symbol, 0);
+                }).OrderBy(x => x.Amount);
                 Logger.LogInformation($"Most valuable asset in portfolio: {sorted.Last().Symbol}");
 
                 // Construct the most valueble asset as a currency
-                Currency majorityAsset = new Currency(sorted.Last().Symbol);
+                Currency majorityAsset = sorted.Last().Symbol;
 
                 // Verify if this asset was also the top performer (winner)
                 if (majorityAsset == winnerPair.Left)
@@ -163,7 +163,7 @@ namespace SpreadShare.Algorithms.Implementations
                 foreach (var asset in assets)
                 {
                     // Skip the base currency itself (ETHETH e.d. makes no sense)
-                    if (asset.Symbol == baseSymbol.ToString())
+                    if (asset.Symbol == baseSymbol)
                     {
                         continue;
                     }
@@ -193,7 +193,7 @@ namespace SpreadShare.Algorithms.Implementations
                     decimal price = priceQuery.Data;
 
                     // Check if the eth value of the asset exceeds the minimum to be consired relevant
-                    decimal value = price * asset.Value;
+                    decimal value = price * asset.Amount;
                     if (value >= valueMinimum)
                     {
                         Logger.LogInformation($"Reverting for {pair}");
