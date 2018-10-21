@@ -3,11 +3,11 @@
 ## Synopsis
 Algorithms have to be tested by a system that mimics the interface 
 of exchange- and other provider. This mitigates the need for the risky and error prone
-process of porting algorithm implementation between two environments. Secondly, it ensures
-a fast development process.
+process of porting algorithm implementations between two environments. Secondly, it ensures
+a fast development cycle.
  
 Additionally, the output of a backtesting run is
-constraint by the use of a required format that allows for fast and effective evaluation
+constraint a format that allows for fast and effective evaluation
 of algorithms on both an individual level as well as relative to one another.
 
 
