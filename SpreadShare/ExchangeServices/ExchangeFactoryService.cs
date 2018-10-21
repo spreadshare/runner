@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Binance;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Provider;
 
 namespace SpreadShare.ExchangeServices
@@ -11,6 +13,7 @@ namespace SpreadShare.ExchangeServices
     {
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly BinanceCommunicationsService _binanceCommunications;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExchangeFactoryService"/> class.
@@ -29,7 +32,7 @@ namespace SpreadShare.ExchangeServices
         public ExchangeProvidersContainer BuildContainer()
         {
             var dataProviderImplementation = new BinanceDataProvider(_loggerFactory);
-            var tradingProviderImplementation = new BinanceTradingProvider(_loggerFactory);
+            var tradingProviderImplementation = new BinanceTradingProvider(_loggerFactory, null);
 
             return new ExchangeProvidersContainer(
                 new DataProvider(dataProviderImplementation),

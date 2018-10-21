@@ -26,9 +26,9 @@ namespace SpreadShare.ExchangeServices.Provider
         }
 
         /// <inheritdoc />
-        public ResponseObject CancelOrder(long orderId)
+        public ResponseObject CancelOrder(CurrencyPair pair, long orderId)
         {
-            return _implementation.CancelOrder(orderId);
+            return _implementation.CancelOrder(pair, orderId);
         }
     }
 }

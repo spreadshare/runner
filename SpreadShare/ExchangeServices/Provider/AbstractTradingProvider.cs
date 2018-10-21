@@ -27,6 +27,6 @@ namespace SpreadShare.ExchangeServices.Provider
         public abstract ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side);
 
         /// <inheritdoc />
-        public abstract ResponseObject CancelOrder(long orderId);
+        public abstract ResponseObject CancelOrder(CurrencyPair pair, long orderId);
     }
 }
