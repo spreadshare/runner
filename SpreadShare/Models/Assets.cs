@@ -8,18 +8,18 @@ namespace SpreadShare.Models
     /// </summary>
     internal class Assets
     {
-        private readonly Dictionary<string, decimal> _free;
-        private readonly Dictionary<string, decimal> _locked;
-        private readonly Dictionary<string, decimal> _total;
+        private readonly Dictionary<Currency, decimal> _free;
+        private readonly Dictionary<Currency, decimal> _locked;
+        private readonly Dictionary<Currency, decimal> _total;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Assets"/> class.
         /// </summary>
         public Assets()
         {
-            _free = new Dictionary<string, decimal>();
-            _locked = new Dictionary<string, decimal>();
-            _total = new Dictionary<string, decimal>();
+            _free = new Dictionary<Currency, decimal>();
+            _locked = new Dictionary<Currency, decimal>();
+            _total = new Dictionary<Currency, decimal>();
         }
 
         /// <summary>
@@ -31,9 +31,9 @@ namespace SpreadShare.Models
         {
             foreach (var balance in input)
             {
-                _free.Add(balance.Symbol, balance.Free);
-                _locked.Add(balance.Symbol, balance.Locked);
-                _total.Add(balance.Symbol, balance.Total);
+                _free.Add(new Currency(balance.Symbol), balance.Free);
+                _locked.Add(new Currency(balance.Symbol), balance.Locked);
+                _total.Add(new Currency(balance.Symbol), balance.Total);
             }
         }
 
@@ -44,7 +44,7 @@ namespace SpreadShare.Models
         /// <returns>The unallocated balance of a currency</returns>
         public decimal GetFreeBalance(Currency symbol)
         {
-            return _free.GetValueOrDefault(symbol.ToString(), 0);
+            return _free.GetValueOrDefault(symbol, 0);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace SpreadShare.Models
         /// <returns>The locked balance of a currency</returns>
         public decimal GetLockedBalance(Currency symbol)
         {
-            return _locked.GetValueOrDefault(symbol.ToString(), 0);
+            return _locked.GetValueOrDefault(symbol, 0);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace SpreadShare.Models
         /// <returns>The total balance of a currency</returns>
         public decimal GetTotalBalance(Currency symbol)
         {
-            return _free.GetValueOrDefault(symbol.ToString(), 0);
+            return _free.GetValueOrDefault(symbol, 0);
         }
 
         /// <summary>
