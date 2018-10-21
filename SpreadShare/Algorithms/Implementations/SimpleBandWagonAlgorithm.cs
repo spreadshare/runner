@@ -91,7 +91,7 @@ namespace SpreadShare.Algorithms.Implementations
                 }
 
                 // Retrieve all the assets to determine if perhaps the desired asset is already a majority share, in which case we do nothing.
-                var assetsQuery = DataProvider.GetPortfolio();
+                var assetsQuery = TradingProvider.GetPortfolio();
                 if (!assetsQuery.Success)
                 {
                     Logger.LogError($"Could not get portfolio!\n{assetsQuery}\ntrying again after 1 minute");
@@ -150,7 +150,7 @@ namespace SpreadShare.Algorithms.Implementations
                 decimal valueMinimum = AlgorithmSettings.MinimalRevertValue;
 
                 // Retrieve the portfolio, using a fallback in case of failure.
-                var assetsQuery = DataProvider.GetPortfolio();
+                var assetsQuery = TradingProvider.GetPortfolio();
                 if (!assetsQuery.Success)
                 {
                     Logger.LogWarning("Could not get portfolio, going idle for 1 minute, then try again.");

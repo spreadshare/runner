@@ -21,6 +21,12 @@ namespace SpreadShare.ExchangeServices.Binance
         }
 
         /// <inheritdoc />
+        public override ResponseObject<Assets> GetPortfolio()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
         public override ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
         {
             throw new NotImplementedException();

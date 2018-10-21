@@ -20,6 +20,12 @@ namespace SpreadShare.ExchangeServices.Provider
         }
 
         /// <inheritdoc />
+        public ResponseObject<Assets> GetPortfolio()
+        {
+            return _implementation.GetPortfolio();
+        }
+
+        /// <inheritdoc />
         public ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
         {
             return _implementation.PlaceFullMarketOrder(pair, side);

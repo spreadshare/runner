@@ -21,12 +21,6 @@ namespace SpreadShare.ExchangeServices.Binance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<Assets> GetPortfolio()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceLastTrade(CurrencyPair pair)
         {
             throw new NotImplementedException();

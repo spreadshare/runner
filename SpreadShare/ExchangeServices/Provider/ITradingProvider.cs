@@ -9,6 +9,12 @@ namespace SpreadShare.ExchangeServices.Provider
     internal interface ITradingProvider
     {
         /// <summary>
+        /// Gets the portfolio
+        /// </summary>
+        /// <returns>A portfolio instance</returns>
+        ResponseObject<Assets> GetPortfolio();
+
+        /// <summary>
         /// Places market order with the full amount of given pair
         /// </summary>
         /// <param name="pair">Currency pair to trade with</param>

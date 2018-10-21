@@ -10,12 +10,6 @@ namespace SpreadShare.ExchangeServices.Provider
     internal interface IDataProvider
     {
         /// <summary>
-        /// Gets the portfolio
-        /// </summary>
-        /// <returns>A portfolio instance</returns>
-        ResponseObject<Assets> GetPortfolio();
-
-        /// <summary>
         /// Gets the current price of a currency pair by checking the last trade
         /// </summary>
         /// <param name="pair">The currency pair</param>
