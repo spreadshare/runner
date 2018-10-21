@@ -13,12 +13,12 @@ of algorithms on both an individual level as well as relative to one another.
 
 
 ## Adjustable parameters
-On top of the algorithm parameters, the following should also be configurable.
+On top of the algorithm parameters, the following should be configurable.
 
 * Fees per transaction
 * Currency used to pay fees
     * Methodology for paying fees (e.g. 3rd asset like BNB or substracted from trade directly.)
-* Starting and end date of data input
+* Starting- and end date of data input
 * Trading pairs to evaluate
     * Optional varying starting and end dates per pair
     
