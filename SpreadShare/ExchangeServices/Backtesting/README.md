@@ -1,7 +1,7 @@
 # Backtesting documentation and requirements.
 
 ## Synopsis
-Algorithms have to be tested by a system that implements mimics the interface 
+Algorithms have to be tested by a system that mimics the interface 
 of exchange- and other provider. This mitigates the need for the risky and error prone
 process of porting algorithm implementation between two environments. Secondly, it ensures
 a fast development process.
