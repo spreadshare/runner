@@ -23,15 +23,13 @@ namespace SpreadShare.Algorithms.Implementations
         /// Initializes a new instance of the <see cref="SimpleBandWagonAlgorithm"/> class.
         /// </summary>
         /// <param name="loggerFactory">Provided logger creating capabilities</param>
-        /// <param name="tradingService">Provides trading capabilities</param>
-        /// <param name="userService">Provides user data fetching capabilities</param>
         /// <param name="settingsService">Provides access to global settings</param>
+        /// <param name="factory">Used to generate a service container</param>
         public SimpleBandWagonAlgorithm(
             ILoggerFactory loggerFactory,
-            ITradingService tradingService,
-            IUserService userService,
-            ISettingsService settingsService)
-            : base(loggerFactory, tradingService, userService, settingsService)
+            ISettingsService settingsService,
+            ExchangeFactoryService factory)
+            : base(loggerFactory, settingsService, factory.BuildContainer())
         {
             Settings = SettingsService.SimpleBandWagonAlgorithmSettings;
         }
@@ -71,7 +69,7 @@ namespace SpreadShare.Algorithms.Implementations
                 var activeTradingPairs = AlgorithmSettings.ActiveTradingPairs;
 
                 // Try to get to top performer, if not try state again after 10 seconds
-                var winnerQuery = TradingService.GetTopPerformance(activeTradingPairs, checkTime, DateTime.Now);
+                var winnerQuery = DataProvider.GetTopPerformance(activeTradingPairs, checkTime, DateTime.Now);
                 if (!winnerQuery.Success)
                 {
                     Logger.LogError($"Could not get top performer!\n{winnerQuery}\ntrying again after 1 minute");
@@ -93,7 +91,7 @@ namespace SpreadShare.Algorithms.Implementations
                 }
 
                 // Retrieve all the assets to determine if perhaps the desired asset is already a majority share, in which case we do nothing.
-                var assetsQuery = UserService.GetPortfolio();
+                var assetsQuery = DataProvider.GetPortfolio();
                 if (!assetsQuery.Success)
                 {
                     Logger.LogError($"Could not get portfolio!\n{assetsQuery}\ntrying again after 1 minute");
@@ -116,7 +114,7 @@ namespace SpreadShare.Algorithms.Implementations
                     {
                         return new AssetValue(x.Symbol, 0);
                     }
-                    var query = TradingService.GetCurrentPriceTopBid(pair);
+                    var query = DataProvider.GetCurrentPriceTopBid(pair);
 
                     // Use a value of zero for assets whose price retrievals fail.
                     return query.Success ? new AssetValue(x.Symbol, x.Value * query.Data) : new AssetValue(x.Symbol, 0);
@@ -152,7 +150,7 @@ namespace SpreadShare.Algorithms.Implementations
                 decimal valueMinimum = AlgorithmSettings.MinimalRevertValue;
 
                 // Retrieve the portfolio, using a fallback in case of failure.
-                var assetsQuery = UserService.GetPortfolio();
+                var assetsQuery = DataProvider.GetPortfolio();
                 if (!assetsQuery.Success)
                 {
                     Logger.LogWarning("Could not get portfolio, going idle for 1 minute, then try again.");
@@ -183,7 +181,7 @@ namespace SpreadShare.Algorithms.Implementations
                     }
 
                     // Get the price of pair (thus in terms of baseCurrency)
-                    var priceQuery = TradingService.GetCurrentPriceTopBid(pair);
+                    var priceQuery = DataProvider.GetCurrentPriceTopBid(pair);
 
                     // In case of failure, just skip
                     if (!priceQuery.Success)
@@ -199,7 +197,7 @@ namespace SpreadShare.Algorithms.Implementations
                     if (value >= valueMinimum)
                     {
                         Logger.LogInformation($"Reverting for {pair}");
-                        var orderQuery = TradingService.PlaceFullMarketOrder(pair, OrderSide.Sell);
+                        var orderQuery = TradingProvider.PlaceFullMarketOrder(pair, OrderSide.Sell);
                         if (!orderQuery.Success)
                         {
                             Logger.LogWarning($"Reverting for {pair} failed! Is this pair trading on the exchange?");
@@ -232,7 +230,7 @@ namespace SpreadShare.Algorithms.Implementations
 
                 // Try to retrieve the top performer, using a tryAfterWait fallback in case of failure.
                 Logger.LogInformation($"Looking for the top performer from the previous {checkTime} hours");
-                var query = TradingService.GetTopPerformance(activeTradingPairs, checkTime, DateTime.Now);
+                var query = DataProvider.GetTopPerformance(activeTradingPairs, checkTime, DateTime.Now);
                 if (query.Success)
                 {
                     Logger.LogInformation($"Top performer is {query.Data.Item1}");
@@ -258,7 +256,7 @@ namespace SpreadShare.Algorithms.Implementations
                 }
 
                 // Place an order for the selected winner and goin into holding (again using a tryAfterWait fallback option)
-                var response = TradingService.PlaceFullMarketOrder(query.Data.Item1, OrderSide.Buy);
+                var response = TradingProvider.PlaceFullMarketOrder(query.Data.Item1, OrderSide.Buy);
                 if (response.Success)
                 {
                     SwitchState(new WaitHoldingState());

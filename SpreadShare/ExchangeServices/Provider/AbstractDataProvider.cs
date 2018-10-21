@@ -25,6 +25,9 @@ namespace SpreadShare.ExchangeServices.Provider
         }
 
         /// <inheritdoc />
+        public abstract ResponseObject<Assets> GetPortfolio();
+
+        /// <inheritdoc />
         public abstract ResponseObject<decimal> GetCurrentPriceLastTrade(CurrencyPair pair);
 
         /// <inheritdoc />

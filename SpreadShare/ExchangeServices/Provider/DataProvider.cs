@@ -21,6 +21,12 @@ namespace SpreadShare.ExchangeServices.Provider
         }
 
         /// <inheritdoc />
+        public ResponseObject<Assets> GetPortfolio()
+        {
+            return _implementation.GetPortfolio();
+        }
+
+        /// <inheritdoc />
         public ResponseObject<decimal> GetCurrentPriceLastTrade(CurrencyPair pair)
         {
             return _implementation.GetCurrentPriceLastTrade(pair);
