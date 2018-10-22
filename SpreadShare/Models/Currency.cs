@@ -21,20 +21,22 @@ namespace SpreadShare.Models
         /// </summary>
         private string Symbol { get; }
 
-        public static bool operator !=(Currency a, Currency b)
-        {
-            return !a.ToString().Equals(b.ToString(), StringComparison.Ordinal);
-        }
-
-        public static bool operator ==(Currency a, Currency b)
-        {
-            return a.ToString().Equals(b.ToString(), StringComparison.Ordinal);
-        }
-
         /// <summary>
         /// String representation of a currency
         /// </summary>
         /// <returns>Returns the string representation of a currency</returns>
         public override string ToString() => Symbol;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return obj is Currency currency && Symbol == currency.Symbol;
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Symbol);
+        }
     }
 }
