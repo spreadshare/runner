@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices.SettingsServices
@@ -8,6 +9,9 @@ namespace SpreadShare.SupportServices.SettingsServices
     /// </summary>
     internal class SimpleBandWagonAlgorithmSettings : AlgorithmSettings
     {
+        /// <inheritdoc />
+        public override Exchange Exchange { get; set; }
+
         /// <summary>
         /// Gets or sets the list of active trading pairs
         /// </summary>
