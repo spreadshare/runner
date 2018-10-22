@@ -37,6 +37,7 @@ namespace SpreadShare.Algorithms
             ExchangeFactoryService exchangeFactoryService)
         {
             _logger = loggerFactory.CreateLogger<AlgorithmService>();
+            _loggerFactory = loggerFactory;
             _allocationManager = allocationManager;
             _exchangeFactoryService = exchangeFactoryService;
             _settingsService = settingsService;
@@ -63,7 +64,7 @@ namespace SpreadShare.Algorithms
 
             // TODO: Figure out which container to get
             BaseAlgorithm algorithm = (BaseAlgorithm)Activator.CreateInstance(algorithmType);
-            Exchange exchangeEnum = GetSettings(algorithm.GetSettingsType).GetExchange;
+            Exchange exchangeEnum = GetSettings(algorithm.GetSettingsType).Exchange;
 
             // Build container
             var container = _exchangeFactoryService.BuildContainer(
@@ -121,7 +122,7 @@ namespace SpreadShare.Algorithms
             var algorithms =
                 from assembly in AppDomain.CurrentDomain.GetAssemblies()
                 from type in assembly.GetTypes()
-                where type.IsSubclassOf(typeof(BaseAlgorithm<>))
+                where type.IsSubclassOf(typeof(BaseAlgorithm))
                 select type;
 
             // Checks if all algorithms were added to the dictionary

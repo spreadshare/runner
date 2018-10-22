@@ -1,5 +1,4 @@
-﻿using System.Data;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
@@ -9,17 +8,23 @@ namespace SpreadShare.Algorithms
     /// <summary>
     /// Base class for all algorithms
     /// </summary>
-    /// <typeparam name="T">The specific algorithm that is associated with it</typeparam>
     internal abstract class BaseAlgorithm
     {
         /// <summary>
-        /// Start algorithm with the initial state using a StateManager
+        /// Gets type of the settings of the algorithm
         /// </summary>
-        /// <returns>Whether the algorithm started succesfully</returns>
-        public abstract ResponseObject Start(ILoggerFactory loggerFactory,
-            ISettingsService settingsService, ExchangeProvidersContainer container);
-
         public abstract System.Type GetSettingsType { get; }
 
+        /// <summary>
+        /// Start algorithm with the initial state using a StateManager
+        /// </summary>
+        /// <param name="loggerFactory">Provides logging</param>
+        /// <param name="settingsService">Provides access to StrategySettings</param>
+        /// <param name="container">Provides trading and data gathering capabilities</param>
+        /// <returns>Whether the algorithm started succesfully</returns>
+        public abstract ResponseObject Start(
+            ILoggerFactory loggerFactory,
+            ISettingsService settingsService,
+            ExchangeProvidersContainer container);
     }
 }

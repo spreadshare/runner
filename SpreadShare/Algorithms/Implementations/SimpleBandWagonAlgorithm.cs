@@ -18,8 +18,14 @@ namespace SpreadShare.Algorithms.Implementations
     /// </summary>
     internal class SimpleBandWagonAlgorithm : BaseAlgorithm
     {
-        public override ResponseObject Start(ILoggerFactory loggerFactory,
-            ISettingsService settingsService, ExchangeProvidersContainer container)
+        /// <inheritdoc />
+        public override Type GetSettingsType => typeof(SimpleBandWagonAlgorithmSettings);
+
+        /// <inheritdoc />
+        public override ResponseObject Start(
+            ILoggerFactory loggerFactory,
+            ISettingsService settingsService,
+            ExchangeProvidersContainer container)
         {
             var stateManager = new StateManager<SimpleBandWagonAlgorithmSettings>(
                 ((SettingsService)settingsService).SimpleBandWagonAlgorithmSettings,
@@ -29,8 +35,6 @@ namespace SpreadShare.Algorithms.Implementations
 
             return new ResponseObject(ResponseCode.Success);
         }
-
-        public override Type GetSettingsType => typeof(SimpleBandWagonAlgorithmSettings);
 
         /// <summary>
         /// Starting state of the algorithm
