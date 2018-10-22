@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
+using SpreadShare.ExchangeServices.Backtesting;
 using SpreadShare.ExchangeServices.Binance;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Provider;
@@ -37,9 +38,8 @@ namespace SpreadShare.ExchangeServices
         /// <returns>Response object indicating success or not</returns>
         public ResponseObject Start()
         {
-            ResponseObject response;
             _logger.LogInformation("Starting binance communication service...");
-            response = _binanceCommunications.Start();
+            var response = _binanceCommunications.Start();
             if (!response.Success)
             {
                 _logger.LogError(response.ToString());
@@ -64,6 +64,7 @@ namespace SpreadShare.ExchangeServices
         {
             AbstractDataProvider dataProviderImplementation;
             AbstractTradingProvider tradingProviderImplementation;
+            ITimerProvider timerProvider = new ExchangeTimerProvider();
             switch (exchange)
             {
                 case Exchange.Binance:
@@ -71,18 +72,24 @@ namespace SpreadShare.ExchangeServices
                     tradingProviderImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications);
                     break;
                 case Exchange.Backtesting:
-                    throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);
+                    // Override timer provider to backtest variant
+                    timerProvider = new BacktestTimerProvider(_loggerFactory);
+
+                    dataProviderImplementation = new BacktestDataProvider(_loggerFactory, timerProvider as BacktestTimerProvider);
+                    tradingProviderImplementation = new BacktestTradingProvider(_loggerFactory);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);
             }
 
             var dataProvider = new DataProvider(dataProviderImplementation);
+            var tradingProvider = new TradingProvider(_loggerFactory, tradingProviderImplementation, dataProvider, allocationManager, algorithm, exchange);
 
             return new ExchangeProvidersContainer(
                 _loggerFactory,
                 dataProvider,
-                new ExchangeTimerProvider(),
-                new TradingProvider(_loggerFactory, tradingProviderImplementation, dataProvider, allocationManager, algorithm, exchange));
+                timerProvider,
+                tradingProvider);
         }
     }
 }

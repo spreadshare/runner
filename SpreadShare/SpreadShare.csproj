@@ -51,8 +51,4 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ExchangeServices\Backtesting" />
-  </ItemGroup>
-
 </Project>
