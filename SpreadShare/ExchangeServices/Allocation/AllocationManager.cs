@@ -16,7 +16,7 @@ namespace SpreadShare.ExchangeServices.Allocation
 
         private readonly ILogger _logger;
         private readonly IPortfolioFetcherService _portfolioFetcherService;
-        private Dictionary<Type, Dictionary<Currency, decimal>> _allocations;
+        private Dictionary<Exchange, Dictionary<Type, Assets>> _allocations;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AllocationManager"/> class.
@@ -34,7 +34,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// Sets initial configuration of allocations per algorithm.
         /// </summary>
         /// <param name="allocations">Initial set of allocations</param>
-        public void SetInitialConfiguration(Dictionary<Type, Dictionary<Currency, decimal>> allocations)
+        public void SetInitialConfiguration(Dictionary<Exchange, Dictionary<Type, Assets>> allocations)
         {
             if (_allocations != null)
             {
@@ -48,60 +48,61 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <summary>
         /// Check if algorithm has enough of certain currency
         /// </summary>
+        /// <param name="exchange">Exchange to trade on</param>
         /// <param name="algorithm">The algorithm that wants to execute a trade</param>
         /// <param name="currency">The currency to be sold</param>
         /// <param name="fundsToTrade">The amount to be sold of given currency</param>
         /// <returns>Returns if enough funds are present to execute the trade</returns>
-        public bool CheckFunds(Type algorithm, Currency currency, decimal fundsToTrade)
+        public bool CheckFunds(Exchange exchange, Type algorithm, Currency currency, decimal fundsToTrade)
         {
+            // Check if exchange is used
+            if (!_allocations.ContainsKey(exchange))
+            {
+                _logger.LogTrace($"CheckFunds: Exchange {exchange} not available.");
+                return false;
+            }
+
             // Check if algorithm is allocated
-            if (!_allocations.ContainsKey(algorithm))
+            if (!_allocations[exchange].ContainsKey(algorithm))
             {
                 _logger.LogTrace($"CheckFunds: Algorithm {algorithm} not available.");
                 return false;
             }
 
-            // Check if algorithm's portfolio contains currency
-            if (_allocations[algorithm].ContainsKey(currency))
-            {
-                _logger.LogTrace($"CheckFunds: Currency {currency} not available for Algorithm {algorithm}.");
-                return false;
-            }
-
-            // Check if algorithm's portfolio has enough of the currency
-            return _allocations[algorithm][currency] >= fundsToTrade;
+            return _allocations[exchange][algorithm].GetFreeBalance(currency) >= fundsToTrade)
         }
 
         /// <summary>
         /// Get available funds for a given algorithm and currency.
         /// </summary>
+        /// <param name="exchange">Exchange to trade on</param>
         /// <param name="algorithm">Algorithm to get funds for</param>
         /// <param name="currency">Currency to get funds for</param>
         /// <returns>Available funds or -1 if not available</returns>
-        public decimal GetAvailableFunds(Type algorithm, Currency currency)
+        public decimal GetAvailableFunds(Exchange exchange, Type algorithm, Currency currency)
         {
-            // Check if algorithm is allocated
-            if (!_allocations.ContainsKey(algorithm))
+            // Check if exchange is used
+            if (!_allocations.ContainsKey(exchange))
             {
                 _logger.LogTrace($"GetAvailableFunds: Algorithm {algorithm} not available.");
                 return -1;
             }
 
-            // Check if algorithm's portfolio contains currency
-            if (_allocations[algorithm].ContainsKey(currency))
+            // Check if algorithm is allocated
+            if (!_allocations[exchange].ContainsKey(algorithm))
             {
-                _logger.LogTrace($"GetAvailableFunds: Currency {currency} not available for Algorithm {algorithm}.");
+                _logger.LogTrace($"GetAvailableFunds: Algorithm {algorithm} not available.");
                 return -1;
             }
 
             // Check if algorithm's portfolio has enough of the currency
-            if (_allocations[algorithm][currency] < DustThreshold)
+            if (_allocations[exchange][algorithm].GetFreeBalance(currency) < DustThreshold)
             {
                 _logger.LogTrace($"GetAvailableFunds: Not enough funds availble for Currency {currency} for Algorithm {algorithm}.");
                 return -1;
             }
 
-            return _allocations[algorithm][currency];
+            return _allocations[exchange][algorithm].GetFreeBalance(currency);
         }
 
         /// <summary>
@@ -121,6 +122,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="exchangeSpecification">Specifies which exchange is used</param>
         private void UpdatePortfolio(Type algorithm, IExchangeSpecification exchangeSpecification)
         {
+            // TODO: Update allocation
             _portfolioFetcherService.GetPortfolio(exchangeSpecification);
         }
     }
