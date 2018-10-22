@@ -52,39 +52,6 @@ namespace SpreadShare
             ILogger logger = loggerFactory.CreateLogger("ExecuteBusinessLogic");
             SettingsService settings = (SettingsService)serviceProvider.GetService<ISettingsService>();
 
-            // Start TradingService
-            ResponseObject tradingResult = null;
-            if (settings.EnabledServices.Trading)
-            {
-                var trading = serviceProvider.GetService<ITradingService>();
-                tradingResult = trading.Start();
-            }
-            else
-            {
-                logger.LogInformation("TradingService has been disabled. If you want to enable the TradingService," +
-                                      "you must change this in appsettings.json");
-            }
-
-            // Start UserService
-            ResponseObject userResult = null;
-            if (settings.EnabledServices.User)
-            {
-                if (!settings.EnabledServices.Trading)
-                {
-                    logger.LogCritical("TradingService is not enabled. You must enable tradingService in " +
-                                       "appsettings.json if you want to use the UserService");
-                    throw new ArgumentException("UserService depends on TradingService, which is disabled");
-                }
-
-                var user = serviceProvider.GetService<IUserService>();
-                userResult = user.Start();
-            }
-            else
-            {
-                logger.LogInformation("UserService has been disabled. If you want to enable the UserService," +
-                                      "you must change this in appsettings.json");
-            }
-
             // Start the exchange factory
             var factory = serviceProvider.GetService<ExchangeFactoryService>();
             var factoryResult = factory.Start();
