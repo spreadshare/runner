@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Binance;
 using SpreadShare.ExchangeServices.Provider;
 
@@ -25,8 +26,9 @@ namespace SpreadShare.ExchangeServices
         /// <summary>
         /// Builds container for Binance
         /// </summary>
+        /// <param name="allocationManager">Provides portfolio access</param>
         /// <returns>Binance container with providers</returns>
-        public ExchangeProvidersContainer BuildContainer()
+        public ExchangeProvidersContainer BuildContainer(WeakAllocationManager allocationManager)
         {
             var dataProviderImplementation = new BinanceDataProvider(_loggerFactory);
             var tradingProviderImplementation = new BinanceTradingProvider(_loggerFactory);
@@ -34,7 +36,7 @@ namespace SpreadShare.ExchangeServices
             return new ExchangeProvidersContainer(
                 new DataProvider(dataProviderImplementation),
                 new ExchangeTimerProvider(),
-                new TradingProvider(tradingProviderImplementation));
+                new TradingProvider(tradingProviderImplementation, allocationManager));
         }
     }
 }

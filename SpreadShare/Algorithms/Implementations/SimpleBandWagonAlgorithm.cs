@@ -28,7 +28,7 @@ namespace SpreadShare.Algorithms.Implementations
             ILoggerFactory loggerFactory,
             ISettingsService settingsService,
             ExchangeFactoryService factory)
-            : base(loggerFactory, settingsService, factory.BuildContainer())
+            : base(loggerFactory, settingsService, factory.BuildContainer(null))
         {
             Settings = SettingsService.SimpleBandWagonAlgorithmSettings;
         }
