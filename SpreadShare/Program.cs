@@ -85,6 +85,14 @@ namespace SpreadShare
                 logger.LogInformation("UserService has been disabled. If you want to enable the UserService," +
                                       "you must change this in appsettings.json");
             }
+            
+            // Start the exchange factory
+            var factory = serviceProvider.GetService<ExchangeFactoryService>();
+            var factoryResult = factory.Start();
+            if (!factoryResult.Success)
+            {
+                logger.LogError($"Exchange Factory Service failed to start! {factoryResult}");
+            }
 
             // Start StrategyService
             if (settings.EnabledServices.Algorithm)

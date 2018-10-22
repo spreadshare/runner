@@ -4,6 +4,7 @@ using SpreadShare.ExchangeServices.Binance;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Provider;
+using SpreadShare.Models;
 
 namespace SpreadShare.ExchangeServices
 {
@@ -28,6 +29,20 @@ namespace SpreadShare.ExchangeServices
 
             // link communication services
             _binanceCommunications = binanceComm;
+        }
+
+        public ResponseObject Start()
+        {
+            ResponseObject response;
+            _logger.LogInformation("Starting binance communication service...");
+            response = _binanceCommunications.Start();
+            if (!response.Success)
+            {
+                _logger.LogError(response.ToString());
+                return new ResponseObject(ResponseCode.Error, "Binance communications failed to start");
+            }
+            _logger.LogInformation("Binance communication successfully started");
+            return new ResponseObject(ResponseCode.Success);
         }
 
         /// <summary>
