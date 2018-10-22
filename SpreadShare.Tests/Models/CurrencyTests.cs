@@ -29,6 +29,7 @@ namespace SpreadShare.Tests.Models
             var b = new Currency("ETH");
 
             Assert.True(a == b, $"Same currencies where not evaluated as equal");
+            Assert.True(Equals(a, b), $"Same currencies where not evaluated as equal");
         }
 
         /// <summary>
@@ -41,6 +42,7 @@ namespace SpreadShare.Tests.Models
             var b = new Currency("VTHO");
 
             Assert.False(a == b, "Different currencies where evaluated as equal");
+            Assert.False(Equals(a, b), "Different currencies where evaluated as equal");
         }
 
         /// <summary>

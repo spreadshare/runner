@@ -76,6 +76,53 @@ namespace SpreadShare.SupportServices.SettingsServices
         }
 
         /// <summary>
+        /// Get a dictionary of classes with class name
+        /// </summary>
+        /// <returns>Dictionary of classes with class name</returns>
+        private static Dictionary<string, TypeInfo> GetClasses()
+        {
+            // Get current assembly
+            Assembly thisAssembly = Array.Find(AppDomain.CurrentDomain.GetAssemblies(), assembly
+                => assembly.ManifestModule.Name.Contains("SpreadShare.dll", StringComparison.InvariantCulture));
+
+            // Check if the assembly was found
+            if (thisAssembly == null)
+            {
+                throw new InvalidProgramException("Could not find SpreadShare.dll");
+            }
+
+            // Get all defined classes
+            var typeInfos = thisAssembly.DefinedTypes;
+            Dictionary<string, TypeInfo> classes = new Dictionary<string, TypeInfo>();
+            foreach (var typeInfo in typeInfos)
+            {
+                var typeInfoName = typeInfo.Name;
+
+                // Remove noise
+                string[] patterns = { "`1", "+<>c" };
+                foreach (string pattern in patterns)
+                {
+                    if (typeInfoName.EndsWith(pattern, true, CultureInfo.InvariantCulture))
+                    {
+                        typeInfoName = typeInfoName.Substring(0, typeInfoName.Length - pattern.Length);
+                    }
+                }
+
+                if (!classes.ContainsKey(typeInfoName))
+                {
+                    classes.Add(typeInfoName, typeInfo);
+                }
+                else
+                {
+                    // Make sure the algorithm class does not have different parameterized types
+                    classes[typeInfoName] = null;
+                }
+            }
+
+            return classes;
+        }
+
+        /// <summary>
         /// Download all currencies from Binance
         /// </summary>
         private void DownloadCurrencies()
@@ -132,7 +179,7 @@ namespace SpreadShare.SupportServices.SettingsServices
                     {
                         CurrencyPair.AddParseEntry(pair.Value, result);
                     }
-                    catch (ArgumentException ignored)
+                    catch (ArgumentException)
                     {
                         // Double entries because of binance
                     }
@@ -210,53 +257,6 @@ namespace SpreadShare.SupportServices.SettingsServices
                     AllocationSettings[exchangeEnum].Add(algorithmType, allocation);
                 }
             }
-        }
-
-        /// <summary>
-        /// Get a dictionary of classes with class name
-        /// </summary>
-        /// <returns>Dictionary of classes with class name</returns>
-        private Dictionary<string, TypeInfo> GetClasses()
-        {
-            // Get current assembly
-            Assembly thisAssembly = Array.Find(AppDomain.CurrentDomain.GetAssemblies(), assembly
-                => assembly.ManifestModule.Name.Contains("SpreadShare.dll", StringComparison.InvariantCulture));
-
-            // Check if the assembly was found
-            if (thisAssembly == null)
-            {
-                throw new InvalidProgramException("Could not find SpreadShare.dll");
-            }
-
-            // Get all defined classes
-            var typeInfos = thisAssembly.DefinedTypes;
-            Dictionary<string, TypeInfo> classes = new Dictionary<string, TypeInfo>();
-            foreach (var typeInfo in typeInfos)
-            {
-                var typeInfoName = typeInfo.Name;
-
-                // Remove noise
-                string[] patterns = { "`1", "+<>c" };
-                foreach (string pattern in patterns)
-                {
-                    if (typeInfoName.EndsWith(pattern, true, CultureInfo.InvariantCulture))
-                    {
-                        typeInfoName = typeInfoName.Substring(0, typeInfoName.Length - pattern.Length);
-                    }
-                }
-
-                if (!classes.ContainsKey(typeInfoName))
-                {
-                    classes.Add(typeInfoName, typeInfo);
-                }
-                else
-                {
-                    // Make sure the algorithm class does not have different parameterized types
-                    classes[typeInfoName] = null;
-                }
-            }
-
-            return classes;
         }
     }
 }

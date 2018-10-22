@@ -21,6 +21,16 @@ namespace SpreadShare.Models
         /// </summary>
         private string Symbol { get; }
 
+        public static bool operator !=(Currency a, Currency b)
+        {
+            return !a.ToString().Equals(b.ToString(), StringComparison.Ordinal);
+        }
+
+        public static bool operator ==(Currency a, Currency b)
+        {
+            return a.ToString().Equals(b.ToString(), StringComparison.Ordinal);
+        }
+
         /// <summary>
         /// String representation of a currency
         /// </summary>
