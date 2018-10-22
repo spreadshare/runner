@@ -8,7 +8,6 @@ using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Binance;
-using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
