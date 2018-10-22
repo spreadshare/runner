@@ -162,8 +162,7 @@ namespace SpreadShare.SupportServices.SettingsServices
 
             // Parse exchange to enum Exchange
             var exchange = _configuration.GetSection("SimpleBandWagonAlgorithm:Exchange").Get<string>();
-            //SimpleBandWagonAlgorithmSettings.Exchange = Enum.Parse<Exchange>(exchange);
-            SimpleBandWagonAlgorithmSettings.Exchange = Exchange.Binance;
+            SimpleBandWagonAlgorithmSettings.Exchange = Enum.Parse<Exchange>(exchange);
         }
 
         /// <summary>
