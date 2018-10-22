@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
@@ -16,6 +17,7 @@ namespace SpreadShare.Algorithms
     internal class AlgorithmService : IAlgorithmService
     {
         private readonly ILogger _logger;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly ISettingsService _settingsService;
         private readonly AllocationManager _allocationManager;
         private readonly ExchangeFactoryService _exchangeFactoryService;
@@ -45,36 +47,41 @@ namespace SpreadShare.Algorithms
         }
 
         /// <inheritdoc />
-        public ResponseObject StartAlgorithm(Type algorithm)
+        public ResponseObject StartAlgorithm(Type algorithmType)
         {
             // Check if algorithm exists
-            if (!_algorithms.ContainsKey(algorithm))
+            if (!_algorithms.ContainsKey(algorithmType))
             {
-                throw new ArgumentException($"Algorithm {algorithm} was not found in AlgorithmService");
+                throw new ArgumentException($"Algorithm {algorithmType} was not found in AlgorithmService");
             }
 
             // Check if algorithm is in a stopped state
-            if (_algorithms[algorithm])
+            if (_algorithms[algorithmType])
             {
                 return new ResponseObject(ResponseCode.Error, "Algorithm was already started.");
             }
 
             // TODO: Figure out which container to get
+            BaseAlgorithm algorithm = (BaseAlgorithm)Activator.CreateInstance(algorithmType);
+            Exchange exchangeEnum = GetSettings(algorithm.GetSettingsType).GetExchange;
 
             // Build container
-            var container = _exchangeFactoryService.BuildContainer(_allocationManager.GetWeakAllocationManager());
+            var container = _exchangeFactoryService.BuildContainer(
+                exchangeEnum,
+                _allocationManager.GetWeakAllocationManager());
 
-            // TODO: Initialise algorithm with container
+            // Initialise algorithm with container
+            algorithm.Start(_loggerFactory, _settingsService, container);
 
             // Set status Running to True
-            _algorithms[algorithm] = true;
+            _algorithms[algorithmType] = true;
 
             // Return a success
             return new ResponseObject(ResponseCode.Success);
         }
 
         /// <inheritdoc />
-        public ResponseObject StopAlgorithm(Type algorithm)
+        public ResponseObject StopAlgorithm(Type algorithmType)
         {
             throw new NotImplementedException();
         }

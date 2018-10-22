@@ -11,15 +11,15 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Starts the algorithm
         /// </summary>
-        /// <param name="algorithm">Algorithm to start</param>
+        /// <param name="algorithmType">Algorithm to start</param>
         /// <returns>If the algorithm was started successfully</returns>
-        ResponseObject StartAlgorithm(Type algorithm);
+        ResponseObject StartAlgorithm(Type algorithmType);
 
         /// <summary>
         /// Stops the given algorithm
         /// </summary>
-        /// <param name="algorithm">Algorithm to stop</param>
+        /// <param name="algorithmType">Algorithm to stop</param>
         /// <returns>If the algorithm was stopped successfully</returns>
-        ResponseObject StopAlgorithm(Type algorithm);
+        ResponseObject StopAlgorithm(Type algorithmType);
     }
 }
