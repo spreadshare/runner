@@ -1,10 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Binance;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
@@ -57,9 +54,13 @@ namespace SpreadShare.ExchangeServices
         /// Builds container for Binance
         /// </summary>
         /// <param name="exchange">Specifies which container to create</param>
+        /// <param name="algorithm">The type of the algorithm</param>
         /// <param name="allocationManager">Provides portfolio access</param>
         /// <returns>Binance container with providers</returns>
-        public ExchangeProvidersContainer BuildContainer(Exchange exchange, Type algorithm, WeakAllocationManager allocationManager)
+        public ExchangeProvidersContainer BuildContainer(
+            Exchange exchange,
+            Type algorithm,
+            WeakAllocationManager allocationManager)
         {
             AbstractDataProvider dataProviderImplementation;
             AbstractTradingProvider tradingProviderImplementation;
@@ -74,21 +75,14 @@ namespace SpreadShare.ExchangeServices
                 default:
                     throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);
             }
-            
+
             var dataProvider = new DataProvider(dataProviderImplementation);
 
             return new ExchangeProvidersContainer(
                 _loggerFactory,
                 dataProvider,
                 new ExchangeTimerProvider(),
-                new TradingProvider(_loggerFactory,
-                    tradingProviderImplementation,
-                    dataProvider,
-                    allocationManager,
-                    algorithm,
-                    exchange)
-                );
-
+                new TradingProvider(_loggerFactory, tradingProviderImplementation, dataProvider, allocationManager, algorithm, exchange));
         }
     }
 }

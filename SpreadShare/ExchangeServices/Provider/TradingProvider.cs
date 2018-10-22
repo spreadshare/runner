@@ -21,9 +21,19 @@ namespace SpreadShare.ExchangeServices.Provider
         /// <summary>
         /// Initializes a new instance of the <see cref="TradingProvider"/> class.
         /// </summary>
-        /// <param name="implementation">Exchange implementation of trading provider</param>
-        public TradingProvider(ILoggerFactory loggerFactory, AbstractTradingProvider implementation,
-            DataProvider dataProvider, WeakAllocationManager allocationManager, Type algorithm, Exchange exchange)
+        /// <param name="loggerFactory">Used to create output</param>
+        /// <param name="implementation">The implementationt to delegate calls to</param>
+        /// <param name="dataProvider">The data provider to manager certain orders with</param>
+        /// <param name="allocationManager">The allocation manager to verify orders</param>
+        /// <param name="algorithm">The type of the algorithm</param>
+        /// <param name="exchange">The exchange to provide in question</param>
+        public TradingProvider(
+            ILoggerFactory loggerFactory,
+            AbstractTradingProvider implementation,
+            DataProvider dataProvider,
+            WeakAllocationManager allocationManager,
+            Type algorithm,
+            Exchange exchange)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _implementation = implementation;
@@ -54,7 +64,6 @@ namespace SpreadShare.ExchangeServices.Provider
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             decimal amount = _allocationManager.GetAvailableFunds(_exchange, _algorithm, currency);
 
-
             // Calculate amount of non base currency to buy
             if (side == OrderSide.Buy)
             {
@@ -67,7 +76,7 @@ namespace SpreadShare.ExchangeServices.Provider
 
                 amount = amount / query.Data;
             }
-            
+
             uint retries = 0;
 
             while (retries++ < 5)
@@ -76,10 +85,12 @@ namespace SpreadShare.ExchangeServices.Provider
                 if (!query.Success)
                 {
                     _logger.LogWarning(query.ToString());
-                    continue;;
+                    continue;
                 }
+
                 return new ResponseObject(ResponseCode.Success);
             }
+
             _logger.LogError($"Trade for {pair} failed after 5 retries");
             return new ResponseObject(ResponseCode.Error);
         }

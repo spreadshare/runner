@@ -29,7 +29,7 @@ namespace SpreadShare.ExchangeServices.Binance
         public override ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side, decimal amount)
         {
             var client = _communications.Client;
-            
+
             var query = client.PlaceOrder(pair.ToString(), side, OrderType.Market, amount);
             if (query.Success)
             {
