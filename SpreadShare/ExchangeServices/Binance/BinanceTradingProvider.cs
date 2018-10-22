@@ -38,9 +38,11 @@ namespace SpreadShare.ExchangeServices.Binance
                 {
                     return new ResponseObject(ResponseCode.Success);
                 }
+
                 Logger.LogWarning(query.ToString());
                 Logger.LogWarning($"Placing market order ({side} {amount}{pair}) failed, retrying {retries}/5");
             }
+
             Logger.LogError($"Placing market order {side} {amount}{pair} failed after retrying 5 times");
             return new ResponseObject(ResponseCode.Error);
         }

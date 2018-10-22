@@ -3,6 +3,9 @@ using SpreadShare.Models;
 
 namespace SpreadShare.ExchangeServices.Provider
 {
+    /// <summary>
+    /// Alternative specification for implementation of trading providers.
+    /// </summary>
     internal interface IExchangeTradingProvider
     {
         /// <summary>
@@ -17,6 +20,7 @@ namespace SpreadShare.ExchangeServices.Provider
         /// <summary>
         /// Cancels order
         /// </summary>
+        /// <param name="pair">The currency pair for which the order is set</param>
         /// <param name="orderId">Id of the order</param>
         /// <returns>A response object with the results of the action</returns>
         ResponseObject CancelOrder(CurrencyPair pair, long orderId);
