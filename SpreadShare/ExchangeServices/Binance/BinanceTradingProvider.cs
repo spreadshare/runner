@@ -1,6 +1,7 @@
 ﻿using System;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 
@@ -11,25 +12,54 @@ namespace SpreadShare.ExchangeServices.Binance
     /// </summary>
     internal class BinanceTradingProvider : AbstractTradingProvider, IExchangeSpecification
     {
+        private readonly BinanceCommunicationsService _communications;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceTradingProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output stream</param>
-        public BinanceTradingProvider(ILoggerFactory loggerFactory)
+        /// <param name="communications">For communication with Binance</param>
+        public BinanceTradingProvider(ILoggerFactory loggerFactory, BinanceCommunicationsService communications)
             : base(loggerFactory)
         {
+            _communications = communications;
         }
 
         /// <inheritdoc />
-        public override ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
+        public override ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side, decimal amount)
         {
-            throw new NotImplementedException();
+            var client = _communications.Client;
+            uint retries = 0;
+
+            while (retries++ < 5)
+            {
+                var query = client.PlaceOrder(pair.ToString(), side, OrderType.Market, amount);
+                if (query.Success)
+                {
+                    return new ResponseObject(ResponseCode.Success);
+                }
+
+                Logger.LogWarning(query.ToString());
+                Logger.LogWarning($"Placing market order ({side} {amount}{pair}) failed, retrying {retries}/5");
+            }
+
+            Logger.LogError($"Placing market order {side} {amount}{pair} failed after retrying 5 times");
+            return new ResponseObject(ResponseCode.Error);
         }
 
         /// <inheritdoc />
-        public override ResponseObject CancelOrder(long orderId)
+        public override ResponseObject CancelOrder(CurrencyPair pair, long orderId)
         {
-            throw new NotImplementedException();
+            // set alias for more readable code
+            var client = _communications.Client;
+
+            var query = client.CancelOrder(pair.ToString(), orderId);
+            if (query.Success)
+            {
+                return new ResponseObject(ResponseCode.Error, query.Error.Message);
+            }
+
+            return new ResponseObject(ResponseCode.Success);
         }
 
         /// <inheritdoc />

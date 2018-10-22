@@ -8,6 +8,7 @@ using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Binance;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
@@ -48,6 +49,12 @@ namespace SpreadShare
 
             // Add Binance User Websocket dependency
             services.AddSingleton<IUserService, BinanceUserService>();
+
+            // Exchange Factory dependency
+            services.AddSingleton<ExchangeFactoryService, ExchangeFactoryService>();
+
+            // Binance Communication dependency
+            services.AddSingleton<BinanceCommunicationsService, BinanceCommunicationsService>();
 
             // Create algorithm service that manages running algorithms
             services.AddSingleton<IAlgorithmService, AlgorithmService>();

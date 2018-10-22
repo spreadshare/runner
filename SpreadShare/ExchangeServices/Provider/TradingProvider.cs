@@ -10,7 +10,7 @@ namespace SpreadShare.ExchangeServices.Provider
     /// </summary>
     internal class TradingProvider : ITradingProvider
     {
-        private readonly ITradingProvider _implementation;
+        private readonly IExchangeTradingProvider _implementation;
         private readonly WeakAllocationManager _allocationManager;
 
         /// <summary>
@@ -18,7 +18,7 @@ namespace SpreadShare.ExchangeServices.Provider
         /// </summary>
         /// <param name="implementation">Exchange implementation of trading provider</param>
         /// <param name="allocationManager">Provides portfolio access</param>
-        public TradingProvider(ITradingProvider implementation, WeakAllocationManager allocationManager)
+        public TradingProvider(IExchangeTradingProvider implementation, WeakAllocationManager allocationManager)
         {
             _implementation = implementation;
             _allocationManager = allocationManager;
@@ -37,13 +37,15 @@ namespace SpreadShare.ExchangeServices.Provider
         /// <inheritdoc />
         public ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
         {
-            return _implementation.PlaceFullMarketOrder(pair, side);
+            // TODO: Use allocation manager to fetch funds
+            decimal amount = 0;
+            return _implementation.PlaceFullMarketOrder(pair, side, amount);
         }
 
         /// <inheritdoc />
-        public ResponseObject CancelOrder(long orderId)
+        public ResponseObject CancelOrder(CurrencyPair pair, long orderId)
         {
-            return _implementation.CancelOrder(orderId);
+            return _implementation.CancelOrder(pair, orderId);
         }
     }
 }
