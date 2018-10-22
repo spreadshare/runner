@@ -28,25 +28,21 @@ namespace SpreadShare.Algorithms
         /// <param name="algorithmSettings">The settings of the algorithm settings</param>
         /// <param name="initial">Initial state of the algorithm</param>
         /// <param name="loggerFactory">LoggerFactory for creating loggers</param>
-        /// <param name="tradingService">Instance of the trading service</param>
-        /// <param name="userService">Instance of the user service</param>
+        /// <param name="container">Exchange service container</param>
         public StateManager(
             T algorithmSettings,
             State<T> initial,
             ILoggerFactory loggerFactory,
-            ITradingService tradingService,
-            IUserService userService)
+            ExchangeProvidersContainer container)
         {
             // Setup logging
             _logger = loggerFactory.CreateLogger("StateManager");
             _loggerFactory = loggerFactory;
 
-            // Setup trading services (gain access to abstract members)
-            TradingService = tradingService as AbstractTradingService;
-            UserService = userService as AbstractUserService;
-
             // Link the parent algorithm setting
             AlgorithmSettings = algorithmSettings;
+
+            Container = container;
 
             // Setup initial state
             _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
@@ -54,14 +50,9 @@ namespace SpreadShare.Algorithms
         }
 
         /// <summary>
-        /// Gets an instance of the trading service
+        /// Gets the container with exchange service providers
         /// </summary>
-        public AbstractTradingService TradingService { get; }
-
-        /// <summary>
-        /// Gets an instance of the user service
-        /// </summary>
-        public AbstractUserService UserService { get; }
+        public ExchangeProvidersContainer Container { get; }
 
         /// <summary>
         /// Gets a link to the algorithm settings.

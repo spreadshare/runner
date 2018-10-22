@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
 
@@ -22,12 +23,12 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Gets a trading service instance
         /// </summary>
-        protected AbstractTradingService TradingService { get; private set; }
+        protected TradingProvider TradingProvider => _stateManager.Container.TradingProvider as TradingProvider;
 
         /// <summary>
         /// Gets a user service instance
         /// </summary>
-        protected AbstractUserService UserService { get; private set; }
+        protected DataProvider DataProvider => _stateManager.Container.DataProvider as DataProvider;
 
         /// <summary>
         /// Gets a link to the parent algorithm settings
@@ -42,8 +43,6 @@ namespace SpreadShare.Algorithms
         public void Activate(StateManager<T> stateManager, ILoggerFactory loggerFactory)
         {
             _stateManager = stateManager;
-            TradingService = stateManager.TradingService;
-            UserService = stateManager.UserService;
             Logger = loggerFactory.CreateLogger(GetType());
             AlgorithmSettings = _stateManager.AlgorithmSettings;
             Run();
