@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Binance;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
@@ -19,10 +20,14 @@ namespace SpreadShare.ExchangeServices
         /// Initializes a new instance of the <see cref="ExchangeFactoryService"/> class.
         /// </summary>
         /// <param name="loggerFactory">Provides logging</param>
-        public ExchangeFactoryService(ILoggerFactory loggerFactory)
+        /// <param name="binanceComm">Injected binance communication service</param>
+        public ExchangeFactoryService(ILoggerFactory loggerFactory, BinanceCommunicationsService binanceComm)
         {
             _logger = loggerFactory.CreateLogger<ExchangeFactoryService>();
             _loggerFactory = loggerFactory;
+
+            // link communication services
+            _binanceCommunications = binanceComm;
         }
 
         /// <summary>
@@ -31,8 +36,8 @@ namespace SpreadShare.ExchangeServices
         /// <returns>Binance container with providers</returns>
         public ExchangeProvidersContainer BuildContainer()
         {
-            var dataProviderImplementation = new BinanceDataProvider(_loggerFactory);
-            var tradingProviderImplementation = new BinanceTradingProvider(_loggerFactory, null);
+            var dataProviderImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
+            var tradingProviderImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications);
 
             return new ExchangeProvidersContainer(
                 new DataProvider(dataProviderImplementation),
