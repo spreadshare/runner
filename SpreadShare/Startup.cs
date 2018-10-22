@@ -44,16 +44,10 @@ namespace SpreadShare
         /// <param name="services">Collection of services</param>
         public static void ConfigureBusinessServices(IServiceCollection services)
         {
-            // Add Binance Rest API dependency
-            services.AddSingleton<ITradingService, BinanceTradingService>();
-
-            // Add Binance User Websocket dependency
-            services.AddSingleton<IUserService, BinanceUserService>();
-
             // Exchange Factory dependency
             services.AddSingleton<ExchangeFactoryService, ExchangeFactoryService>();
 
-            // Binance Communication dependency
+            // Binance communication dependency
             services.AddSingleton<BinanceCommunicationsService, BinanceCommunicationsService>();
 
             // Binance Communication dependency
@@ -61,6 +55,9 @@ namespace SpreadShare
 
             // Create algorithm service that manages running algorithms
             services.AddSingleton<IAlgorithmService, AlgorithmService>();
+
+            // Add allocation service
+            services.AddSingleton<AllocationManager, AllocationManager>();
 
             // ZeroMQ Service to interface with other programs
             services.AddSingleton<IZeroMqService, ZeroMqService>();
