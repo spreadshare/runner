@@ -5,11 +5,12 @@
     "BinanceClientSettings": {
         "ReceiveWindow": 10000000,
         "Credentials": {
-          "Key": "api_key",
-          "Secret": "api_secret"
+            "Key": "api_key",
+            "Secret": "api_secret"
         }
     },
     "SimpleBandwagonAlgorithm": {
+        "Exchange" : "Binance",
         "BaseCurrency": "ETH",
         "MinimalRevertValue": "0.01",
         "MinimalGrowthPercentage" : 7,
@@ -31,11 +32,15 @@
             "EOSETH"
         ]
     }, 
-   "EnabledServices": {
-        "Exchange" : "Binance",
+    "EnabledServices": {
         "Algorithm": false,
         "Trading": false,
         "User": false,
         "ZeroMq": false 
-   }
+    },
+    "AllocationSettings": {
+        "Binance": {
+            "SimpleBandWagonAlgorithm": 1.0,
+        }
+    }
 }
