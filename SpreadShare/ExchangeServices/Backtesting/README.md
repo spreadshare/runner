@@ -35,3 +35,13 @@ On top of the algorithm parameters, the following should be configurable.
 | 2018-11-09 : 16:42    | CheckPositionValidity   | WaitHoldingTime         |
 | 2018-11-09 : 16:58    | WaitHoldingTime         | CheckPositionValidity   |
 | 2018-11-09 : 16:42    | CheckPositionValidity   | BuyState                |
+
+### Final report appendix
+
+* Total number of trades
+* Starting state of assets
+* End state of assets
+* Total value gained/lost in base currency
+* Total volume moved in base currency
+* The ratio between losing and winning trades
+* Histogram of trade wins/losses
