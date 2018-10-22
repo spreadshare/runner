@@ -23,12 +23,12 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Gets a trading service instance
         /// </summary>
-        protected ITradingProvider TradingProvider => _stateManager.Container.TradingProvider;
+        protected TradingProvider TradingProvider => _stateManager.Container.TradingProvider as TradingProvider;
 
         /// <summary>
         /// Gets a user service instance
         /// </summary>
-        protected IDataProvider DataProvider => _stateManager.Container.DataProvider;
+        protected DataProvider DataProvider => _stateManager.Container.DataProvider as DataProvider;
 
         /// <summary>
         /// Gets a link to the parent algorithm settings

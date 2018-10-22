@@ -1,4 +1,5 @@
-﻿using Binance.Net.Objects;
+﻿using System;
+using Binance.Net.Objects;
 using SpreadShare.Models;
 
 namespace SpreadShare.ExchangeServices.Provider
@@ -19,10 +20,14 @@ namespace SpreadShare.ExchangeServices.Provider
             _implementation = implementation;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the portfolio associated with an algorithm
+        /// </summary>
+        /// <returns>Response object indicating success or not</returns>
+        /// TODO: Make method algorithm specific
         public ResponseObject<Assets> GetPortfolio()
         {
-            return _implementation.GetPortfolio();
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
