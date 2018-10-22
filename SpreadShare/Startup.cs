@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Binance;
-using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
@@ -49,8 +49,8 @@ namespace SpreadShare
             // Add Binance User Websocket dependency
             services.AddSingleton<IUserService, BinanceUserService>();
 
-            // Strategy to be executed
-            services.AddSingleton<IStrategy, SimpleBandWagonStrategy>();
+            // Algorithm to be executed
+            services.AddSingleton<IAlgorithm, SimpleBandWagonAlgorithm>();
 
             // ZeroMQ Service to interface with other programs
             services.AddSingleton<IZeroMqService, ZeroMqService>();
@@ -106,6 +106,9 @@ namespace SpreadShare
 
             // Configuration files globals
             services.AddSingleton<ISettingsService, SettingsService>();
+
+            // Add Portfolio fetching
+            services.AddSingleton<IPortfolioFetcherService, PortfolioFetcherService>();
         }
     }
 }

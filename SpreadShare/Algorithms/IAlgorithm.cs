@@ -5,7 +5,7 @@ namespace SpreadShare.Algorithms
     /// <summary>
     /// Interface for all algorithms
     /// </summary>
-    internal interface IStrategy
+    internal interface IAlgorithm
     {
         /// <summary>
         /// Starts the algorithm

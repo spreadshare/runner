@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
-using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
 
@@ -10,7 +9,7 @@ namespace SpreadShare.Algorithms
     /// Base class for all algorithms
     /// </summary>
     /// <typeparam name="T">The specific algorithm that is associated with it</typeparam>
-    internal abstract class BaseStrategy<T> : IStrategy
+    internal abstract class BaseAlgorithm<T> : IAlgorithm
        where T : AlgorithmSettings
     {
         /// <summary>
@@ -19,26 +18,22 @@ namespace SpreadShare.Algorithms
         protected readonly SettingsService SettingsService;
 
         private readonly ILoggerFactory _loggerFactory;
-        private readonly ITradingService _tradingService;
-        private readonly IUserService _userService;
+        private readonly ExchangeProvidersContainer _exchangeProvidersContainer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BaseStrategy{T}"/> class.
+        /// Initializes a new instance of the <see cref="BaseAlgorithm{T}"/> class.
         /// Implements and provides dependencies required by the StateManager
         /// </summary>
         /// <param name="loggerFactory">Provided logger creating capabilities</param>
-        /// <param name="tradingService">Provides trading capabilities</param>
-        /// <param name="userService">Provides user data fetching capabilities</param>
         /// <param name="settingsService">Provides access to global settings</param>
-        protected BaseStrategy(
+        /// <param name="container">Provides access to service providers</param>
+        protected BaseAlgorithm(
             ILoggerFactory loggerFactory,
-            ITradingService tradingService,
-            IUserService userService,
-            ISettingsService settingsService)
+            ISettingsService settingsService,
+            ExchangeProvidersContainer container)
         {
             _loggerFactory = loggerFactory;
-            _tradingService = tradingService;
-            _userService = userService;
+            _exchangeProvidersContainer = container;
             SettingsService = settingsService as SettingsService;
         }
 
@@ -57,8 +52,7 @@ namespace SpreadShare.Algorithms
                 Settings,
                 GetInitialState(),
                 _loggerFactory,
-                _tradingService,
-                _userService);
+                _exchangeProvidersContainer);
 
             return new ResponseObject(ResponseCode.Success);
         }
