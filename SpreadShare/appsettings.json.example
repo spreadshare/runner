@@ -32,9 +32,10 @@
         ]
     }, 
    "EnabledServices": {
-       "Algorithm": false,
-       "Trading": false,
-       "User": false,
-       "ZeroMq": false 
+        "Exchange" : "Binance",
+        "Algorithm": false,
+        "Trading": false,
+        "User": false,
+        "ZeroMq": false 
    }
 }

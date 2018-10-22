@@ -1,5 +1,6 @@
 ﻿using System;
 using Binance.Net.Objects;
+using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
 
 namespace SpreadShare.ExchangeServices.Provider
@@ -10,14 +11,17 @@ namespace SpreadShare.ExchangeServices.Provider
     internal class TradingProvider : ITradingProvider
     {
         private readonly IExchangeTradingProvider _implementation;
+        private readonly WeakAllocationManager _allocationManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TradingProvider"/> class.
         /// </summary>
         /// <param name="implementation">Exchange implementation of trading provider</param>
-        public TradingProvider(IExchangeTradingProvider implementation)
+        /// <param name="allocationManager">Provides portfolio access</param>
+        public TradingProvider(IExchangeTradingProvider implementation, WeakAllocationManager allocationManager)
         {
             _implementation = implementation;
+            _allocationManager = allocationManager;
         }
 
         /// <summary>

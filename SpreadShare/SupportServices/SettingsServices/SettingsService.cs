@@ -6,6 +6,7 @@ using Binance.Net;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices.SettingsServices
@@ -139,6 +140,12 @@ namespace SpreadShare.SupportServices.SettingsServices
             // Parse the base currency string to a Currency type
             var baseStr = _configuration.GetSection("SimpleBandWagonAlgorithm:BaseCurrency").Get<string>();
             SimpleBandWagonAlgorithmSettings.BaseCurrency = new Currency(baseStr);
+
+            // TODO: Parse exchange in the AlgorithmSettings class
+
+            // Parse exchange to enum Exchange
+            var exchange = _configuration.GetSection("SimpleBandWagonAlgorithm:Exchange").Get<string>();
+            SimpleBandWagonAlgorithmSettings.Exchange = Enum.Parse<Exchange>(exchange);
         }
     }
 }

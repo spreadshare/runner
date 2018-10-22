@@ -1,6 +1,3 @@
-using System;
-using System.Numerics;
-using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using Xunit;
@@ -22,7 +19,8 @@ namespace SpreadShare.Tests.ExchangeServices.Binance
         public BinanceDataProviderTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            _container = ExchangeFactoryService.BuildContainer();
+            // TODO: Get reference to WeakAllocationManager in tests
+            _container = ExchangeFactoryService.BuildContainer(Exchange.Binance, null);
         }
 
         /// <summary>

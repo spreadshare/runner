@@ -56,8 +56,8 @@ namespace SpreadShare
             // Binance Communication dependency
             services.AddSingleton<BinanceCommunicationsService, BinanceCommunicationsService>();
 
-            // Algorithm to be executed
-            services.AddSingleton<IAlgorithm, SimpleBandWagonAlgorithm>();
+            // Create algorithm service that manages running algorithms
+            services.AddSingleton<IAlgorithmService, AlgorithmService>();
 
             // ZeroMQ Service to interface with other programs
             services.AddSingleton<IZeroMqService, ZeroMqService>();

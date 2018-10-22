@@ -1,3 +1,6 @@
+﻿using System;
+using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.Allocation;
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Binance;
@@ -53,16 +56,30 @@ namespace SpreadShare.ExchangeServices
         /// <summary>
         /// Builds container for Binance
         /// </summary>
+        /// <param name="exchange">Specifies which container to create</param>
+        /// <param name="allocationManager">Provides portfolio access</param>
         /// <returns>Binance container with providers</returns>
-        public ExchangeProvidersContainer BuildContainer()
+        public ExchangeProvidersContainer BuildContainer(Exchange exchange, WeakAllocationManager allocationManager)
         {
-            var dataProviderImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
-            var tradingProviderImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications);
+            AbstractDataProvider dataProviderImplementation;
+            AbstractTradingProvider tradingProviderImplementation;
+            switch (exchange)
+            {
+                case Exchange.Binance:
+                    dataProviderImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
+                    tradingProviderImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications);
+                    break;
+                case Exchange.Backtesting:
+                    throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);
+            }
 
             return new ExchangeProvidersContainer(
+                _loggerFactory,
                 new DataProvider(dataProviderImplementation),
                 new ExchangeTimerProvider(),
-                new TradingProvider(tradingProviderImplementation));
+                new TradingProvider(tradingProviderImplementation, allocationManager));
         }
     }
 }
