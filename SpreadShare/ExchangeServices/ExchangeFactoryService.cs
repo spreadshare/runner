@@ -31,6 +31,10 @@ namespace SpreadShare.ExchangeServices
             _binanceCommunications = binanceComm;
         }
 
+        /// <summary>
+        /// Start the factory service, which intern starts all the communication services.
+        /// </summary>
+        /// <returns>Response object indicating success or not</returns>
         public ResponseObject Start()
         {
             ResponseObject response;
@@ -41,6 +45,7 @@ namespace SpreadShare.ExchangeServices
                 _logger.LogError(response.ToString());
                 return new ResponseObject(ResponseCode.Error, "Binance communications failed to start");
             }
+
             _logger.LogInformation("Binance communication successfully started");
             return new ResponseObject(ResponseCode.Success);
         }

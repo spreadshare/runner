@@ -49,10 +49,10 @@ namespace SpreadShare
 
             // Add Binance User Websocket dependency
             services.AddSingleton<IUserService, BinanceUserService>();
-            
+
             // Exchange Factory dependency
             services.AddSingleton<ExchangeFactoryService, ExchangeFactoryService>();
-            
+
             // Binance Communication dependency
             services.AddSingleton<BinanceCommunicationsService, BinanceCommunicationsService>();
 
