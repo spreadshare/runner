@@ -20,7 +20,7 @@ namespace SpreadShare.Tests.ExchangeServices.Binance
             : base(outputHelper)
         {
             // TODO: Get reference to WeakAllocationManager in tests
-            _container = ExchangeFactoryService.BuildContainer(Exchange.Binance, null);
+            _container = ExchangeFactoryService.BuildContainer(Exchange.Binance, null, null);
         }
 
         /// <summary>
