@@ -7,15 +7,15 @@ namespace SpreadShare.ExchangeServices.Provider
     /// <summary>
     /// Provides data gathering capabilities.
     /// </summary>
-    internal class DataProvider : IDataProvider
+    internal class DataProvider
     {
-        private readonly IDataProvider _implementation;
+        private readonly DataProvider _implementation;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataProvider"/> class.
         /// </summary>
         /// <param name="implementation">Exchange implementation of data provider</param>
-        public DataProvider(IDataProvider implementation)
+        public DataProvider(DataProvider implementation)
         {
             _implementation = implementation;
         }

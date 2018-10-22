@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using SpreadShare.Models;
 
@@ -7,7 +7,7 @@ namespace SpreadShare.ExchangeServices.Provider
     /// <summary>
     /// Interface for classes providing data gathering capabilities.
     /// </summary>
-    internal interface IDataProvider
+    internal interface IExchangeDataProvider
     {
         /// <summary>
         /// Gets the current price of a currency pair by checking the last trade

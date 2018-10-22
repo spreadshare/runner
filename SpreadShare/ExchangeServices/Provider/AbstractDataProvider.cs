@@ -8,9 +8,9 @@ namespace SpreadShare.ExchangeServices.Provider
     /// <summary>
     /// Abstract specification of a data provider.
     /// </summary>
-    internal abstract class AbstractDataProvider : IDataProvider
+    internal abstract class AbstractDataProvider : IExchangeDataProvider
     {
-        /// <summary>
+        /// <summary>: IExchangeDataProvider
         /// Create identifiable output
         /// </summary>
         protected readonly ILogger Logger;
@@ -24,19 +24,14 @@ namespace SpreadShare.ExchangeServices.Provider
             Logger = loggerFactory.CreateLogger(GetType());
         }
 
-        /// <inheritdoc />
         public abstract ResponseObject<decimal> GetCurrentPriceLastTrade(CurrencyPair pair);
 
-        /// <inheritdoc />
         public abstract ResponseObject<decimal> GetCurrentPriceTopBid(CurrencyPair pair);
 
-        /// <inheritdoc />
         public abstract ResponseObject<decimal> GetCurrentPriceTopAsk(CurrencyPair pair);
 
-        /// <inheritdoc />
         public abstract ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTime endTime);
 
-        /// <inheritdoc />
         public abstract ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(List<CurrencyPair> pairs, double hoursBack, DateTime endTime);
     }
 }

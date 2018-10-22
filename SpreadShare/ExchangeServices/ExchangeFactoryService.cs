@@ -62,7 +62,7 @@ namespace SpreadShare.ExchangeServices
             return new ExchangeProvidersContainer(
                 new DataProvider(dataProviderImplementation),
                 new ExchangeTimerProvider(),
-                new TradingProvider(tradingProviderImplementation));
+                new TradingProvider(_loggerFactory, tradingProviderImplementation));
         }
     }
 }
