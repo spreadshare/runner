@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
@@ -67,7 +68,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <returns>The portfolio</returns>
         private ResponseObject<Assets> GetBacktestingPortfolio()
         {
-            return new ResponseObject<Assets>(ResponseCode.NotDefined, "Fetching backtesting portfolios has not been defined");
+            throw new NotImplementedException();
         }
     }
 }
