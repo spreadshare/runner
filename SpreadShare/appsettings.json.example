@@ -9,7 +9,7 @@
             "Secret": "api_secret"
         }
     },
-    "SimpleBandwagonAlgorithm": {
+    "SimpleBandWagonAlgorithm": {
         "Exchange" : "Binance",
         "BaseCurrency": "ETH",
         "MinimalRevertValue": "0.01",
