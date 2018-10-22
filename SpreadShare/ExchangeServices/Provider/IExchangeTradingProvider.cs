@@ -19,6 +19,6 @@ namespace SpreadShare.ExchangeServices.Provider
         /// </summary>
         /// <param name="orderId">Id of the order</param>
         /// <returns>A response object with the results of the action</returns>
-        ResponseObject CancelOrder(long orderId);
+        ResponseObject CancelOrder(CurrencyPair pair, long orderId);
     }
 }
