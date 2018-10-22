@@ -128,7 +128,14 @@ namespace SpreadShare.SupportServices.SettingsServices
                     // Add the instance to the parseTable to make it available for parsing
                     int decimals = -(int)Math.Log10((double)stepSize);
                     var result = new CurrencyPair(new Currency(left), new Currency(right), decimals);
-                    CurrencyPair.AddParseEntry(pair.Value, result);
+                    try
+                    {
+                        CurrencyPair.AddParseEntry(pair.Value, result);
+                    }
+                    catch (ArgumentException ignored)
+                    {
+                        // Double entries because of binance
+                    }
                 }
             }
         }
