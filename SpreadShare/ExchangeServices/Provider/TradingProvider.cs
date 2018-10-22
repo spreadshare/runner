@@ -33,6 +33,7 @@ namespace SpreadShare.ExchangeServices.Provider
         /// <inheritdoc />
         public ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
         {
+            // TODO: Use allocation manager to fetch funds
             decimal amount = 0;
             return _implementation.PlaceFullMarketOrder(pair, side, amount);
         }
