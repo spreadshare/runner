@@ -12,7 +12,7 @@ namespace SpreadShare.ExchangeServices.Provider
     internal class TradingProvider
     {
         private readonly ILogger _logger;
-        private readonly IExchangeTradingProvider _implementation;
+        private readonly AbstractTradingProvider _implementation;
         private readonly WeakAllocationManager _allocationManager;
         private readonly DataProvider _dataProvider;
         private readonly Type _algorithm;
@@ -22,7 +22,7 @@ namespace SpreadShare.ExchangeServices.Provider
         /// Initializes a new instance of the <see cref="TradingProvider"/> class.
         /// </summary>
         /// <param name="implementation">Exchange implementation of trading provider</param>
-        public TradingProvider(ILoggerFactory loggerFactory, IExchangeTradingProvider implementation,
+        public TradingProvider(ILoggerFactory loggerFactory, AbstractTradingProvider implementation,
             DataProvider dataProvider, WeakAllocationManager allocationManager, Type algorithm, Exchange exchange)
         {
             _logger = loggerFactory.CreateLogger(GetType());

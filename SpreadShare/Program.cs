@@ -110,20 +110,11 @@ namespace SpreadShare
                     throw new ArgumentException("StrategyService depends on TradingService, which is disabled");
                 }
 
-                if (userResult.Success && tradingResult.Success)
+                var algorithm = serviceProvider.GetService<IAlgorithmService>();
+                var algorithmResponse = algorithm.StartAlgorithm(typeof(SimpleBandWagonAlgorithmSettings));
+                if (algorithmResponse.Code != ResponseCode.Success)
                 {
-                    var algorithm = serviceProvider.GetService<IAlgorithm>();
-                    var algorithmResponse = algorithm.Start();
-                    if (algorithmResponse.Code != ResponseCode.Success)
-                    {
-                        logger.LogError($"algorithm failed to start, report: {algorithmResponse}");
-                    }
-                }
-                else
-                {
-                    logger.LogError("Algorithm not started because not all needed service started");
-                    logger.LogError($"User service report: {userResult}");
-                    logger.LogError($"Trading Service report: {tradingResult}");
+                    logger.LogError($"algorithm failed to start, report: {algorithmResponse}");
                 }
             }
             else

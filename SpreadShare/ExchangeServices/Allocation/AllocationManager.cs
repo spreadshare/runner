@@ -123,6 +123,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         private void UpdatePortfolio(Type algorithm, IExchangeSpecification exchangeSpecification)
         {
             // TODO: Update allocation
+            algorithm = null;
             _portfolioFetcherService.GetPortfolio(exchangeSpecification);
         }
     }

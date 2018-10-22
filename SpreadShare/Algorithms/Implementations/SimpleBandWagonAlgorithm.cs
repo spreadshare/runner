@@ -16,30 +16,23 @@ namespace SpreadShare.Algorithms.Implementations
     /// fully change position to that asset and hold for the holdingTime before checking again.
     /// If their is no winner, remain in baseCurrency and check again after waitTime.
     /// </summary>
-    internal class SimpleBandWagonAlgorithm : BaseAlgorithm<SimpleBandWagonAlgorithmSettings>
+    internal class SimpleBandWagonAlgorithm : BaseAlgorithm
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SimpleBandWagonAlgorithm"/> class.
-        /// </summary>
-        /// <param name="loggerFactory">Provided logger creating capabilities</param>
-        /// <param name="settingsService">Provides access to global settings</param>
-        /// <param name="factory">Used to generate a service container</param>
-        public SimpleBandWagonAlgorithm(
-            ILoggerFactory loggerFactory,
-            ISettingsService settingsService,
-            ExchangeFactoryService factory)
-            : base(loggerFactory, settingsService, factory.BuildContainer())
-        {
-            Settings = SettingsService.SimpleBandWagonAlgorithmSettings;
-        }
-
-        /// <summary>
-        /// Gets the algorithm's settings
-        /// </summary>
-        protected override SimpleBandWagonAlgorithmSettings Settings { get; }
+        /// <inheritdoc />
+        public override Type GetSettingsType => typeof(SimpleBandWagonAlgorithmSettings);
 
         /// <inheritdoc />
-        protected override State<SimpleBandWagonAlgorithmSettings> GetInitialState() => new EntryState();
+        public override ResponseObject Start(
+            AlgorithmSettings settings,
+            ExchangeProvidersContainer container)
+        {
+            var stateManager = new StateManager<SimpleBandWagonAlgorithmSettings>(
+                settings as SimpleBandWagonAlgorithmSettings,
+                new EntryState(),
+                container);
+
+            return new ResponseObject(ResponseCode.Success);
+        }
 
         /// <summary>
         /// Starting state of the algorithm
