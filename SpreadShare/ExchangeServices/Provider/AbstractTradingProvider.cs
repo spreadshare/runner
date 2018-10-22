@@ -7,7 +7,7 @@ namespace SpreadShare.ExchangeServices.Provider
     /// <summary>
     /// Abstract specification of a trading provider.
     /// </summary>
-    internal abstract class AbstractTradingProvider : ITradingProvider
+    internal abstract class AbstractTradingProvider : IExchangeTradingProvider
     {
         /// <summary>
         /// Create identifiable output.
@@ -24,7 +24,7 @@ namespace SpreadShare.ExchangeServices.Provider
         }
 
         /// <inheritdoc />
-        public abstract ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side);
+        public abstract ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side, decimal amount);
 
         /// <inheritdoc />
         public abstract ResponseObject CancelOrder(long orderId);
