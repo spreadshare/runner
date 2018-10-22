@@ -92,10 +92,8 @@ namespace SpreadShare.Algorithms
         /// </summary>
         private void SetInitialAllocation()
         {
-            // TODO: Get allocation from Settings
-
             // Sets initial configuration
-            _allocationManager.SetInitialConfiguration(null);
+            _allocationManager.SetInitialConfiguration((_settingsService as SettingsService).AllocationSettings);
         }
 
         /// <summary>
