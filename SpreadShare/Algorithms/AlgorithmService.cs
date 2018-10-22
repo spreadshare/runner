@@ -127,5 +127,40 @@ namespace SpreadShare.Algorithms
                 }
             }
         }
+
+        /// <summary>
+        /// Gets the exchange from the algorithm settings
+        /// </summary>
+        /// <param name="algorithmSettingsType">Type of the settings of the algorithm</param>
+        /// <returns>The settings of the algorithm with configured values</returns>
+        private AlgorithmSettings GetSettings(Type algorithmSettingsType)
+        {
+            // Get type of SettingsService as declared in Startup.cs
+            Type settingsType = _settingsService.GetType();
+
+            // Get public non-static properties in settings
+            var publicInstanceProperties = settingsType.GetProperties(
+                BindingFlags.Public | BindingFlags.Instance);
+
+            // Get all properties with returnType = algorithmSettingsType
+            List<PropertyInfo> list = publicInstanceProperties
+                .Where(methodInfo => methodInfo.PropertyType == algorithmSettingsType).ToList();
+
+            // Check if any property with searched settings return type is declared
+            if (list.Count < 1)
+            {
+                throw new InvalidConstraintException($"No methods with type {algorithmSettingsType} " +
+                                                     $"were declared in ${settingsType}");
+            }
+
+            // Check if multiple properties with searched settings return type are declared
+            if (list.Count > 1)
+            {
+                throw new InvalidConstraintException($"Multiple methods with type {algorithmSettingsType} " +
+                                                     $"were declared in ${settingsType}");
+            }
+
+            return (AlgorithmSettings)list[0].GetValue(_settingsService);
+        }
     }
 }
