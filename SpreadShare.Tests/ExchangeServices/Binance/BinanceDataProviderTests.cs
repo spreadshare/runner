@@ -1,3 +1,4 @@
+using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using Xunit;
@@ -20,7 +21,7 @@ namespace SpreadShare.Tests.ExchangeServices.Binance
             : base(outputHelper)
         {
             // TODO: Get reference to WeakAllocationManager in tests
-            _container = ExchangeFactoryService.BuildContainer(Exchange.Binance, null, null);
+            _container = ExchangeFactoryService.BuildContainer(Exchange.Binance, typeof(SimpleBandWagonAlgorithm), AllocationManager);
         }
 
         /// <summary>

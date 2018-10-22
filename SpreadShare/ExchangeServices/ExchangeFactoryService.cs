@@ -38,9 +38,8 @@ namespace SpreadShare.ExchangeServices
         /// <returns>Response object indicating success or not</returns>
         public ResponseObject Start()
         {
-            ResponseObject response;
             _logger.LogInformation("Starting binance communication service...");
-            response = _binanceCommunications.Start();
+            var response = _binanceCommunications.Start();
             if (!response.Success)
             {
                 _logger.LogError(response.ToString());
