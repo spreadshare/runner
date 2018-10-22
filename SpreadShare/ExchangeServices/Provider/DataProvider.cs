@@ -9,13 +9,13 @@ namespace SpreadShare.ExchangeServices.Provider
     /// </summary>
     internal class DataProvider
     {
-        private readonly DataProvider _implementation;
+        private readonly IExchangeDataProvider _implementation;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataProvider"/> class.
         /// </summary>
         /// <param name="implementation">Exchange implementation of data provider</param>
-        public DataProvider(DataProvider implementation)
+        public DataProvider(IExchangeDataProvider implementation)
         {
             _implementation = implementation;
         }
