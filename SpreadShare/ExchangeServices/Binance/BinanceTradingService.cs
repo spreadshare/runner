@@ -100,9 +100,9 @@ namespace SpreadShare.ExchangeServices.Binance
                 return new ResponseObject(ResponseCode.Error, "Could not retrieve assets");
             }
 
-            decimal correction = 1.0M;
+            uint retries = 0;
 
-            while (correction > 0.95M)
+            while (retries++ < 5)
             {
                 decimal amount = query.Data.GetFreeBalance(side == OrderSide.Buy ? pair.Right : pair.Left);
 
@@ -113,7 +113,7 @@ namespace SpreadShare.ExchangeServices.Binance
                     if (priceQuery.Success)
                     {
                         // Ensure that the price stay valid for a short while.
-                        amount = (amount / priceQuery.Data) * correction;
+                        amount = amount / priceQuery.Data;
                         _logger.LogInformation($"Current price of {pair} is {priceQuery.Data}{pair.Right}");
                     }
                     else
@@ -134,10 +134,9 @@ namespace SpreadShare.ExchangeServices.Binance
                 }
 
                 _logger.LogWarning($"Error while placing order: {trade.Error.Message}");
-                correction -= 0.01M;
             }
 
-            return new ResponseObject(ResponseCode.Error, $"Market order failed, even after underestimating wth a factor of {correction}");
+            return new ResponseObject(ResponseCode.Error, $"Market order failed, even after retrying {retries} times");
         }
 
         /// <summary>
