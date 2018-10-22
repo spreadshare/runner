@@ -44,12 +44,6 @@ namespace SpreadShare
         /// <param name="services">Collection of services</param>
         public static void ConfigureBusinessServices(IServiceCollection services)
         {
-            // Add Binance Rest API dependency
-            services.AddSingleton<ITradingService, BinanceTradingService>();
-
-            // Add Binance User Websocket dependency
-            services.AddSingleton<IUserService, BinanceUserService>();
-
             // Exchange Factory dependency
             services.AddSingleton<ExchangeFactoryService, ExchangeFactoryService>();
 
