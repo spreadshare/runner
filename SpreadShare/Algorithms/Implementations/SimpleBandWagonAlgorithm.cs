@@ -23,14 +23,12 @@ namespace SpreadShare.Algorithms.Implementations
 
         /// <inheritdoc />
         public override ResponseObject Start(
-            ILoggerFactory loggerFactory,
-            ISettingsService settingsService,
+            AlgorithmSettings settings,
             ExchangeProvidersContainer container)
         {
             var stateManager = new StateManager<SimpleBandWagonAlgorithmSettings>(
-                ((SettingsService)settingsService).SimpleBandWagonAlgorithmSettings,
+                settings as SimpleBandWagonAlgorithmSettings,
                 new EntryState(),
-                loggerFactory,
                 container);
 
             return new ResponseObject(ResponseCode.Success);

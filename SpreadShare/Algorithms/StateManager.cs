@@ -27,17 +27,15 @@ namespace SpreadShare.Algorithms
         /// </summary>
         /// <param name="algorithmSettings">The settings of the algorithm settings</param>
         /// <param name="initial">Initial state of the algorithm</param>
-        /// <param name="loggerFactory">LoggerFactory for creating loggers</param>
         /// <param name="container">Exchange service container</param>
         public StateManager(
             T algorithmSettings,
             State<T> initial,
-            ILoggerFactory loggerFactory,
             ExchangeProvidersContainer container)
         {
             // Setup logging
-            _logger = loggerFactory.CreateLogger("StateManager");
-            _loggerFactory = loggerFactory;
+            _logger = container.LoggerFactory.CreateLogger("StateManager");
+            _loggerFactory = container.LoggerFactory;
 
             // Link the parent algorithm setting
             AlgorithmSettings = algorithmSettings;

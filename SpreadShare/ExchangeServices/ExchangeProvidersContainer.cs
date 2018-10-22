@@ -1,4 +1,5 @@
-﻿using SpreadShare.ExchangeServices.Provider;
+﻿using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.Provider;
 
 namespace SpreadShare.ExchangeServices
 {
@@ -10,15 +11,26 @@ namespace SpreadShare.ExchangeServices
         /// <summary>
         /// Initializes a new instance of the <see cref="ExchangeProvidersContainer"/> class.
         /// </summary>
+        /// <param name="loggerFactory">Provides logging capabilities</param>
         /// <param name="dataProvider">Provides data gathering capabilities</param>
         /// <param name="timerProvider">Provides timer and scheduling capabilities</param>
         /// <param name="tradingProvider">Provides trading capabilities</param>
-        public ExchangeProvidersContainer(IDataProvider dataProvider, ITimerProvider timerProvider, ITradingProvider tradingProvider)
+        public ExchangeProvidersContainer(
+            ILoggerFactory loggerFactory,
+            IDataProvider dataProvider,
+            ITimerProvider timerProvider,
+            ITradingProvider tradingProvider)
         {
+            LoggerFactory = loggerFactory;
             DataProvider = dataProvider;
             TimerProvider = timerProvider;
             TradingProvider = tradingProvider;
         }
+
+        /// <summary>
+        /// Gets the provider for logging capabilities.
+        /// </summary>
+        public ILoggerFactory LoggerFactory { get; }
 
         /// <summary>
         /// Gets the provider for data gathering capabilities.

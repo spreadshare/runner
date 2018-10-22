@@ -17,7 +17,6 @@ namespace SpreadShare.Algorithms
     internal class AlgorithmService : IAlgorithmService
     {
         private readonly ILogger _logger;
-        private readonly ILoggerFactory _loggerFactory;
         private readonly ISettingsService _settingsService;
         private readonly AllocationManager _allocationManager;
         private readonly ExchangeFactoryService _exchangeFactoryService;
@@ -37,7 +36,6 @@ namespace SpreadShare.Algorithms
             ExchangeFactoryService exchangeFactoryService)
         {
             _logger = loggerFactory.CreateLogger<AlgorithmService>();
-            _loggerFactory = loggerFactory;
             _allocationManager = allocationManager;
             _exchangeFactoryService = exchangeFactoryService;
             _settingsService = settingsService;
@@ -62,9 +60,10 @@ namespace SpreadShare.Algorithms
                 return new ResponseObject(ResponseCode.Error, "Algorithm was already started.");
             }
 
-            // TODO: Figure out which container to get
+            // Figure out which container to get
             BaseAlgorithm algorithm = (BaseAlgorithm)Activator.CreateInstance(algorithmType);
-            Exchange exchangeEnum = GetSettings(algorithm.GetSettingsType).Exchange;
+            AlgorithmSettings settings = GetSettings(algorithm.GetSettingsType);
+            Exchange exchangeEnum = settings.Exchange;
 
             // Build container
             var container = _exchangeFactoryService.BuildContainer(
@@ -72,7 +71,7 @@ namespace SpreadShare.Algorithms
                 _allocationManager.GetWeakAllocationManager());
 
             // Initialise algorithm with container
-            algorithm.Start(_loggerFactory, _settingsService, container);
+            algorithm.Start(settings, container);
 
             // Set status Running to True
             _algorithms[algorithmType] = true;

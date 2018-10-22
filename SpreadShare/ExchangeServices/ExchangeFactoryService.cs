@@ -47,6 +47,7 @@ namespace SpreadShare.ExchangeServices
             }
 
             return new ExchangeProvidersContainer(
+                _loggerFactory,
                 new DataProvider(dataProviderImplementation),
                 new ExchangeTimerProvider(),
                 new TradingProvider(tradingProviderImplementation, allocationManager));
