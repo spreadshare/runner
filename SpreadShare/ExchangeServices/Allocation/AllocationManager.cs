@@ -69,7 +69,7 @@ namespace SpreadShare.ExchangeServices.Allocation
                 return false;
             }
 
-            return _allocations[exchange][algorithm].GetFreeBalance(currency) >= fundsToTrade)
+            return _allocations[exchange][algorithm].GetFreeBalance(currency) >= fundsToTrade;
         }
 
         /// <summary>
