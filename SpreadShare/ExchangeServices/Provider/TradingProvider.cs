@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
