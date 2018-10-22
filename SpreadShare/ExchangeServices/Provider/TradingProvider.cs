@@ -9,13 +9,13 @@ namespace SpreadShare.ExchangeServices.Provider
     /// </summary>
     internal class TradingProvider : ITradingProvider
     {
-        private readonly ITradingProvider _implementation;
+        private readonly IExchangeTradingProvider _implementation;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TradingProvider"/> class.
         /// </summary>
         /// <param name="implementation">Exchange implementation of trading provider</param>
-        public TradingProvider(ITradingProvider implementation)
+        public TradingProvider(IExchangeTradingProvider implementation)
         {
             _implementation = implementation;
         }
@@ -33,7 +33,8 @@ namespace SpreadShare.ExchangeServices.Provider
         /// <inheritdoc />
         public ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
         {
-            return _implementation.PlaceFullMarketOrder(pair, side);
+            decimal amount = 0;
+            return _implementation.PlaceFullMarketOrder(pair, side, amount);
         }
 
         /// <inheritdoc />
