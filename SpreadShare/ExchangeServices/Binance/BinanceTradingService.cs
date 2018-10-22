@@ -113,7 +113,7 @@ namespace SpreadShare.ExchangeServices.Binance
                     if (priceQuery.Success)
                     {
                         // Ensure that the price stay valid for a short while.
-                        amount = (amount / priceQuery.Data);
+                        amount = amount / priceQuery.Data;
                         _logger.LogInformation($"Current price of {pair} is {priceQuery.Data}{pair.Right}");
                     }
                     else
