@@ -56,6 +56,9 @@ namespace SpreadShare
             // Binance Communication dependency
             services.AddSingleton<BinanceCommunicationsService, BinanceCommunicationsService>();
 
+            // Binance Communication dependency
+            services.AddSingleton<AllocationManager, AllocationManager>();
+
             // Create algorithm service that manages running algorithms
             services.AddSingleton<IAlgorithmService, AlgorithmService>();
 
