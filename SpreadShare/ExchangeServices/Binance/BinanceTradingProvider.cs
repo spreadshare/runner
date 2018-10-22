@@ -9,7 +9,8 @@ namespace SpreadShare.ExchangeServices.Binance
     /// <summary>
     /// Provides trading capabilities for Binance.
     /// </summary>
-    internal class BinanceTradingProvider : AbstractTradingProvider, IExchangeSpecification {
+    internal class BinanceTradingProvider : AbstractTradingProvider, IExchangeSpecification
+    {
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceTradingProvider"/> class.
         /// </summary>
