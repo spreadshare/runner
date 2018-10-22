@@ -16,30 +16,21 @@ namespace SpreadShare.Algorithms.Implementations
     /// fully change position to that asset and hold for the holdingTime before checking again.
     /// If their is no winner, remain in baseCurrency and check again after waitTime.
     /// </summary>
-    internal class SimpleBandWagonAlgorithm : BaseAlgorithm<SimpleBandWagonAlgorithmSettings>
+    internal class SimpleBandWagonAlgorithm : BaseAlgorithm
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SimpleBandWagonAlgorithm"/> class.
-        /// </summary>
-        /// <param name="loggerFactory">Provided logger creating capabilities</param>
-        /// <param name="settingsService">Provides access to global settings</param>
-        /// <param name="factory">Used to generate a service container</param>
-        public SimpleBandWagonAlgorithm(
-            ILoggerFactory loggerFactory,
-            ISettingsService settingsService,
-            ExchangeFactoryService factory)
-            : base(loggerFactory, settingsService, factory.BuildContainer(null))
+        public override ResponseObject Start(ILoggerFactory loggerFactory,
+            ISettingsService settingsService, ExchangeProvidersContainer container)
         {
-            Settings = SettingsService.SimpleBandWagonAlgorithmSettings;
+            var stateManager = new StateManager<SimpleBandWagonAlgorithmSettings>(
+                ((SettingsService)settingsService).SimpleBandWagonAlgorithmSettings,
+                new EntryState(),
+                loggerFactory,
+                container);
+
+            return new ResponseObject(ResponseCode.Success);
         }
 
-        /// <summary>
-        /// Gets the algorithm's settings
-        /// </summary>
-        protected override SimpleBandWagonAlgorithmSettings Settings { get; }
-
-        /// <inheritdoc />
-        protected override State<SimpleBandWagonAlgorithmSettings> GetInitialState() => new EntryState();
+        public override Type GetSettingsType => typeof(SimpleBandWagonAlgorithmSettings);
 
         /// <summary>
         /// Starting state of the algorithm
