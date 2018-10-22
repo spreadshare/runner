@@ -26,8 +26,8 @@ On top of the algorithm parameters, the following should be configurable.
 
 ### Executed trade
 | timestamp             | base   | asset | BUY/SELL | quantity | total assets before (url?)| total assets after(url?)| fees |
-| ---                   | ---    | ---   | ---      | ---      | ---                       | ---                     |  --- |
-| 2018-11-09 : 16:42    | ETH    | VET   | BUY      | 2452.23  | /bk/assets/4234.md        | /bk/assets/4244.md      | 0.003 ETH |
+| ---                   | ---    | ---   | ---      | ---      | ---                       | ---                     |  --- 
+| 2018-11-09 : 16:42    | ETH    | VET   | BUY      | 2452.23  | /bk/assets/4234.md        | /bk/assets/4244.md      | 0.042BNB  |
 
 ### State Switch
 | timestamp             | state from              | state to                |
