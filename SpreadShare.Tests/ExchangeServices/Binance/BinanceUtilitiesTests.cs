@@ -1,8 +1,7 @@
-using System.Globalization;
 using SpreadShare.ExchangeServices.Binance;
+using SpreadShare.Models;
 using Xunit;
 using Xunit.Abstractions;
-using OrderSide = SpreadShare.Models.OrderSide;
 
 namespace SpreadShare.Tests.ExchangeServices.Binance
 {
