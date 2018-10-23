@@ -40,7 +40,7 @@
     },
     "AllocationSettings": {
         "Binance": {
-            "SimpleBandWagonAlgorithm": 1.0,
+            "SimpleBandWagonAlgorithm": 1.0
         }
     }
 }
