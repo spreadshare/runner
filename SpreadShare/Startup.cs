@@ -4,10 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
-using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
-using SpreadShare.ExchangeServices.Binance;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
@@ -53,7 +51,7 @@ namespace SpreadShare
             // Create algorithm service that manages running algorithms
             services.AddSingleton<IAlgorithmService, AlgorithmService>();
 
-            // Add allocation service
+            // Add allocation manager
             services.AddSingleton<AllocationManager, AllocationManager>();
 
             // ZeroMQ Service to interface with other programs
