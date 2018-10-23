@@ -20,7 +20,6 @@ namespace SpreadShare.Tests.ExchangeServices.Binance
         public BinanceDataProviderTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            // TODO: Get reference to WeakAllocationManager in tests
             _container = ExchangeFactoryService.BuildContainer(Exchange.Binance, typeof(SimpleBandWagonAlgorithm), AllocationManager);
         }
 
