@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,7 +20,7 @@ namespace SpreadShare
     /// <summary>
     /// Startup object for assigning and configuring all services
     /// </summary>
-    internal class Startup
+    internal class Startup : IDesignTimeDbContextFactory<DatabaseContext>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Startup"/> class.
@@ -32,12 +33,12 @@ namespace SpreadShare
                 .AddJsonFile(jsonfile)
                 .Build();
         }
-
+    
         /// <summary>
         /// Gets the configuration of the application
         /// </summary>
         public IConfiguration Configuration { get; }
-
+    
         /// <summary>
         /// Configure business logic services such as fetching exchange data
         /// </summary>
@@ -46,20 +47,20 @@ namespace SpreadShare
         {
             // Exchange Factory dependency
             services.AddSingleton<ExchangeFactoryService, ExchangeFactoryService>();
-
+    
             // Binance communication dependency
             services.AddSingleton<BinanceCommunicationsService, BinanceCommunicationsService>();
-
+    
             // Create algorithm service that manages running algorithms
             services.AddSingleton<IAlgorithmService, AlgorithmService>();
-
+    
             // Add allocation service
             services.AddSingleton<AllocationManager, AllocationManager>();
-
+    
             // ZeroMQ Service to interface with other programs
             services.AddSingleton<IZeroMqService, ZeroMqService>();
         }
-
+    
         /// <summary>
         /// Additional configuration after all have been configured
         /// </summary>
@@ -68,7 +69,7 @@ namespace SpreadShare
         public static void Configure(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
-
+    
             // Setup Settings service
             var settings = serviceProvider.GetService<ISettingsService>();
             var settingsResult = settings.Start();
@@ -76,7 +77,7 @@ namespace SpreadShare
             {
                 logger.LogError($"SettingsService failed to start, aborting other services\n{settingsResult}");
             }
-
+    
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
             if (service.Migrate().Code == ResponseCode.Success)
@@ -84,7 +85,7 @@ namespace SpreadShare
                 logger.LogError("Could not migrate database");
             }
         }
-
+    
         /// <summary>
         /// Configure support services such as databases and logging
         /// </summary>
@@ -94,25 +95,33 @@ namespace SpreadShare
             // Add Database context dependency
             services.AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>(opt
                 => opt.UseNpgsql(Configuration.GetConnectionString("LocalConnection")));
-
+    
             // TODO: Add layered timeout for unsuccesfully connecting to DB
-
+    
             // Add Logging dependency
             services.AddLogging(loggingBuilder => loggingBuilder
                 .AddConsole(opt => opt.DisableColors = true)
                 .SetMinimumLevel(LogLevel.Information));
-
+    
             // Add Configuration dependency (provides access to appsettings.json)
             services.AddSingleton(Configuration);
-
+    
             // Add MyService dependency
             services.AddSingleton<IDatabaseMigrationService, DatabaseMigrationService>();
-
+    
             // Configuration files globals
             services.AddSingleton<ISettingsService, SettingsService>();
-
+    
             // Add Portfolio fetching
             services.AddSingleton<IPortfolioFetcherService, PortfolioFetcherService>();
+        }
+
+        public DatabaseContext CreateDbContext(string[] args)
+        {
+            // Add Database context dependency
+            var builder = new DbContextOptionsBuilder<DatabaseContext>();
+            builder.UseNpgsql(Configuration.GetConnectionString("LocalConnection"));
+            return new DatabaseContext(builder.Options);
         }
     }
 }

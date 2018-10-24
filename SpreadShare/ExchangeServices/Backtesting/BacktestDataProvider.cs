@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 
@@ -21,7 +23,7 @@ namespace SpreadShare.ExchangeServices.Backtesting
         public BacktestDataProvider(ILoggerFactory loggerFactory, BacktestTimerProvider timerProvider)
             : base(loggerFactory)
         {
-            _timerProvider = timerProvider;
+            
         }
 
         /// <inheritdoc />

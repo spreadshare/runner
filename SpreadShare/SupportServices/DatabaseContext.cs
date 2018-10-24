@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {
@@ -17,5 +18,7 @@ namespace SpreadShare.SupportServices
             : base(options)
         {
         }
+        
+        public DbSet<DBCandle> Candles { get; set; }
     }
 }

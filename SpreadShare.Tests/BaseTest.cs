@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
 using SpreadShare.SupportServices.SettingsServices;
 using Xunit.Abstractions;
 
@@ -24,17 +25,22 @@ namespace SpreadShare.Tests
         /// <param name="outputHelper">Output helper that writes to TestOutput</param>
         protected BaseTest(ITestOutputHelper outputHelper)
         {
-            var loggerFactory = (ILoggerFactory)ServiceProviderSingleton.Instance
+            LoggerFactory = (ILoggerFactory)ServiceProviderSingleton.Instance
                 .ServiceProvider.GetService(typeof(ILoggerFactory));
             TestLoggingProvider = new TestLoggingProvider(outputHelper);
-            loggerFactory.AddProvider(TestLoggingProvider);
-            Logger = loggerFactory.CreateLogger(GetType());
+            LoggerFactory.AddProvider(TestLoggingProvider);
+            Logger = LoggerFactory.CreateLogger(GetType());
         }
 
         /// <summary>
         /// Gets logging
         /// </summary>
         protected ILogger Logger { get; }
+
+        /// <summary>
+        /// Gets the logging factory
+        /// </summary>
+        protected ILoggerFactory LoggerFactory { get; }
 
         /// <summary>
         /// Gets logging provider
