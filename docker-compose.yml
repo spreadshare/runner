@@ -1,14 +1,14 @@
 version: '3.4'
 
 services:
-  zeromq:
-    build:
-      context: zeromq
-      dockerfile: Dockerfile
-    entrypoint: python
-    command: -u zeromq.py
-    depends_on: 
-      - spreadshare
+  # zeromq:
+  #   build:
+  #     context: zeromq
+  #     dockerfile: Dockerfile
+  #   entrypoint: python
+  #   command: -u zeromq.py
+  #   depends_on: 
+  #     - spreadshare
 
   spreadshare:
     image: ${DOCKER_REGISTRY}spreadshare
@@ -17,6 +17,20 @@ services:
       dockerfile: SpreadShare/Dockerfile
     depends_on:
       - db
+
+  datapump:
+    build:
+      context: datapump
+      dockerfile: Dockerfile
+    entrypoint: python
+    command: -u datapump.py
+    env_file:
+      - .env
+    depends_on: 
+      - db
+    volumes:
+      - ./DataPump/input-data:/app/data
+
   db:
     image: "postgres"
     restart: always
@@ -24,9 +38,13 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     env_file:
       - .env
+    ports:
+      - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql:Z
+      - ./postgres-data:/var/lib/postgresql:Z
 
 volumes:
   postgres-data:
+    external: true
+  input-data:
     external: true

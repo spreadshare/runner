@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {
@@ -17,5 +18,10 @@ namespace SpreadShare.SupportServices
             : base(options)
         {
         }
+
+        /// <summary>
+        /// Gets or sets the backtesting candles.
+        /// </summary>
+        public DbSet<BacktestingCandle> Candles { get; set; }
     }
 }

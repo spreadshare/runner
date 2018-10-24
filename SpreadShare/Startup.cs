@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,17 +18,16 @@ namespace SpreadShare
     /// <summary>
     /// Startup object for assigning and configuring all services
     /// </summary>
-    internal class Startup
+    internal class Startup : IDesignTimeDbContextFactory<DatabaseContext>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Startup"/> class.
         /// Sets configuration
         /// </summary>
-        /// <param name="jsonfile">Filename of json file</param>
-        public Startup(string jsonfile = "appsettings.json")
+        public Startup()
         {
             Configuration = new ConfigurationBuilder()
-                .AddJsonFile(jsonfile)
+                .AddJsonFile("appsettings.json")
                 .Build();
         }
 
@@ -77,7 +77,7 @@ namespace SpreadShare
 
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
-            if (service.Migrate().Code == ResponseCode.Success)
+            if (!service.Migrate().Success)
             {
                 logger.LogError("Could not migrate database");
             }
@@ -111,6 +111,19 @@ namespace SpreadShare
 
             // Add Portfolio fetching
             services.AddSingleton<IPortfolioFetcherService, PortfolioFetcherService>();
+        }
+
+        /// <summary>
+        /// Creates database context
+        /// </summary>
+        /// <param name="args">Arguments for creating database context</param>
+        /// <returns>DatabaseContext</returns>
+        public DatabaseContext CreateDbContext(string[] args)
+        {
+            // Add Database context dependency
+            var builder = new DbContextOptionsBuilder<DatabaseContext>();
+            builder.UseNpgsql(Configuration.GetConnectionString("LocalConnection"));
+            return new DatabaseContext(builder.Options);
         }
     }
 }
