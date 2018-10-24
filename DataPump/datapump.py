@@ -23,10 +23,6 @@ print(cur.fetchone())
 cur.execute("select relname from pg_class where relkind='r' and relname !~ '^(pg_|sql_)';")
 print(cur.fetchall())
 
-cur.execute(""" SELECT * from pg_database """)
-print(cur.fetchall())
-
-
 # sql = """INSERT INTO "Candles" ("Timestamp", "Close", "High", "Low", "Open", "TradingPair", "Volume")
 #          VALUES (2,2,3,4,5,6, 'd');"""
 # timestamp = None
@@ -37,6 +33,5 @@ print(cur.fetchall())
 sql = """ SELECT * FROM "Candles" """
 cur.execute(sql)
 print(cur.fetchall())
-
 
 conn.close()
