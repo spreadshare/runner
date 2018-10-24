@@ -3,7 +3,7 @@ using SpreadShare.Models;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SpreadShare.Tests.ExchangeServices.Binance
+namespace SpreadShare.Tests.ExchangeServices.BinanceTests
 {
     /// <summary>
     /// Test collection for the Binance utilities
@@ -28,10 +28,10 @@ namespace SpreadShare.Tests.ExchangeServices.Binance
         [InlineData(OrderSide.Sell)]
         public void ToBinanceOrderConversion(OrderSide side)
         {
-            global::Binance.Net.Objects.OrderSide converted = BinanceUtilities.ToExternal(side);
-            global::Binance.Net.Objects.OrderSide check = side == OrderSide.Buy
-                ? global::Binance.Net.Objects.OrderSide.Buy
-                : global::Binance.Net.Objects.OrderSide.Sell;
+            Binance.Net.Objects.OrderSide converted = BinanceUtilities.ToExternal(side);
+            Binance.Net.Objects.OrderSide check = side == OrderSide.Buy
+                ? Binance.Net.Objects.OrderSide.Buy
+                : Binance.Net.Objects.OrderSide.Sell;
             Assert.Equal(converted, check);
         }
 
@@ -40,12 +40,12 @@ namespace SpreadShare.Tests.ExchangeServices.Binance
         /// </summary>
         /// <param name="side">Binance.Net order side</param>
         [Theory]
-        [InlineData(global::Binance.Net.Objects.OrderSide.Buy)]
-        [InlineData(global::Binance.Net.Objects.OrderSide.Sell)]
-        public void ToInternalOrderConversion(global::Binance.Net.Objects.OrderSide side)
+        [InlineData(Binance.Net.Objects.OrderSide.Buy)]
+        [InlineData(Binance.Net.Objects.OrderSide.Sell)]
+        public void ToInternalOrderConversion(Binance.Net.Objects.OrderSide side)
         {
             OrderSide converted = BinanceUtilities.ToInternal(side);
-            Assert.Equal(converted, side == global::Binance.Net.Objects.OrderSide.Buy ? OrderSide.Buy : OrderSide.Sell);
+            Assert.Equal(converted, side == Binance.Net.Objects.OrderSide.Buy ? OrderSide.Buy : OrderSide.Sell);
         }
     }
 }
