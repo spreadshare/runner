@@ -1,7 +1,7 @@
 using System;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Binance
+namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
     /// <summary>
     /// Utility methods collection for Binance.Net related subjects
@@ -13,13 +13,13 @@ namespace SpreadShare.ExchangeServices.Binance
         /// </summary>
         /// <param name="side">Binance.Net.Orderside</param>
         /// <returns>SpreadShare.Models.OrderSide</returns>
-        public static OrderSide ToInternal(global::Binance.Net.Objects.OrderSide side)
+        public static OrderSide ToInternal(Binance.Net.Objects.OrderSide side)
         {
             switch (side)
             {
-                case global::Binance.Net.Objects.OrderSide.Buy:
+                case Binance.Net.Objects.OrderSide.Buy:
                     return OrderSide.Buy;
-                case global::Binance.Net.Objects.OrderSide.Sell:
+                case Binance.Net.Objects.OrderSide.Sell:
                     return OrderSide.Sell;
                 default:
                     throw new ArgumentException($"{side} not a known order side");
@@ -31,14 +31,14 @@ namespace SpreadShare.ExchangeServices.Binance
         /// </summary>
         /// <param name="side">SpreadShare.Models.OrderSide</param>
         /// <returns>Binance.Net.OrderSide</returns>
-        public static global::Binance.Net.Objects.OrderSide ToExternal(OrderSide side)
+        public static Binance.Net.Objects.OrderSide ToExternal(OrderSide side)
         {
             switch (side)
             {
                 case OrderSide.Buy:
-                    return global::Binance.Net.Objects.OrderSide.Buy;
+                    return Binance.Net.Objects.OrderSide.Buy;
                 case OrderSide.Sell:
-                    return global::Binance.Net.Objects.OrderSide.Sell;
+                    return Binance.Net.Objects.OrderSide.Sell;
                 default:
                     throw new ArgumentException($"{side} not a known order side");
             }

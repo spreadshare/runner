@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Backtesting;
-using SpreadShare.ExchangeServices.Binance;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Provider;
+using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models;
 
 namespace SpreadShare.ExchangeServices

@@ -4,7 +4,7 @@ using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Binance
+namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
     /// <summary>
     /// Provides trading capabilities for Binance.

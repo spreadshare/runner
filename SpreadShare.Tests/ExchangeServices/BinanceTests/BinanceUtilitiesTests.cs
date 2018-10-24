@@ -1,4 +1,4 @@
-using SpreadShare.ExchangeServices.Binance;
+using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models;
 using Xunit;
 using Xunit.Abstractions;
