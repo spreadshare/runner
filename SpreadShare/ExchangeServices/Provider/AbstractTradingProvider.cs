@@ -1,4 +1,3 @@
-using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 

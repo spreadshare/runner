@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
-using SpreadShare.Models;
 using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.ExchangeServices
