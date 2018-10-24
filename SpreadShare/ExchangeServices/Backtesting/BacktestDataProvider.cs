@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
+using SpreadShare.SupportServices;
 
 namespace SpreadShare.ExchangeServices.Backtesting
 {
@@ -13,47 +14,89 @@ namespace SpreadShare.ExchangeServices.Backtesting
     /// </summary>
     internal class BacktestDataProvider : AbstractDataProvider
     {
-        private readonly BacktestTimerProvider _timerProvider;
+        private readonly BacktestTimerProvider _timer;
+        private readonly DatabaseContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestDataProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output</param>
+        /// <param name="context">The backtest database context</param>
         /// <param name="timerProvider">Used to keep track of time</param>
-        public BacktestDataProvider(ILoggerFactory loggerFactory, BacktestTimerProvider timerProvider)
+        public BacktestDataProvider(ILoggerFactory loggerFactory, DatabaseContext context, BacktestTimerProvider timerProvider)
             : base(loggerFactory)
         {
-            
+            _context = context;
+            _timer = timerProvider;
         }
 
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceLastTrade(CurrencyPair pair)
         {
-            throw new NotImplementedException();
+            var candle = _context.Candles.First(x => x.Timestamp == _timer.CurrentEpoc);
+            return new ResponseObject<decimal>(ResponseCode.Success, candle.Average);
         }
-
+ 
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceTopBid(CurrencyPair pair)
         {
-            throw new NotImplementedException();
+            return GetCurrentPriceLastTrade(pair);
         }
 
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceTopAsk(CurrencyPair pair)
         {
-            throw new NotImplementedException();
+            return GetCurrentPriceLastTrade(pair);
         }
 
         /// <inheritdoc />
-        public override ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTime endTime)
+        public override ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTimeOffset endTime)
         {
-            throw new NotImplementedException();
+            var now = endTime.ToUnixTimeMilliseconds();
+            var back = now - (long)(hoursBack * 3600 * 1000);
+            var candleNow = _context.Candles.First(x => x.Timestamp == now);
+            var candleBack = _context.Candles.First(x => x.Timestamp == back);
+            return new ResponseObject<decimal>(ResponseCode.Success, (candleNow.Average / candleBack.Average));
         }
 
         /// <inheritdoc />
         public override ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(List<CurrencyPair> pairs, double hoursBack, DateTime endTime)
         {
-            throw new NotImplementedException();
+            if (hoursBack <= 0)
+            {
+                throw new ArgumentException("Argument hoursBack should be larger than 0.");
+            }
+
+            decimal max = -1;
+            CurrencyPair maxTradingPair = null;
+
+            foreach (var tradingPair in pairs)
+            {
+                var performanceQuery = GetPerformancePastHours(tradingPair, hoursBack, endTime);
+                decimal performance;
+                if (performanceQuery.Code == ResponseCode.Success)
+                {
+                    performance = performanceQuery.Data;
+                }
+                else
+                {
+                    Logger.LogWarning($"Error fetching performance data: {performanceQuery}");
+                    return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCode.Error, performanceQuery.ToString());
+                }
+
+                if (max < performance)
+                {
+                    max = performance;
+                    maxTradingPair = tradingPair;
+                }
+            }
+
+            if (maxTradingPair == null)
+            {
+                return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCode.Error, "No trading pairs defined");
+            }
+
+            return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCode.Success, new Tuple<CurrencyPair, decimal>(maxTradingPair, max));
         }
     }
 }

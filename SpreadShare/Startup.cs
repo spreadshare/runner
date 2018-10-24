@@ -5,10 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
-using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
-using SpreadShare.ExchangeServices.Binance;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
@@ -26,19 +24,18 @@ namespace SpreadShare
         /// Initializes a new instance of the <see cref="Startup"/> class.
         /// Sets configuration
         /// </summary>
-        /// <param name="jsonfile">Filename of json file</param>
-        public Startup(string jsonfile = "appsettings.json")
+        public Startup()
         {
             Configuration = new ConfigurationBuilder()
-                .AddJsonFile(jsonfile)
+                .AddJsonFile("appsettings.json")
                 .Build();
         }
-    
+
         /// <summary>
         /// Gets the configuration of the application
         /// </summary>
         public IConfiguration Configuration { get; }
-    
+
         /// <summary>
         /// Configure business logic services such as fetching exchange data
         /// </summary>
@@ -47,16 +44,16 @@ namespace SpreadShare
         {
             // Exchange Factory dependency
             services.AddSingleton<ExchangeFactoryService, ExchangeFactoryService>();
-    
+
             // Binance communication dependency
             services.AddSingleton<BinanceCommunicationsService, BinanceCommunicationsService>();
-    
+
             // Create algorithm service that manages running algorithms
             services.AddSingleton<IAlgorithmService, AlgorithmService>();
-    
+
             // Add allocation service
             services.AddSingleton<AllocationManager, AllocationManager>();
-    
+
             // ZeroMQ Service to interface with other programs
             services.AddSingleton<IZeroMqService, ZeroMqService>();
         }
@@ -69,7 +66,7 @@ namespace SpreadShare
         public static void Configure(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
-    
+
             // Setup Settings service
             var settings = serviceProvider.GetService<ISettingsService>();
             var settingsResult = settings.Start();
@@ -77,15 +74,24 @@ namespace SpreadShare
             {
                 logger.LogError($"SettingsService failed to start, aborting other services\n{settingsResult}");
             }
-    
+
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
             if (service.Migrate().Code == ResponseCode.Success)
             {
                 logger.LogError("Could not migrate database");
             }
+            /*
+
+            var dbService = serviceProvider.GetService<DatabaseContext>();
+            dbService.Candles.Add(new DBCandle(72, 11, 12, 420, 14));
+            dbService.SaveChanges();
+            logger.LogCritical("WINNER");
+            var lol = dbService.Candles;
+            var val = lol.Find((long)72);
+            logger.LogCritical(val.High.ToString()); */
         }
-    
+
         /// <summary>
         /// Configure support services such as databases and logging
         /// </summary>
@@ -97,21 +103,21 @@ namespace SpreadShare
                 => opt.UseNpgsql(Configuration.GetConnectionString("LocalConnection")));
     
             // TODO: Add layered timeout for unsuccesfully connecting to DB
-    
+
             // Add Logging dependency
             services.AddLogging(loggingBuilder => loggingBuilder
                 .AddConsole(opt => opt.DisableColors = true)
                 .SetMinimumLevel(LogLevel.Information));
-    
+
             // Add Configuration dependency (provides access to appsettings.json)
             services.AddSingleton(Configuration);
-    
+
             // Add MyService dependency
             services.AddSingleton<IDatabaseMigrationService, DatabaseMigrationService>();
-    
+
             // Configuration files globals
             services.AddSingleton<ISettingsService, SettingsService>();
-    
+
             // Add Portfolio fetching
             services.AddSingleton<IPortfolioFetcherService, PortfolioFetcherService>();
         }

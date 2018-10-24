@@ -10,19 +10,27 @@ namespace SpreadShare.ExchangeServices.Backtesting
     /// </summary>
     internal class BacktestTradingProvider : AbstractTradingProvider
     {
+        private readonly BacktestOutputAgent _agent;
+        private readonly BacktestTimerProvider _timer;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestTradingProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output</param>
-        public BacktestTradingProvider(ILoggerFactory loggerFactory)
+        /// <param name="agent">Output agent for writing backtest report</param>
+        /// <param name="timer">timer provider for registering trades</param>
+        public BacktestTradingProvider(ILoggerFactory loggerFactory, BacktestOutputAgent agent, BacktestTimerProvider timer)
             : base(loggerFactory)
         {
+            _agent = agent;
+            _timer = timer;
         }
 
         /// <inheritdoc />
         public override ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side, decimal amount)
         {
-            throw new System.NotImplementedException();
+            _agent.RegisterTradeEvent(_timer.CurrentTime, pair.Right, pair.Left, side, amount, new Currency("BNB"), 69);
+            return new ResponseObject(ResponseCode.Success);
         }
 
         /// <inheritdoc />

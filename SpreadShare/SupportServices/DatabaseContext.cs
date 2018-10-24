@@ -19,6 +19,9 @@ namespace SpreadShare.SupportServices
         {
         }
         
+        /// <summary>
+        /// Gets or sets the candles
+        /// </summary>
         public DbSet<DBCandle> Candles { get; set; }
     }
 }

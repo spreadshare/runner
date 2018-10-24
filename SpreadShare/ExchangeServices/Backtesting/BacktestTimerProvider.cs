@@ -28,6 +28,8 @@ namespace SpreadShare.ExchangeServices.Backtesting
         /// </summary>
         public DateTimeOffset CurrentTime { get; private set; }
 
+        public long CurrentEpoc => CurrentTime.ToUnixTimeMilliseconds();
+
         /// <inheritdoc />
         public void SetTimer(uint minutes, Action callback)
         {

@@ -54,7 +54,7 @@ namespace SpreadShare.ExchangeServices.Provider
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>A response object with the performance on success</returns>
-        public abstract ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTime endTime);
+        public abstract ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTimeOffset endTime);
 
         /// <summary>
         /// Gets the top performing currency pair

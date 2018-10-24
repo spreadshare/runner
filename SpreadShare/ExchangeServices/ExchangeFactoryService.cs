@@ -6,6 +6,7 @@ using SpreadShare.ExchangeServices.Binance;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
+using SpreadShare.SupportServices;
 
 namespace SpreadShare.ExchangeServices
 {
@@ -17,16 +18,23 @@ namespace SpreadShare.ExchangeServices
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly BinanceCommunicationsService _binanceCommunications;
+        private readonly DatabaseContext _databaseContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExchangeFactoryService"/> class.
         /// </summary>
         /// <param name="loggerFactory">Provides logging</param>
+        /// <param name="context">Injected database context</param>
         /// <param name="binanceComm">Injected binance communication service</param>
-        public ExchangeFactoryService(ILoggerFactory loggerFactory, BinanceCommunicationsService binanceComm)
+        public ExchangeFactoryService(
+            ILoggerFactory loggerFactory, 
+            DatabaseContext context,
+            BinanceCommunicationsService binanceComm)
         {
             _logger = loggerFactory.CreateLogger<ExchangeFactoryService>();
             _loggerFactory = loggerFactory;
+
+            _databaseContext = context;
 
             // link communication services
             _binanceCommunications = binanceComm;
@@ -74,9 +82,10 @@ namespace SpreadShare.ExchangeServices
                 case Exchange.Backtesting:
                     // Override timer provider to backtest variant
                     timerProvider = new BacktestTimerProvider(_loggerFactory, DateTimeOffset.Now);
+                    var agent = new BacktestOutputAgent();
 
-                    dataProviderImplementation = new BacktestDataProvider(_loggerFactory, timerProvider as BacktestTimerProvider);
-                    tradingProviderImplementation = new BacktestTradingProvider(_loggerFactory);
+                    dataProviderImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, timerProvider as BacktestTimerProvider);
+                    tradingProviderImplementation = new BacktestTradingProvider(_loggerFactory, agent, timerProvider as BacktestTimerProvider);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);

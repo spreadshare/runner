@@ -34,7 +34,7 @@ namespace SpreadShare.ExchangeServices.Backtesting
         /// <param name="feeAsset">asset used to pay the fees</param>
         /// <param name="fees">amount of fees</param>
         public void RegisterTradeEvent(
-            DateTime timestamp,
+            DateTimeOffset timestamp,
             Currency baseAsset,
             Currency counterAsset,
             OrderSide side,

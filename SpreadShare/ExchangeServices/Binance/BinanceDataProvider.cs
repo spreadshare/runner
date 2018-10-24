@@ -80,7 +80,7 @@ namespace SpreadShare.ExchangeServices.Binance
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>A response object with the performance on success</returns>
-        public override ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTime endTime)
+        public override ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTimeOffset endTime)
         {
             if (hoursBack <= 0)
             {
@@ -89,8 +89,8 @@ namespace SpreadShare.ExchangeServices.Binance
 
             var client = _communications.Client;
 
-            DateTime startTime = endTime.AddHours(-hoursBack);
-            var response = client.GetKlines(pair.ToString(), KlineInterval.OneMinute, startTime, endTime);
+            var startTime = endTime.AddHours(-hoursBack);
+            var response = client.GetKlines(pair.ToString(), KlineInterval.OneMinute, startTime.UtcDateTime, endTime.UtcDateTime);
 
             if (response.Success)
             {
