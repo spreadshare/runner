@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SpreadShare.SupportServices;
 
+#pragma warning disable
+
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
@@ -12,7 +14,6 @@ namespace SpreadShare.Migrations
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
-#pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
@@ -39,7 +40,7 @@ namespace SpreadShare.Migrations
 
                     b.ToTable("Candles");
                 });
-#pragma warning restore 612, 618
+#pragma warning restore
         }
     }
 }

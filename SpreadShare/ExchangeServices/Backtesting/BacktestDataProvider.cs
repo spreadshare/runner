@@ -36,7 +36,7 @@ namespace SpreadShare.ExchangeServices.Backtesting
             var candle = _context.Candles.First(x => x.Timestamp == _timer.CurrentEpoc);
             return new ResponseObject<decimal>(ResponseCode.Success, candle.Average);
         }
- 
+
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceTopBid(CurrencyPair pair)
         {
@@ -56,7 +56,7 @@ namespace SpreadShare.ExchangeServices.Backtesting
             var back = now - (long)(hoursBack * 3600 * 1000);
             var candleNow = _context.Candles.First(x => x.Timestamp == now);
             var candleBack = _context.Candles.First(x => x.Timestamp == back);
-            return new ResponseObject<decimal>(ResponseCode.Success, (candleNow.Average / candleBack.Average));
+            return new ResponseObject<decimal>(ResponseCode.Success, candleNow.Average / candleBack.Average);
         }
 
         /// <inheritdoc />

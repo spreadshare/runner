@@ -28,6 +28,9 @@ namespace SpreadShare.ExchangeServices.Backtesting
         /// </summary>
         public DateTimeOffset CurrentTime { get; private set; }
 
+        /// <summary>
+        /// Gets the unix timestamp milliseconds
+        /// </summary>
         public long CurrentEpoc => CurrentTime.ToUnixTimeMilliseconds();
 
         /// <inheritdoc />

@@ -27,7 +27,7 @@ namespace SpreadShare.ExchangeServices
         /// <param name="context">Injected database context</param>
         /// <param name="binanceComm">Injected binance communication service</param>
         public ExchangeFactoryService(
-            ILoggerFactory loggerFactory, 
+            ILoggerFactory loggerFactory,
             DatabaseContext context,
             BinanceCommunicationsService binanceComm)
         {

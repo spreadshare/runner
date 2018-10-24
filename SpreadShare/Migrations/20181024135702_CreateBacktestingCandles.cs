@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
+#pragma warning disable
+
 namespace SpreadShare.Migrations
 {
     public partial class CreateBacktestingCandles : Migration
@@ -31,3 +33,5 @@ namespace SpreadShare.Migrations
         }
     }
 }
+
+#pragma warning restore

@@ -57,7 +57,7 @@ namespace SpreadShare
             // ZeroMQ Service to interface with other programs
             services.AddSingleton<IZeroMqService, ZeroMqService>();
         }
-    
+
         /// <summary>
         /// Additional configuration after all have been configured
         /// </summary>
@@ -81,8 +81,8 @@ namespace SpreadShare
             {
                 logger.LogError("Could not migrate database");
             }
-            /*
 
+            /*
             var dbService = serviceProvider.GetService<DatabaseContext>();
             dbService.Candles.Add(new BacktestingCandle(72, 11, 12, 420, 14));
             dbService.SaveChanges();
@@ -101,7 +101,7 @@ namespace SpreadShare
             // Add Database context dependency
             services.AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>(opt
                 => opt.UseNpgsql(Configuration.GetConnectionString("LocalConnection")));
-    
+
             // TODO: Add layered timeout for unsuccesfully connecting to DB
 
             // Add Logging dependency
