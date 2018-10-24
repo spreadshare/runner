@@ -23,6 +23,12 @@ docker-compose up
 ## Development
 If you want to run this application without Docker, the framework [.NET Core 2.1](https://www.microsoft.com/net/download/dotnet-core/2.1) is required. Furthermore, please read the [testing documentation](TESTING.md).
 
+### Database migrations
+Each time the database schema changes, the following command needs to be ran.
+```
+dotnet ef migrations add [MigrationTitle]
+```
+
 ### Architecture
 This is a console application written in [ASP.Net Core 2.1](https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-2.1). [Dependency injection](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1) is used for injecting common dependencies (such as database context and logger factories). Different modules are separated in services which are registered in `Startup.cs` and can be accessed via a `ServiceCollection`. A [PostgreSQL](https://www.postgresql.org/) database is connected with a database context. This database runs in a separate Docker container. There are three Docker containers in total: SpreadShare, the database and a ZeroMQ-enabled python application.
 
