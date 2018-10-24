@@ -33,16 +33,42 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <summary>
         /// Sets initial configuration of allocations per algorithm.
         /// </summary>
-        /// <param name="allocations">Initial set of allocations</param>
-        public void SetInitialConfiguration(Dictionary<Exchange, Dictionary<Type, Assets>> allocations)
+        /// <param name="initialAllocations">Initial set of allocations</param>
+        public void SetInitialConfiguration(Dictionary<Exchange, Dictionary<Type, decimal>> initialAllocations)
         {
+            // Make sure AllocationManager is not already configured
             if (_allocations != null)
             {
-                throw new Exception("Allocation Manager already configured");
+                throw new Exception("AllocationManager already configured");
+            }
+
+            // Initialise _allocations
+            _allocations = new Dictionary<Exchange, Dictionary<Type, Assets>>();
+
+            // Get Assets for all configured exchanges
+            Dictionary<Exchange, Assets> balances = new Dictionary<Exchange, Assets>();
+            foreach (var exchangeEntry in initialAllocations)
+            {
+                balances.Add(exchangeEntry.Key, _portfolioFetcherService.GetPortfolio(exchangeEntry.Key).Data);
+            }
+
+            // Loop over exchanges
+            foreach (var exchangeEntry in balances)
+            {
+                // Add exchange to _allocations
+                _allocations.Add(exchangeEntry.Key, new Dictionary<Type, Assets>());
+
+                // Loop over configured algorithms
+                foreach (var algorithmType in initialAllocations[exchangeEntry.Key].Keys)
+                {
+                    // Copy scaled down assets to _allocations
+                    _allocations[exchangeEntry.Key][algorithmType] =
+                        exchangeEntry.Value.DuplicateWithScale(
+                            initialAllocations[exchangeEntry.Key][algorithmType]);
+                }
             }
 
             _logger.LogTrace("Configured AllocationManager");
-            _allocations = allocations;
         }
 
         /// <summary>

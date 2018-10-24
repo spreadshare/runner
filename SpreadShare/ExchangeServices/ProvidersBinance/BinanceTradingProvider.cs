@@ -1,11 +1,10 @@
-﻿using System;
-using Binance.Net.Objects;
+﻿using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Binance
+namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
     /// <summary>
     /// Provides trading capabilities for Binance.
@@ -26,11 +25,11 @@ namespace SpreadShare.ExchangeServices.Binance
         }
 
         /// <inheritdoc />
-        public override ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side, decimal amount)
+        public override ResponseObject PlaceFullMarketOrder(CurrencyPair pair, Models.OrderSide side, decimal amount)
         {
             var client = _communications.Client;
 
-            var query = client.PlaceOrder(pair.ToString(), side, OrderType.Market, amount);
+            var query = client.PlaceOrder(pair.ToString(), BinanceUtilities.ToExternal(side), OrderType.Market, amount);
             if (query.Success)
             {
                 return new ResponseObject(ResponseCode.Success);

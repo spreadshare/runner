@@ -31,7 +31,13 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <inheritdoc />
         public ResponseObject<Assets> GetPortfolio(IExchangeSpecification exchangeSpecification)
         {
-            switch (exchangeSpecification.GetExchangeType())
+            return GetPortfolio(exchangeSpecification.GetExchangeType());
+        }
+
+        /// <inheritdoc />
+        public ResponseObject<Assets> GetPortfolio(Exchange exchange)
+        {
+            switch (exchange)
             {
                 case Exchange.Binance:
                     return GetBinancePortfolio();
@@ -39,7 +45,7 @@ namespace SpreadShare.ExchangeServices.Allocation
                     return GetBacktestingPortfolio();
                 default:
                     throw new InvalidEnumArgumentException(
-                        exchangeSpecification.GetExchangeType() + "not found!");
+                        exchange + "not found!");
             }
         }
 

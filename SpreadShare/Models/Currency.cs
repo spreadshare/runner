@@ -36,5 +36,17 @@ namespace SpreadShare.Models
         /// </summary>
         /// <returns>Returns the string representation of a currency</returns>
         public override string ToString() => Symbol;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return obj is Currency currency && Symbol == currency.Symbol;
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Symbol);
+        }
     }
 }

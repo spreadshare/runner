@@ -18,10 +18,10 @@ namespace SpreadShare.SupportServices
             : base(options)
         {
         }
-        
+
         /// <summary>
-        /// Gets or sets the candles
+        /// Gets or sets the backtesting candles.
         /// </summary>
-        public DbSet<DBCandle> Candles { get; set; }
+        public DbSet<BacktestingCandle> Candles { get; set; }
     }
 }

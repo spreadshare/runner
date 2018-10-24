@@ -51,7 +51,7 @@ namespace SpreadShare
             // Create algorithm service that manages running algorithms
             services.AddSingleton<IAlgorithmService, AlgorithmService>();
 
-            // Add allocation service
+            // Add allocation manager
             services.AddSingleton<AllocationManager, AllocationManager>();
 
             // ZeroMQ Service to interface with other programs
@@ -77,14 +77,14 @@ namespace SpreadShare
 
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
-            if (service.Migrate().Code == ResponseCode.Success)
+            if (!service.Migrate().Success)
             {
                 logger.LogError("Could not migrate database");
             }
             /*
 
             var dbService = serviceProvider.GetService<DatabaseContext>();
-            dbService.Candles.Add(new DBCandle(72, 11, 12, 420, 14));
+            dbService.Candles.Add(new BacktestingCandle(72, 11, 12, 420, 14));
             dbService.SaveChanges();
             logger.LogCritical("WINNER");
             var lol = dbService.Candles;
@@ -122,6 +122,11 @@ namespace SpreadShare
             services.AddSingleton<IPortfolioFetcherService, PortfolioFetcherService>();
         }
 
+        /// <summary>
+        /// Creates database context
+        /// </summary>
+        /// <param name="args">Arguments for creating database context</param>
+        /// <returns>DatabaseContext</returns>
         public DatabaseContext CreateDbContext(string[] args)
         {
             // Add Database context dependency
