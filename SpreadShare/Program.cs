@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
+using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
 using SpreadShare.ZeroMQ;
 
@@ -51,6 +53,10 @@ namespace SpreadShare
         {
             ILogger logger = loggerFactory.CreateLogger("ExecuteBusinessLogic");
             SettingsService settings = (SettingsService)serviceProvider.GetService<ISettingsService>();
+
+            DatabaseContext dbContext = (DatabaseContext)serviceProvider.GetService<DatabaseContext>();
+            var count = dbContext.Candles.Count();
+            logger.LogCritical($"#####\n{count}\n###");
 
             // Start the exchange factory
             var factory = serviceProvider.GetService<ExchangeFactoryService>();
