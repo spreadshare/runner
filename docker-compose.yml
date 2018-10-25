@@ -20,7 +20,7 @@ services:
 
   datapump:
     build:
-      context: datapump
+      context: DataPump
       dockerfile: Dockerfile
     entrypoint: python
     command: -u datapump.py
@@ -29,7 +29,7 @@ services:
     depends_on: 
       - db
     volumes:
-      - ./DataPump/input-data:/app/data
+      - ./DataPump/input-data:/app/data # Path-based volume
 
   db:
     image: "postgres"
@@ -38,13 +38,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     env_file:
       - .env
-    ports:
-      - "5432:5432"
     volumes:
-      - ./postgres-data:/var/lib/postgresql:Z
+      - postgres-data:/var/lib/postgresql # Named volume
+    # Expose for pgAdmin or remote access
+    # ports:
+    #   - "5432:5432"
 
 volumes:
   postgres-data:
-    external: true
-  input-data:
-    external: true
