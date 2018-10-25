@@ -29,9 +29,9 @@ namespace SpreadShare.ExchangeServices.Backtesting
         public DateTimeOffset CurrentTime { get; private set; }
 
         /// <summary>
-        /// Gets the unix timestamp milliseconds
+        /// Gets the unix timestamp as potential index of database entries
         /// </summary>
-        public long CurrentEpoc => CurrentTime.ToUnixTimeMilliseconds();
+        public long CurrentMinuteEpoc => CurrentTime.ToUnixTimeMilliseconds() - CurrentTime.ToUnixTimeMilliseconds() % 60000;
 
         /// <inheritdoc />
         public void SetTimer(uint minutes, Action callback)

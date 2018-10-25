@@ -33,7 +33,7 @@ namespace SpreadShare.ExchangeServices.Backtesting
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceLastTrade(CurrencyPair pair)
         {
-            var candle = _context.Candles.First(x => x.Timestamp == _timer.CurrentEpoc);
+            var candle = _context.Candles.First(x => x.Timestamp == _timer.CurrentMinuteEpoc);
             return new ResponseObject<decimal>(ResponseCode.Success, candle.Average);
         }
 
@@ -53,9 +53,10 @@ namespace SpreadShare.ExchangeServices.Backtesting
         public override ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTimeOffset endTime)
         {
             var now = endTime.ToUnixTimeMilliseconds();
-            var back = now - (long)(hoursBack * 3600 * 1000);
-            var candleNow = _context.Candles.First(x => x.Timestamp == now);
-            var candleBack = _context.Candles.First(x => x.Timestamp == back);
+            var rawBack = now - (long)(hoursBack * 3600 * 1000);
+            var roundedBack = rawBack - rawBack % 60000;
+            var candleNow = _context.Candles.First(x => x.Timestamp == now && x.TradingPair == pair.ToString());
+            var candleBack = _context.Candles.First(x => x.Timestamp == roundedBack && x.TradingPair == pair.ToString());
             return new ResponseObject<decimal>(ResponseCode.Success, candleNow.Average / candleBack.Average);
         }
 
