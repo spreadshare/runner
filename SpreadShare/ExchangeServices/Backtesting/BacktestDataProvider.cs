@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
@@ -54,7 +53,7 @@ namespace SpreadShare.ExchangeServices.Backtesting
         {
             var now = endTime.ToUnixTimeMilliseconds();
             var rawBack = now - (long)(hoursBack * 3600 * 1000);
-            var roundedBack = rawBack - rawBack % 60000;
+            var roundedBack = rawBack - (rawBack % 60000);
             var candleNow = _context.Candles.First(x => x.Timestamp == now && x.TradingPair == pair.ToString());
             var candleBack = _context.Candles.First(x => x.Timestamp == roundedBack && x.TradingPair == pair.ToString());
             return new ResponseObject<decimal>(ResponseCode.Success, candleNow.Average / candleBack.Average);

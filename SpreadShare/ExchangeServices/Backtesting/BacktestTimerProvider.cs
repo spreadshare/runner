@@ -1,5 +1,4 @@
 using System;
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Provider;
 
@@ -31,7 +30,7 @@ namespace SpreadShare.ExchangeServices.Backtesting
         /// <summary>
         /// Gets the unix timestamp as potential index of database entries
         /// </summary>
-        public long CurrentMinuteEpoc => CurrentTime.ToUnixTimeMilliseconds() - CurrentTime.ToUnixTimeMilliseconds() % 60000;
+        public long CurrentMinuteEpoc => CurrentTime.ToUnixTimeMilliseconds() - (CurrentTime.ToUnixTimeMilliseconds() % 60000);
 
         /// <inheritdoc />
         public void SetTimer(uint minutes, Action callback)
