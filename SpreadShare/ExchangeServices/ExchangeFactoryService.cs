@@ -73,12 +73,14 @@ namespace SpreadShare.ExchangeServices
             AbstractDataProvider dataProviderImplementation;
             AbstractTradingProvider tradingProviderImplementation;
             ITimerProvider timerProvider = new ExchangeTimerProvider();
+
             switch (exchange)
             {
                 case Exchange.Binance:
                     dataProviderImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
                     tradingProviderImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications);
                     break;
+
                 case Exchange.Backtesting:
                     // Override timer provider to backtest variant
                     timerProvider = new BacktestTimerProvider(_loggerFactory, DateTimeOffset.Now);
@@ -87,6 +89,7 @@ namespace SpreadShare.ExchangeServices
                     dataProviderImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, timerProvider as BacktestTimerProvider);
                     tradingProviderImplementation = new BacktestTradingProvider(_loggerFactory, backtestOutputLogger, timerProvider as BacktestTimerProvider);
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);
             }
