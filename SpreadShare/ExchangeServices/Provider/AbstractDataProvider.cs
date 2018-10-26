@@ -19,7 +19,7 @@ namespace SpreadShare.ExchangeServices.Provider
         /// Initializes a new instance of the <see cref="AbstractDataProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output stream </param>
-        public AbstractDataProvider(ILoggerFactory loggerFactory)
+        protected AbstractDataProvider(ILoggerFactory loggerFactory)
         {
             Logger = loggerFactory.CreateLogger(GetType());
         }

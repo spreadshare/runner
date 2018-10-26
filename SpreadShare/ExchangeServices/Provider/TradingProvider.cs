@@ -73,7 +73,7 @@ namespace SpreadShare.ExchangeServices.Provider
                     return new ResponseObject(ResponseCode.Success);
                 }
 
-                amount = amount / query.Data;
+                amount /= query.Data;
             }
 
             uint retries = 0;
