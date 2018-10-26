@@ -9,14 +9,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     /// <summary>
     /// File writing agent for producing backtest reports.
     /// </summary>
-    internal class BacktestOutputAgent
+    internal class BacktestOutputLogger
     {
         private StringBuilder _outputStream;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BacktestOutputAgent"/> class.
+        /// Initializes a new instance of the <see cref="BacktestOutputLogger"/> class.
         /// </summary>
-        public BacktestOutputAgent()
+        public BacktestOutputLogger()
         {
             _outputStream = new StringBuilder();
         }
