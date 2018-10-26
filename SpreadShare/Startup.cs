@@ -8,7 +8,6 @@ using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
-using SpreadShare.Models;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
 using SpreadShare.ZeroMQ;
@@ -81,15 +80,6 @@ namespace SpreadShare
             {
                 logger.LogError("Could not migrate database");
             }
-
-            /*
-            var dbService = serviceProvider.GetService<DatabaseContext>();
-            dbService.Candles.Add(new BacktestingCandle(72, 11, 12, 420, 14));
-            dbService.SaveChanges();
-            logger.LogCritical("WINNER");
-            var lol = dbService.Candles;
-            var val = lol.Find((long)72);
-            logger.LogCritical(val.High.ToString()); */
         }
 
         /// <summary>

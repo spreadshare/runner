@@ -47,7 +47,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 counterAsset.ToString(),
                 side.ToString(),
                 quantity.ToString(CultureInfo.InvariantCulture),
-                feeAsset.ToString() + fees.ToString(CultureInfo.InvariantCulture)
+                feeAsset + fees.ToString(CultureInfo.InvariantCulture)
             };
 
             _outputStream.Append(string.Join(",", items));
