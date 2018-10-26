@@ -54,10 +54,6 @@ namespace SpreadShare
             ILogger logger = loggerFactory.CreateLogger("ExecuteBusinessLogic");
             SettingsService settings = (SettingsService)serviceProvider.GetService<ISettingsService>();
 
-            DatabaseContext dbContext = (DatabaseContext)serviceProvider.GetService<DatabaseContext>();
-            var count = dbContext.Candles.Count();
-            logger.LogCritical($"#####\n{count}\n###");
-
             // Start the exchange factory
             var factory = serviceProvider.GetService<ExchangeFactoryService>();
             var factoryResult = factory.Start();
