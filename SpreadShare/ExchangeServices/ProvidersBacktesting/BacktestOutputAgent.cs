@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Backtesting
+namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
     /// <summary>
     /// File writing agent for producing backtest reports.

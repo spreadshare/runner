@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Backtesting
+namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
     /// <summary>
     /// Trading provider implementation for backtesting purposes.

@@ -1,5 +1,5 @@
 using System;
-using SpreadShare.ExchangeServices.Backtesting;
+using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using Xunit;
 using Xunit.Abstractions;
 

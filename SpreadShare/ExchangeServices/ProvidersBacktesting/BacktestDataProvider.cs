@@ -6,7 +6,7 @@ using SpreadShare.ExchangeServices.Provider;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
 
-namespace SpreadShare.ExchangeServices.Backtesting
+namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
     /// <summary>
     /// Provider implementation for backtest purposes.
