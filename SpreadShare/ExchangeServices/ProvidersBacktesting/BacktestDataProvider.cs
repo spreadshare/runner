@@ -14,25 +14,25 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     internal class BacktestDataProvider : AbstractDataProvider
     {
         private readonly BacktestTimerProvider _timer;
-        private readonly DatabaseContext _context;
+        private readonly DatabaseContext _database;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestDataProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output</param>
-        /// <param name="context">The backtest database context</param>
+        /// <param name="database">The backtest database database</param>
         /// <param name="timerProvider">Used to keep track of time</param>
-        public BacktestDataProvider(ILoggerFactory loggerFactory, DatabaseContext context, BacktestTimerProvider timerProvider)
+        public BacktestDataProvider(ILoggerFactory loggerFactory, DatabaseContext database, BacktestTimerProvider timerProvider)
             : base(loggerFactory)
         {
-            _context = context;
+            _database = database;
             _timer = timerProvider;
         }
 
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceLastTrade(CurrencyPair pair)
         {
-            var candle = _context.Candles.First(x => x.Timestamp == _timer.CurrentMinuteEpoc);
+            var candle = _database.Candles.First(x => x.Timestamp == _timer.CurrentMinuteEpoc);
             return new ResponseObject<decimal>(ResponseCode.Success, candle.Average);
         }
 
@@ -54,8 +54,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var now = endTime.ToUnixTimeMilliseconds();
             var rawBack = now - (long)(hoursBack * 3600 * 1000);
             var roundedBack = rawBack - (rawBack % 60000);
-            var candleNow = _context.Candles.First(x => x.Timestamp == now && x.TradingPair == pair.ToString());
-            var candleBack = _context.Candles.First(x => x.Timestamp == roundedBack && x.TradingPair == pair.ToString());
+            var candleNow = _database.Candles.First(x => x.Timestamp == now && x.TradingPair == pair.ToString());
+            var candleBack = _database.Candles.First(x => x.Timestamp == roundedBack && x.TradingPair == pair.ToString());
             return new ResponseObject<decimal>(ResponseCode.Success, candleNow.Average / candleBack.Average);
         }
 
