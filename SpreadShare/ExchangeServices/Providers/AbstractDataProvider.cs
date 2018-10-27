@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Provider
+namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
     /// Abstract specification of a data provider.
@@ -19,7 +19,7 @@ namespace SpreadShare.ExchangeServices.Provider
         /// Initializes a new instance of the <see cref="AbstractDataProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output stream </param>
-        public AbstractDataProvider(ILoggerFactory loggerFactory)
+        protected AbstractDataProvider(ILoggerFactory loggerFactory)
         {
             Logger = loggerFactory.CreateLogger(GetType());
         }
@@ -54,7 +54,7 @@ namespace SpreadShare.ExchangeServices.Provider
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>A response object with the performance on success</returns>
-        public abstract ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTime endTime);
+        public abstract ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTimeOffset endTime);
 
         /// <summary>
         /// Gets the top performing currency pair

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Provider
+namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
     /// Provides trading capabilities.
@@ -73,7 +73,7 @@ namespace SpreadShare.ExchangeServices.Provider
                     return new ResponseObject(ResponseCode.Success);
                 }
 
-                amount = amount / query.Data;
+                amount /= query.Data;
             }
 
             uint retries = 0;

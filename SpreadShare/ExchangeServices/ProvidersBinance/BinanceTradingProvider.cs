@@ -1,7 +1,7 @@
 ﻿using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
-using SpreadShare.ExchangeServices.Provider;
+using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance

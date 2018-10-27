@@ -33,9 +33,9 @@
         ]
     }, 
     "EnabledServices": {
-        "Algorithm": false,
-        "Trading": false,
-        "User": false,
+        "Algorithms": {
+          "SimpleBandWagonAlgorithm": true
+        },
         "ZeroMq": false 
     },
     "AllocationSettings": {

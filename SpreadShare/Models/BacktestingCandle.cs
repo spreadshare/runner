@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace SpreadShare.Models
 {
     /// <summary>
-    /// Represents 1-minute candles for backtesting purposes.
+    /// Data structure for representing candles.
     /// </summary>
-    public class BacktestingCandle
+    internal class BacktestingCandle
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestingCandle"/> class.
@@ -63,5 +63,10 @@ namespace SpreadShare.Models
         /// Gets or sets the tradingpair.
         /// </summary>
         public string TradingPair { get; set; }
+
+        /// <summary>
+        /// Gets the average price (not weighted)
+        /// </summary>
+        public decimal Average => (High + Low) / 2M;
     }
 }

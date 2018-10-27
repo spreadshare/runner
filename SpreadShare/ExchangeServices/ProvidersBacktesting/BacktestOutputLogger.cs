@@ -4,19 +4,19 @@ using System.IO;
 using System.Text;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Backtesting
+namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
     /// <summary>
     /// File writing agent for producing backtest reports.
     /// </summary>
-    internal class BacktestOutputAgent
+    internal class BacktestOutputLogger
     {
         private StringBuilder _outputStream;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BacktestOutputAgent"/> class.
+        /// Initializes a new instance of the <see cref="BacktestOutputLogger"/> class.
         /// </summary>
-        public BacktestOutputAgent()
+        public BacktestOutputLogger()
         {
             _outputStream = new StringBuilder();
         }
@@ -32,7 +32,7 @@ namespace SpreadShare.ExchangeServices.Backtesting
         /// <param name="feeAsset">asset used to pay the fees</param>
         /// <param name="fees">amount of fees</param>
         public void RegisterTradeEvent(
-            DateTime timestamp,
+            DateTimeOffset timestamp,
             Currency baseAsset,
             Currency counterAsset,
             OrderSide side,
@@ -47,7 +47,7 @@ namespace SpreadShare.ExchangeServices.Backtesting
                 counterAsset.ToString(),
                 side.ToString(),
                 quantity.ToString(CultureInfo.InvariantCulture),
-                feeAsset.ToString() + fees.ToString(CultureInfo.InvariantCulture)
+                feeAsset + fees.ToString(CultureInfo.InvariantCulture)
             };
 
             _outputStream.Append(string.Join(",", items));
