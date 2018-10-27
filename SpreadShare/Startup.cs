@@ -76,16 +76,9 @@ namespace SpreadShare
 
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
-            try
+            if (!service.Migrate().Success)
             {
-                if (!service.Migrate().Success)
-                {
-                    logger.LogError("Could not migrate database");
-                }
-            }
-            catch (Exception e)
-            {
-                logger.LogError($"Could not migrate database: \n{e.Message}");
+                logger.LogError("Could not migrate database");
             }
         }
 
