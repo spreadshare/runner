@@ -55,21 +55,6 @@ namespace SpreadShare
             ILogger logger = loggerFactory.CreateLogger("ExecuteBusinessLogic");
             SettingsService settings = (SettingsService)serviceProvider.GetService<ISettingsService>();
 
-            // Start the exchange factory, which also starts any communications with exchanges.
-            var factory = serviceProvider.GetService<ExchangeFactoryService>();
-            var factoryResult = factory.Start();
-            if (!factoryResult.Success)
-            {
-                logger.LogError($"Exchange Factory Service failed to start! {factoryResult}");
-            }
-
-            // Start algorithm service
-            if (!factoryResult.Success)
-            {
-                logger.LogCritical("Exchange Factory service is not running, the algorithms can not start.");
-                throw new ArgumentException("Algorithm Service depends on TradingService, which is disabled");
-            }
-
             var algorithm = serviceProvider.GetService<IAlgorithmService>();
             foreach (var name in settings.EnabledServices.Algorithms.Keys)
             {
