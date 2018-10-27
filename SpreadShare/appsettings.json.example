@@ -5,8 +5,8 @@
     "BinanceClientSettings": {
         "ReceiveWindow": 10000000,
         "Credentials": {
-					"Key": "api-key",
-					"Secret": "api-secret",
+          "Key": "api-key",
+          "Secret": "api-secret",
         }
     },
     "SimpleBandWagonAlgorithm": {
