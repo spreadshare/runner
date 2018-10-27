@@ -5,8 +5,8 @@
     "BinanceClientSettings": {
         "ReceiveWindow": 10000000,
         "Credentials": {
-            "Key": "api_key",
-            "Secret": "api_secret"
+					"Key": "key",
+					"Secret": "secret",
         }
     },
     "SimpleBandWagonAlgorithm": {
@@ -33,9 +33,9 @@
         ]
     }, 
     "EnabledServices": {
-        "Algorithms": [SimpleBandWagonAlgorithm]
-        "Trading": false,
-        "User": false,
+        "Algorithms": {
+          "SimpleBandWagonAlgorithm": true
+        },
         "ZeroMq": false 
     },
     "AllocationSettings": {
