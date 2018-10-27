@@ -42,28 +42,35 @@ namespace SpreadShare.Algorithms
             _settingsService = settingsService;
             _algorithms = new Dictionary<Type, bool>();
 
-            InitialiseAlgorithms();
             SetInitialAllocation();
         }
 
         /// <inheritdoc />
         public ResponseObject StartAlgorithm(Type algorithmType)
         {
-            // Check if algorithm exists
-            if (!_algorithms.ContainsKey(algorithmType))
+            // Check if type is an algorithm
+            if (!algorithmType.IsSubclassOf(typeof(BaseAlgorithm)))
             {
-                throw new ArgumentException($"Algorithm {algorithmType} was not found in AlgorithmService");
+                return new ResponseObject(ResponseCode.Error, $"Provided type {algorithmType} is not an algorithm.");
             }
 
             // Check if algorithm is in a stopped state
-            if (_algorithms[algorithmType])
+            if (_algorithms.ContainsKey(algorithmType) && _algorithms[algorithmType])
             {
                 return new ResponseObject(ResponseCode.Error, "Algorithm was already started.");
             }
 
             // Figure out which container to get
             BaseAlgorithm algorithm = (BaseAlgorithm)Activator.CreateInstance(algorithmType);
-            AlgorithmSettings settings = GetSettings(algorithm.GetSettingsType);
+
+            // Get settings
+            var settingsResponse = GetSettings(algorithm.GetSettingsType);
+            if (!settingsResponse.Success)
+            {
+                return new ResponseObject(ResponseCode.Error, settingsResponse.Message);
+            }
+
+            AlgorithmSettings settings = settingsResponse.Data;
             Exchange exchangeEnum = settings.Exchange;
 
             // Build container
@@ -73,7 +80,11 @@ namespace SpreadShare.Algorithms
                 _allocationManager.GetWeakAllocationManager());
 
             // Initialise algorithm with container
-            algorithm.Start(settings, container);
+            var startResponse = algorithm.Start(settings, container);
+            if(!startResponse.Success)
+            {
+                return startResponse;
+            }
 
             // Set status Running to True
             _algorithms[algorithmType] = true;
@@ -85,6 +96,12 @@ namespace SpreadShare.Algorithms
         /// <inheritdoc />
         public ResponseObject StopAlgorithm(Type algorithmType)
         {
+            // Check if type is an algorithm
+            if (!algorithmType.IsSubclassOf(typeof(BaseAlgorithm)))
+            {
+                return new ResponseObject(ResponseCode.Error, $"Provided type {algorithmType} is not an algorithm.");
+            }
+
             throw new NotImplementedException();
         }
 
@@ -98,49 +115,11 @@ namespace SpreadShare.Algorithms
         }
 
         /// <summary>
-        /// Initialises _algorithms with the implemented algorithms
-        /// </summary>
-        private void InitialiseAlgorithms()
-        {
-            // Make sure this method is working with a fresh dictionary
-            if (_algorithms.Count != 0)
-            {
-                throw new InvalidConstraintException("_algorithms should not have any algorithms initialised " +
-                                                     "or be reinitialised");
-            }
-
-            /* You have to add your algorithm manually and the method checks if all instances
-             * of BaseAlgorithm were added. This prevents dangling algorithms until a better system
-             * has been created.
-             */
-
-            // Add algorithms (intentionally hardcoded)
-            _algorithms.Add(typeof(SimpleBandWagonAlgorithm), false);
-
-            // Get all implemented algorithms
-            var algorithms =
-                from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                from type in assembly.GetTypes()
-                where type.IsSubclassOf(typeof(BaseAlgorithm))
-                select type;
-
-            // Checks if all algorithms were added to the dictionary
-            foreach (Type algorithm in algorithms)
-            {
-                if (!_algorithms.ContainsKey(algorithm))
-                {
-                    throw new InvalidConstraintException($"The algorithm {algorithm} was not added to " +
-                                                     $"AlgorithmService._algorithms. Is this on purpose?");
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets the exchange from the algorithm settings
         /// </summary>
         /// <param name="algorithmSettingsType">Type of the settings of the algorithm</param>
         /// <returns>The settings of the algorithm with configured values</returns>
-        private AlgorithmSettings GetSettings(Type algorithmSettingsType)
+        private ResponseObject<AlgorithmSettings> GetSettings(Type algorithmSettingsType)
         {
             // Get type of SettingsService as declared in Startup.cs
             Type settingsType = _settingsService.GetType();
@@ -156,18 +135,20 @@ namespace SpreadShare.Algorithms
             // Check if any property with searched settings return type is declared
             if (list.Count < 1)
             {
-                throw new InvalidConstraintException($"No methods with type {algorithmSettingsType} " +
-                                                     $"were declared in ${settingsType}");
+                return new ResponseObject<AlgorithmSettings>(ResponseCode.Error,
+                    $"No settings could be found for {algorithmSettingsType}. Did you add settings to appsettings.json?");
             }
 
             // Check if multiple properties with searched settings return type are declared
             if (list.Count > 1)
             {
-                throw new InvalidConstraintException($"Multiple methods with type {algorithmSettingsType} " +
-                                                     $"were declared in ${settingsType}");
+                return new ResponseObject<AlgorithmSettings>(ResponseCode.Error,
+                    $"Multiple settings were found for {algorithmSettingsType}. Do you have duplicate settings " +
+                    "in appsettings.json?");
             }
 
-            return (AlgorithmSettings)list[0].GetValue(_settingsService);
+            return new ResponseObject<AlgorithmSettings>(ResponseCode.Success,
+                (AlgorithmSettings)list[0].GetValue(_settingsService));
         }
     }
 }

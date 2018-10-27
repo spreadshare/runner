@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
-using SpreadShare.Algorithms.Implementations;
-using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
-using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
-using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
@@ -52,55 +47,28 @@ namespace SpreadShare
         /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
         private static void ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
-            ILogger logger = loggerFactory.CreateLogger("ExecuteBusinessLogic");
+            ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
+
+            // Read settings from appsettings.json
             SettingsService settings = (SettingsService)serviceProvider.GetService<ISettingsService>();
-
-            // Start the exchange factory, which also starts any communications with exchanges.
-            var factory = serviceProvider.GetService<ExchangeFactoryService>();
-            var factoryResult = factory.Start();
-            if (!factoryResult.Success)
+            var settingsReponse = settings.Start();
+            if (!settingsReponse.Success)
             {
-                logger.LogError($"Exchange Factory Service failed to start! {factoryResult}");
+                logger.LogError("The program will exit as SettingsService could not be started properly. " +
+                                "Please check your configuration in SpreadShare/appsettings.json");
+                return;
             }
 
-            // Start algorithm service
-            if (!factoryResult.Success)
+            // Start allocated services
+            var algorithmService = serviceProvider.GetService<IAlgorithmService>();
+            foreach (var algo in settings.EnabledAlgorithms)
             {
-                logger.LogCritical("Exchange Factory service is not running, the algorithms can not start.");
-                throw new ArgumentException("Algorithm Service depends on TradingService, which is disabled");
-            }
-
-            var algorithm = serviceProvider.GetService<IAlgorithmService>();
-            foreach (var name in settings.EnabledServices.Algorithms.Keys)
-            {
-                if (settings.EnabledServices.Algorithms[name])
+                var algorithmResponse = algorithmService.StartAlgorithm(algo);
+                if (!algorithmResponse.Success)
                 {
-                    var algorithmResponse = algorithm.StartAlgorithm(typeof(SimpleBandWagonAlgorithm));
-                    if (algorithmResponse.Code != ResponseCode.Success)
-                    {
-                        logger.LogError($"algorithm failed to start, report: {algorithmResponse}");
-                    }
+                    logger.LogError($"Algorithm failed to start:\n\t {algorithmResponse}");
                 }
-            }
-
-            // Start ZeroMQ command listener and broadcaster
-            if (settings.EnabledServices.ZeroMq)
-            {
-                var zeroMq = serviceProvider.GetService<IZeroMqService>();
-                var zeroMqResult = zeroMq.Start();
-                if (zeroMqResult.Success)
-                {
-                    logger.LogInformation("ZeroMqService has started");
-                }
-                else
-                {
-                    logger.LogError($"ZeroMqService could not be started: {zeroMqResult.Message}");
-                }
-            }
-            else
-            {
-                logger.LogInformation("ZeroMqService has been disabled. If you want to enable the ZeroMqService," +
-                                      "you must change this in appsettings.json");
+                logger.LogInformation($"Started algorithm '{algo}' successfully");
             }
         }
 
