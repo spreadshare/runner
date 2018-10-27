@@ -107,7 +107,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
              */
             return _database.Candles
                 .AsNoTracking()
-                .Single(c => timestamp - HalfCandleInterval <= c.Timestamp
+                .Single(c =>
+                       timestamp - HalfCandleInterval <= c.Timestamp
                     && c.Timestamp <= timestamp + HalfCandleInterval
                     && c.TradingPair == pair.ToString());
         }
