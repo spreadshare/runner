@@ -33,7 +33,7 @@
         ]
     }, 
     "EnabledServices": {
-        "Algorithm": false,
+        "Algorithms": [SimpleBandWagonAlgorithm]
         "Trading": false,
         "User": false,
         "ZeroMq": false 

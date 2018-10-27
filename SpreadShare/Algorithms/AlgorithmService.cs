@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
+using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
@@ -114,7 +115,7 @@ namespace SpreadShare.Algorithms
              */
 
             // Add algorithms (intentionally hardcoded)
-            _algorithms.Add(typeof(SimpleBandWagonAlgorithmSettings), false);
+            _algorithms.Add(typeof(SimpleBandWagonAlgorithm), false);
 
             // Get all implemented algorithms
             var algorithms =
