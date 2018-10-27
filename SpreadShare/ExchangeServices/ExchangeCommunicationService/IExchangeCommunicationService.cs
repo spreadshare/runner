@@ -1,16 +1,15 @@
-using SpreadShare.Models;
-
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService
 {
     /// <summary>
     /// Interface for exchange communications services.
     /// </summary>
-    internal interface IExchangeCommunicationService
+    /// <typeparam name="TClient">Type of the client</typeparam>
+    internal interface IExchangeCommunicationService<out TClient>
     {
         /// <summary>
-        /// Start the service
+        /// Gets the client that commmunicates with the exchange
         /// </summary>
-        /// <returns>Response object indicating wether the service started successfully</returns>
-        ResponseObject Start();
+        /// <returns>The client that communicates with the exchange</returns>
+        TClient Client { get; }
     }
 }
