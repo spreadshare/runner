@@ -63,7 +63,7 @@ namespace SpreadShare
                 logger.LogError($"Exchange Factory Service failed to start! {factoryResult}");
             }
 
-            //Start algorithm service
+            // Start algorithm service
             if (!factoryResult.Success)
             {
                 logger.LogCritical("Exchange Factory service is not running, the algorithms can not start.");
