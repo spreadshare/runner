@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Provider
+namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
     /// Abstract specification of a trading provider.

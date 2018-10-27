@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Provider
+namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
     /// Provides trading capabilities.

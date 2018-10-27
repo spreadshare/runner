@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.Provider;
+using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting

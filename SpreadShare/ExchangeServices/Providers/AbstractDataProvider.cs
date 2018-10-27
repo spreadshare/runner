@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Provider
+namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
     /// Abstract specification of a data provider.

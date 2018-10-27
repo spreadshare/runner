@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.Provider
+namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
     /// Provides data gathering capabilities.

@@ -1,4 +1,4 @@
-﻿namespace SpreadShare.ExchangeServices.Provider
+﻿namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
     /// Forces classes to specify the used exchange.

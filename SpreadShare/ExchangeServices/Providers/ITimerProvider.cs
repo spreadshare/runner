@@ -1,6 +1,6 @@
 using System;
 
-namespace SpreadShare.ExchangeServices.Provider
+namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
     /// Abstract defnition of the timer provider

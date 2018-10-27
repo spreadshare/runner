@@ -1,6 +1,6 @@
 using System;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.Provider;
+using SpreadShare.ExchangeServices.Providers;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
