@@ -39,6 +39,7 @@ build.txt
 
 # Postgres data
 postgres-data
+input-data
 
 # Environment secrets
 .env

@@ -4,7 +4,7 @@ using System.Threading;
 using Binance.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.BinanceServices.Implementations;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using Xunit;
 using Xunit.Abstractions;
 

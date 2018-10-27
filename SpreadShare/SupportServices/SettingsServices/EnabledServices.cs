@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
@@ -6,19 +8,9 @@ namespace SpreadShare.SupportServices.SettingsServices
     internal class EnabledServices
     {
         /// <summary>
-        /// Gets or sets a value indicating whether strategy service is enabled
+        /// Gets or sets a value indicating whether algorithm service is enabled
         /// </summary>
-        public bool Strategy { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether trading service is enabled
-        /// </summary>
-        public bool Trading { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether user service is enabled
-        /// </summary>
-        public bool User { get; set; }
+        public Dictionary<string, bool> Algorithms { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether ZeroMQ service is enabled

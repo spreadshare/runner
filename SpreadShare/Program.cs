@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.BinanceServices;
+using SpreadShare.Algorithms;
+using SpreadShare.Algorithms.Implementations;
+using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
-using SpreadShare.Strategy;
+using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
 using SpreadShare.ZeroMQ;
 
@@ -52,76 +55,32 @@ namespace SpreadShare
             ILogger logger = loggerFactory.CreateLogger("ExecuteBusinessLogic");
             SettingsService settings = (SettingsService)serviceProvider.GetService<ISettingsService>();
 
-            // Start TradingService
-            ResponseObject tradingResult = null;
-            if (settings.EnabledServices.Trading)
+            // Start the exchange factory, which also starts any communications with exchanges.
+            var factory = serviceProvider.GetService<ExchangeFactoryService>();
+            var factoryResult = factory.Start();
+            if (!factoryResult.Success)
             {
-                var trading = serviceProvider.GetService<ITradingService>();
-                tradingResult = trading.Start();
-            }
-            else
-            {
-                logger.LogInformation("TradingService has been disabled. If you want to enable the TradingService," +
-                                      "you must change this in appsettings.json");
+                logger.LogError($"Exchange Factory Service failed to start! {factoryResult}");
             }
 
-            // Start UserService
-            ResponseObject userResult = null;
-            if (settings.EnabledServices.User)
+            // Start algorithm service
+            if (!factoryResult.Success)
             {
-                if (!settings.EnabledServices.Trading)
-                {
-                    logger.LogCritical("TradingService is not enabled. You must enable tradingService in " +
-                                       "appsettings.json if you want to use the UserService");
-                    throw new ArgumentException("UserService depends on TradingService, which is disabled");
-                }
-
-                var user = serviceProvider.GetService<IUserService>();
-                userResult = user.Start();
-            }
-            else
-            {
-                logger.LogInformation("UserService has been disabled. If you want to enable the UserService," +
-                                      "you must change this in appsettings.json");
+                logger.LogCritical("Exchange Factory service is not running, the algorithms can not start.");
+                throw new ArgumentException("Algorithm Service depends on TradingService, which is disabled");
             }
 
-            // Start StrategyService
-            if (settings.EnabledServices.Strategy)
+            var algorithm = serviceProvider.GetService<IAlgorithmService>();
+            foreach (var name in settings.EnabledServices.Algorithms.Keys)
             {
-                if (!settings.EnabledServices.Trading)
+                if (settings.EnabledServices.Algorithms[name])
                 {
-                    logger.LogCritical("TradingService is not enabled. You must enable tradingService in " +
-                                       "appsettings.json if you want to use the UserService");
-                    throw new ArgumentException("StrategyService depends on TradingService, which is disabled");
-                }
-
-                if (!settings.EnabledServices.User)
-                {
-                    logger.LogCritical("UserService is not enabled. You must enable userService in " +
-                                       "appsettings.json if you want to use the UserService");
-                    throw new ArgumentException("StrategyService depends on TradingService, which is disabled");
-                }
-
-                if (userResult.Success && tradingResult.Success)
-                {
-                    var strategy = serviceProvider.GetService<IStrategy>();
-                    var strategyResult = strategy.Start();
-                    if (strategyResult.Code != ResponseCode.Success)
+                    var algorithmResponse = algorithm.StartAlgorithm(typeof(SimpleBandWagonAlgorithm));
+                    if (algorithmResponse.Code != ResponseCode.Success)
                     {
-                        logger.LogError($"Strategy failed to start, report: {strategyResult}");
+                        logger.LogError($"algorithm failed to start, report: {algorithmResponse}");
                     }
                 }
-                else
-                {
-                    logger.LogError("Strategy not started because not all needed service started");
-                    logger.LogError($"User service report: {userResult}");
-                    logger.LogError($"Trading Service report: {tradingResult}");
-                }
-            }
-            else
-            {
-                logger.LogInformation("StrategyService has been disabled. If you want to enable the StrategyService," +
-                                      "you must change this in appsettings.json");
             }
 
             // Start ZeroMQ command listener and broadcaster
