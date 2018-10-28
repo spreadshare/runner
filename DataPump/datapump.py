@@ -10,9 +10,13 @@ from time import sleep
 from urllib.parse import urlparse
 
 def main():
-  path = "./data"
+  path = "./input-data"
   extension = ".csv"
   files = getCSVFiles(path, extension)
+  if len(files) == 0:
+    printStatusUpdate("No data found. Please place your csv files in ./DataPump/input-data/")
+    exit()
+
   printStatusUpdate("Pushing data of the following csv files:"
     + "".join(["\n\t" + join(path, f + extension) for f in files]))
   jobs = convertFilesToJobs(path, files, extension)
