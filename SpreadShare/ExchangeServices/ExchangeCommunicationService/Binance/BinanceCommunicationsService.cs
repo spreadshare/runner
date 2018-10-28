@@ -3,7 +3,6 @@ using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
@@ -11,14 +10,10 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
     /// <summary>
     /// Binance implementantion of the communication service.
     /// </summary>
-    internal class BinanceCommunicationsService : IExchangeCommunicationService, IDisposable
+    internal class BinanceCommunicationsService : IDisposable
     {
-        private readonly BinanceCredentials _authy;
-        private readonly BinanceSettings _settings;
         private readonly ILogger _logger;
-        private readonly ILoggerFactory _loggerFactory;
-
-        private ListenKeyManager _listenKeyManager;
+        private readonly ListenKeyManager _listenKeyManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceCommunicationsService"/> class.
@@ -27,36 +22,30 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         /// <param name="settings">Used to extract the binance settings</param>
         public BinanceCommunicationsService(ILoggerFactory loggerFactory, ISettingsService settings)
         {
-            _loggerFactory = loggerFactory;
-            _logger = _loggerFactory.CreateLogger(GetType());
-            _settings = ((SettingsService)settings).BinanceSettings;
-            _authy = _settings.Credentials;
-        }
+            _logger = loggerFactory.CreateLogger(GetType());
+            var authy = ((SettingsService)settings).BinanceSettings.Credentials;
 
-        /// <summary>
-        /// Gets the instance of the binance client
-        /// </summary>
-        public BinanceClient Client { get; private set; }
-
-        /// <summary>
-        /// Gets the instance of the binance user socket
-        /// </summary>
-        public BinanceSocketClient Socket { get; private set; }
-
-        /// <inheritdoc />
-        public ResponseObject Start()
-        {
             Client = new BinanceClient();
-            Client.SetApiCredentials(_authy.Key, _authy.Secret);
+            Client.SetApiCredentials(authy.Key, authy.Secret);
 
             var options = new BinanceSocketClientOptions { LogVerbosity = LogVerbosity.Debug };
             Socket = new BinanceSocketClient(options);
 
             // Setup ListenKeyManager
-            _listenKeyManager = new ListenKeyManager(_loggerFactory, Client);
+            _listenKeyManager = new ListenKeyManager(loggerFactory, Client);
 
-            return EnableStreams();
+            EnableStreams();
         }
+
+        /// <summary>
+        /// Gets the instance of the binance client
+        /// </summary>
+        public BinanceClient Client { get; }
+
+        /// <summary>
+        /// Gets the instance of the binance user socket
+        /// </summary>
+        public BinanceSocketClient Socket { get; }
 
         /// <inheritdoc />
         public void Dispose()
@@ -82,8 +71,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         /// <summary>
         /// Enable streams for 24 hours
         /// </summary>
-        /// <returns>If this operation succeeded</returns>
-        private ResponseObject EnableStreams()
+        private void EnableStreams()
         {
             _logger.LogInformation($"Enabling streams at {DateTime.UtcNow}");
 
@@ -92,7 +80,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
             if (!response.Success)
             {
                 _logger.LogError("Unable to obtain listenKey");
-                return new ResponseObject(ResponseCode.Error);
+                return;
             }
 
             var listenKey = response.Data;
@@ -122,7 +110,6 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
             };
 
             _logger.LogInformation("Binance User Service was successfully started!");
-            return new ResponseObject(ResponseCode.Success);
         }
     }
 }

@@ -33,12 +33,6 @@ namespace SpreadShare.Tests.ExchangeServices
 
             AllocationManager = fullAllocationService.GetWeakAllocationManager();
             ExchangeFactoryService = serviceProvider.GetService<ExchangeFactoryService>();
-
-            var result = ExchangeFactoryService.Start();
-            if (!result.Success)
-            {
-                Logger.LogError($"Exchange factory service failed to start! {result}");
-            }
         }
     }
 }
