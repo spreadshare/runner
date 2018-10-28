@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
-using SpreadShare.Algorithms.Implementations;
-using SpreadShare.ExchangeServices;
-using SpreadShare.Models;
-using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
-using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
@@ -52,40 +46,29 @@ namespace SpreadShare
         /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
         private static void ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
-            ILogger logger = loggerFactory.CreateLogger("ExecuteBusinessLogic");
+            ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
+
+            // Read settings from appsettings.json
             SettingsService settings = (SettingsService)serviceProvider.GetService<ISettingsService>();
-
-            var algorithm = serviceProvider.GetService<IAlgorithmService>();
-            foreach (var name in settings.EnabledServices.Algorithms.Keys)
+            var settingsReponse = settings.Start();
+            if (!settingsReponse.Success)
             {
-                if (settings.EnabledServices.Algorithms[name])
-                {
-                    var algorithmResponse = algorithm.StartAlgorithm(typeof(SimpleBandWagonAlgorithm));
-                    if (algorithmResponse.Code != ResponseCode.Success)
-                    {
-                        logger.LogError($"algorithm failed to start, report: {algorithmResponse}");
-                    }
-                }
+                logger.LogError("The program will exit as SettingsService could not be started properly. " +
+                                "Please check your configuration in SpreadShare/appsettings.json");
+                return;
             }
 
-            // Start ZeroMQ command listener and broadcaster
-            if (settings.EnabledServices.ZeroMq)
+            // Start allocated services
+            var algorithmService = serviceProvider.GetService<IAlgorithmService>();
+            foreach (var algo in settings.EnabledAlgorithms)
             {
-                var zeroMq = serviceProvider.GetService<IZeroMqService>();
-                var zeroMqResult = zeroMq.Start();
-                if (zeroMqResult.Success)
+                var algorithmResponse = algorithmService.StartAlgorithm(algo);
+                if (!algorithmResponse.Success)
                 {
-                    logger.LogInformation("ZeroMqService has started");
+                    logger.LogError($"Algorithm failed to start:\n\t {algorithmResponse}");
                 }
-                else
-                {
-                    logger.LogError($"ZeroMqService could not be started: {zeroMqResult.Message}");
-                }
-            }
-            else
-            {
-                logger.LogInformation("ZeroMqService has been disabled. If you want to enable the ZeroMqService," +
-                                      "you must change this in appsettings.json");
+
+                logger.LogInformation($"Started algorithm '{algo}' successfully");
             }
         }
 

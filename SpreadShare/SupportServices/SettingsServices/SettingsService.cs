@@ -40,6 +40,14 @@ namespace SpreadShare.SupportServices.SettingsServices
         public Dictionary<Exchange, Dictionary<Type, decimal>> AllocationSettings { get; private set; }
 
         /// <summary>
+        /// Gets the algorithms that are enabled by having allocation
+        /// </summary>
+        public List<Type> EnabledAlgorithms => (from e in AllocationSettings
+                                                from allocation in e.Value
+                                                where allocation.Value > 0
+                                                select allocation.Key).ToList();
+
+        /// <summary>
         /// Gets the binance settings
         /// </summary>
         public BinanceSettings BinanceSettings { get; private set; }
@@ -48,11 +56,6 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// Gets the settings for the simple bandwagon algorithm
         /// </summary>
         public SimpleBandWagonAlgorithmSettings SimpleBandWagonAlgorithmSettings { get; private set; }
-
-        /// <summary>
-        /// Gets the (en/dis)able settings of services
-        /// </summary>
-        public EnabledServices EnabledServices { get; private set; }
 
         /// <inheritdoc />
         public ResponseObject Start()
@@ -64,7 +67,6 @@ namespace SpreadShare.SupportServices.SettingsServices
                 DownloadCurrencies();
                 ParseSimpleBandwagonSettings();
                 BinanceSettings = _configuration.GetSection("BinanceClientSettings").Get<BinanceSettings>();
-                EnabledServices = _configuration.GetSection("EnabledServices").Get<EnabledServices>();
             }
             catch (Exception e)
             {

@@ -31,15 +31,9 @@
             "XVGETH",
             "EOSETH"
         ]
-    }, 
-    "EnabledServices": {
-        "Algorithms": {
-          "SimpleBandWagonAlgorithm": true
-        },
-        "ZeroMq": false 
     },
     "AllocationSettings": {
-        "Binance": {
+        "Backtesting": {
             "SimpleBandWagonAlgorithm": 1.0
         }
     }
