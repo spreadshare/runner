@@ -9,7 +9,7 @@ namespace SpreadShare.ExchangeServices.Allocation
     /// <summary>
     /// This class provides allocation management for multiple algorithms.
     /// </summary>
-    internal class AllocationManager : TradeObserver
+    internal class AllocationManager : ITradeObserver
     {
         // TODO: Is the DustThreshold different per currency?
         private const decimal DustThreshold = 0.01M;
