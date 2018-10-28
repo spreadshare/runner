@@ -10,7 +10,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
     /// <summary>
     /// Binance implementantion of the communication service.
     /// </summary>
-    internal class BinanceCommunicationsService : IExchangeCommunicationService<BinanceClient>, IDisposable
+    internal class BinanceCommunicationsService : IDisposable
     {
         private readonly ILogger _logger;
         private readonly ListenKeyManager _listenKeyManager;
