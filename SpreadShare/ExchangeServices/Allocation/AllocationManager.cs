@@ -138,7 +138,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         public WeakAllocationManager GetWeakAllocationManager() => new WeakAllocationManager(this);
 
         /// <inheritdoc />
-        public override void Update(Type algorithm, IExchangeSpecification exchangeSpecification)
+        public void Update(Type algorithm, IExchangeSpecification exchangeSpecification)
             => UpdatePortfolio(algorithm, exchangeSpecification);
 
         /// <summary>
