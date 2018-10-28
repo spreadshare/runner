@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
@@ -81,7 +79,8 @@ namespace SpreadShare.Algorithms
 
             // Initialise algorithm with container
             var startResponse = algorithm.Start(settings, container);
-            if(!startResponse.Success)
+
+            if (!startResponse.Success)
             {
                 return startResponse;
             }
@@ -135,20 +134,21 @@ namespace SpreadShare.Algorithms
             // Check if any property with searched settings return type is declared
             if (list.Count < 1)
             {
-                return new ResponseObject<AlgorithmSettings>(ResponseCode.Error,
-                    $"No settings could be found for {algorithmSettingsType}. Did you add settings to appsettings.json?");
+                var msg = $"No settings could be found for {algorithmSettingsType}. " +
+                          "Did you add settings to appsettings.json?";
+                return new ResponseObject<AlgorithmSettings>(ResponseCode.Error, msg);
             }
 
             // Check if multiple properties with searched settings return type are declared
             if (list.Count > 1)
             {
-                return new ResponseObject<AlgorithmSettings>(ResponseCode.Error,
-                    $"Multiple settings were found for {algorithmSettingsType}. Do you have duplicate settings " +
-                    "in appsettings.json?");
+                var msg = $"Multiple settings were found for {algorithmSettingsType}. Do you have duplicate settings " +
+                          "in appsettings.json?";
+                return new ResponseObject<AlgorithmSettings>(ResponseCode.Error, msg);
             }
 
-            return new ResponseObject<AlgorithmSettings>(ResponseCode.Success,
-                (AlgorithmSettings)list[0].GetValue(_settingsService));
+            return new ResponseObject<AlgorithmSettings>(
+                ResponseCode.Success, (AlgorithmSettings)list[0].GetValue(_settingsService));
         }
     }
 }

@@ -3,7 +3,6 @@ using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
-using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare
@@ -68,6 +67,7 @@ namespace SpreadShare
                 {
                     logger.LogError($"Algorithm failed to start:\n\t {algorithmResponse}");
                 }
+
                 logger.LogInformation($"Started algorithm '{algo}' successfully");
             }
         }
