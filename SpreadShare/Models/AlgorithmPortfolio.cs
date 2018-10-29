@@ -31,6 +31,22 @@ namespace SpreadShare.Models
         }
 
         /// <summary>
+        /// Update the allocation of an algorithm
+        /// </summary>
+        /// <param name="trade">The trade proposal to digest</param>
+        public void UpdateAllocation(TradeProposal trade)
+        {
+            if (_dict[trade.From.Symbol] < trade.From.Amount)
+            {
+                // TODO: Report a critical error that shutdowns all algorithms
+                throw new ArgumentException("Trade proposal was invalid with respect to the allocation!");
+            }
+
+            _dict[trade.From.Symbol] -= trade.From.Amount;
+            _dict[trade.To.Symbol] += trade.To.Amount;
+        }
+
+        /// <summary>
         /// Returns a string format JSON representation of the portfolio
         /// </summary>
         /// <returns>JSON string</returns>
