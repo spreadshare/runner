@@ -1,9 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using CommandLine;
+using CSharpx;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
+using SpreadShare.ExchangeServices;
+using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
@@ -12,11 +19,19 @@ namespace SpreadShare
     /// </summary>
     public static class Program
     {
+        private static CommandLineArgs _commandLineArgs;
+
         /// <summary>
         /// Entrypoint of the application
         /// </summary>
-        public static void Main()
+        /// <param name="args">The command line arguments</param>
+        /// <returns>Status code</returns>
+        public static int Main(string[] args)
         {
+            // Bind command line args to local variable.
+            Parser.Default.ParseArguments<CommandLineArgs>(args)
+                .WithParsed(o => _commandLineArgs = o);
+
             // Create service collection
             IServiceCollection services = new ServiceCollection();
 
@@ -34,9 +49,14 @@ namespace SpreadShare
 
             // --------------------------------------------------
             // Setup finished --> Execute business logic services
-            ExecuteBusinessLogic(serviceProvider, loggerFactory);
+            bool successfulStart = ExecuteBusinessLogic(serviceProvider, loggerFactory);
+            if (!successfulStart)
+            {
+                return 1;
+            }
 
             KeepRunningForever();
+            return 0;
         }
 
         /// <summary>
@@ -44,7 +64,8 @@ namespace SpreadShare
         /// </summary>
         /// <param name="serviceProvider">Service provider</param>
         /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        private static void ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+        /// <returns>Boolean indicating success</returns>
+        private static bool ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
 
@@ -55,7 +76,34 @@ namespace SpreadShare
             {
                 logger.LogError("The program will exit as SettingsService could not be started properly. " +
                                 "Please check your configuration in SpreadShare/appsettings.json");
-                return;
+                return false;
+            }
+
+            // TODO: Check if allocation either completely set as backtesting, or the _commandLineArgs.Trading is enabled.
+            if (!_commandLineArgs.Trading)
+            {
+                decimal sum = 0.0M;
+
+                // Iterate over all exchange types
+                foreach (var exchange in settings.AllocationSettings.Keys)
+                {
+                    // Skip backtesting
+                    if (exchange == Exchange.Backtesting)
+                    {
+                        continue;
+                    }
+
+                    // Aggregate all allocation
+                    var allocation = settings.AllocationSettings[exchange];
+                    sum += allocation.Keys.Select(x => allocation[x]).Aggregate((a, b) => a + b);
+                }
+
+                if (sum > 0)
+                {
+                    logger.LogError("Algorithms where configured with a non-backtesting allocation, " +
+                                    "but the --trading flag was off, did you mean to go live?");
+                    return false;
+                }
             }
 
             // Start allocated services
@@ -66,10 +114,13 @@ namespace SpreadShare
                 if (!algorithmResponse.Success)
                 {
                     logger.LogError($"Algorithm failed to start:\n\t {algorithmResponse}");
+                    return false;
                 }
 
                 logger.LogInformation($"Started algorithm '{algo}' successfully");
             }
+
+            return true;
         }
 
         /// <summary>
