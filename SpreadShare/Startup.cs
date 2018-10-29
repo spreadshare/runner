@@ -10,7 +10,6 @@ using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
-using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
@@ -52,9 +51,6 @@ namespace SpreadShare
 
             // Add allocation manager
             services.AddSingleton<AllocationManager, AllocationManager>();
-
-            // ZeroMQ Service to interface with other programs
-            services.AddSingleton<IZeroMqService, ZeroMqService>();
         }
 
         /// <summary>
