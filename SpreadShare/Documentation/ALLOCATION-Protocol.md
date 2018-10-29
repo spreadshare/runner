@@ -3,14 +3,13 @@
 ### When is a trade successful?
 A trade is considered successful when the [Exchange]TradingProvider reports it as such. 
 
-
 ### Who checks the exchange trading provider?
 The TradingProvider will be checked by the AllocationService, who using real world data, has a
 final say over the state of the portfolio.
 
 ### How does the allocation provider learn about a trade?
 The TradingProvider will inform its WeakAllocation about a trade that was reported
-as succesful by its implementation.
+as successful by its implementation.
 
 ### What happens when the local and remote portfolio diverge?
 The remote portfolio is considered more truthful, but a warning is produced. When the divergence is too
