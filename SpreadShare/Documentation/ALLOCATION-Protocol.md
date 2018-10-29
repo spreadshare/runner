@@ -1,6 +1,6 @@
 ## Solved Problems
 
-### When is a trade succesful?
+### When is a trade successful?
 A trade is considered successful when the [Exchange]TradingProvider reports it as such. 
 
 
@@ -8,7 +8,7 @@ A trade is considered successful when the [Exchange]TradingProvider reports it a
 The TradingProvider will be checked by the AllocationService, who using real world data, has a
 final say over the state of the portfolio.
 
-### How does the allocaction provider learn about a trade?
+### How does the allocation provider learn about a trade?
 The TradingProvider will inform its WeakAllocation about a trade that was reported
 as succesful by its implementation.
 
