@@ -39,3 +39,23 @@ to remote state to diff by a maximum of one trade. It can now be assumed that an
 of the Algorithm that reported the trade in the first place.
 
 
+## Pseudo code as should be found in the TradingProvider
+```csharp
+public void PlaceFullMarketOrder(pair, algo)
+{
+    AlgorithmPortfolio pre = weakAllocation.GetPortfolio();
+    decimal amount = pre.GetAllocation(pair);
+    Trade proposal = new Trade(pair, amount);
+    // Kept in busy wait if other trade is still review
+    if (weakAllocation.VerifyTrade(proposal))
+    {
+        _implementation.MarketOrder(proposal.Pair, proposal.Amount)
+    }
+    weakAllocation.ReportTrade(proposal)
+    AlgorithmPorfolio post = weakAllocation.GetPortfolio();
+    DatabaseTrade log = new DatabaseTrade(proposal, pre, post);
+    context.Write(log);
+}
+```
+    
+    
