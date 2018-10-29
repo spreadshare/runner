@@ -28,7 +28,11 @@ is occured, the application will produce a warning, but continue with the remote
 
 * Lastly, if the previous step did produce a diff, the two branches (remote, and supposedly after trade) will be
 checked againt each other. The ideal is that these version are on and the same. Yet, when they are not, another
-warning is produces and the remote portfolio considered the truth. A probable cause for this is namely the fact
-that two algorithms made two near concurrent trades. 
+warning is produces and the remote portfolio considered the truth.
+
+### How does the allocation manager interpret the remote portfolio back to a, per algorithm, splitted list?
+Trading providers are kept in a busy wait (when requesting trade verification) until no other trades are pending. This ensures
+to remote state to diff by a maximum of one trade. It can now be assumed that any diff occurs in the allocation
+of the algorithm that reported the trade in the first place.
 
 
