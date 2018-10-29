@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Threading;
+using CommandLine;
+using CSharpx;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
+using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {
@@ -12,11 +16,18 @@ namespace SpreadShare
     /// </summary>
     public static class Program
     {
+        private static CommandLineArgs _commandLineArgs;
+
         /// <summary>
         /// Entrypoint of the application
         /// </summary>
-        public static void Main()
+        /// <param name="args">The command line arguments</param>
+        public static void Main(string[] args)
         {
+            // Bind command line args to local variable.
+            Parser.Default.ParseArguments<CommandLineArgs>(args)
+                .WithParsed(o => _commandLineArgs = o);
+
             // Create service collection
             IServiceCollection services = new ServiceCollection();
 
@@ -57,6 +68,8 @@ namespace SpreadShare
                                 "Please check your configuration in SpreadShare/appsettings.json");
                 return;
             }
+
+            // TODO: Check if allocation either completely set as backtesting, or the _commandLineArgs.Trading is enabled.
 
             // Start allocated services
             var algorithmService = serviceProvider.GetService<IAlgorithmService>();
