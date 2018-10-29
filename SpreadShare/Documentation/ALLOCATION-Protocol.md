@@ -53,7 +53,7 @@ public void PlaceFullMarketOrder(pair, algo)
     weakAllocation.ReportTrade(proposal)
     AlgorithmPorfolio post = weakAllocation.GetPortfolio();
     DatabaseTrade log = new DatabaseTrade(proposal, pre, post);
-    context.Write(log);
+    _databaseContext.Write(log);
 }
 ```
     
