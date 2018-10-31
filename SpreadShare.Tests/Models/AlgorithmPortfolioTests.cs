@@ -79,6 +79,7 @@ namespace SpreadShare.Tests.Models
             var exec = new TradeExecution(from, to, typeof(bool));
             allocation.UpdateAllocation(exec);
             Assert.Equal(allocation.GetAllocation(new Currency("ETH")), 0.9M);
+            Assert.Equal(allocation.GetAllocation(new Currency("BNB")), 4000.0M);
         }
     }
 }
