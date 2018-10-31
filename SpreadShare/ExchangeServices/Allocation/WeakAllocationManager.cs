@@ -55,7 +55,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// </summary>
         /// <param name="p">TradeProposal to be verified</param>
         /// <param name="tradeCallback">Trade callback to be executed if verification was succesful</param>
-        public void QueueTrade(TradeProposal p, Func<TradeExecution> tradeCallback)
+        public bool QueueTrade(TradeProposal p, Func<TradeExecution> tradeCallback)
             => _allocationManager.QueueTrade(p, tradeCallback);
     }
 }
