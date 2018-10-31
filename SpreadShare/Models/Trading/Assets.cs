@@ -39,7 +39,12 @@ namespace SpreadShare.Models.Trading
         /// <returns>The unallocated balance of a currency</returns>
         public decimal GetFreeBalance(Currency symbol)
         {
-            return _free.GetValueOrDefault(symbol, 0);
+            if (!_balances.ContainsKey(symbol))
+            {
+                return 0.0M;
+            }
+
+            return _balances[symbol].Free;
         }
 
         /// <summary>
@@ -49,45 +54,39 @@ namespace SpreadShare.Models.Trading
         /// <returns>The locked balance of a currency</returns>
         public decimal GetLockedBalance(Currency symbol)
         {
-            return _locked.GetValueOrDefault(symbol, 0);
+            if (!_balances.ContainsKey(symbol))
+            {
+                return 0.0M;
+            }
+
+            return _balances[symbol].Locked;
         }
 
-        /// <summary>
-        /// Gets the total balance of a currency
-        /// </summary>
-        /// <param name="symbol">Symbol of the currency</param>
-        /// <returns>The total balance of a currency</returns>
-        public decimal GetTotalBalance(Currency symbol)
+        public List<Currency> GetCurrencies()
         {
-            return _free.GetValueOrDefault(symbol, 0);
+            return _balances.Keys.ToList();
         }
 
-        /// <summary>
-        /// Gets all non-zero balances that are unallocated
-        /// </summary>
-        /// <returns>All non-zero balances that are unallocated</returns>
-        public List<AssetValue> GetAllFreeBalances()
+        public Assets Add(Assets other)
         {
-            return (from symbol in _free.Keys where _free[symbol] > 0 select new AssetValue(symbol, _free[symbol])).ToList();
+            if (other == null)
+            {
+                return this;
+            }
+
+            var result = new Assets(_balances.Values.ToList());
+
+            foreach (var currency in other.GetCurrencies())
+            {
+                var allKeys = GetCurrencies();
+                allKeys.AddRange(other.GetCurrencies());
+            }
+
+
+
         }
 
-        /// <summary>
-        /// Gets all non-zero balances that are locked
-        /// </summary>
-        /// <returns>All non-zero balances that are locked</returns>
-        public List<AssetValue> GetAllLockedBalances()
-        {
-            return (from symbol in _locked.Keys where _locked[symbol] > 0 select new AssetValue(symbol, _locked[symbol])).ToList();
-        }
 
-        /// <summary>
-        /// Gets all non-zero balances
-        /// </summary>
-        /// <returns>All non-zero balances</returns>
-        public List<AssetValue> GetAllTotalBalances()
-        {
-            return (from symbol in _total.Keys where _total[symbol] > 0 select new AssetValue(symbol, _total[symbol])).ToList();
-        }
 
         /// <summary>
         /// Gets a copy of the Assets scaled down with given scale
