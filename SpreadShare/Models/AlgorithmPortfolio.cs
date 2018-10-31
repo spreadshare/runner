@@ -47,6 +47,10 @@ namespace SpreadShare.Models
             }
 
             _dict[trade.From.Symbol] -= trade.From.Amount;
+            
+            // The aqcuired asset can be a non entry
+            if (!_dict.ContainsKey(trade.To.Symbol))
+                _dict.Add(trade.To.Symbol, 0.0M);
             _dict[trade.To.Symbol] += trade.To.Amount;
         }
 
