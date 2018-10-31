@@ -25,8 +25,8 @@ namespace SpreadShare.Models
             CurrencyPair pair,
             decimal quantity,
             OrderSide side,
-            AlgorithmPortfolio pre,
-            AlgorithmPortfolio post,
+            Portfolio pre,
+            Portfolio post,
             decimal preValue,
             decimal postValue)
         {
@@ -56,8 +56,8 @@ namespace SpreadShare.Models
             CurrencyPair pair,
             decimal quantity,
             OrderSide side,
-            AlgorithmPortfolio pre,
-            AlgorithmPortfolio post,
+            Portfolio pre,
+            Portfolio post,
             decimal preValue,
             decimal postValue)
             : this(timestamp.ToUnixTimeMilliseconds(), pair, quantity, side, pre, post, preValue, postValue)
@@ -87,12 +87,12 @@ namespace SpreadShare.Models
         /// <summary>
         /// Gets or sets the portfolio as it was before the trade
         /// </summary>
-        public AlgorithmPortfolio Pre { get; set; }
+        public Portfolio Pre { get; set; }
 
         /// <summary>
         /// Gets or sets the portfolio as it was after the trade
         /// </summary>
-        public AlgorithmPortfolio Post { get; set; }
+        public Portfolio Post { get; set; }
 
         /// <summary>
         /// Gets or sets the value of the portfolio as it was before the trade

@@ -19,7 +19,7 @@ namespace SpreadShare.Tests.Models
             List<Balance> balances = new List<Balance>() 
                 { new Balance(new Currency("ETH"), 1.0M, 0.0M) };
             var assets = new Assets(balances);
-            var allocation = new AlgorithmPortfolio(assets);
+            var allocation = new Portfolio(assets);
             Assert.Equal(allocation.GetAllocation(new Currency("ETH")), 1.0M);
             Assert.Equal(allocation.GetAllocation(new Currency("NONCOIN")), 0.0M);
         }
@@ -71,7 +71,7 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void TradeExecutionIsDigested()
         {
-            var allocation = new AlgorithmPortfolio(new Assets(new List<Balance>()
+            var allocation = new Portfolio(new Assets(new List<Balance>()
             {
                 new Balance(new Currency("ETH"), 2.9M, 0.0M)
             }));

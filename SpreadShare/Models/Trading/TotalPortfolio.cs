@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Metadata.Ecma335;
+using Microsoft.EntityFrameworkCore.Storage.Internal;
 
 namespace SpreadShare.Models.Trading
 {
@@ -8,21 +11,14 @@ namespace SpreadShare.Models.Trading
     /// </summary>
     internal class TotalPortfolio
     {
-        private Dictionary<Type, AlgorithmPortfolio> _allocations;
-        private const decimal DustThreshold = 0.01M;
-
+        private Dictionary<Type, Portfolio> _allocations;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TotalPortfolio"/> class.
         /// </summary>
         public TotalPortfolio()
         {
-            _allocations = new Dictionary<Type, AlgorithmPortfolio>();
-        }
-
-        public void AddEntry(Type algorithm, AlgorithmPortfolio allocation)
-        {
-            _allocations.Add(algorithm, allocation);
+            _allocations = new Dictionary<Type, Portfolio>();
         }
 
         /// <summary>
@@ -50,37 +46,12 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Determines of a portfolio matches the exchange report within a margin.
         /// </summary>
-        /// <param name="remoteAssets">Remote assets to compare with</param>
+        /// <param name="remote">Remote assets to compare with</param>
         /// <returns>Whether or not the situations can be considered equal</returns>
-        public bool GetDifferenceWithRemote(Assets remoteAssets)
+        public List<Balance> GetDifferenceWithRemote(Portfolio remote)
         {
-            Assets sum = null;
-            foreach (var alg in _allocations.Values)
-            {
-                sum = alg.getAsAssets().Union(sum);
-            }
-
-            var difference = remoteAssets.Difference(sum).GetAllTotalBalances();
-
-            foreach (var assetValue in difference)
-            {
-                if (assetValue.Amount < DustThreshold)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Determines if a certain algorithm is allocated.
-        /// </summary>
-        /// <param name="alg">The algorithm type to evaluate</param>
-        /// <returns>Whether the algorithm is allocated</returns>
-        public bool AllocatesAlgorithm(Type alg)
-        {
-            return _allocations.ContainsKey(alg);
+            var sum = _allocations.Values.Aggregate((a, b) => Portfolio.Add(a, b));
+            return Portfolio.AbsoluteDifferences(sum, remote);
         }
 
         /// <summary>
@@ -88,10 +59,12 @@ namespace SpreadShare.Models.Trading
         /// </summary>
         /// <param name="alg">The algorithm type to evaluate</param>
         /// <returns>The algorithm's portfolio</returns>
-        public AlgorithmPortfolio GetAlgorithmAllocation(Type alg)
+        public Portfolio GetAlgorithmAllocation(Type alg)
         {
             if (!_allocations.ContainsKey(alg))
-                throw new ArgumentException($"No allocation available for {alg}");
+            {
+                return Portfolio.Empty;
+            }
 
             return _allocations[alg];
         }
@@ -101,9 +74,15 @@ namespace SpreadShare.Models.Trading
         /// </summary>
         /// <param name="alg">The algorithm type to evaluate</param>
         /// <param name="alloc">The allocation as assets</param>
-        public void SetAlgorithmAllocation(Type alg, Assets alloc)
+        public void SetAlgorithmAllocation(Type alg, Portfolio alloc)
         {
-            _allocations[alg] = new AlgorithmPortfolio(alloc);
+            if (_allocations.ContainsKey(alg))
+            {
+                _allocations[alg] = alloc;
+                return;
+            }
+                
+            _allocations.Add(alg, alloc);
         }
     }
 }

@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
@@ -8,17 +10,17 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Symbol of the asset
         /// </summary>
-        public readonly Currency Symbol;
+        public Currency Symbol;
 
         /// <summary>
         /// Amount of balance that is free
         /// </summary>
-        public readonly decimal Free;
+        public decimal Free;
 
         /// <summary>
         /// Amount of balance that is locked
         /// </summary>
-        public readonly decimal Locked;
+        public decimal Locked;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Balance"/> class.
@@ -32,5 +34,7 @@ namespace SpreadShare.Models.Trading
             Free = free;
             Locked = locked;
         }
+        
+        public static Balance Empty(Currency c) => new Balance(c, 0.0M, 0.0M);
     }
 }

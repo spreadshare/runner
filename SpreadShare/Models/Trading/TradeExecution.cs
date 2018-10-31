@@ -13,7 +13,7 @@ namespace SpreadShare.Models.Trading
         /// <param name="from">The asset value on the left side of the trade</param>
         /// <param name="to">The asset value on the right side of the trade</param>
         /// <param name="algorithm">The type of the algorithm that proposes</param>
-        public TradeExecution(AssetValue from, AssetValue to, Type algorithm)
+        public TradeExecution(Balance from, Balance to, Type algorithm)
         {
             From = from;
             To = to;
@@ -23,12 +23,12 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Gets the left side of the executed trade
         /// </summary>
-        public AssetValue From { get; }
+        public Balance From { get; }
 
         /// <summary>
         /// Gets the right side of the executed trade
         /// </summary>
-        public AssetValue To { get; }
+        public Balance To { get; }
 
         /// <summary>
         /// Gets the type of the algorithm that proposed the trade
