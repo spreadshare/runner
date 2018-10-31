@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 
@@ -10,14 +11,18 @@ namespace SpreadShare.ExchangeServices.Allocation
     internal class WeakAllocationManager
     {
         private readonly AllocationManager _allocationManager;
+        private readonly Type _algorithm;
+        private Exchange _exchange;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WeakAllocationManager"/> class.
         /// </summary>
         /// <param name="allocationManager">Instance of AllocationManager</param>
-        public WeakAllocationManager(AllocationManager allocationManager)
+        public WeakAllocationManager(AllocationManager allocationManager, Type algorithm, Exchange exchange)
         {
             _allocationManager = allocationManager;
+            _algorithm = algorithm;
+            _exchange = exchange;
         }
 
         /// <summary>
@@ -28,8 +33,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="currency">The currency to be sold</param>
         /// <param name="fundsToTrade">The amount to be sold of given currency</param>
         /// <returns>Returns if enough funds are present to execute the trade</returns>
-        public bool CheckFunds(Exchange exchange, Type algorithm, Currency currency, decimal fundsToTrade)
-            => _allocationManager.CheckFunds(exchange, algorithm, currency, fundsToTrade);
+        public bool CheckFunds(Currency currency, decimal fundsToTrade)
+            => _allocationManager.CheckFunds(_exchange, _algorithm, currency, fundsToTrade);
 
         /// <summary>
         /// Get available funds for a given algorithm and currency.
@@ -38,8 +43,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="algorithm">Algorithm to get funds for</param>
         /// <param name="currency">Currency to get funds for</param>
         /// <returns>Available funds or -1 if not available</returns>
-        public decimal GetAvailableFunds(Exchange exchange, Type algorithm, Currency currency)
-            => _allocationManager.GetAvailableFunds(exchange, algorithm, currency);
+        public decimal GetAvailableFunds(Currency currency)
+            => _allocationManager.GetAvailableFunds(_exchange, _algorithm, currency);
 
         /// <summary>
         /// Trigger a portfolio update in the AllocationManager.
@@ -56,6 +61,6 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="p">TradeProposal to be verified</param>
         /// <param name="tradeCallback">Trade callback to be executed if verification was succesful</param>
         public bool QueueTrade(TradeProposal p, Func<TradeExecution> tradeCallback)
-            => _allocationManager.QueueTrade(p, tradeCallback);
+            => _allocationManager.QueueTrade(p, _algorithm, tradeCallback);
     }
 }
