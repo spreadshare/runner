@@ -63,7 +63,7 @@ namespace SpreadShare.ExchangeServices.Allocation
             }
 
             // Map to general ExchangeBalance datatype for parsing to assets object.
-            var values = accountInfo.Data.Balances.Select(x => new ExchangeBalance(x.Asset, x.Free, x.Locked)).ToList();
+            var values = accountInfo.Data.Balances.Select(x => new ExchangeBalance(new Currency(x.Asset), x.Free, x.Locked)).ToList();
 
             return new ResponseObject<Assets>(ResponseCode.Success, new Assets(values));
         }

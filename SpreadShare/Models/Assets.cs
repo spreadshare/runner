@@ -32,9 +32,9 @@ namespace SpreadShare.Models
         {
             foreach (var balance in input)
             {
-                _free.Add(new Currency(balance.Symbol), balance.Free);
-                _locked.Add(new Currency(balance.Symbol), balance.Locked);
-                _total.Add(new Currency(balance.Symbol), balance.Total);
+                _free.Add(balance.Symbol, balance.Free);
+                _locked.Add(balance.Symbol, balance.Locked);
+                _total.Add(balance.Symbol, balance.Total);
             }
         }
 
@@ -109,29 +109,17 @@ namespace SpreadShare.Models
 
             return new Assets(GetAllTotalBalances()
                 .Select(assetValue => new ExchangeBalance(
-                    assetValue.Symbol.ToString(),
+                    assetValue.Symbol,
                     GetFreeBalance(assetValue.Symbol) * scale,
                     GetLockedBalance(assetValue.Symbol) * scale))
                 .ToList());
         }
 
-        private List<ExchangeBalance> GetExchangeBalances()
-        {
-            List<ExchangeBalance> balances = new List<ExchangeBalance>();
-            
-            foreach (var balance in GetAllTotalBalances())
-            {
-                balances.Add(
-                    new ExchangeBalance(
-                        balance.Symbol.ToString(),
-                        GetFreeBalance(balance.Symbol),
-                        GetLockedBalance(balance.Symbol)
-                    ));
-            }
-
-            return balances;
-        }
-        
+        /// <summary>
+        /// Combine two asset collections and return the result
+        /// </summary>
+        /// <param name="other">The other instance to combine with</param>
+        /// <returns>Combined result</returns>
         public Assets Combine(Assets other)
         {
             List<ExchangeBalance> result = new List<ExchangeBalance>();
@@ -146,14 +134,13 @@ namespace SpreadShare.Models
                 {
                     temp = new ExchangeBalance(balance.Symbol, 0.0M, 0.0M);
                 }
-                
+
                 result.Add(new ExchangeBalance(
                     balance.Symbol,
                     temp.Free + balance.Free,
-                    temp.Locked + balance.Locked
-                    ));                
+                    temp.Locked + balance.Locked));                
             }
-            
+
             // Result += Where (this.Currency NOT IN other.Currency)
             foreach (var balance in balancesThis)
             {
@@ -161,15 +148,38 @@ namespace SpreadShare.Models
                 {
                     continue;
                 }
+
                 result.Add(new ExchangeBalance(balance.Symbol, balance.Free, balance.Locked));
             }
 
             return new Assets(result);
         }
-        
+
+        /// <summary>
+        /// Get the intersection of two asset collections
+        /// </summary>
+        /// <param name="other">The other asset collection</param>
+        /// <returns>Intersection result</returns>
+        /// <exception cref="NotImplementedException"></exception>
         public Assets Intersection(Assets other)
         {
             throw new NotImplementedException();
+        }
+
+        private List<ExchangeBalance> GetExchangeBalances()
+        {
+            List<ExchangeBalance> balances = new List<ExchangeBalance>();
+
+            foreach (var balance in GetAllTotalBalances())
+            {
+                balances.Add(
+                    new ExchangeBalance(
+                        balance.Symbol,
+                        GetFreeBalance(balance.Symbol),
+                        GetLockedBalance(balance.Symbol)));
+            }
+
+            return balances;
         }
     }
 }

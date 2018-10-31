@@ -13,7 +13,7 @@ namespace SpreadShare.Models
         /// </summary>
         /// <param name="from">The asset value on the left side of the trade</param>
         /// <param name="algorithm">The type of the algorithm that proposes</param>
-        public TradeProposal(AssetValue from, AssetValue to, Type algorithm)
+        public TradeProposal(AssetValue from, Type algorithm)
         {
             From = from;
             Algorithm = algorithm;

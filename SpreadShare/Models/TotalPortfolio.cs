@@ -16,7 +16,6 @@ namespace SpreadShare.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="TotalPortfolio"/> class.
         /// </summary>
-        /// <param name="allocations">The initial allocation</param>
         public TotalPortfolio()
         {
             _allocations = new Dictionary<Type, AlgorithmPortfolio>();
@@ -28,29 +27,33 @@ namespace SpreadShare.Models
         }
 
         /// <summary>
-        /// Creates a branched version of the total portfolio using a trade personal
+        /// Modifies the allocation based on the executed trade.
         /// </summary>
         /// <param name="trade">The trade proposal</param>
-        /// <returns>A branched version of the portfolio</returns>
         public void ApplyTradeExecution(TradeExecution trade)
         {
             if (trade == null)
             {
                 throw new ArgumentNullException("Parameter 'trade' should not be null");
             }
-            
+
             // Algorithm should always be in _allocations
             if (!_allocations.ContainsKey(trade.Algorithm))
             {
                 throw new ArgumentException(
                     $"{trade.Algorithm} did not receive any funds during allocation but is trying to change its portfolio.");
             }
-            
+
             // Substract spent funds
             _allocations[trade.Algorithm].UpdateAllocation(trade);
         }
 
-        public void CompareWithExchange(Assets assets)
+        /// <summary>
+        /// Determines of a portfolio matches the exchange report within a margin.
+        /// </summary>
+        /// <param name="assets">Assets representing exchange balances.</param>
+        /// <returns>Whether or not the situations can be considered equal</returns>
+        public bool CompareWithExchange(Assets assets)
         {
             Assets sum = null;
             foreach (var alg in _allocations.Values)
@@ -58,14 +61,25 @@ namespace SpreadShare.Models
                 sum = alg.getAsAssets().Combine(sum);
             }
 
-            Assets a =sum.Intersection(assets);
+            Assets a = sum.Intersection(assets);
+            throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Determines if a certain algorithm is allocated.
+        /// </summary>
+        /// <param name="alg">The algorithm type to evaluate</param>
+        /// <returns>Whether the algorithm is allocated</returns>
         public bool AllocatesAlgorithm(Type alg)
         {
             return _allocations.ContainsKey(alg);
         }
 
+        /// <summary>
+        /// Returns the allocation of a certain algorithm
+        /// </summary>
+        /// <param name="alg">The algorithm type to evaluate</param>
+        /// <returns>The algorithm's portfolio</returns>
         public AlgorithmPortfolio GetAlgorithmAllocation(Type alg)
         {
             if (!_allocations.ContainsKey(alg))
@@ -74,6 +88,11 @@ namespace SpreadShare.Models
             return _allocations[alg];
         }
 
+        /// <summary>
+        /// Set the allocation of a certain algorithm using an assets representation.
+        /// </summary>
+        /// <param name="alg">The algorithm type to evaluate</param>
+        /// <param name="alloc">The allocation as assets</param>
         public void SetAlgorithmAllocation(Type alg, Assets alloc)
         {
             _allocations[alg] = new AlgorithmPortfolio(alloc);

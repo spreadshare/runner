@@ -59,6 +59,10 @@ namespace SpreadShare.Models
             return JsonConvert.SerializeObject(_dict);
         }
 
+        /// <summary>
+        /// Return an assets representation of this instance
+        /// </summary>
+        /// <returns>Assets representation</returns>
         public Assets getAsAssets()
         {
             throw new NotImplementedException();

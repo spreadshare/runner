@@ -111,7 +111,8 @@ namespace SpreadShare.ExchangeServices.Allocation
             if (!_allocations.ContainsKey(exchange))
             {
                 _logger.LogTrace($"GetAvailableFunds: Algorithm {algorithm} not available.");
-                //TODO: Is minus 1 best solution here?
+
+                // TODO: Is minus 1 best solution here?
                 return -1;
             }
 
@@ -143,6 +144,17 @@ namespace SpreadShare.ExchangeServices.Allocation
             => UpdatePortfolio(algorithm, exchangeSpecification);
 
         /// <summary>
+        /// Queue a trade based on a proposal, the callback must return the trade execution
+        /// which will be used to update the allocation.
+        /// </summary>
+        /// <param name="p">TradeProposal to be verified</param>
+        /// <param name="tradeCallback">Trade callback to be executed if verification was succesful</param>
+        public void QueueTrade(TradeProposal p, Func<TradeExecution> tradeCallback)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Update portfolio after trade.
         /// </summary>
         /// <param name="algorithm">Algorithm that has traded</param>
@@ -152,11 +164,6 @@ namespace SpreadShare.ExchangeServices.Allocation
             // TODO: Update allocation
             algorithm = null;
             _portfolioFetcherService.GetPortfolio(exchangeSpecification);
-        }
-
-        public void QueueTrade(TradeProposal p, Func<TradeExecution> tradeCallback)
-        {
-            
         }
     }
 }
