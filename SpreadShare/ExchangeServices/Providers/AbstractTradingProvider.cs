@@ -29,7 +29,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="side">Whether to buy or sell</param>
         /// <param name="amount">The amount to buy or sell</param>
         /// <returns>A response object indicating the status of the market order</returns>
-        public abstract ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side, decimal amount);
+        public abstract ResponseObject<decimal> PlaceFullMarketOrder(CurrencyPair pair, OrderSide side, decimal amount);
 
         /// <summary>
         /// Cancels order

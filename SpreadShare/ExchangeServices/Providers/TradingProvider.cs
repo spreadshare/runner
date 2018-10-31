@@ -62,36 +62,39 @@ namespace SpreadShare.ExchangeServices.Providers
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             decimal amount = _allocationManager.GetAvailableFunds(_exchange, _algorithm, currency);
-
-            // Calculate amount of non base currency to buy
-            if (side == OrderSide.Buy)
+            var proposal = new TradeProposal(new AssetValue(currency, amount), _algorithm);
+            
+            var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                var query = _dataProvider.GetCurrentPriceTopAsk(pair);
-                if (!query.Success)
+                ResponseObject<decimal> query = null;
+                decimal tradeAmount = amount;
+                for(uint retries = 0; retries < 5; retries++)
                 {
+                    // Estimate the value that will be obtained from the order when buying.
+                    tradeAmount = side == OrderSide.Buy ? GetBuyAmountEstimate(pair, amount) : amount;
+                    query = _implementation.PlaceFullMarketOrder(pair, side, tradeAmount);
+                    if (query.Success)
+                    {
+                        break;
+                    }
+
                     _logger.LogWarning(query.ToString());
-                    return new ResponseObject(ResponseCode.Success);
                 }
 
-                amount /= query.Data;
-            }
-
-            uint retries = 0;
-
-            while (retries++ < 5)
-            {
-                var query = _implementation.PlaceFullMarketOrder(pair, side, amount);
                 if (!query.Success)
                 {
-                    _logger.LogWarning(query.ToString());
-                    continue;
+                    _logger.LogError($"Trade for {pair} failed after 5 retries");
+                    return null;
                 }
 
-                return new ResponseObject(ResponseCode.Success);
-            }
+                // Report the trade with the actual amount as communicated by the exchange.
+                return new TradeExecution(
+                    new AssetValue(pair.Left, amount),
+                    new AssetValue(pair.Right, query.Data),
+                    _algorithm);
+            });
 
-            _logger.LogError($"Trade for {pair} failed after 5 retries");
-            return new ResponseObject(ResponseCode.Error);
+            return tradeSuccess ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);
         }
 
         /// <summary>
@@ -103,6 +106,18 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject CancelOrder(CurrencyPair pair, long orderId)
         {
             return _implementation.CancelOrder(pair, orderId);
+        }
+
+        private decimal GetBuyAmountEstimate(CurrencyPair pair, decimal baseAmount)
+        {
+            var query = _dataProvider.GetCurrentPriceTopAsk(pair);
+            if (!query.Success)
+            {
+                _logger.LogWarning(query.ToString());
+                return 0.0M;
+            }
+
+            return baseAmount / query.Data;
         }
     }
 }
