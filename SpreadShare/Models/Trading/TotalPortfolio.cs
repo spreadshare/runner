@@ -54,6 +54,8 @@ namespace SpreadShare.Models.Trading
             return Portfolio.AbsoluteDifferences(sum, remote);
         }
 
+        public bool IsAllocated(Type algo) => _allocations.ContainsKey(algo);
+
         /// <summary>
         /// Returns the allocation of a certain algorithm
         /// </summary>

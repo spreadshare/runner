@@ -30,13 +30,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <inheritdoc />
-        public ResponseObject<Assets> GetPortfolio(IExchangeSpecification exchangeSpecification)
-        {
-            return GetPortfolio(exchangeSpecification.GetExchangeType());
-        }
-
-        /// <inheritdoc />
-        public ResponseObject<Assets> GetPortfolio(Exchange exchange)
+        public ResponseObject<Portfolio> GetPortfolio(Exchange exchange)
         {
             switch (exchange)
             {
@@ -54,26 +48,30 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// Gets the portfolio of the user
         /// </summary>
         /// <returns>The portfolio</returns>
-        private ResponseObject<Assets> GetBinancePortfolio()
+        private ResponseObject<Portfolio> GetBinancePortfolio()
         {
             var accountInfo = _binance.Client.GetAccountInfo();
             if (!accountInfo.Success)
             {
                 _logger.LogCritical($"Could not get assets: {accountInfo.Error.Message}");
-                return new ResponseObject<Assets>(ResponseCode.Error);
+                return new ResponseObject<Portfolio>(ResponseCode.Error);
             }
 
             // Map to general Balance datatype for parsing to assets object.
-            var values = accountInfo.Data.Balances.Select(x => new Balance(new Currency(x.Asset), x.Free, x.Locked)).ToList();
+            var values = accountInfo.Data.Balances.ToDictionary(x => 
+                new Currency(x.Asset), x => new Balance(
+                    new Currency(x.Asset),
+                    x.Free,
+                    x.Locked));
 
-            return new ResponseObject<Assets>(ResponseCode.Success, new Assets(values));
+            return new ResponseObject<Portfolio>(ResponseCode.Success, new Portfolio(values));
         }
 
         /// <summary>
         /// Gets the portfolio of the user
         /// </summary>
         /// <returns>The portfolio</returns>
-        private ResponseObject<Assets> GetBacktestingPortfolio()
+        private ResponseObject<Portfolio> GetBacktestingPortfolio()
         {
             throw new NotImplementedException();
         }

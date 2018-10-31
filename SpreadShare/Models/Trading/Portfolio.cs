@@ -102,14 +102,17 @@ namespace SpreadShare.Models.Trading
         /// </summary>
         /// <param name="scale">Decimal between 0 and 1 indicating the scale</param>
         /// <returns>Exchange balance corresponding to the given currency</returns>
-        public void DuplicateWithScale(decimal scale)
+        public static Portfolio DuplicateWithScale(Portfolio portfolio, decimal scale)
         {
             if (scale < 0 || scale > 1)
             {
                 throw new ArgumentException("Argument 'scale' should be between 0 and 1.");
             }
-
-            _dict.Values.Select(x => new Balance(x.Symbol, x.Free * scale, x.Locked * scale));
+            
+            // Create deep copy of the dictionary
+            var ret = new Portfolio(new Dictionary<Currency, Balance>(portfolio._dict));
+            ret._dict.Values.Select(x => new Balance(x.Symbol, x.Free * scale, x.Locked * scale));
+            return ret;
         }
 
         /// <summary>

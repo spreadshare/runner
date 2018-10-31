@@ -44,7 +44,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="algorithm">Algorithm to get funds for</param>
         /// <param name="currency">Currency to get funds for</param>
         /// <returns>Available funds or -1 if not available</returns>
-        public decimal GetAvailableFunds(Currency currency)
+        public Balance GetAvailableFunds(Currency currency)
             => _allocationManager.GetAvailableFunds(_exchange, _algorithm, currency);
 
         /// <summary>
@@ -52,8 +52,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// </summary>
         /// <param name="algorithm">Algorithm that has traded</param>
         /// <param name="exchangeSpecification">Specifies which exchange is used</param>
-        public void Update(Type algorithm, IExchangeSpecification exchangeSpecification)
-            => _allocationManager.Update(algorithm, exchangeSpecification);
+        public void Update(Type algorithm, Exchange exchange)
+            => _allocationManager.Update(algorithm, exchange);
 
         /// <summary>
         /// Queue a trade based on a proposal, the callback must return the trade execution
@@ -62,6 +62,6 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="p">TradeProposal to be verified</param>
         /// <param name="tradeCallback">Trade callback to be executed if verification was succesful</param>
         public bool QueueTrade(TradeProposal p, Func<TradeExecution> tradeCallback)
-            => _allocationManager.QueueTrade(p, _algorithm, tradeCallback);
+            => _allocationManager.QueueTrade(p, _algorithm, _exchange, tradeCallback);
     }
 }

@@ -48,7 +48,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <returns>Response object indicating success or not</returns>
         /// TODO: Make method algorithm specific
-        public ResponseObject<Assets> GetPortfolio()
+        public ResponseObject<Portfolio> GetPortfolio()
         {
             throw new NotImplementedException();
         }
@@ -62,17 +62,17 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            decimal amount = _allocationManager.GetAvailableFunds(currency);
-            var proposal = new TradeProposal(new AssetValue(currency, amount), _algorithm);
+            Balance amount = _allocationManager.GetAvailableFunds(currency);
+            var proposal = new TradeProposal(new Balance(currency, amount.Free, 0.0M), _algorithm);
             
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
                 ResponseObject<decimal> query = null;
-                decimal tradeAmount = amount;
+                decimal tradeAmount = proposal.From.Free;
                 for(uint retries = 0; retries < 5; retries++)
                 {
                     // Estimate the value that will be obtained from the order when buying.
-                    tradeAmount = side == OrderSide.Buy ? GetBuyAmountEstimate(pair, amount) : amount;
+                    tradeAmount = side == OrderSide.Buy ? GetBuyAmountEstimate(pair, proposal.From.Free) : proposal.From.Free;
                     query = _implementation.PlaceFullMarketOrder(pair, side, tradeAmount);
                     if (query.Success)
                     {
@@ -89,9 +89,10 @@ namespace SpreadShare.ExchangeServices.Providers
                 }
 
                 // Report the trade with the actual amount as communicated by the exchange.
+                // TODO: Is this correct???
                 return new TradeExecution(
-                    new AssetValue(pair.Left, amount),
-                    new AssetValue(pair.Right, query.Data),
+                    new Balance(pair.Left, proposal.From.Free, 0.0M), 
+                    new Balance(pair.Right, query.Data, 0.0M), 
                     _algorithm);
             });
 

@@ -47,7 +47,7 @@ namespace SpreadShare.ExchangeServices.Allocation
             _allocations = new Dictionary<Exchange, TotalPortfolio>();
 
             // Get Assets for all configured exchanges
-            Dictionary<Exchange, Assets> balances = new Dictionary<Exchange, Assets>();
+            Dictionary<Exchange, Portfolio> balances = new Dictionary<Exchange, Portfolio>();
             foreach (var exchangeEntry in initialAllocations)
             {
                 balances.Add(exchangeEntry.Key, _portfolioFetcherService.GetPortfolio(exchangeEntry.Key).Data);
@@ -64,7 +64,7 @@ namespace SpreadShare.ExchangeServices.Allocation
                 {
                     // Copy scaled down assets to _allocations
                     _allocations[exchangeEntry.Key].SetAlgorithmAllocation(algorithmType,
-                        exchangeEntry.Value.DuplicateWithScale(
+                        Portfolio.DuplicateWithScale(exchangeEntry.Value,
                             initialAllocations[exchangeEntry.Key][algorithmType]));
                 }
             }
@@ -90,13 +90,13 @@ namespace SpreadShare.ExchangeServices.Allocation
             }
 
             // Check if algorithm is allocated
-            if (!_allocations[exchange].AllocatesAlgorithm(algorithm))
+            if (!_allocations[exchange].IsAllocated(algorithm))
             {
                 _logger.LogTrace($"CheckFunds: Algorithm {algorithm} not available.");
                 return false;
             }
 
-            return _allocations[exchange].GetAlgorithmAllocation(algorithm).GetAllocation(currency) >= fundsToTrade;
+            return _allocations[exchange].GetAlgorithmAllocation(algorithm).GetAllocation(currency).Free >= fundsToTrade;
         }
 
         /// <summary>
@@ -106,29 +106,27 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="algorithm">Algorithm to get funds for</param>
         /// <param name="currency">Currency to get funds for</param>
         /// <returns>Available funds or -1 if not available</returns>
-        public decimal GetAvailableFunds(Exchange exchange, Type algorithm, Currency currency)
+        public Balance GetAvailableFunds(Exchange exchange, Type algorithm, Currency currency)
         {
             // Check if exchange is used
             if (!_allocations.ContainsKey(exchange))
             {
                 _logger.LogTrace($"GetAvailableFunds: Algorithm {algorithm} not available.");
-
-                // TODO: Is minus 1 best solution here?
-                return -1;
+                return Balance.Empty(currency);
             }
 
             // Check if algorithm is allocated
-            if (!_allocations[exchange].AllocatesAlgorithm(algorithm))
+            if (!_allocations[exchange].IsAllocated(algorithm))
             {
                 _logger.LogTrace($"GetAvailableFunds: Algorithm {algorithm} not available.");
-                return -1;
+                return Balance.Empty(currency);
             }
 
             // Check if algorithm's portfolio has enough of the currency
-            if (_allocations[exchange].GetAlgorithmAllocation(algorithm).GetAllocation(currency) < DustThreshold)
+            if (_allocations[exchange].GetAlgorithmAllocation(algorithm).GetAllocation(currency).Free < DustThreshold)
             {
                 _logger.LogTrace($"GetAvailableFunds: Not enough funds availble for Currency {currency} for Algorithm {algorithm}.");
-                return -1;
+                return Balance.Empty(currency);
             }
 
             return _allocations[exchange].GetAlgorithmAllocation(algorithm).GetAllocation(currency);
@@ -142,8 +140,8 @@ namespace SpreadShare.ExchangeServices.Allocation
             => new WeakAllocationManager(this, algorith, exchange);
 
         /// <inheritdoc />
-        public void Update(Type algorithm, IExchangeSpecification exchangeSpecification)
-            => UpdatePortfolio(algorithm, exchangeSpecification);
+        public void Update(Type algorithm, Exchange exchange)
+            => UpdatePortfolio(algorithm, exchange);
 
         /// <summary>
         /// Queue a trade based on a proposal, the callback must return the trade execution
@@ -154,9 +152,9 @@ namespace SpreadShare.ExchangeServices.Allocation
         public bool QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<TradeExecution> tradeCallback)
         {
             var alloc = GetAvailableFunds(exchange, algorithm, p.From.Symbol);
-            if (alloc > p.From.Amount)
+            if (alloc.Free < p.From.Free || alloc.Locked < p.From.Locked)
             {
-                _logger.LogCritical($"Got trade proposal for {p.From.Amount}{p.From.Symbol}, but allocation" +
+                _logger.LogCritical($"Got trade proposal for ({p.From.Free}|{p.From.Locked}){p.From.Symbol}, but allocation" +
                                     $"showed only {alloc}{p.From.Symbol} was available");
                 return false;
             }
@@ -171,11 +169,11 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// </summary>
         /// <param name="algorithm">Algorithm that has traded</param>
         /// <param name="exchangeSpecification">Specifies which exchange is used</param>
-        private void UpdatePortfolio(Type algorithm, IExchangeSpecification exchangeSpecification)
+        private void UpdatePortfolio(Type algorithm, Exchange exchange)
         {
             // TODO: Update allocation
             algorithm = null;
-            _portfolioFetcherService.GetPortfolio(exchangeSpecification);
+            _portfolioFetcherService.GetPortfolio(exchange);
         }
     }
 }
