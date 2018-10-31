@@ -114,5 +114,62 @@ namespace SpreadShare.Models
                     GetLockedBalance(assetValue.Symbol) * scale))
                 .ToList());
         }
+
+        private List<ExchangeBalance> GetExchangeBalances()
+        {
+            List<ExchangeBalance> balances = new List<ExchangeBalance>();
+            
+            foreach (var balance in GetAllTotalBalances())
+            {
+                balances.Add(
+                    new ExchangeBalance(
+                        balance.Symbol.ToString(),
+                        GetFreeBalance(balance.Symbol),
+                        GetLockedBalance(balance.Symbol)
+                    ));
+            }
+
+            return balances;
+        }
+        
+        public Assets Combine(Assets other)
+        {
+            List<ExchangeBalance> result = new List<ExchangeBalance>();
+            var balancesThis = this.GetExchangeBalances();
+
+            // Result += contains all Other.Currencies
+            foreach (var balance in other.GetExchangeBalances())
+            {
+                // Get [Symbol, Free, Locked] from current balances
+                ExchangeBalance temp = balancesThis.SingleOrDefault(b => b.Symbol.Equals(balance.Symbol));
+                if (temp == null)
+                {
+                    temp = new ExchangeBalance(balance.Symbol, 0.0M, 0.0M);
+                }
+                
+                result.Add(new ExchangeBalance(
+                    balance.Symbol,
+                    temp.Free + balance.Free,
+                    temp.Locked + balance.Locked
+                    ));                
+            }
+            
+            // Result += Where (this.Currency NOT IN other.Currency)
+            foreach (var balance in balancesThis)
+            {
+                if (result.Select(x => x.Symbol).Contains(balance.Symbol))
+                {
+                    continue;
+                }
+                result.Add(new ExchangeBalance(balance.Symbol, balance.Free, balance.Locked));
+            }
+
+            return new Assets(result);
+        }
+        
+        public Assets Intersection(Assets other)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

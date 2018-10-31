@@ -48,5 +48,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="exchangeSpecification">Specifies which exchange is used</param>
         public void Update(Type algorithm, IExchangeSpecification exchangeSpecification)
             => _allocationManager.Update(algorithm, exchangeSpecification);
+
+        public void QueueTrade(TradeProposal p, Func<TradeExecution> tradeCallback) 
+            => _allocationManager.QueueTrade(p, tradeCallback);  
     }
 }

@@ -16,7 +16,7 @@ namespace SpreadShare.ExchangeServices.Allocation
 
         private readonly ILogger _logger;
         private readonly IPortfolioFetcherService _portfolioFetcherService;
-        private Dictionary<Exchange, Dictionary<Type, Assets>> _allocations;
+        private Dictionary<Exchange, TotalPortfolio> _allocations;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AllocationManager"/> class.
@@ -43,7 +43,7 @@ namespace SpreadShare.ExchangeServices.Allocation
             }
 
             // Initialise _allocations
-            _allocations = new Dictionary<Exchange, Dictionary<Type, Assets>>();
+            _allocations = new Dictionary<Exchange, TotalPortfolio>();
 
             // Get Assets for all configured exchanges
             Dictionary<Exchange, Assets> balances = new Dictionary<Exchange, Assets>();
@@ -56,15 +56,15 @@ namespace SpreadShare.ExchangeServices.Allocation
             foreach (var exchangeEntry in balances)
             {
                 // Add exchange to _allocations
-                _allocations.Add(exchangeEntry.Key, new Dictionary<Type, Assets>());
+                _allocations.Add(exchangeEntry.Key, new TotalPortfolio());
 
                 // Loop over configured algorithms
                 foreach (var algorithmType in initialAllocations[exchangeEntry.Key].Keys)
                 {
                     // Copy scaled down assets to _allocations
-                    _allocations[exchangeEntry.Key][algorithmType] =
+                    _allocations[exchangeEntry.Key].SetAlgorithmAllocation(algorithmType,
                         exchangeEntry.Value.DuplicateWithScale(
-                            initialAllocations[exchangeEntry.Key][algorithmType]);
+                            initialAllocations[exchangeEntry.Key][algorithmType]));
                 }
             }
 
@@ -89,13 +89,13 @@ namespace SpreadShare.ExchangeServices.Allocation
             }
 
             // Check if algorithm is allocated
-            if (!_allocations[exchange].ContainsKey(algorithm))
+            if (!_allocations[exchange].AllocatesAlgorithm(algorithm))
             {
                 _logger.LogTrace($"CheckFunds: Algorithm {algorithm} not available.");
                 return false;
             }
 
-            return _allocations[exchange][algorithm].GetFreeBalance(currency) >= fundsToTrade;
+            return _allocations[exchange].GetAlgorithmAllocation(algorithm).GetAllocation(currency) >= fundsToTrade;
         }
 
         /// <summary>
@@ -111,24 +111,25 @@ namespace SpreadShare.ExchangeServices.Allocation
             if (!_allocations.ContainsKey(exchange))
             {
                 _logger.LogTrace($"GetAvailableFunds: Algorithm {algorithm} not available.");
+                //TODO: Is minus 1 best solution here?
                 return -1;
             }
 
             // Check if algorithm is allocated
-            if (!_allocations[exchange].ContainsKey(algorithm))
+            if (!_allocations[exchange].AllocatesAlgorithm(algorithm))
             {
                 _logger.LogTrace($"GetAvailableFunds: Algorithm {algorithm} not available.");
                 return -1;
             }
 
             // Check if algorithm's portfolio has enough of the currency
-            if (_allocations[exchange][algorithm].GetFreeBalance(currency) < DustThreshold)
+            if (_allocations[exchange].GetAlgorithmAllocation(algorithm).GetAllocation(currency) < DustThreshold)
             {
                 _logger.LogTrace($"GetAvailableFunds: Not enough funds availble for Currency {currency} for Algorithm {algorithm}.");
                 return -1;
             }
 
-            return _allocations[exchange][algorithm].GetFreeBalance(currency);
+            return _allocations[exchange].GetAlgorithmAllocation(algorithm).GetAllocation(currency);
         }
 
         /// <summary>
@@ -151,6 +152,11 @@ namespace SpreadShare.ExchangeServices.Allocation
             // TODO: Update allocation
             algorithm = null;
             _portfolioFetcherService.GetPortfolio(exchangeSpecification);
+        }
+
+        public void QueueTrade(TradeProposal p, Func<TradeExecution> tradeCallback)
+        {
+            
         }
     }
 }

@@ -14,10 +14,13 @@ namespace SpreadShare.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="AlgorithmPortfolio"/> class.
         /// </summary>
-        public AlgorithmPortfolio()
+        public AlgorithmPortfolio(Assets assets)
         {
-            _dict = null;
-            throw new NotImplementedException();
+            _dict = new Dictionary<Currency, decimal>();
+            foreach (var assetValue in assets.GetAllFreeBalances())
+            {
+                _dict.Add(assetValue.Symbol, assetValue.Amount);
+            }
         }
 
         /// <summary>
@@ -34,8 +37,9 @@ namespace SpreadShare.Models
         /// Update the allocation of an algorithm
         /// </summary>
         /// <param name="trade">The trade proposal to digest</param>
-        public void UpdateAllocation(TradeProposal trade)
+        public void UpdateAllocation(TradeExecution trade)
         {
+            //TODO: Offset for dust?
             if (_dict[trade.From.Symbol] < trade.From.Amount)
             {
                 // TODO: Report a critical error that shutdowns all algorithms
@@ -53,6 +57,11 @@ namespace SpreadShare.Models
         public string ToJson()
         {
             return JsonConvert.SerializeObject(_dict);
+        }
+
+        public Assets getAsAssets()
+        {
+            throw new NotImplementedException();
         }
     }
 }
