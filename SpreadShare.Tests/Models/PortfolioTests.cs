@@ -16,15 +16,33 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void PortfolioConstructor()
         {
-            List<Balance> balances = new List<Balance>()
+            Currency c = new Currency("ETH");
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
             {
-                new Balance(new Currency("ETH"), 1.0M, 0.0M)
-            };
-
-            var dict = balances.ToDictionary(x => x.Symbol, x => x);
-            var portfolio = new Portfolio(dict);
+                { c, new Balance(c, 1.0M, 0.0M )}
+            });
             
             Assert.Equal(portfolio.GetAllocation(new Currency("ETH")).Free, 1.0M);
+        }
+
+        [Fact]
+        public void BalancesAreSummed()
+        {
+            Currency c = new Currency("ETH");
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
+            {
+                { c, new Balance(c, 1.0M, 0.0M )}
+            });
+            
+            var secondary = new Portfolio(new Dictionary<Currency, Balance>()
+            {
+                { c, new Balance(c, 3.0M, 5.0M) }
+            });
+
+            var result = Portfolio.Add(portfolio, secondary);
+            Assert.Equal(result.GetAllocation(c).Free, 4.0M);
+            Assert.Equal(portfolio.GetAllocation(c).Free, 1.0M);
+            Assert.Equal(secondary.GetAllocation(c).Free, 3.0M);
         }
     }
 }
