@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using Xunit.Abstractions;
@@ -31,7 +32,7 @@ namespace SpreadShare.Tests.ExchangeServices
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             var fullAllocationService = serviceProvider.GetService<AllocationManager>();
 
-            AllocationManager = fullAllocationService.GetWeakAllocationManager();
+            AllocationManager = fullAllocationService.GetWeakAllocationManager(typeof(SimpleBandWagonAlgorithm), Exchange.Backtesting);
             ExchangeFactoryService = serviceProvider.GetService<ExchangeFactoryService>();
         }
     }

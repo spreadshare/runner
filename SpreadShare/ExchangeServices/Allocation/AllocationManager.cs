@@ -137,7 +137,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// Get weakened version of allocation manager for the trading provider.
         /// </summary>
         /// <returns>Weakened version of allocation manager</returns>
-        public WeakAllocationManager GetWeakAllocationManager() => new WeakAllocationManager(this);
+        public WeakAllocationManager GetWeakAllocationManager(Type algorith, Exchange exchange) 
+            => new WeakAllocationManager(this, algorith, exchange);
 
         /// <inheritdoc />
         public void Update(Type algorithm, IExchangeSpecification exchangeSpecification)
@@ -149,9 +150,19 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// </summary>
         /// <param name="p">TradeProposal to be verified</param>
         /// <param name="tradeCallback">Trade callback to be executed if verification was succesful</param>
-        public bool QueueTrade(TradeProposal p, Func<TradeExecution> tradeCallback)
+        public bool QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<TradeExecution> tradeCallback)
         {
-            throw new NotImplementedException();
+            var alloc = GetAvailableFunds(exchange, algorithm, p.From.Symbol);
+            if (alloc > p.From.Amount)
+            {
+                _logger.LogCritical($"Got trade proposal for {p.From.Amount}{p.From.Symbol}, but allocation" +
+                                    $"showed only {alloc}{p.From.Symbol} was available");
+                return false;
+            }
+
+            var exec = tradeCallback();
+            //TODO Update the portfolio and verify it.
+            return true;
         }
 
         /// <summary>

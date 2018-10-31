@@ -61,7 +61,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            decimal amount = _allocationManager.GetAvailableFunds(_exchange, _algorithm, currency);
+            decimal amount = _allocationManager.GetAvailableFunds(currency);
             var proposal = new TradeProposal(new AssetValue(currency, amount), _algorithm);
             
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
