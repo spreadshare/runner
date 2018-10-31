@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 
 namespace SpreadShare.SupportServices.SettingsServices
 {

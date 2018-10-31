@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting

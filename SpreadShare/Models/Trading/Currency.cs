@@ -1,13 +1,11 @@
 using System;
 
-namespace SpreadShare.Models
+namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Object representation of a currency
     /// </summary>
-#pragma warning disable 660,661
     internal class Currency
-#pragma warning restore 660,661
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Currency"/> class.

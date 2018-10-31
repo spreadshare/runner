@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SpreadShare.Models
+namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Object representation of a currency pair

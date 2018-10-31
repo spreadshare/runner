@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,8 +16,8 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void AllocationIsAllocated()
         {
-            List<ExchangeBalance> balances = new List<ExchangeBalance>() 
-                { new ExchangeBalance(new Currency("ETH"), 1.0M, 0.0M) };
+            List<Balance> balances = new List<Balance>() 
+                { new Balance(new Currency("ETH"), 1.0M, 0.0M) };
             var assets = new Assets(balances);
             var allocation = new AlgorithmPortfolio(assets);
             Assert.Equal(allocation.GetAllocation(new Currency("ETH")), 1.0M);
@@ -26,14 +27,14 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void AllocationsAreSummed()
         {
-            List<ExchangeBalance> firstList = new List<ExchangeBalance>()
+            List<Balance> firstList = new List<Balance>()
             {
-                new ExchangeBalance(new Currency("ETH"), 1.0M, 0.0M)
+                new Balance(new Currency("ETH"), 1.0M, 0.0M)
             };
             
-            List<ExchangeBalance> secondList = new List<ExchangeBalance>()
+            List<Balance> secondList = new List<Balance>()
             {
-                new ExchangeBalance(new Currency("ETH"), 1.5M, 0.0M)
+                new Balance(new Currency("ETH"), 1.5M, 0.0M)
             };
             
             var first = new Assets(firstList);
@@ -46,16 +47,16 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void NonOverlappingAllocationsAreSummed()
         {
-            List<ExchangeBalance> firstList = new List<ExchangeBalance>()
+            List<Balance> firstList = new List<Balance>()
             {
-                new ExchangeBalance(new Currency("ETH"), 1.0M, 0.0M),
-                new ExchangeBalance(new Currency("VET"), 42.0M, 0.0M) 
+                new Balance(new Currency("ETH"), 1.0M, 0.0M),
+                new Balance(new Currency("VET"), 42.0M, 0.0M) 
             };
             
-            List<ExchangeBalance> secondList = new List<ExchangeBalance>()
+            List<Balance> secondList = new List<Balance>()
             {
-                new ExchangeBalance(new Currency("ETH"), 1.5M, 0.0M),
-                new ExchangeBalance(new Currency("BTC"), 69.0M, 0.0M)
+                new Balance(new Currency("ETH"), 1.5M, 0.0M),
+                new Balance(new Currency("BTC"), 69.0M, 0.0M)
             };
             
             var first = new Assets(firstList);
@@ -70,9 +71,9 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void TradeExecutionIsDigested()
         {
-            var allocation = new AlgorithmPortfolio(new Assets(new List<ExchangeBalance>()
+            var allocation = new AlgorithmPortfolio(new Assets(new List<Balance>()
             {
-                new ExchangeBalance(new Currency("ETH"), 2.9M, 0.0M)
+                new Balance(new Currency("ETH"), 2.9M, 0.0M)
             }));
             var from = new AssetValue(new Currency("ETH"), 2.0M);
             var to = new AssetValue(new Currency("BNB"), 4000.0M);

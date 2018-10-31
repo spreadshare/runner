@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,9 +18,9 @@ namespace SpreadShare.Tests.Models
         public void PortfolioIsBuild()
         {
             var portfolio = new TotalPortfolio();
-            var allocation = new Assets(new List<ExchangeBalance>()
+            var allocation = new Assets(new List<Balance>()
             {
-                new ExchangeBalance(new Currency("ETH"), 1.0M, 0)
+                new Balance(new Currency("ETH"), 1.0M, 0)
             });
             portfolio.SetAlgorithmAllocation(typeof(SimpleBandWagonAlgorithm), allocation);
             
@@ -36,9 +37,9 @@ namespace SpreadShare.Tests.Models
             Currency to = new Currency("VET");
             
             var portfolio = new TotalPortfolio();
-            var allocation = new Assets(new List<ExchangeBalance>()
+            var allocation = new Assets(new List<Balance>()
             {
-                new ExchangeBalance(from, 666.0M, 0.0M)
+                new Balance(from, 666.0M, 0.0M)
             });
             portfolio.SetAlgorithmAllocation(alg, allocation);
             

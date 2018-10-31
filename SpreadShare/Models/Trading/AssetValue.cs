@@ -1,4 +1,4 @@
-namespace SpreadShare.Models
+namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Object representing the amount of an asset

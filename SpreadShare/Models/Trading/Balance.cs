@@ -1,9 +1,9 @@
-namespace SpreadShare.Models
+namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Adapter wrapper for creating an <see cref="Assets"/> object
     /// </summary>
-    internal class ExchangeBalance
+    internal class Balance
     {
         /// <summary>
         /// Symbol of the asset
@@ -21,22 +21,16 @@ namespace SpreadShare.Models
         public readonly decimal Locked;
 
         /// <summary>
-        /// Total balance
-        /// </summary>
-        public readonly decimal Total;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExchangeBalance"/> class.
+        /// Initializes a new instance of the <see cref="Balance"/> class.
         /// </summary>
         /// <param name="symbol">Symbol of the asset</param>
         /// <param name="free">Amount of balance that is free</param>
         /// <param name="locked">Amount of balance that is locked</param>
-        public ExchangeBalance(Currency symbol, decimal free, decimal locked)
+        public Balance(Currency symbol, decimal free, decimal locked)
         {
             Symbol = symbol;
             Free = free;
             Locked = locked;
-            Total = free + locked;
         }
     }
 }

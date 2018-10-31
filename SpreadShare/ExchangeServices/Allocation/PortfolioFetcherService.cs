@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 
 namespace SpreadShare.ExchangeServices.Allocation
 {
@@ -62,8 +63,8 @@ namespace SpreadShare.ExchangeServices.Allocation
                 return new ResponseObject<Assets>(ResponseCode.Error);
             }
 
-            // Map to general ExchangeBalance datatype for parsing to assets object.
-            var values = accountInfo.Data.Balances.Select(x => new ExchangeBalance(new Currency(x.Asset), x.Free, x.Locked)).ToList();
+            // Map to general Balance datatype for parsing to assets object.
+            var values = accountInfo.Data.Balances.Select(x => new Balance(new Currency(x.Asset), x.Free, x.Locked)).ToList();
 
             return new ResponseObject<Assets>(ResponseCode.Success, new Assets(values));
         }

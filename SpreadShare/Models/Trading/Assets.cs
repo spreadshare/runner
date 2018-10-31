@@ -2,39 +2,33 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpreadShare.Models
+namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Represents the portfolio of an exchange wallet.
     /// </summary>
     internal class Assets
     {
-        private readonly Dictionary<Currency, decimal> _free;
-        private readonly Dictionary<Currency, decimal> _locked;
-        private readonly Dictionary<Currency, decimal> _total;
+        private readonly Dictionary<Currency, Balance> _balances;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Assets"/> class.
         /// </summary>
         public Assets()
         {
-            _free = new Dictionary<Currency, decimal>();
-            _locked = new Dictionary<Currency, decimal>();
-            _total = new Dictionary<Currency, decimal>();
+            _balances = new Dictionary<Currency, Balance>();
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Assets"/> class.
         /// </summary>
         /// <param name="input">List of balances</param>
-        public Assets(List<ExchangeBalance> input)
+        public Assets(List<Balance> input)
             : this()
         {
             foreach (var balance in input)
             {
-                _free.Add(balance.Symbol, balance.Free);
-                _locked.Add(balance.Symbol, balance.Locked);
-                _total.Add(balance.Symbol, balance.Total);
+                _balances.Add(balance.Symbol, balance);
             }
         }
 
@@ -108,7 +102,7 @@ namespace SpreadShare.Models
             }
 
             return new Assets(GetAllTotalBalances()
-                .Select(assetValue => new ExchangeBalance(
+                .Select(assetValue => new Balance(
                     assetValue.Symbol,
                     GetFreeBalance(assetValue.Symbol) * scale,
                     GetLockedBalance(assetValue.Symbol) * scale))
@@ -127,20 +121,20 @@ namespace SpreadShare.Models
                 return this;
             }
 
-            List<ExchangeBalance> result = new List<ExchangeBalance>();
+            List<Balance> result = new List<Balance>();
             var balancesThis = this.GetExchangeBalances();
 
             // Result += contains all Other.Currencies
             foreach (var balance in other.GetExchangeBalances())
             {
                 // Get [Symbol, Free, Locked] from current balances
-                ExchangeBalance temp = balancesThis.SingleOrDefault(b => b.Symbol.Equals(balance.Symbol));
+                Balance temp = balancesThis.SingleOrDefault(b => b.Symbol.Equals(balance.Symbol));
                 if (temp == null)
                 {
-                    temp = new ExchangeBalance(balance.Symbol, 0.0M, 0.0M);
+                    temp = new Balance(balance.Symbol, 0.0M, 0.0M);
                 }
 
-                result.Add(new ExchangeBalance(
+                result.Add(new Balance(
                     balance.Symbol,
                     temp.Free + balance.Free,
                     temp.Locked + balance.Locked));
@@ -154,20 +148,20 @@ namespace SpreadShare.Models
                     continue;
                 }
 
-                result.Add(new ExchangeBalance(balance.Symbol, balance.Free, balance.Locked));
+                result.Add(new Balance(balance.Symbol, balance.Free, balance.Locked));
             }
 
             return new Assets(result);
         }
 
-        private List<ExchangeBalance> GetExchangeBalances()
+        private List<Balance> GetExchangeBalances()
         {
-            List<ExchangeBalance> balances = new List<ExchangeBalance>();
+            List<Balance> balances = new List<Balance>();
 
             foreach (var balance in GetAllTotalBalances())
             {
                 balances.Add(
-                    new ExchangeBalance(
+                    new Balance(
                         balance.Symbol,
                         GetFreeBalance(balance.Symbol),
                         GetLockedBalance(balance.Symbol)));
@@ -183,80 +177,6 @@ namespace SpreadShare.Models
         /// <returns>All assets unique to this assets object</returns>
         public Assets Difference(Assets other)
         {
-            if (other == null)
-            {
-                return this;
-            }
-
-            var freeLeft = new List<AssetValue>();
-            foreach (var assetValue in GetAllFreeBalances())
-            {
-                var diff = assetValue.Amount - other.GetFreeBalance(assetValue.Symbol);
-                if (diff > 0)
-                {
-                    freeLeft.Add(new AssetValue(assetValue.Symbol, diff));
-                }
-            }
-
-            var lockedLeft = new List<AssetValue>();
-            foreach (var assetValue in GetAllLockedBalances())
-            {
-                var diff = assetValue.Amount - other.GetLockedBalance(assetValue.Symbol);
-                if (diff > 0)
-                {
-                    lockedLeft.Add(new AssetValue(assetValue.Symbol, diff));
-                }
-            }
-
-            var freeRight = new List<AssetValue>();
-            foreach (var assetValue in other.GetAllFreeBalances())
-            {
-                var diff = assetValue.Amount - GetFreeBalance(assetValue.Symbol);
-                if (diff > 0)
-                {
-                    freeRight.Add(new AssetValue(assetValue.Symbol, diff));
-                }
-            }
-
-            var lockedRight = new List<AssetValue>();
-            foreach (var assetValue in other.GetAllLockedBalances())
-            {
-                var diff = assetValue.Amount - GetLockedBalance(assetValue.Symbol);
-                if (diff > 0)
-                {
-                    lockedRight.Add(new AssetValue(assetValue.Symbol, diff));
-                }
-            }
-
-            // Combine free and locked
-            freeLeft.AddRange(freeRight);
-            lockedLeft.AddRange(lockedRight);
-
-            var dict = new Dictionary<Currency, Tuple<decimal, decimal>>();
-            foreach (var freeAssetValue in freeLeft)
-            {
-                dict.Add(freeAssetValue.Symbol, new Tuple<decimal, decimal>(freeAssetValue.Amount, 0));
-            }
-
-            foreach (var lockedAssetValue in lockedLeft)
-            {
-                if (dict.ContainsKey(lockedAssetValue.Symbol))
-                {
-                    var tuple = dict[lockedAssetValue.Symbol];
-                    dict[lockedAssetValue.Symbol] = new Tuple<decimal, decimal>(tuple.Item1, lockedAssetValue.Amount);
-                }
-                else
-                {
-                    dict.Add(lockedAssetValue.Symbol, new Tuple<decimal, decimal>(lockedAssetValue.Amount, 0));
-                }
-            }
-
-            List<ExchangeBalance> ebs = new List<ExchangeBalance>();
-            foreach (var tuple in dict)
-            {
-                ebs.Add(new ExchangeBalance(tuple.Key, tuple.Value.Item1, tuple.Value.Item2));
-            }
-
             return new Assets(ebs);
         }
     }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SpreadShare.Models
+namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Generic model for a total portfolio allocation for multiple algorithms.

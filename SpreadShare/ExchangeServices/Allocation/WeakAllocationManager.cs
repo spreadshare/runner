@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 
 namespace SpreadShare.ExchangeServices.Allocation
 {
