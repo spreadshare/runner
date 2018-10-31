@@ -67,9 +67,12 @@ namespace SpreadShare.ExchangeServices.Providers
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
                 ResponseObject<decimal> query = null;
+                decimal tradeAmount = amount;
                 for(uint retries = 0; retries < 5; retries++)
                 {
-                    query = _implementation.PlaceFullMarketOrder(pair, side, amount);
+                    // Estimate the value that will be obtained from the order when buying.
+                    tradeAmount = side == OrderSide.Buy ? GetBuyAmountEstimate(pair, amount) : amount;
+                    query = _implementation.PlaceFullMarketOrder(pair, side, tradeAmount);
                     if (query.Success)
                     {
                         break;
@@ -84,6 +87,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     return null;
                 }
 
+                // Report the trade with the actual amount as communicated by the exchange.
                 return new TradeExecution(
                     new AssetValue(pair.Left, amount),
                     new AssetValue(pair.Right, query.Data),
