@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices;
 
 namespace SpreadShare.Models
 {
@@ -12,6 +9,8 @@ namespace SpreadShare.Models
     internal class TotalPortfolio
     {
         private Dictionary<Type, AlgorithmPortfolio> _allocations;
+        private const decimal DustThreshold = 0.01M;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TotalPortfolio"/> class.
@@ -34,7 +33,7 @@ namespace SpreadShare.Models
         {
             if (trade == null)
             {
-                throw new ArgumentNullException("Parameter 'trade' should not be null");
+                throw new ArgumentNullException(nameof(trade));
             }
 
             // Algorithm should always be in _allocations
@@ -51,18 +50,27 @@ namespace SpreadShare.Models
         /// <summary>
         /// Determines of a portfolio matches the exchange report within a margin.
         /// </summary>
-        /// <param name="assets">Assets representing exchange balances.</param>
+        /// <param name="remoteAssets">Remote assets to compare with</param>
         /// <returns>Whether or not the situations can be considered equal</returns>
-        public bool CompareWithExchange(Assets assets)
+        public bool GetDifferenceWithRemote(Assets remoteAssets)
         {
             Assets sum = null;
             foreach (var alg in _allocations.Values)
             {
-                sum = alg.getAsAssets().Combine(sum);
+                sum = alg.getAsAssets().Union(sum);
             }
 
-            Assets a = sum.Intersection(assets);
-            throw new NotImplementedException();
+            var difference = remoteAssets.Difference(sum).GetAllTotalBalances();
+
+            foreach (var assetValue in difference)
+            {
+                if (assetValue.Amount < DustThreshold)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

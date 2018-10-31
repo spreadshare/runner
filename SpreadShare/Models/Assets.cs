@@ -120,8 +120,13 @@ namespace SpreadShare.Models
         /// </summary>
         /// <param name="other">The other instance to combine with</param>
         /// <returns>Combined result</returns>
-        public Assets Combine(Assets other)
+        public Assets Union(Assets other)
         {
+            if (other == null)
+            {
+                return this;
+            }
+
             List<ExchangeBalance> result = new List<ExchangeBalance>();
             var balancesThis = this.GetExchangeBalances();
 
@@ -138,7 +143,7 @@ namespace SpreadShare.Models
                 result.Add(new ExchangeBalance(
                     balance.Symbol,
                     temp.Free + balance.Free,
-                    temp.Locked + balance.Locked));                
+                    temp.Locked + balance.Locked));
             }
 
             // Result += Where (this.Currency NOT IN other.Currency)
@@ -155,17 +160,6 @@ namespace SpreadShare.Models
             return new Assets(result);
         }
 
-        /// <summary>
-        /// Get the intersection of two asset collections
-        /// </summary>
-        /// <param name="other">The other asset collection</param>
-        /// <returns>Intersection result</returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public Assets Intersection(Assets other)
-        {
-            throw new NotImplementedException();
-        }
-
         private List<ExchangeBalance> GetExchangeBalances()
         {
             List<ExchangeBalance> balances = new List<ExchangeBalance>();
@@ -180,6 +174,90 @@ namespace SpreadShare.Models
             }
 
             return balances;
+        }
+
+        /// <summary>
+        /// Get difference between this and other (not in other)
+        /// </summary>
+        /// <param name="other">The other asset collection</param>
+        /// <returns>All assets unique to this assets object</returns>
+        public Assets Difference(Assets other)
+        {
+            if (other == null)
+            {
+                return this;
+            }
+
+            var freeLeft = new List<AssetValue>();
+            foreach (var assetValue in GetAllFreeBalances())
+            {
+                var diff = assetValue.Amount - other.GetFreeBalance(assetValue.Symbol);
+                if (diff > 0)
+                {
+                    freeLeft.Add(new AssetValue(assetValue.Symbol, diff));
+                }
+            }
+
+            var lockedLeft = new List<AssetValue>();
+            foreach (var assetValue in GetAllLockedBalances())
+            {
+                var diff = assetValue.Amount - other.GetLockedBalance(assetValue.Symbol);
+                if (diff > 0)
+                {
+                    lockedLeft.Add(new AssetValue(assetValue.Symbol, diff));
+                }
+            }
+
+            var freeRight = new List<AssetValue>();
+            foreach (var assetValue in other.GetAllFreeBalances())
+            {
+                var diff = assetValue.Amount - GetFreeBalance(assetValue.Symbol);
+                if (diff > 0)
+                {
+                    freeRight.Add(new AssetValue(assetValue.Symbol, diff));
+                }
+            }
+
+            var lockedRight = new List<AssetValue>();
+            foreach (var assetValue in other.GetAllLockedBalances())
+            {
+                var diff = assetValue.Amount - GetLockedBalance(assetValue.Symbol);
+                if (diff > 0)
+                {
+                    lockedRight.Add(new AssetValue(assetValue.Symbol, diff));
+                }
+            }
+
+            // Combine free and locked
+            freeLeft.AddRange(freeRight);
+            lockedLeft.AddRange(lockedRight);
+
+            var dict = new Dictionary<Currency, Tuple<decimal, decimal>>();
+            foreach (var freeAssetValue in freeLeft)
+            {
+                dict.Add(freeAssetValue.Symbol, new Tuple<decimal, decimal>(freeAssetValue.Amount, 0));
+            }
+
+            foreach (var lockedAssetValue in lockedLeft)
+            {
+                if (dict.ContainsKey(lockedAssetValue.Symbol))
+                {
+                    var tuple = dict[lockedAssetValue.Symbol];
+                    dict[lockedAssetValue.Symbol] = new Tuple<decimal, decimal>(tuple.Item1, lockedAssetValue.Amount);
+                }
+                else
+                {
+                    dict.Add(lockedAssetValue.Symbol, new Tuple<decimal, decimal>(lockedAssetValue.Amount, 0));
+                }
+            }
+
+            List<ExchangeBalance> ebs = new List<ExchangeBalance>();
+            foreach (var tuple in dict)
+            {
+                ebs.Add(new ExchangeBalance(tuple.Key, tuple.Value.Item1, tuple.Value.Item2));
+            }
+
+            return new Assets(ebs);
         }
     }
 }

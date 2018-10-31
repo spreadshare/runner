@@ -39,7 +39,7 @@ namespace SpreadShare.Models
         /// <param name="trade">The trade proposal to digest</param>
         public void UpdateAllocation(TradeExecution trade)
         {
-            //TODO: Offset for dust?
+            // TODO: Offset for dust?
             if (_dict[trade.From.Symbol] < trade.From.Amount)
             {
                 // TODO: Report a critical error that shutdowns all algorithms
@@ -47,10 +47,13 @@ namespace SpreadShare.Models
             }
 
             _dict[trade.From.Symbol] -= trade.From.Amount;
-            
+
             // The aqcuired asset can be a non entry
             if (!_dict.ContainsKey(trade.To.Symbol))
+            {
                 _dict.Add(trade.To.Symbol, 0.0M);
+            }
+
             _dict[trade.To.Symbol] += trade.To.Amount;
         }
 
@@ -67,9 +70,9 @@ namespace SpreadShare.Models
         /// Return an assets representation of this instance
         /// </summary>
         /// <returns>Assets representation</returns>
-        public Assets getAsAssets()
+        public Assets ToAssets()
         {
-            throw new NotImplementedException();
+            return new Assets();
         }
     }
 }
