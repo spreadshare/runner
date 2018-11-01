@@ -1,50 +1,104 @@
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.Models
 {
+    /// <summary>
+    /// Test collection for the portfolio model
+    /// </summary>
     public class PortfolioTests : BaseTest
     {
-        public PortfolioTests(ITestOutputHelper outputHelper) : base(outputHelper)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PortfolioTests"/> class.
+        /// </summary>
+        /// <param name="outputHelper">Generates output</param>
+        public PortfolioTests(ITestOutputHelper outputHelper)
+            : base(outputHelper)
         {
         }
 
+        /// <summary>
+        /// Tests valid parsing of values after the constructor
+        /// </summary>
         [Fact]
-        public void PortfolioConstructor()
+        public void Constructor()
         {
             Currency c = new Currency("ETH");
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
             {
-                { c, new Balance(c, 1.0M, 0.0M )}
+                { c, new Balance(c, 1.0M, 0.0M) }
             });
-            
-            Assert.Equal(portfolio.GetAllocation(new Currency("ETH")).Free, 1.0M);
+
+            Assert.Equal(1.0M, portfolio.GetAllocation(new Currency("ETH")).Free);
         }
 
+        /// <summary>
+        /// Tests a number of cases to see of adding to portfolio adds the balances correctly
+        /// </summary>
+        /// <param name="currency">Currency</param>
+        /// <param name="free1">Free balance for the first</param>
+        /// <param name="locked1">Locked balance for the first</param>
+        /// <param name="free2">Free balance for the second</param>
+        /// <param name="locked2">Locked balance for the second</param>
         [Theory]
         [InlineData("ETH", 1.0, 0.0, 3.0, 5.0)]
+        [InlineData("BTC", 0.000002, 0.0, 0.0, 0.0)]
+        [InlineData("DOGE", 0.0, 0.0, 0.0, 0.0)]
+        [InlineData("VET", 1.00000000001, 100000, 3.9999999, 1000000)]
         public void BalancesAreSummed(string currency, decimal free1, decimal locked1, decimal free2, decimal locked2)
         {
             Currency c = new Currency(currency);
-            var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
+            var first = new Portfolio(new Dictionary<Currency, Balance>()
             {
-                { c, new Balance(c, free1, locked1 )}
+                { c, new Balance(c, free1, locked1) }
             });
-            
-            var secondary = new Portfolio(new Dictionary<Currency, Balance>()
+
+            var second = new Portfolio(new Dictionary<Currency, Balance>()
             {
                 { c, new Balance(c, free2, locked2) }
             });
 
-            var result = Portfolio.Add(portfolio, secondary);
-            Assert.Equal(result.GetAllocation(c).Free, free1 + free2);
-            Assert.Equal(portfolio.GetAllocation(c).Free, free1);
-            Assert.Equal(secondary.GetAllocation(c).Free, free2);
-            Assert.Equal(result.GetAllocation(c).Locked, locked1 + locked2);
+            var result = Portfolio.Add(first, second);
+            Assert.Equal(free1 + free2, result.GetAllocation(c).Free);
+            Assert.Equal(locked1 + locked2, result.GetAllocation(c).Locked);
+            Assert.Equal(free1, first.GetAllocation(c).Free);
+            Assert.Equal(locked1, first.GetAllocation(c).Locked);
+            Assert.Equal(free2, second.GetAllocation(c).Free);
+            Assert.Equal(locked2, second.GetAllocation(c).Locked);
+        }
+
+        /// <summary>
+        /// Tests if partial overlapping portfolios are summed together correctly.
+        /// </summary>
+        [Fact]
+        public void PartialOverlappingBalances()
+        {
+            Currency c1 = new Currency("ETH");
+            Currency c2 = new Currency("BTC");
+            Currency c3 = new Currency("DOGE");
+
+            var first = new Portfolio(new Dictionary<Currency, Balance>()
+            {
+                { c1, new Balance(c1, 4.0M, 1M) },
+                { c2, new Balance(c2, 1.0M, 5.5M) }
+            });
+
+            var second = new Portfolio(new Dictionary<Currency, Balance>()
+            {
+                { c1, new Balance(c1, 0.02M, 0) },
+                { c3, new Balance(c3, 66.5M, 0.0000000004M) }
+            });
+
+            var result = Portfolio.Add(first, second);
+
+            Assert.Equal(4.02M, result.GetAllocation(c1).Free);
+            Assert.Equal(1.0M, result.GetAllocation(c1).Locked);
+            Assert.Equal(1.0M, result.GetAllocation(c2).Free);
+            Assert.Equal(5.5M, result.GetAllocation(c2).Locked);
+            Assert.Equal(66.5M, result.GetAllocation(c3).Free);
+            Assert.Equal(0.0000000004M, result.GetAllocation(c3).Locked);
         }
     }
 }
