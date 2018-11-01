@@ -43,12 +43,12 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run()
             {
                 Logger.LogInformation("Started the simple bandwagon algorithm");
-                //SwitchState(new CheckPositionValidityState());
+
+                // SwitchState(new CheckPositionValidityState());
             }
         }
-        
-        /*
 
+        /*
         /// <summary>
         /// Checks if the winner is not already the majority share of the portfolio.
         /// </summary>

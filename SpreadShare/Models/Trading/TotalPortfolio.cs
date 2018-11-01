@@ -54,6 +54,11 @@ namespace SpreadShare.Models.Trading
             return Portfolio.AbsoluteDifferences(sum, remote);
         }
 
+        /// <summary>
+        /// Determines if an algorithm has any defined allocation.
+        /// </summary>
+        /// <param name="algo">The type of the algorithm to evaluate</param>
+        /// <returns>Boolean indicating the presence of an allocation object</returns>
         public bool IsAllocated(Type algo) => _allocations.ContainsKey(algo);
 
         /// <summary>
@@ -83,7 +88,7 @@ namespace SpreadShare.Models.Trading
                 _allocations[alg] = alloc;
                 return;
             }
-                
+
             _allocations.Add(alg, alloc);
         }
     }

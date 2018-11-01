@@ -56,8 +56,5 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
 
             return new ResponseObject(ResponseCode.Success);
         }
-
-        /// <inheritdoc />
-        public Exchange GetExchangeType() => Exchange.Binance;
     }
 }

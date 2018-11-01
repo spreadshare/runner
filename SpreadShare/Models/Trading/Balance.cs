@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
-    /// Adapter wrapper for creating an <see cref="Assets"/> object
+    /// Model for representing a currency a certain quantity, locked or free.
     /// </summary>
     internal class Balance
     {
@@ -34,7 +34,12 @@ namespace SpreadShare.Models.Trading
             Free = free;
             Locked = locked;
         }
-        
+
+        /// <summary>
+        /// Returns a new instance of balance with free and locked balances set to zero given a certain currency.
+        /// </summary>
+        /// <param name="c">Currency to represent</param>
+        /// <returns>A zero initiated balance object</returns>
         public static Balance Empty(Currency c) => new Balance(c, 0.0M, 0.0M);
     }
 }

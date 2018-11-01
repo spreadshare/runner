@@ -63,8 +63,10 @@ namespace SpreadShare.ExchangeServices.Allocation
                 foreach (var algorithmType in initialAllocations[exchangeEntry.Key].Keys)
                 {
                     // Copy scaled down assets to _allocations
-                    _allocations[exchangeEntry.Key].SetAlgorithmAllocation(algorithmType,
-                        Portfolio.DuplicateWithScale(exchangeEntry.Value,
+                    _allocations[exchangeEntry.Key].SetAlgorithmAllocation(
+                        algorithmType,
+                        Portfolio.DuplicateWithScale(
+                            exchangeEntry.Value,
                             initialAllocations[exchangeEntry.Key][algorithmType]));
                 }
             }
@@ -133,11 +135,13 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <summary>
-        /// Get weakened version of allocation manager for the trading provider.
+        /// Gets a weakened version of allocation manager for the trading provider.
         /// </summary>
+        /// <param name="algorithm">The algorithm to represent</param>
+        /// <param name="exchange">The exchange to represent</param>
         /// <returns>Weakened version of allocation manager</returns>
-        public WeakAllocationManager GetWeakAllocationManager(Type algorith, Exchange exchange) 
-            => new WeakAllocationManager(this, algorith, exchange);
+        public WeakAllocationManager GetWeakAllocationManager(Type algorithm, Exchange exchange)
+            => new WeakAllocationManager(this, algorithm, exchange);
 
         /// <inheritdoc />
         public void Update(Type algorithm, Exchange exchange)
@@ -148,7 +152,10 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// which will be used to update the allocation.
         /// </summary>
         /// <param name="p">TradeProposal to be verified</param>
-        /// <param name="tradeCallback">Trade callback to be executed if verification was succesful</param>
+        /// <param name="algorithm">The algorithm in question</param>
+        /// <param name="exchange">The exchange in question</param>
+        /// <param name="tradeCallback">Trade callback to be executed if verification was successful</param>
+        /// <returns>Boolean indicating successful execution of the callback    </returns>
         public bool QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<TradeExecution> tradeCallback)
         {
             var alloc = GetAvailableFunds(exchange, algorithm, p.From.Symbol);
@@ -160,7 +167,8 @@ namespace SpreadShare.ExchangeServices.Allocation
             }
 
             var exec = tradeCallback();
-            //TODO Update the portfolio and verify it.
+
+            // TODO Update the portfolio and verify it.
             return true;
         }
 
@@ -168,7 +176,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// Update portfolio after trade.
         /// </summary>
         /// <param name="algorithm">Algorithm that has traded</param>
-        /// <param name="exchangeSpecification">Specifies which exchange is used</param>
+        /// <param name="exchange">Specifies which exchange is used</param>
         private void UpdatePortfolio(Type algorithm, Exchange exchange)
         {
             // TODO: Update allocation

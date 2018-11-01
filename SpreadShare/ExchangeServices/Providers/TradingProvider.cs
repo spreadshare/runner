@@ -64,12 +64,12 @@ namespace SpreadShare.ExchangeServices.Providers
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             Balance amount = _allocationManager.GetAvailableFunds(currency);
             var proposal = new TradeProposal(new Balance(currency, amount.Free, 0.0M), _algorithm);
-            
+
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
                 ResponseObject<decimal> query = null;
                 decimal tradeAmount = proposal.From.Free;
-                for(uint retries = 0; retries < 5; retries++)
+                for (uint retries = 0; retries < 5; retries++)
                 {
                     // Estimate the value that will be obtained from the order when buying.
                     tradeAmount = side == OrderSide.Buy ? GetBuyAmountEstimate(pair, proposal.From.Free) : proposal.From.Free;
@@ -91,8 +91,8 @@ namespace SpreadShare.ExchangeServices.Providers
                 // Report the trade with the actual amount as communicated by the exchange.
                 // TODO: Is this correct???
                 return new TradeExecution(
-                    new Balance(pair.Left, proposal.From.Free, 0.0M), 
-                    new Balance(pair.Right, query.Data, 0.0M), 
+                    new Balance(pair.Left, proposal.From.Free, 0.0M),
+                    new Balance(pair.Right, query.Data, 0.0M),
                     _algorithm);
             });
 

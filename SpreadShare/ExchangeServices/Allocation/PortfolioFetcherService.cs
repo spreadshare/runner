@@ -58,11 +58,12 @@ namespace SpreadShare.ExchangeServices.Allocation
             }
 
             // Map to general Balance datatype for parsing to assets object.
-            var values = accountInfo.Data.Balances.ToDictionary(x => 
-                new Currency(x.Asset), x => new Balance(
-                    new Currency(x.Asset),
-                    x.Free,
-                    x.Locked));
+            var values = accountInfo.Data.Balances.ToDictionary(
+                x => new Currency(x.Asset),
+                    x => new Balance(
+                        new Currency(x.Asset),
+                        x.Free,
+                        x.Locked));
 
             return new ResponseObject<Portfolio>(ResponseCode.Success, new Portfolio(values));
         }

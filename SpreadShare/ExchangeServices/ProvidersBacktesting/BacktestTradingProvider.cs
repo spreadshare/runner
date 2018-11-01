@@ -32,6 +32,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public override ResponseObject<decimal> PlaceFullMarketOrder(CurrencyPair pair, OrderSide side, decimal amount)
         {
             _backtestOutputLogger.RegisterTradeEvent(_timer.CurrentTime, pair.Right, pair.Left, side, amount, new Currency("BNB"), 69);
+
             // TODO: retrieve the executed amount
             return new ResponseObject<decimal>(ResponseCode.Success, 0);
             throw new NotImplementedException();
