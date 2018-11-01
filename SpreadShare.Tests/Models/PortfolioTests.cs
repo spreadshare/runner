@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using SpreadShare.Algorithms.Implementations;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace SpreadShare.Tests.Models
 {
@@ -99,6 +101,27 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(5.5M, result.GetAllocation(c2).Locked);
             Assert.Equal(66.5M, result.GetAllocation(c3).Free);
             Assert.Equal(0.0000000004M, result.GetAllocation(c3).Locked);
+        }
+
+        [Fact]
+        public void TradeIsDigested()
+        {
+            Currency c1 = new Currency("BTC");
+            Currency c2 = new Currency("ETH");
+            var trade = new TradeExecution(
+                new Balance(c1, 2.0M, 0.0M),
+                new Balance(c2, 11.2422359M, 0.0M),
+                typeof(SimpleBandWagonAlgorithm));
+            
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
+            {
+                { c1, new Balance(c1, 2.5M, 0.0M) }
+            });
+            
+            portfolio.UpdateAllocation(trade);
+            
+            Assert.Equal(0.5M, portfolio.GetAllocation(c1).Free);
+            Assert.Equal(11.2422359M, portfolio.GetAllocation(c2).Free);
         }
     }
 }
