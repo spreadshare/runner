@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
-
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
@@ -10,7 +8,7 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Symbol of the asset
         /// </summary>
-        public Currency Symbol;
+        public readonly Currency Symbol;
 
         /// <summary>
         /// Amount of balance that is free

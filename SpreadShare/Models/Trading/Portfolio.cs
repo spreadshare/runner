@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Newtonsoft.Json;
 
 namespace SpreadShare.Models.Trading
@@ -107,7 +108,7 @@ namespace SpreadShare.Models.Trading
             if (_dict[trade.From.Symbol].Free < trade.From.Free || _dict[trade.From.Symbol].Locked < trade.From.Locked)
             {
                 // TODO: Report a critical error that shutdowns all algorithms
-                throw new ArgumentException("Trade proposal was invalid with respect to the allocation!");
+                throw new InvalidOperationException("Trade proposal was invalid with respect to the allocation!");
             }
 
             _dict[trade.From.Symbol].Free -= trade.From.Free;

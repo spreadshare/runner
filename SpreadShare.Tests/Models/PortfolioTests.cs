@@ -1,4 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.Models.Trading;
 using Xunit;
@@ -103,6 +107,9 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(0.0000000004M, result.GetAllocation(c3).Locked);
         }
 
+        /// <summary>
+        /// Tests if a trade execution is digested correctly.
+        /// </summary>
         [Fact]
         public void TradeIsDigested()
         {
@@ -112,16 +119,111 @@ namespace SpreadShare.Tests.Models
                 new Balance(c1, 2.0M, 0.0M),
                 new Balance(c2, 11.2422359M, 0.0M),
                 typeof(SimpleBandWagonAlgorithm));
-            
+
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
             {
                 { c1, new Balance(c1, 2.5M, 0.0M) }
             });
-            
+
             portfolio.UpdateAllocation(trade);
-            
+
             Assert.Equal(0.5M, portfolio.GetAllocation(c1).Free);
             Assert.Equal(11.2422359M, portfolio.GetAllocation(c2).Free);
+        }
+
+        /// <summary>
+        /// Checks if an invalid trade execution throws
+        /// (This should have been mitigated by using a TradeProposal before hand)
+        /// </summary>
+        [Fact]
+        public void InvalidTradeIsRejected()
+        {
+            Currency c1 = new Currency("BTC");
+            Currency c2 = new Currency("ETH");
+            var trade = new TradeExecution(
+                new Balance(c1, 0.6M, 0.0M),
+                new Balance(c2, 11.0M, 0.0M),
+                typeof(SimpleBandWagonAlgorithm));
+
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 0.57M, 0.0M) }
+            });
+
+            Assert.Throws<InvalidOperationException>(() => portfolio.UpdateAllocation(trade));
+        }
+
+        /// <summary>
+        /// Tests if the difference between to portfolios is correct
+        /// </summary>
+        [Fact]
+        public void DifferenceIsCorrect()
+        {
+            Currency c1 = new Currency("BTC");
+            Currency c2 = new Currency("ETH");
+            Currency c3 = new Currency("VET");
+            Currency c4 = new Currency("DOGE");
+            var first = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 0.4M, 10M) },
+                { c2, new Balance(c2, 0.45M, 0) },
+                { c3, new Balance(c3, 0.66M, 1.0M) }
+            });
+
+            var second = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c2, 10M, 10M) },
+                { c2, new Balance(c2, 0.6M, 0M) },
+                { c4, new Balance(c4, 4.2M, 0.00000001M) }
+            });
+
+            var diff = Portfolio.AbsoluteDifferences(first, second);
+            Assert.Equal(4, diff.Count);
+
+            foreach (var balance in diff)
+            {
+                switch (balance.Symbol.ToString())
+                {
+                     case "BTC":
+                         Assert.Equal(9.6M, balance.Free);
+                         Assert.Equal(0.0M, balance.Locked);
+                         break;
+                    case "ETH":
+                        Assert.Equal(0.15M, balance.Free);
+                        Assert.Equal(0.0M, balance.Locked);
+                        break;
+                     case "VET":
+                         Assert.Equal(0.66M, balance.Free);
+                         Assert.Equal(1.0m, balance.Locked);
+                         break;
+                     case "DOGE":
+                         Assert.Equal(4.2M, balance.Free);
+                         Assert.Equal(0.00000001M, balance.Locked);
+                         break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tests the JSON serializing capabilities of the portfolio model
+        /// </summary>
+        [Fact]
+        public void JsonString()
+        {
+            Currency c1 = new Currency("ETH");
+            Currency c2 = new Currency("BTC");
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
+            {
+                { c1, new Balance(c1, 1.0M, 2.0M) },
+                { c2, new Balance(c2, 99.0M, 0.0M) }
+            });
+
+            string str = portfolio.ToJson();
+            Assert.Contains("\"ETH\"", str, StringComparison.Ordinal);
+            Assert.Contains("\"BTC\"", str, StringComparison.Ordinal);
+            Assert.Contains("\"Free\"", str, StringComparison.Ordinal);
+            Assert.Contains("\"Locked\"", str, StringComparison.Ordinal);
+            Assert.Contains(".", str, StringComparison.Ordinal);
         }
     }
 }

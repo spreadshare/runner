@@ -1,5 +1,8 @@
 using System;
-using SpreadShare.Models;
+using System.Globalization;
+using System.ServiceModel.Channels;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
@@ -53,6 +56,55 @@ namespace SpreadShare.Tests.Models
         public void NullCurrencyThrows()
         {
             Assert.Throws<ArgumentException>(() => new Currency(null));
+            Assert.Throws<ArgumentException>(() => new Currency(string.Empty));
+        }
+
+        /// <summary>
+        /// Tests if the serialized version of a currency is the correct JSON string
+        /// </summary>
+        /// <param name="input">input currency as string</param>
+        [Theory]
+        [InlineData("OMG")]
+        [InlineData("eth")]
+        [InlineData("lol")]
+        [InlineData("DoGe")]
+        public void JsonSerialization(string input)
+        {
+            Currency c = new Currency(input);
+            string str = JsonConvert.SerializeObject(c);
+            Assert.Equal(str, "\"" + input.ToUpper(CultureInfo.InvariantCulture) + "\"");
+        }
+
+        /// <summary>
+        /// Tests if a JSON string is correctly deserialized to a Currency instance.
+        /// </summary>
+        /// <param name="input">input currency as string</param>
+        [Theory]
+        [InlineData("OMG")]
+        [InlineData("eth")]
+        [InlineData("lol")]
+        [InlineData("DoGe")]
+        public void JsonDeserialization(string input)
+        {
+            var c = JsonConvert.DeserializeObject<Currency>("\"" + input + "\"");
+            Assert.Equal(input.ToUpper(CultureInfo.InvariantCulture), c.Symbol);
+        }
+
+        /// <summary>
+        /// Tests if the combined operation of serialization and deserialization results in an identity function.
+        /// </summary>
+        /// <param name="input">input currency as string    </param>
+        [Theory]
+        [InlineData("OMG")]
+        [InlineData("eth")]
+        [InlineData("lol")]
+        [InlineData("DoGe")]
+        public void JsonParsingIsIdentity(string input)
+        {
+            var c = new Currency(input);
+            var jsonstr = JsonConvert.SerializeObject(c);
+            var post = JsonConvert.DeserializeObject<Currency>(jsonstr);
+            Assert.Equal(c, post);
         }
     }
 }
