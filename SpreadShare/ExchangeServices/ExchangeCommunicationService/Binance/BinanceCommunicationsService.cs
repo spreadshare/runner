@@ -109,7 +109,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 EnableStreams();
             };
 
-            _logger.LogInformation("Binance User Service was successfully started!");
+            _logger.LogInformation("Binance Communication Service was successfully started!");
         }
     }
 }
