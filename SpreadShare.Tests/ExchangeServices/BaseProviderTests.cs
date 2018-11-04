@@ -18,11 +18,6 @@ namespace SpreadShare.Tests.ExchangeServices
         internal ExchangeFactoryService ExchangeFactoryService;
 
         /// <summary>
-        /// Link to the allocation manager
-        /// </summary>
-        internal WeakAllocationManager AllocationManager;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="BaseProviderTests"/> class.
         /// </summary>
         /// <param name="outputHelper">Used to create output</param>
@@ -30,9 +25,6 @@ namespace SpreadShare.Tests.ExchangeServices
             : base(outputHelper)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
-            var fullAllocationService = serviceProvider.GetService<AllocationManager>();
-
-            AllocationManager = fullAllocationService.GetWeakAllocationManager(typeof(SimpleBandWagonAlgorithm), Exchange.Backtesting);
             ExchangeFactoryService = serviceProvider.GetService<ExchangeFactoryService>();
         }
     }
