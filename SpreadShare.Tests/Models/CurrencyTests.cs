@@ -49,7 +49,6 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void ConstructorEmpty()
         {
-            Assert.Throws<ArgumentException>(() => new Currency(""));
             Assert.Throws<ArgumentException>(() => new Currency(string.Empty));
             Assert.Throws<ArgumentException>(() => new Currency(" "));
         }
