@@ -74,8 +74,7 @@ namespace SpreadShare.Algorithms
             // Build container
             var container = _exchangeFactoryService.BuildContainer(
                 exchangeEnum,
-                algorithmType,
-                _allocationManager.GetWeakAllocationManager(algorithmType, exchangeEnum));
+                algorithmType);
 
             // Initialise algorithm with container
             var startResponse = algorithm.Start(settings, container);
