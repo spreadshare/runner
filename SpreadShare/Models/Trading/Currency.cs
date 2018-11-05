@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using Newtonsoft.Json;
 using SpreadShare.Models.Serializers;
 
@@ -17,12 +16,12 @@ namespace SpreadShare.Models.Trading
         /// <param name="symbol">The symbol of a currency</param>
         public Currency(string symbol)
         {
-            if (string.IsNullOrEmpty(symbol))
+            if (string.IsNullOrWhiteSpace(symbol))
             {
                 throw new ArgumentException("Currency symbol can't be an empty string");
             }
 
-            Symbol = symbol.ToUpper(CultureInfo.InvariantCulture);
+            Symbol = symbol.ToUpperInvariant().Trim();
         }
 
         /// <summary>
@@ -31,14 +30,34 @@ namespace SpreadShare.Models.Trading
         /// </summary>
         public string Symbol { get; }
 
-        public static bool operator !=(Currency a, Currency b)
-        {
-            return !a.ToString().Equals(b.ToString(), StringComparison.Ordinal);
-        }
-
         public static bool operator ==(Currency a, Currency b)
         {
+            if (a is null && b is null)
+            {
+                return true;
+            }
+
+            if (a is null || b is null)
+            {
+                return false;
+            }
+
             return a.ToString().Equals(b.ToString(), StringComparison.Ordinal);
+        }
+
+        public static bool operator !=(Currency a, Currency b)
+        {
+            if (a is null && b is null)
+            {
+                return false;
+            }
+
+            if (a is null || b is null)
+            {
+                return true;
+            }
+
+            return !a.ToString().Equals(b.ToString(), StringComparison.Ordinal);
         }
 
         /// <summary>
