@@ -106,7 +106,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// </summary>
         /// <param name="exchange">The exchange in question</param>
         /// <param name="algorithm">The algorithm in question</param>
-        /// <returns></returns>
+        /// <returns>Portfolio containing all available funds</returns>
         public Portfolio GetAllFunds(Exchange exchange, Type algorithm)
         {
             return _allocations[exchange].GetAlgorithmAllocation(algorithm);
