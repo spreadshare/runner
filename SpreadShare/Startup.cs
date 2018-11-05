@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
@@ -45,6 +46,8 @@ namespace SpreadShare
 
             // Binance communication dependency
             services.AddSingleton<BinanceCommunicationsService, BinanceCommunicationsService>();
+
+            services.AddSingleton<BacktestCommunicationService, BacktestCommunicationService>();
 
             // Create algorithm service that manages running algorithms
             services.AddSingleton<IAlgorithmService, AlgorithmService>();

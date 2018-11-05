@@ -8,9 +8,12 @@ using System.Text.RegularExpressions;
 using Binance.Net;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Binder;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 
@@ -58,6 +61,11 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// </summary>
         public SimpleBandWagonAlgorithmSettings SimpleBandWagonAlgorithmSettings { get; private set; }
 
+        /// <summary>
+        /// Gets the initial portfolio representing the state of the backtesting exchange.
+        /// </summary>
+        public Portfolio BacktestInitialPortfolio { get; private set; }
+
         /// <inheritdoc />
         public ResponseObject Start()
         {
@@ -68,6 +76,7 @@ namespace SpreadShare.SupportServices.SettingsServices
                 DownloadCurrencies();
                 ParseSimpleBandwagonSettings();
                 BinanceSettings = _configuration.GetSection("BinanceClientSettings").Get<BinanceSettings>();
+                BacktestInitialPortfolio = ParseBacktestPortfolio();
             }
             catch (Exception e)
             {
@@ -260,6 +269,18 @@ namespace SpreadShare.SupportServices.SettingsServices
                     AllocationSettings[exchangeEnum].Add(algorithmType, allocation);
                 }
             }
+        }
+
+        private Portfolio ParseBacktestPortfolio()
+        {
+            var rawJson = _configuration.GetSection("BacktestPortfolio").GetChildren();
+            var parsed = rawJson.ToDictionary(
+                x => new Currency(x.Key.ToString(CultureInfo.InvariantCulture)),
+                x => new Balance(
+                    new Currency(x.Key.ToString(CultureInfo.InvariantCulture)),
+                    x.GetValue<decimal>("Free"),
+                    x.GetValue<decimal>("Locked")));
+            return new Portfolio(parsed);
         }
     }
 }

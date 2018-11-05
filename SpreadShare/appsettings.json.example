@@ -36,5 +36,8 @@
         "Backtesting": {
             "SimpleBandWagonAlgorithm": 1.0
         }
+    },
+    "BacktestPortfolio" : {
+        "ETH" : { "Symbol": "ETH", "Free" : 11.0, "Locked": 0.0 }
     }
 }
