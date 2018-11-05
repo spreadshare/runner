@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
@@ -17,16 +18,22 @@ namespace SpreadShare.ExchangeServices.Allocation
     {
         private readonly ILogger _logger;
         private readonly BinanceCommunicationsService _binance;
+        private readonly BacktestCommunicationService _backtest;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PortfolioFetcherService"/> class.
         /// </summary>
         /// <param name="loggerFactory">Provides logging</param>
         /// <param name="binance">Provides access to <binance cref="BinanceCommunicationsService"/></param>
-        public PortfolioFetcherService(ILoggerFactory loggerFactory, BinanceCommunicationsService binance)
+        /// <param name="backtest">Provides access to the <backtest cref="BacktestCommunicationService"/></param>
+        public PortfolioFetcherService(
+            ILoggerFactory loggerFactory,
+            BinanceCommunicationsService binance,
+            BacktestCommunicationService backtest)
         {
             _logger = loggerFactory.CreateLogger<PortfolioFetcherService>();
             _binance = binance;
+            _backtest = backtest;
         }
 
         /// <inheritdoc />
@@ -74,7 +81,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <returns>The portfolio</returns>
         private ResponseObject<Portfolio> GetBacktestingPortfolio()
         {
-            throw new NotImplementedException();
+            return new ResponseObject<Portfolio>(ResponseCode.Success, _backtest.RemotePortfolio);
         }
     }
 }

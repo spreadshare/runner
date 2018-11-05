@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
@@ -18,6 +19,7 @@ namespace SpreadShare.ExchangeServices
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly BinanceCommunicationsService _binanceCommunications;
+        private readonly BacktestCommunicationService _backtestCommunicationService;
         private readonly DatabaseContext _databaseContext;
         private readonly AllocationManager _allocationManager;
 
@@ -28,11 +30,13 @@ namespace SpreadShare.ExchangeServices
         /// <param name="context">Injected database context</param>
         /// <param name="alloc">Injected AllocationManager service</param>
         /// <param name="binanceComm">Injected binance communication service</param>
+        /// <param name="backtestCom">Injected backtest communication service</param>
         public ExchangeFactoryService(
             ILoggerFactory loggerFactory,
             DatabaseContext context,
             AllocationManager alloc,
-            BinanceCommunicationsService binanceComm)
+            BinanceCommunicationsService binanceComm,
+            BacktestCommunicationService backtestCom)
         {
             _logger = loggerFactory.CreateLogger<ExchangeFactoryService>();
             _loggerFactory = loggerFactory;
@@ -41,6 +45,7 @@ namespace SpreadShare.ExchangeServices
 
             // Link communication services
             _binanceCommunications = binanceComm;
+            _backtestCommunicationService = backtestCom;
 
             _allocationManager = alloc;
         }
