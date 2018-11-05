@@ -1,7 +1,5 @@
 using System;
 using System.Globalization;
-using System.ServiceModel.Channels;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SpreadShare.Models.Trading;
 using Xunit;

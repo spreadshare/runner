@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;

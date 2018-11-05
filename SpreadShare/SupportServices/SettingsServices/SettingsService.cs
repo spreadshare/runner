@@ -8,12 +8,9 @@ using System.Text.RegularExpressions;
 using Binance.Net;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Binder;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 

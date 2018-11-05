@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using SpreadShare.Models.Trading;
 
 namespace SpreadShare.Models

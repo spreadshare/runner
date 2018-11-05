@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using SpreadShare.ExchangeServices;
-using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 
 namespace SpreadShare.SupportServices.SettingsServices

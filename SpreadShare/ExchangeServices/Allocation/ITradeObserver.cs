@@ -1,5 +1,4 @@
 ﻿using System;
-using SpreadShare.ExchangeServices.Providers;
 
 namespace SpreadShare.ExchangeServices.Allocation
 {

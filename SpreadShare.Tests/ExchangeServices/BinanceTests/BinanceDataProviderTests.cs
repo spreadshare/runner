@@ -1,6 +1,5 @@
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
-using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;

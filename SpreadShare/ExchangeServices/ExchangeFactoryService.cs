@@ -6,7 +6,6 @@ using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.ExchangeServices.ProvidersBinance;
-using SpreadShare.Models;
 using SpreadShare.SupportServices;
 
 namespace SpreadShare.ExchangeServices

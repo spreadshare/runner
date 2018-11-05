@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace SpreadShare.Tests.Models
 {
