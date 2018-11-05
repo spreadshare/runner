@@ -275,6 +275,7 @@ namespace SpreadShare.Tests.Models
             Currency a = new Currency(symbolUppercase);
             Currency b = null;
             Assert.False(a == b, "Currency == null should report False and not throw any errors");
+            Assert.False(b == a, "Currency == null should report False and not throw any errors");
         }
 
         /// <summary>
@@ -337,6 +338,7 @@ namespace SpreadShare.Tests.Models
             Currency a = new Currency(symbolUppercase);
             Currency b = null;
             Assert.True(a != b, "Currency != null should report True and not throw any errors");
+            Assert.True(b != a, "Currency != null should report True and not throw any errors");
         }
 
         /// <summary>
