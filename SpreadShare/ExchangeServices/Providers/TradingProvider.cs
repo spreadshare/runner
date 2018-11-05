@@ -48,9 +48,9 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <returns>Response object indicating success or not</returns>
         /// TODO: Make method algorithm specific
-        public ResponseObject<Portfolio> GetPortfolio()
+        public Portfolio GetPortfolio()
         {
-            throw new NotImplementedException();
+            return _allocationManager.GetAllFunds();
         }
 
         /// <summary>
