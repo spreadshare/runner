@@ -43,6 +43,13 @@ namespace SpreadShare.ExchangeServices.Allocation
             => _allocationManager.GetAvailableFunds(_exchange, _algorithm, currency);
 
         /// <summary>
+        /// Get all available funds for a given algorithm as portfolio.
+        /// </summary>
+        /// <returns>Portfolio containing available funds</returns>
+        public Portfolio GetAllFunds()
+            => _allocationManager.GetAllFunds(_exchange, _algorithm);
+
+        /// <summary>
         /// Trigger a portfolio update in the AllocationManager.
         /// </summary>
         public void Update()

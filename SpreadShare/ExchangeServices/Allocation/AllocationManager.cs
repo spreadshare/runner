@@ -100,6 +100,17 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <summary>
+        /// Gives the entire portfolio of a certain algorithm on a certain exchange
+        /// </summary>
+        /// <param name="exchange">The exchange in question</param>
+        /// <param name="algorithm">The algorithm in question</param>
+        /// <returns>Portfolio containing all available funds</returns>
+        public Portfolio GetAllFunds(Exchange exchange, Type algorithm)
+        {
+            return _allocations[exchange].GetAlgorithmAllocation(algorithm);
+        }
+
+        /// <summary>
         /// Get available funds for a given algorithm and currency.
         /// </summary>
         /// <param name="exchange">Exchange to trade on</param>
