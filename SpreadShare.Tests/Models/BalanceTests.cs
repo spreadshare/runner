@@ -9,7 +9,8 @@ namespace SpreadShare.Tests.Models
 {
     public class BalanceTests : BaseTest
     {
-        public BalanceTests(ITestOutputHelper outputHelper) : base(outputHelper)
+        public BalanceTests(ITestOutputHelper outputHelper)
+            : base(outputHelper)
         {
         }
 
