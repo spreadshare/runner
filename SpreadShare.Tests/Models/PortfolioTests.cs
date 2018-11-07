@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpreadShare.Algorithms.Implementations;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;

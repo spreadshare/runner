@@ -5,7 +5,6 @@ using SpreadShare.Algorithms.Implementations;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace SpreadShare.Tests.Models
 {
