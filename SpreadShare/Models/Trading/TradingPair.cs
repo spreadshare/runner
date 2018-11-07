@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 
 namespace SpreadShare.Models.Trading
 {
@@ -43,27 +45,37 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// This function adds a parse option tot the table, this should only be used to initialize the environment
         /// </summary>
-        /// <param name="stringCurrencyPair">String representation of the currency pair</param>
+        /// <param name="tradingPairString">String representation of the currency pair</param>
         /// <param name="tradingPair">The currency pair</param>
-        public static void AddParseEntry(string stringCurrencyPair, TradingPair tradingPair)
+        public static void AddParseEntry(string tradingPairString, TradingPair tradingPair)
         {
-            Table.Add(stringCurrencyPair, tradingPair);
+            // Clean the pair string of all whitespace
+            string cleanedPairString = RemoveAllWhiteSpace(tradingPairString);
+
+            Table.Add(tradingPairString, tradingPair);
         }
 
         /// <summary>
         /// Parse given string to currency pair
         /// </summary>
-        /// <param name="currencyPair">String representation of tradingPair</param>
+        /// <param name="tradingPairString">String representation of tradingPair</param>
         /// <returns>The currency pair matching the string</returns>
-        public static TradingPair Parse(string currencyPair)
+        public static TradingPair Parse(string tradingPairString)
         {
-            if (Table.ContainsKey(currencyPair))
+            if (string.IsNullOrWhiteSpace(tradingPairString))
             {
-                return Table[currencyPair];
+                throw new ArgumentException("Trading pair string must not be null or whitespace");
             }
 
-            // TODO: Is this developer fault or input error? We should not throw exceptions on input errors
-            throw new Exception($"{currencyPair} not found in parse table");
+            // Clean the pair string of all whitespace
+            string cleanedPairString = RemoveAllWhiteSpace(tradingPairString);
+
+            if (Table.ContainsKey(cleanedPairString))
+            {
+                return Table[cleanedPairString];
+            }
+
+            throw new KeyNotFoundException($"{cleanedPairString} not found in parse table");
         }
 
         /// <summary>
@@ -73,7 +85,7 @@ namespace SpreadShare.Models.Trading
         /// <returns>Rounded amount</returns>
         public decimal RoundToTradable(decimal amount)
         {
-            decimal lotSize = (decimal)Math.Pow(10, Decimals);
+            long lotSize = (long)Math.Pow(10, Decimals);
             return Math.Floor(amount * lotSize) / lotSize;
         }
 
@@ -84,6 +96,27 @@ namespace SpreadShare.Models.Trading
         public override string ToString()
         {
             return $"{Left}{Right}";
+        }
+
+        private static string RemoveAllWhiteSpace(string input)
+        {
+            return new string(input.Where(x => !char.IsWhiteSpace(x)).ToArray());
+        }
+        
+        private static int IntPow(int x, uint pow)
+        {
+            int ret = 1;
+            while ( pow != 0 )
+            {
+                if ( (pow & 1) == 1 )
+                {
+                    ret *= x;
+                }
+
+                x *= x;
+                pow >>= 1;
+            }
+            return ret;
         }
     }
 }

@@ -22,6 +22,7 @@ namespace SpreadShare.Tests.Models
             var pair = new TradingPair(left, right, decimals);
             Assert.Equal(left, pair.Left);
             Assert.Equal(right, pair.Right);
+            Assert.Equal(decimals, pair.Decimals);
         }
 
         [Fact]
@@ -53,14 +54,37 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void ParsingHappyFlow()
         {
-            var left = new Currency("BNB");
-            var right = new Currency("ETH");
-            int decimals = 0;
-            var pair = new TradingPair(left, right, decimals);
+            var pair = GetTradingPair("BNB", "ETH", 2);
             TradingPair.AddParseEntry("BNBETH", pair);
             var parsed = TradingPair.Parse("BNBETH");
+
             Assert.Equal(pair.Left, parsed.Left);
             Assert.Equal(pair.Right, parsed.Right);
+            Assert.Equal(pair.Decimals, parsed.Decimals);
+        }
+
+        [Fact]
+        public void ParsingWithWhitspace()
+        {
+            var pair = GetTradingPair("BNB", "ETH");
+            TradingPair.AddParseEntry("BNBETH", pair);
+            var parsed = TradingPair.Parse(" BNB ETH ");
+            
+            Assert.Equal(pair.Left, parsed.Left);
+            Assert.Equal(pair.Right, parsed.Right);
+            Assert.Equal(pair.Decimals, parsed.Decimals);
+        }
+
+        [Fact]
+        public void AddParseEntryWithWhiteSpace()
+        {
+            var pair = GetTradingPair("BNB", "ETH", 7);
+            TradingPair.AddParseEntry(" BNB ETH ", pair);
+            var parsed = TradingPair.Parse("BNBETH");
+            
+            Assert.Equal(pair.Left, parsed.Left);
+            Assert.Equal(pair.Right, parsed.Right);
+            Assert.Equal(pair.Decimals, parsed.Decimals);
         }
 
         [Fact]
@@ -123,11 +147,11 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(corrected, calc);
         }
 
-        private TradingPair GetTradingPair(string left, string right, int decimals = 0)
+        private TradingPair GetTradingPair(string strLeft, string strRight, int decimals = 0)
         {
-            Currency cleft = new Currency(left);
-            Currency cright = new Currency(right);
-            return new TradingPair(cleft, cright, decimals);
+            Currency left = new Currency(strLeft);
+            Currency right = new Currency(strRight);
+            return new TradingPair(left, right, decimals);
         }
     }
 }
