@@ -90,7 +90,7 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Returns the quantity of allocated funds, will return 0 if nothing is allocated
         /// </summary>
-        /// <param name="c">Currency pair to query</param>
+        /// <param name="c">Currency to query</param>
         /// <returns>Allocated funds</returns>
         public Balance GetAllocation(Currency c)
         {

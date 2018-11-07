@@ -5,7 +5,7 @@ using System.Linq;
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
-    /// Object representation of a currency pair
+    /// Object representation of a trading pair
     /// </summary>
     internal class TradingPair
     {
@@ -14,9 +14,9 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Initializes a new instance of the <see cref="TradingPair"/> class.
         /// </summary>
-        /// <param name="left">Left side of the currency pair</param>
-        /// <param name="right">Right side of the currency pair</param>
-        /// <param name="decimals">Amount of decimals the currency pair can be expressed in</param>
+        /// <param name="left">Left side of the trading pair</param>
+        /// <param name="right">Right side of the trading pair</param>
+        /// <param name="decimals">Amount of decimals the trading pair can be expressed in</param>
         public TradingPair(Currency left, Currency right, int decimals)
         {
             if (!(decimals >= 0))
@@ -40,12 +40,12 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Gets the left side of the currency pair
+        /// Gets the left side of the trading pair
         /// </summary>
         public Currency Left { get; }
 
         /// <summary>
-        /// Gets the right side of the currency pair
+        /// Gets the right side of the trading pair
         /// </summary>
         public Currency Right { get; }
 
@@ -57,8 +57,8 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// This function adds a parse option tot the table, this should only be used to initialize the environment
         /// </summary>
-        /// <param name="tradingPairString">String representation of the currency pair</param>
-        /// <param name="tradingPair">The currency pair</param>
+        /// <param name="tradingPairString">String representation of the trading pair</param>
+        /// <param name="tradingPair">The trading pair</param>
         public static void AddParseEntry(string tradingPairString, TradingPair tradingPair)
         {
             if (string.IsNullOrWhiteSpace(tradingPairString) || tradingPair == null)
@@ -79,10 +79,10 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Parse given string to currency pair
+        /// Parse given string to trading pair
         /// </summary>
         /// <param name="tradingPairString">String representation of tradingPair</param>
-        /// <returns>The currency pair matching the string</returns>
+        /// <returns>The trading pair matching the string</returns>
         public static TradingPair Parse(string tradingPairString)
         {
             if (string.IsNullOrWhiteSpace(tradingPairString))
@@ -102,7 +102,7 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Round unrounded amount to the tradable amount conform to currency's decimals
+        /// Round unrounded amount to the tradable amount conform to TradingPair's decimals
         /// </summary>
         /// <param name="amount">Unrounded amount</param>
         /// <returns>Rounded amount</returns>
@@ -113,9 +113,9 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Returns a string representation of the currency pair
+        /// Returns a string representation of the trading pair
         /// </summary>
-        /// <returns>A string representation of the currency pair</returns>
+        /// <returns>A string representation of the trading pair</returns>
         public override string ToString()
         {
             return $"{Left}{Right}";

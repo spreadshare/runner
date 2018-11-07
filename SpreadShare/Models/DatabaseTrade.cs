@@ -12,7 +12,7 @@ namespace SpreadShare.Models
         /// Initializes a new instance of the <see cref="DatabaseTrade"/> class.
         /// </summary>
         /// <param name="timestamp">The unix timestamp in milliseconds</param>
-        /// <param name="pair">The currency pair</param>
+        /// <param name="pair">The trading pair</param>
         /// <param name="quantity">The amount of non base currency</param>
         /// <param name="side">Buy or sell order</param>
         /// <param name="pre">The portfolio before the trade</param>
@@ -43,7 +43,7 @@ namespace SpreadShare.Models
         /// Initializes a new instance of the <see cref="DatabaseTrade"/> class.
         /// </summary>
         /// <param name="timestamp">DateTimeOffset object representing the time of the trade</param>
-        /// <param name="pair">The currency pair</param>
+        /// <param name="pair">The trading pair</param>
         /// <param name="quantity">The amount of non base currency</param>
         /// <param name="side">Buy or sell order</param>
         /// <param name="pre">The portfolio before the trade</param>
@@ -69,7 +69,7 @@ namespace SpreadShare.Models
         public long Timestamp { get; set; }
 
         /// <summary>
-        /// Gets or sets the currency pair of the trade
+        /// Gets or sets the trading pair of the trade
         /// </summary>
         public TradingPair Pair { get; set; }
 

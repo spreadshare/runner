@@ -26,7 +26,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Places market order with the full amount of given pair
         /// </summary>
-        /// <param name="pair">Currency pair to trade with</param>
+        /// <param name="pair">trading pair to trade with</param>
         /// <param name="side">Whether to buy or sell</param>
         /// <param name="amount">The amount to buy or sell</param>
         /// <returns>A response object indicating the status of the market order</returns>
@@ -35,7 +35,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Cancels order
         /// </summary>
-        /// <param name="pair">The currency pair for which the order is set</param>
+        /// <param name="pair">The trading pair for which the order is set</param>
         /// <param name="orderId">Id of the order</param>
         /// <returns>A response object with the results of the action</returns>
         public abstract ResponseObject CancelOrder(TradingPair pair, long orderId);
