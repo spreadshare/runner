@@ -8,19 +8,11 @@ namespace SpreadShare.Tests.Models
 {
     public class TradingPairTests : BaseTest
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TradingPairTests"/> class.
-        /// </summary>
-        /// <param name="outputHelper">Used to create output</param>
         public TradingPairTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
         }
 
-
-        /// <summary>
-        /// Constructor should create Currency
-        /// </summary>
         [Fact]
         public void ConstructorHappyFlow()
         {
