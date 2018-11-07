@@ -113,8 +113,7 @@ namespace SpreadShare.Tests.Models
             Currency c2 = new Currency("ETH");
             var trade = new TradeExecution(
                 new Balance(c1, 2.0M, 0.0M),
-                new Balance(c2, 11.2422359M, 0.0M),
-                typeof(SimpleBandWagonAlgorithm));
+                new Balance(c2, 11.2422359M, 0.0M));
 
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
             {
@@ -138,8 +137,7 @@ namespace SpreadShare.Tests.Models
             Currency c2 = new Currency("ETH");
             var trade = new TradeExecution(
                 new Balance(c1, 0.6M, 0.0M),
-                new Balance(c2, 11.0M, 0.0M),
-                typeof(SimpleBandWagonAlgorithm));
+                new Balance(c2, 11.0M, 0.0M));
 
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>
             {
@@ -173,7 +171,7 @@ namespace SpreadShare.Tests.Models
                 { c4, new Balance(c4, 4.2M, 0.00000001M) }
             });
 
-            var diff = Portfolio.AbsoluteDifferences(first, second);
+            var diff = Portfolio.SubtractedDifferences(first, second);
             Assert.Equal(4, diff.Count);
 
             foreach (var balance in diff)
@@ -181,11 +179,11 @@ namespace SpreadShare.Tests.Models
                 switch (balance.Symbol.ToString())
                 {
                      case "BTC":
-                         Assert.Equal(9.6M, balance.Free);
+                         Assert.Equal(-9.6M, balance.Free);
                          Assert.Equal(0.0M, balance.Locked);
                          break;
                     case "ETH":
-                        Assert.Equal(0.15M, balance.Free);
+                        Assert.Equal(-0.15M, balance.Free);
                         Assert.Equal(0.0M, balance.Locked);
                         break;
                      case "VET":
@@ -193,8 +191,8 @@ namespace SpreadShare.Tests.Models
                          Assert.Equal(1.0m, balance.Locked);
                          break;
                      case "DOGE":
-                         Assert.Equal(4.2M, balance.Free);
-                         Assert.Equal(0.00000001M, balance.Locked);
+                         Assert.Equal(-4.2M, balance.Free);
+                         Assert.Equal(-0.00000001M, balance.Locked);
                          break;
                 }
             }
