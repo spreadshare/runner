@@ -30,6 +30,11 @@ namespace SpreadShare.Algorithms
         protected DataProvider DataProvider => _stateManager.Container.DataProvider as DataProvider;
 
         /// <summary>
+        /// Gets a user service instance
+        /// </summary>
+        protected ITimerProvider TimerProvider => _stateManager.Container.TimerProvider;
+
+        /// <summary>
         /// Gets a link to the parent algorithm settings
         /// </summary>
         protected T AlgorithmSettings { get; private set; }

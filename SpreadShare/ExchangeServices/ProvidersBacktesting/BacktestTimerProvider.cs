@@ -33,6 +33,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public long CurrentMinuteEpoc => CurrentTime.ToUnixTimeMilliseconds() - (CurrentTime.ToUnixTimeMilliseconds() % 60000);
 
         /// <inheritdoc />
+        public DateTimeOffset GetCurrentTime() => CurrentTime;
+
+        /// <inheritdoc />
         public void SetTimer(uint minutes, Action callback)
         {
             CurrentTime += TimeSpan.FromMinutes(minutes);

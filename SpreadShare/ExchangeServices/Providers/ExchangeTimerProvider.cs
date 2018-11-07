@@ -21,6 +21,9 @@ namespace SpreadShare.ExchangeServices.Providers
         {
         }
 
+        /// <inheritdoc />
+        public DateTimeOffset GetCurrentTime() => DateTimeOffset.UtcNow;
+
         /// <summary>
         /// Set a timer before executing a callback.
         /// Has an inaccuracy of 60 seconds.
