@@ -50,12 +50,6 @@ namespace SpreadShare.ExchangeServices.Allocation
             => _allocationManager.GetAllFunds(_exchange, _algorithm);
 
         /// <summary>
-        /// Trigger a portfolio update in the AllocationManager.
-        /// </summary>
-        public void Update()
-            => _allocationManager.Update(_algorithm, _exchange);
-
-        /// <summary>
         /// Queue a trade based on a proposal, the callback must return the trade execution
         /// which will be used to update the allocation.
         /// </summary>

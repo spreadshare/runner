@@ -63,7 +63,7 @@ namespace SpreadShare.ExchangeServices.Providers
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             Balance amount = _allocationManager.GetAvailableFunds(currency);
-            var proposal = new TradeProposal(new Balance(currency, amount.Free, 0.0M), _algorithm);
+            var proposal = new TradeProposal(new Balance(currency, amount.Free, 0.0M));
 
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
@@ -92,8 +92,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 // TODO: Is this correct???
                 return new TradeExecution(
                     new Balance(pair.Left, proposal.From.Free, 0.0M),
-                    new Balance(pair.Right, query.Data, 0.0M),
-                    _algorithm);
+                    new Balance(pair.Right, query.Data, 0.0M));
             });
 
             return tradeSuccess ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);

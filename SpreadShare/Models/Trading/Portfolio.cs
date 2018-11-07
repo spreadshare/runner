@@ -70,21 +70,21 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Calculates the absolute difference (both free and locked) between two portfolios
+        /// Calculates the substracted difference (both free and locked) between two portfolios
         /// </summary>
         /// <param name="first">The first portfolio</param>
         /// <param name="second">The second portfolio</param>
         /// <returns>List of balances representing the differences</returns>
-        public static List<Balance> AbsoluteDifferences(Portfolio first, Portfolio second)
+        public static List<Balance> SubtractedDifferences(Portfolio first, Portfolio second)
         {
             var foo = first._dict;
             var bar = second._dict;
             var allKeys = foo.Keys.Union(bar.Keys);
             var res = allKeys.Select(key => new Balance(
                 key,
-                Math.Abs((foo.Keys.Contains(key) ? foo[key].Free : 0.0M) - (bar.Keys.Contains(key) ? bar[key].Free : 0.0M)),
-                Math.Abs((foo.Keys.Contains(key) ? foo[key].Locked : 0.0M) - (bar.Keys.Contains(key) ? bar[key].Locked : 0.0M))));
-            return res.ToList();
+                (foo.Keys.Contains(key) ? foo[key].Free : 0.0M) - (bar.Keys.Contains(key) ? bar[key].Free : 0.0M),
+                (foo.Keys.Contains(key) ? foo[key].Locked : 0.0M) - (bar.Keys.Contains(key) ? bar[key].Locked : 0.0M)));
+            return res.Where(x => x.Free != 0.0M || x.Locked != 0.0M).ToList();
         }
 
         /// <summary>
@@ -121,6 +121,15 @@ namespace SpreadShare.Models.Trading
 
             // Add right side of the trade
             _dict[trade.To.Symbol] += trade.To;
+        }
+
+        /// <summary>
+        /// Returns all balances as a list
+        /// </summary>
+        /// <returns>list of balances</returns>
+        public IEnumerable<Balance> AllBalances()
+        {
+            return _dict.Values;
         }
 
         /// <summary>

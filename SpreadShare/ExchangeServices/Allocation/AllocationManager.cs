@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models.Trading;
 
@@ -8,7 +9,7 @@ namespace SpreadShare.ExchangeServices.Allocation
     /// <summary>
     /// This class provides allocation management for multiple algorithms.
     /// </summary>
-    internal class AllocationManager : ITradeObserver
+    internal class AllocationManager
     {
         // TODO: Is the DustThreshold different per currency?
         private const decimal DustThreshold = 0.01M;
@@ -152,11 +153,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         public WeakAllocationManager GetWeakAllocationManager(Type algorithm, Exchange exchange)
             => new WeakAllocationManager(this, algorithm, exchange);
 
-        /// <inheritdoc />
-        public void Update(Type algorithm, Exchange exchange)
-            => UpdatePortfolio(algorithm, exchange);
-
-        /// <summary>
+         /// <summary>
         /// Queue a trade based on a proposal, the callback must return the trade execution
         /// which will be used to update the allocation.
         /// </summary>
@@ -164,33 +161,62 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="algorithm">The algorithm in question</param>
         /// <param name="exchange">The exchange in question</param>
         /// <param name="tradeCallback">Trade callback to be executed if verification was successful</param>
-        /// <returns>Boolean indicating successful execution of the callback    </returns>
+        /// <returns>Boolean indicating successful execution of the callback</returns>
         public bool QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<TradeExecution> tradeCallback)
         {
             var alloc = GetAvailableFunds(exchange, algorithm, p.From.Symbol);
             if (alloc.Free < p.From.Free || alloc.Locked < p.From.Locked)
             {
-                _logger.LogCritical($"Got trade proposal for ({p.From.Free}|{p.From.Locked}){p.From.Symbol}, but allocation" +
-                                    $"showed only {alloc}{p.From.Symbol} was available");
+                _logger.LogCritical($"Got trade proposal for ({p.From}, but allocation " +
+                                    $"showed only ({alloc}) was available\n" +
+                                    "Trade will not be executed.");
                 return false;
             }
 
+            // Let the provider execute the trade and save the execution report
             var exec = tradeCallback();
 
-            // TODO Update the portfolio and verify it.
-            return true;
-        }
+            // TradingProvider can give a null execution report when it decides not to trade.
+            // if this happens the portfolio will be checked against the remote using an 'empty' or 'monoid' trade execution.
+            if (exec is null)
+            {
+                _logger.LogWarning("TradeExecution report was null, assuming TradingProvider cancelled proposed trade");
 
-        /// <summary>
-        /// Update portfolio after trade.
-        /// </summary>
-        /// <param name="algorithm">Algorithm that has traded</param>
-        /// <param name="exchange">Specifies which exchange is used</param>
-        private void UpdatePortfolio(Type algorithm, Exchange exchange)
-        {
-            // TODO: Update allocation
-            algorithm = null;
-            _portfolioFetcherService.GetPortfolio(exchange);
+                // Check that the portfolio did not mutate by proceeding with a monodic execution
+                exec = new TradeExecution(Balance.Empty(p.From.Symbol), Balance.Empty(p.From.Symbol));
+            }
+
+            // Update the local information
+            _allocations[exchange].ApplyTradeExecution(algorithm, exec);
+
+            // Fetch the remote portfolio
+            var query = _portfolioFetcherService.GetPortfolio(exchange);
+            if (!query.Success)
+            {
+                _logger.LogWarning("Remote portfolio could not be fetched and the not trade could confirmed, " +
+                                   "Assuming local version for now.");
+                return true;
+            }
+
+            var remote = query.Data;
+            var local = _allocations[exchange].GetSummedChildren();
+            var diff = Portfolio.SubtractedDifferences(remote, local);
+
+            if (diff.Any(x => Math.Abs(x.Free) > DustThreshold || Math.Abs(x.Locked) > DustThreshold))
+            {
+                _logger.LogWarning("There was a significant discrepancy between the remote and local portfolio, " +
+                                  $"Assuming the remote portfolio as truth value whilst blaming {algorithm}.\n" +
+                                  $"local portfolio: {local.ToJson()}\n" +
+                                  $"remote portfolio: {remote.ToJson()}\n");
+            }
+
+            // Compensate discrepancy by blaming and correcting the local allocation for the current algorithm.
+            // This is done by adding the differences to the current algorithms allocation.
+            var old = _allocations[exchange].GetAlgorithmAllocation(algorithm);
+            var diffPortfolio = new Portfolio(diff.ToDictionary(x => x.Symbol, x => x));
+            _allocations[exchange].SetAlgorithmAllocation(algorithm, Portfolio.Add(old, diffPortfolio));
+
+            return true;
         }
     }
 }
