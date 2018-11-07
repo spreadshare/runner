@@ -26,10 +26,8 @@ namespace SpreadShare.Models.Trading
         /// <param name="trade">The trade proposal</param>
         public void ApplyTradeExecution(Type algo, TradeExecution trade)
         {
-            if (trade == null)
-            {
-                throw new ArgumentNullException(nameof(trade));
-            }
+            var temp0 = trade ?? throw new ArgumentNullException(nameof(trade));
+            var temp1 = algo ?? throw new ArgumentNullException(nameof(algo));
 
             // Algorithm should always be in _allocations
             if (!_allocations.ContainsKey(algo))

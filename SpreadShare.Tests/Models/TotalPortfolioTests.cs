@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.Models.Trading;
 using Xunit;
@@ -129,6 +130,34 @@ namespace SpreadShare.Tests.Models
             }));
 
             Assert.False(total.IsAllocated(algo));
+        }
+
+        [Fact]
+        public void TradeIsDigestedHappyFlow()
+        {
+            var total = GetDefaultPortfolio();
+            Type algo = typeof(SimpleBandWagonAlgorithm);
+            var trade = new TradeExecution(
+                new Balance(new Currency("ETH"), 2, 0),
+                new Balance(new Currency("VET"), 100, 0));
+
+            total.ApplyTradeExecution(algo, trade);
+
+            Assert.Equal(0.001M, total.GetAlgorithmAllocation(algo).GetAllocation(new Currency("ETH")).Free);
+            Assert.Equal(100, total.GetAlgorithmAllocation(algo).GetAllocation(new Currency("VET")).Free);
+        }
+
+        [Fact]
+        public void TradeIsDigestedNull()
+        {
+            var total = GetDefaultPortfolio();
+            Type algo = typeof(SimpleBandWagonAlgorithm);
+            var trade = new TradeExecution(
+                new Balance(new Currency("ETH"), 2, 0),
+                new Balance(new Currency("VET"), 100, 0));
+
+            Assert.Throws<ArgumentNullException>(() => total.ApplyTradeExecution(algo, null));
+            Assert.Throws<ArgumentNullException>(() => total.ApplyTradeExecution(null, trade));
         }
 
         [Fact]
