@@ -26,7 +26,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">The currency pair</param>
         /// <returns>The current price</returns>
-        public ResponseObject<decimal> GetCurrentPriceLastTrade(CurrencyPair pair)
+        public ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair)
         {
             return _implementation.GetCurrentPriceLastTrade(pair);
         }
@@ -37,7 +37,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">The currency pair</param>
         /// <returns>The current price</returns>
-        public ResponseObject<decimal> GetCurrentPriceTopBid(CurrencyPair pair)
+        public ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair)
         {
             return _implementation.GetCurrentPriceTopBid(pair);
         }
@@ -48,7 +48,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">The currency pair</param>
         /// <returns>The current price</returns>
-        public ResponseObject<decimal> GetCurrentPriceTopAsk(CurrencyPair pair)
+        public ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair)
         {
             return _implementation.GetCurrentPriceTopAsk(pair);
         }
@@ -60,7 +60,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>A response object with the performance on success</returns>
-        public ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTime endTime)
+        public ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack, DateTime endTime)
         {
             return _implementation.GetPerformancePastHours(pair, hoursBack, endTime);
         }
@@ -72,7 +72,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>Top performing currency pair</returns>
-        public ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(List<CurrencyPair> pairs, double hoursBack, DateTime endTime)
+        public ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack, DateTime endTime)
         {
             return _implementation.GetTopPerformance(pairs, hoursBack, endTime);
         }

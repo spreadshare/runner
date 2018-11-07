@@ -15,7 +15,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// <summary>
         /// Gets or sets the list of active trading pairs
         /// </summary>
-        public List<CurrencyPair> ActiveTradingPairs { get; set; }
+        public List<TradingPair> ActiveTradingPairs { get; set; }
 
         /// <summary>
         /// Gets or sets the base currency to trade in

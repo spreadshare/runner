@@ -30,7 +30,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">The currency pair</param>
         /// <returns>The current price</returns>
-        public abstract ResponseObject<decimal> GetCurrentPriceLastTrade(CurrencyPair pair);
+        public abstract ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair);
 
         /// <summary>
         /// Get the current price of a currency pair by checking the top buy bid
@@ -38,7 +38,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">The currency pair</param>
         /// <returns>The current price</returns>
-        public abstract ResponseObject<decimal> GetCurrentPriceTopBid(CurrencyPair pair);
+        public abstract ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair);
 
         /// <summary>
         /// Get the current price of a currency pair by checking to sell bid
@@ -46,7 +46,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">The currency pair</param>
         /// <returns>The current price</returns>
-        public abstract ResponseObject<decimal> GetCurrentPriceTopAsk(CurrencyPair pair);
+        public abstract ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair);
 
         /// <summary>
         /// Gets past performance in the past hours
@@ -55,7 +55,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>A response object with the performance on success</returns>
-        public abstract ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTimeOffset endTime);
+        public abstract ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack, DateTimeOffset endTime);
 
         /// <summary>
         /// Gets the top performing currency pair
@@ -64,6 +64,6 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>Top performing currency pair</returns>
-        public abstract ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(List<CurrencyPair> pairs, double hoursBack, DateTime endTime);
+        public abstract ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack, DateTime endTime);
     }
 }

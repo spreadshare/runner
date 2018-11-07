@@ -26,7 +26,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<decimal> PlaceFullMarketOrder(CurrencyPair pair, Models.OrderSide side, decimal amount)
+        public override ResponseObject<decimal> PlaceFullMarketOrder(TradingPair pair, Models.OrderSide side, decimal amount)
         {
             var client = _communications.Client;
 
@@ -43,7 +43,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject CancelOrder(CurrencyPair pair, long orderId)
+        public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
             // set alias for more readable code
             var client = _communications.Client;

@@ -29,7 +29,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<decimal> PlaceFullMarketOrder(CurrencyPair pair, OrderSide side, decimal amount)
+        public override ResponseObject<decimal> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount)
         {
             _backtestOutputLogger.RegisterTradeEvent(_timer.CurrentTime, pair.Right, pair.Left, side, amount, new Currency("BNB"), 69);
 
@@ -39,7 +39,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject CancelOrder(CurrencyPair pair, long orderId)
+        public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
             throw new System.NotImplementedException();
         }
