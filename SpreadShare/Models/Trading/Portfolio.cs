@@ -90,7 +90,7 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Returns the quantity of allocated funds, will return 0 if nothing is allocated
         /// </summary>
-        /// <param name="c">Currency pair to query</param>
+        /// <param name="c">Currency to query</param>
         /// <returns>Allocated funds</returns>
         public Balance GetAllocation(Currency c)
         {
@@ -110,8 +110,8 @@ namespace SpreadShare.Models.Trading
                 throw new InvalidOperationException("Trade proposal was invalid with respect to the allocation!");
             }
 
-            _dict[trade.From.Symbol].Free -= trade.From.Free;
-            _dict[trade.From.Symbol].Locked -= trade.From.Locked;
+            // Substract left side of the trade
+            _dict[trade.From.Symbol] -= trade.From;
 
             // The acquired asset can be a non entry
             if (!_dict.ContainsKey(trade.To.Symbol))
@@ -119,8 +119,8 @@ namespace SpreadShare.Models.Trading
                 _dict.Add(trade.To.Symbol, Balance.Empty(trade.To.Symbol));
             }
 
-            _dict[trade.To.Symbol].Free += trade.To.Free;
-            _dict[trade.To.Symbol].Locked += trade.To.Locked;
+            // Add right side of the trade
+            _dict[trade.To.Symbol] += trade.To;
         }
 
         /// <summary>

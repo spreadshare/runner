@@ -1,9 +1,11 @@
+using System;
+
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Model for representing a currency a certain quantity, locked or free.
     /// </summary>
-    internal class Balance
+    internal struct Balance
     {
         /// <summary>
         /// Symbol of the asset
@@ -21,16 +23,36 @@ namespace SpreadShare.Models.Trading
         public decimal Locked;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Balance"/> class.
+        /// Initializes a new instance of the <see cref="Balance"/> struct.
         /// </summary>
         /// <param name="symbol">Symbol of the asset</param>
         /// <param name="free">Amount of balance that is free</param>
         /// <param name="locked">Amount of balance that is locked</param>
         public Balance(Currency symbol, decimal free, decimal locked)
         {
-            Symbol = symbol;
+            Symbol = symbol ?? throw new ArgumentNullException(nameof(symbol));
             Free = free;
             Locked = locked;
+        }
+
+        public static Balance operator -(Balance a, Balance b)
+        {
+            if (!(a.Symbol == b.Symbol))
+            {
+                throw new InvalidOperationException("Balances with different symbols cannot be subtracted");
+            }
+
+            return new Balance(a.Symbol, a.Free - b.Free, a.Locked - b.Locked);
+        }
+
+        public static Balance operator +(Balance a, Balance b)
+        {
+            if (!(a.Symbol == b.Symbol))
+            {
+                throw new InvalidOperationException("Balances with different symbols cannot be added");
+            }
+
+            return new Balance(a.Symbol, a.Free + b.Free, a.Locked + b.Locked);
         }
 
         /// <summary>

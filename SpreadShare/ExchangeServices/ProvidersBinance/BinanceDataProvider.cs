@@ -75,7 +75,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <summary>
         /// Gets past performance in the past hours
         /// </summary>
-        /// <param name="pair">Currency pair to obtain performance of</param>
+        /// <param name="pair">Trading pair to obtain performance of</param>
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>A response object with the performance on success</returns>
@@ -105,12 +105,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <summary>
-        /// Gets the top performing currency pair
+        /// Gets the top performing trading pair
         /// </summary>
         /// <param name="pairs">A list of trading pairs to evaluate</param>
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
-        /// <returns>Top performing currency pair</returns>
+        /// <returns>Top performing trading pair</returns>
         public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack, DateTime endTime)
         {
             if (hoursBack <= 0)
