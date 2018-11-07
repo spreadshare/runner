@@ -6,23 +6,22 @@ namespace SpreadShare.Models.Trading
     /// <summary>
     /// Object representation of a currency pair
     /// </summary>
-    /// TODO: Should this not be called trading pair?
-    internal class CurrencyPair
+    internal class TradingPair
     {
-        private static readonly Dictionary<string, CurrencyPair> Table = new Dictionary<string, CurrencyPair>();
+        private static readonly Dictionary<string, TradingPair> Table = new Dictionary<string, TradingPair>();
         private readonly int _decimals;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CurrencyPair"/> class.
+        /// Initializes a new instance of the <see cref="TradingPair"/> class.
         /// </summary>
         /// <param name="left">Left side of the currency pair</param>
         /// <param name="right">Right side of the currency pair</param>
         /// <param name="decimals">Amount of decimals the currency pair can be expressed in</param>
-        public CurrencyPair(Currency left, Currency right, int decimals)
+        public TradingPair(Currency left, Currency right, int decimals)
         {
-            if (!(decimals >= 0 && decimals < 10))
+            if (!(decimals >= 0))
             {
-                throw new ArgumentException("Decimals should be between 0 and 10");
+                throw new ArgumentException("Decimals should be larger than 0");
             }
 
             Left = left;
@@ -43,24 +42,24 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Gets a flipped version of the currency pair
         /// </summary>
-        public CurrencyPair Flipped => new CurrencyPair(Right, Left, _decimals);
+        public TradingPair Flipped => new TradingPair(Right, Left, _decimals);
 
         /// <summary>
         /// This function adds a parse option tot the table, this should only be used to initialize the environment
         /// </summary>
         /// <param name="stringCurrencyPair">String representation of the currency pair</param>
-        /// <param name="currencyPair">The currency pair</param>
-        public static void AddParseEntry(string stringCurrencyPair, CurrencyPair currencyPair)
+        /// <param name="tradingPair">The currency pair</param>
+        public static void AddParseEntry(string stringCurrencyPair, TradingPair tradingPair)
         {
-            Table.Add(stringCurrencyPair, currencyPair);
+            Table.Add(stringCurrencyPair, tradingPair);
         }
 
         /// <summary>
         /// Parse given string to currency pair
         /// </summary>
-        /// <param name="currencyPair">String representation of currencyPair</param>
+        /// <param name="currencyPair">String representation of tradingPair</param>
         /// <returns>The currency pair matching the string</returns>
-        public static CurrencyPair Parse(string currencyPair)
+        public static TradingPair Parse(string currencyPair)
         {
             if (Table.ContainsKey(currencyPair))
             {

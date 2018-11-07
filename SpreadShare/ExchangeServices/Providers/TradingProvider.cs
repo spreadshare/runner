@@ -59,7 +59,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">Currency pair to trade with</param>
         /// <param name="side">Whether to buy or sell</param>
         /// <returns>A response object indicating the status of the market order</returns>
-        public ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
+        public ResponseObject PlaceFullMarketOrder(TradingPair pair, OrderSide side)
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             Balance amount = _allocationManager.GetAvailableFunds(currency);
@@ -105,12 +105,12 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">Currency pair in which the order is found</param>
         /// <param name="orderId">Id of the order</param>
         /// <returns>A response object with the results of the action</returns>
-        public ResponseObject CancelOrder(CurrencyPair pair, long orderId)
+        public ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
             return _implementation.CancelOrder(pair, orderId);
         }
 
-        private decimal GetBuyAmountEstimate(CurrencyPair pair, decimal baseAmount)
+        private decimal GetBuyAmountEstimate(TradingPair pair, decimal baseAmount)
         {
             var query = _dataProvider.GetCurrentPriceTopAsk(pair);
             if (!query.Success)

@@ -29,7 +29,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc/>
-        public override ResponseObject<decimal> GetCurrentPriceLastTrade(CurrencyPair pair)
+        public override ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair)
         {
             var client = _communications.Client;
             var response = client.GetPrice(pair.ToString());
@@ -43,7 +43,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc/>
-        public override ResponseObject<decimal> GetCurrentPriceTopBid(CurrencyPair pair)
+        public override ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair)
         {
             var client = _communications.Client;
             var response = client.GetOrderBook(pair.ToString());
@@ -58,7 +58,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc/>
-        public override ResponseObject<decimal> GetCurrentPriceTopAsk(CurrencyPair pair)
+        public override ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair)
         {
             var client = _communications.Client;
             var response = client.GetOrderBook(pair.ToString());
@@ -79,7 +79,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>A response object with the performance on success</returns>
-        public override ResponseObject<decimal> GetPerformancePastHours(CurrencyPair pair, double hoursBack, DateTimeOffset endTime)
+        public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack, DateTimeOffset endTime)
         {
             if (hoursBack <= 0)
             {
@@ -111,7 +111,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>Top performing currency pair</returns>
-        public override ResponseObject<Tuple<CurrencyPair, decimal>> GetTopPerformance(List<CurrencyPair> pairs, double hoursBack, DateTime endTime)
+        public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack, DateTime endTime)
         {
             if (hoursBack <= 0)
             {
@@ -119,7 +119,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             }
 
             decimal max = -1;
-            CurrencyPair maxTradingPair = null;
+            TradingPair maxTradingPair = null;
 
             foreach (var tradingPair in pairs)
             {
@@ -132,7 +132,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 else
                 {
                     Logger.LogWarning($"Error fetching performance data: {performanceQuery}");
-                    return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCode.Error, performanceQuery.ToString());
+                    return new ResponseObject<Tuple<TradingPair, decimal>>(ResponseCode.Error, performanceQuery.ToString());
                 }
 
                 if (max < performance)
@@ -144,10 +144,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
 
             if (maxTradingPair == null)
             {
-                return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCode.Error, "No trading pairs defined");
+                return new ResponseObject<Tuple<TradingPair, decimal>>(ResponseCode.Error, "No trading pairs defined");
             }
 
-            return new ResponseObject<Tuple<CurrencyPair, decimal>>(ResponseCode.Success, new Tuple<CurrencyPair, decimal>(maxTradingPair, max));
+            return new ResponseObject<Tuple<TradingPair, decimal>>(ResponseCode.Success, new Tuple<TradingPair, decimal>(maxTradingPair, max));
         }
     }
 }

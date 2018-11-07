@@ -32,7 +32,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
         [InlineData("VETETH")]
         public void PriceLastTradeNonZero(string input)
         {
-            var pair = CurrencyPair.Parse(input);
+            var pair = TradingPair.Parse(input);
             var data = _container.DataProvider;
             var query = data.GetCurrentPriceTopAsk(pair);
             if (!query.Success)
@@ -52,7 +52,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
         [InlineData("NEOBNB")]
         public void LowestAskHigherThanHighestBid(string input)
         {
-            var pair = CurrencyPair.Parse(input);
+            var pair = TradingPair.Parse(input);
             var data = _container.DataProvider;
             var topAsk = data.GetCurrentPriceTopAsk(pair);
             var topBid = data.GetCurrentPriceTopBid(pair);

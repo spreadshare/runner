@@ -97,10 +97,10 @@ namespace SpreadShare.Algorithms.Implementations
                 // 2. Order by this newgained value, making the last element the most valuable.
                 var sorted = assets.ToArray().Select(x =>
                 {
-                    CurrencyPair pair;
+                    TradingPair pair;
                     try
                     {
-                        pair = CurrencyPair.Parse($"{x.Symbol}{baseSymbol}");
+                        pair = TradingPair.Parse($"{x.Symbol}{baseSymbol}");
                     }
                     catch
                     {
@@ -161,10 +161,10 @@ namespace SpreadShare.Algorithms.Implementations
                     }
 
                     // Try to get a valid pair against the base assets
-                    CurrencyPair pair;
+                    TradingPair pair;
                     try
                     {
-                        pair = CurrencyPair.Parse($"{asset.Symbol}{baseSymbol}");
+                        pair = TradingPair.Parse($"{asset.Symbol}{baseSymbol}");
                     }
                     catch (Exception)
                     {
