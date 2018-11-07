@@ -19,17 +19,17 @@ namespace SpreadShare.Tests.Models
             var left = new Currency("BNB");
             var right = new Currency("ETH");
             int decimals = 0;
-            var t = new TradingPair(left, right, decimals);
-            Assert.Equal(left, t.Left);
-            Assert.Equal(right, t.Right);
+            var pair = new TradingPair(left, right, decimals);
+            Assert.Equal(left, pair.Left);
+            Assert.Equal(right, pair.Right);
         }
 
         [Fact]
         public void ConstructorNull()
         {
-            var c = new Currency("ETH");
-            Assert.Throws<ArgumentNullException>(() => new TradingPair(null, c, 0));
-            Assert.Throws<ArgumentNullException>(() => new TradingPair(c, null, 0));
+            var currency = new Currency("ETH");
+            Assert.Throws<ArgumentNullException>(() => new TradingPair(null, currency, 0));
+            Assert.Throws<ArgumentNullException>(() => new TradingPair(currency, null, 0));
         }
 
         [Fact]
@@ -116,10 +116,10 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void RoundingHappyFlow()
         {
-            var t = GetTradingPair("BNB", "ETH", 3);
+            var pair = GetTradingPair("BNB", "ETH", 3);
             decimal amount = 420.691234M;
             decimal corrected = Math.Floor(amount * 1000) / 1000;
-            decimal calc = t.RoundToTradable(amount);
+            decimal calc = pair.RoundToTradable(amount);
             Assert.Equal(corrected, calc);
         }
 
