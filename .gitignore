@@ -46,3 +46,8 @@ input-data
 
 # Configuration (until secrets work)
 SpreadShare/appsettings.json
+
+# Minicover test coverage
+coverage-html
+coverage.json
+coverage.hits
