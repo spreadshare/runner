@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <CodeAnalysisRuleSet>../CustomRuleset.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>../CustomRuleset.Tests.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <AssemblyName>SpreadShare.Tests</AssemblyName>
     <RootNamespace>SpreadShare.Tests</RootNamespace>
