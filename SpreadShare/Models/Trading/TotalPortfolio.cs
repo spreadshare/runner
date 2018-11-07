@@ -87,7 +87,7 @@ namespace SpreadShare.Models.Trading
         /// <returns>Summed portfolio</returns>
         public Portfolio GetSummedChildren()
         {
-            return _allocations.Values.Aggregate((a, b) => Portfolio.Add(a, b));
+            return _allocations.Values.Aggregate(Portfolio.Empty, Portfolio.Add);
         }
     }
 }

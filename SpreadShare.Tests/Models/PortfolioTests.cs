@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.Models.Trading;
 using Xunit;
@@ -75,7 +76,7 @@ namespace SpreadShare.Tests.Models
         /// Tests if partial overlapping portfolios are summed together correctly.
         /// </summary>
         [Fact]
-        public void PartialOverlappingBalances()
+        public void PartialOverlappingBalancesAreSummed()
         {
             Currency c1 = new Currency("ETH");
             Currency c2 = new Currency("BTC");
@@ -101,6 +102,28 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(5.5M, result.GetAllocation(c2).Locked);
             Assert.Equal(66.5M, result.GetAllocation(c3).Free);
             Assert.Equal(0.0000000004M, result.GetAllocation(c3).Locked);
+        }
+
+        [Fact]
+        public void GetListOfBalances()
+        {
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { new Currency("VET"), new Balance(new Currency("VET"), 0, 0) },
+                { new Currency("BTC"), new Balance(new Currency("BTC"), 0, 0) }
+            });
+
+            var balances = portfolio.AllBalances().ToList();
+            Assert.Equal(2, balances.Count());
+            Assert.Contains(new Balance(new Currency("VET"), 0, 0), balances);
+            Assert.Contains(new Balance(new Currency("BTC"), 0, 0), balances);
+        }
+
+        [Fact]
+        public void GetListOfBalancesEmpty()
+        {
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
+            Assert.Equal(0, portfolio.AllBalances().Count());
         }
 
         /// <summary>
@@ -168,7 +191,7 @@ namespace SpreadShare.Tests.Models
             {
                 { c1, new Balance(c2, 10M, 10M) },
                 { c2, new Balance(c2, 0.6M, 0M) },
-                { c4, new Balance(c4, -4.2M, -0.00000001M) }
+                { c4, new Balance(c4, 4.2M, -0.00000001M) }
             });
 
             var diff = Portfolio.SubtractedDifferences(first, second);
@@ -192,7 +215,7 @@ namespace SpreadShare.Tests.Models
                          break;
                      case "DOGE":
                          Assert.Equal(-4.2M, balance.Free);
-                         Assert.Equal(-0.00000001M, balance.Locked);
+                         Assert.Equal(0.00000001M, balance.Locked);
                          break;
                 }
             }

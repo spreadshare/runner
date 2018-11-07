@@ -32,7 +32,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void ConstructorHappyFlow()
         {
-            new AllocationManager(LoggerFactory, _fetcher);
+            var allocationManager = new AllocationManager(LoggerFactory, _fetcher);
         }
 
         /// <summary>
