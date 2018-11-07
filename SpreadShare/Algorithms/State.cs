@@ -71,14 +71,5 @@ namespace SpreadShare.Algorithms
         /// Validates if all the required parameters exist within the context
         /// </summary>
         protected abstract void Run();
-
-        /// <summary>
-        /// Sets the timer in the StateManager
-        /// </summary>
-        /// <param name="ms">Timer duration</param>
-        protected void SetTimer(uint ms)
-        {
-            _stateManager.SetTimer(ms);
-        }
     }
 }

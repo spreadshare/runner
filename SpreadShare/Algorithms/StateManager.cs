@@ -88,8 +88,9 @@ namespace SpreadShare.Algorithms
         public void SetTimer(uint minutes)
         {
             // Ensure the previous timer has gone out.
-            _activeTimer?.Stop();
-            _activeTimer = new Timer(minutes, _loggerFactory, () =>
+            Container.TimerProvider.StopTimer();
+
+            Container.TimerProvider.SetTimer(minutes, () =>
             {
                 // Callback returned after waiting period
                 lock (_lock)
