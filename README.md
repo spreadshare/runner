@@ -25,10 +25,9 @@ If you want to run this application without Docker, the framework [.NET Core 2.1
 
 ### Database migrations
 Each time the database schema changes, the following command needs to be ran.
-`dotnet ef migrations add [MigrationTitle]`
-
-### Code coverage report
-To generate a html code coverage report using minicover, you can run the `generate-report.sh` script from within the /tools folder. You can enter the exact name of a test class as filter as an optional first argument. When it has finished it will open /SpreadShare/coverage-html/index.html in the default browser using python.
+```
+dotnet ef migrations add [MigrationTitle]
+```
 
 ### Architecture
 This is a console application written in [ASP.Net Core 2.1](https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-2.1). [Dependency injection](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1) is used for injecting common dependencies (such as database context and logger factories). Different modules are separated in services which are registered in `Startup.cs` and can be accessed via a `ServiceCollection`. A [PostgreSQL](https://www.postgresql.org/) database is connected with a database context. This database runs in a separate Docker container. There are three Docker containers in total: SpreadShare, the database and a ZeroMQ-enabled python application.
