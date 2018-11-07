@@ -191,8 +191,8 @@ namespace SpreadShare.Tests.Models
                          Assert.Equal(1.0m, balance.Locked);
                          break;
                      case "DOGE":
-                         Assert.Equal(4.2M, balance.Free);
-                         Assert.Equal(0.00000001M, balance.Locked);
+                         Assert.Equal(-4.2M, balance.Free);
+                         Assert.Equal(-0.00000001M, balance.Locked);
                          break;
                 }
             }
