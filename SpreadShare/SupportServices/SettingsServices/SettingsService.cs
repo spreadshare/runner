@@ -183,10 +183,10 @@ namespace SpreadShare.SupportServices.SettingsServices
 
                     // Add the instance to the parseTable to make it available for parsing
                     int decimals = -(int)Math.Log10((double)stepSize);
-                    var result = new CurrencyPair(new Currency(left), new Currency(right), decimals);
+                    var result = new TradingPair(new Currency(left), new Currency(right), decimals);
                     try
                     {
-                        CurrencyPair.AddParseEntry(pair.Value, result);
+                        TradingPair.AddParseEntry(pair.Value, result);
                     }
                     catch (ArgumentException)
                     {
@@ -208,7 +208,7 @@ namespace SpreadShare.SupportServices.SettingsServices
                 .Get<List<string>>();
 
             // Map the trading pairs to currencies by parsing and assign to the settings.
-            SimpleBandWagonAlgorithmSettings.ActiveTradingPairs = currencies.Select(CurrencyPair.Parse).ToList();
+            SimpleBandWagonAlgorithmSettings.ActiveTradingPairs = currencies.Select(TradingPair.Parse).ToList();
 
             // Parse the base currency string to a Currency type
             var baseStr = _configuration.GetSection("SimpleBandWagonAlgorithm:BaseCurrency").Get<string>();

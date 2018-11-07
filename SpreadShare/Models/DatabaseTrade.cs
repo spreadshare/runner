@@ -21,7 +21,7 @@ namespace SpreadShare.Models
         /// <param name="postValue">The value of the portfolio after the trade</param>
         public DatabaseTrade(
             long timestamp,
-            CurrencyPair pair,
+            TradingPair pair,
             decimal quantity,
             OrderSide side,
             Portfolio pre,
@@ -52,7 +52,7 @@ namespace SpreadShare.Models
         /// <param name="postValue">The value of the portfolio after the trade</param>
         public DatabaseTrade(
             DateTimeOffset timestamp,
-            CurrencyPair pair,
+            TradingPair pair,
             decimal quantity,
             OrderSide side,
             Portfolio pre,
@@ -71,7 +71,7 @@ namespace SpreadShare.Models
         /// <summary>
         /// Gets or sets the currency pair of the trade
         /// </summary>
-        public CurrencyPair Pair { get; set; }
+        public TradingPair Pair { get; set; }
 
         /// <summary>
         /// Gets or sets the quantity of the trade
