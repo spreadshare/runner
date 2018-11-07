@@ -30,7 +30,7 @@ namespace SpreadShare.Tests.Models
 
             var allocation = total.GetAlgorithmAllocation(algo);
             Assert.NotNull(allocation);
-            Assert.False(allocation.AllBalances().Count() == 0, "Algorithm allocation does have balances");
+            Assert.False(!allocation.AllBalances().Any(), "Algorithm allocation does have balances");
         }
 
         [Fact]
@@ -98,7 +98,7 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
-        public void AllocationIsReportedHappyFlow()
+        public void IsAllocatedHappyFlow()
         {
             var total = new TotalPortfolio();
             Type algo = typeof(SimpleBandWagonAlgorithm);
@@ -115,7 +115,7 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
-        public void AllocationIsReportedNoExist()
+        public void IsAllocatedNonExistent()
         {
             var total = new TotalPortfolio();
             Type algo = typeof(SimpleBandWagonAlgorithm);
