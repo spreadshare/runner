@@ -29,8 +29,8 @@ namespace SpreadShare.Tests.Models
         public void ConstructorNull()
         {
             var currency = new Currency("ETH");
-            Assert.Throws<ArgumentNullException>(() => new TradingPair(null, currency, 0));
-            Assert.Throws<ArgumentNullException>(() => new TradingPair(currency, null, 0));
+            Assert.Throws<ArgumentException>(() => new TradingPair(null, currency, 0));
+            Assert.Throws<ArgumentException>(() => new TradingPair(currency, null, 0));
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace SpreadShare.Tests.Models
             var pair = GetTradingPair("BNB", "ETH");
             TradingPair.AddParseEntry("BNBETH", pair);
             var parsed = TradingPair.Parse(" BNB ETH ");
-            
+
             Assert.Equal(pair.Left, parsed.Left);
             Assert.Equal(pair.Right, parsed.Right);
             Assert.Equal(pair.Decimals, parsed.Decimals);
@@ -81,7 +81,7 @@ namespace SpreadShare.Tests.Models
             var pair = GetTradingPair("BNB", "ETH", 7);
             TradingPair.AddParseEntry(" BNB ETH ", pair);
             var parsed = TradingPair.Parse("BNBETH");
-            
+
             Assert.Equal(pair.Left, parsed.Left);
             Assert.Equal(pair.Right, parsed.Right);
             Assert.Equal(pair.Decimals, parsed.Decimals);
@@ -91,9 +91,9 @@ namespace SpreadShare.Tests.Models
         public void AddParseEntryNull()
         {
             var pair = GetTradingPair("BNB", "ETH");
-            
-            Assert.Throws<ArgumentNullException>(() => TradingPair.AddParseEntry("BNBETH", null));
-            Assert.Throws<ArgumentNullException>(() => TradingPair.AddParseEntry(null, pair));
+
+            Assert.Throws<ArgumentException>(() => TradingPair.AddParseEntry("BNBETH", null));
+            Assert.Throws<ArgumentException>(() => TradingPair.AddParseEntry(null, pair));
         }
 
         [Fact]
@@ -101,7 +101,7 @@ namespace SpreadShare.Tests.Models
         {
             var pair = GetTradingPair("BNB", "ETH");
 
-            Assert.Throws<ArgumentException>(() => TradingPair.AddParseEntry(String.Empty, pair));
+            Assert.Throws<ArgumentException>(() => TradingPair.AddParseEntry(string.Empty, pair));
             Assert.Throws<ArgumentException>(() => TradingPair.AddParseEntry(" ", pair));
         }
 
@@ -121,13 +121,13 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void ParseFromStringNull()
         {
-            Assert.Throws<ArgumentNullException>(() => TradingPair.Parse(null));
+            Assert.Throws<ArgumentException>(() => TradingPair.Parse(null));
         }
 
         [Fact]
         public void ParseFromStringEmpty()
         {
-            Assert.Throws<ArgumentException>(() => TradingPair.Parse(String.Empty));
+            Assert.Throws<ArgumentException>(() => TradingPair.Parse(string.Empty));
             Assert.Throws<ArgumentException>(() => TradingPair.Parse(" "));
         }
 
@@ -147,7 +147,7 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(corrected, calc);
         }
 
-        private TradingPair GetTradingPair(string strLeft, string strRight, int decimals = 0)
+        private static TradingPair GetTradingPair(string strLeft, string strRight, int decimals = 0)
         {
             Currency left = new Currency(strLeft);
             Currency right = new Currency(strRight);

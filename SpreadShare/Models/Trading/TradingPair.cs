@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 
 namespace SpreadShare.Models.Trading
@@ -25,6 +24,16 @@ namespace SpreadShare.Models.Trading
                 throw new ArgumentException("Decimals should be larger than 0");
             }
 
+            if (left == null || right == null)
+            {
+                throw new ArgumentException("Either currency cannot be null");
+            }
+
+            if (left == right)
+            {
+                throw new ArgumentException("TradingPairs cannot contain the same currency twice.");
+            }
+
             Left = left;
             Right = right;
             Decimals = decimals;
@@ -39,7 +48,10 @@ namespace SpreadShare.Models.Trading
         /// Gets the right side of the currency pair
         /// </summary>
         public Currency Right { get; }
-        
+
+        /// <summary>
+        /// Gets the number of decimals
+        /// </summary>
         public int Decimals { get; }
 
         /// <summary>
@@ -49,10 +61,21 @@ namespace SpreadShare.Models.Trading
         /// <param name="tradingPair">The currency pair</param>
         public static void AddParseEntry(string tradingPairString, TradingPair tradingPair)
         {
+            if (string.IsNullOrWhiteSpace(tradingPairString) || tradingPair == null)
+            {
+                throw new ArgumentException("Key and/or value cannot be null");
+            }
+
             // Clean the pair string of all whitespace
             string cleanedPairString = RemoveAllWhiteSpace(tradingPairString);
 
-            Table.Add(tradingPairString, tradingPair);
+            if (Table.ContainsKey(cleanedPairString))
+            {
+                Table[cleanedPairString] = tradingPair;
+                return;
+            }
+
+            Table.Add(cleanedPairString, tradingPair);
         }
 
         /// <summary>
@@ -85,7 +108,7 @@ namespace SpreadShare.Models.Trading
         /// <returns>Rounded amount</returns>
         public decimal RoundToTradable(decimal amount)
         {
-            long lotSize = (long)Math.Pow(10, Decimals);
+            long lotSize = IntPow(10, (uint)Decimals);
             return Math.Floor(amount * lotSize) / lotSize;
         }
 
@@ -102,13 +125,13 @@ namespace SpreadShare.Models.Trading
         {
             return new string(input.Where(x => !char.IsWhiteSpace(x)).ToArray());
         }
-        
+
         private static int IntPow(int x, uint pow)
         {
             int ret = 1;
-            while ( pow != 0 )
+            while (pow != 0)
             {
-                if ( (pow & 1) == 1 )
+                if ((pow & 1) == 1)
                 {
                     ret *= x;
                 }
@@ -116,6 +139,7 @@ namespace SpreadShare.Models.Trading
                 x *= x;
                 pow >>= 1;
             }
+
             return ret;
         }
     }
