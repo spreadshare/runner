@@ -138,11 +138,18 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
+        public void ToStringCheck()
+        {
+            var pair = GetTradingPair("BNB", "ETH", 0);
+            Assert.Equal("BNBETH", pair.ToString());
+        }
+
+        [Fact]
         public void RoundingHappyFlow()
         {
             var pair = GetTradingPair("BNB", "ETH", 3);
-            decimal amount = 420.691234M;
-            decimal corrected = Math.Floor(amount * 1000) / 1000;
+            decimal amount = 420.691634M;
+            decimal corrected = 420.691M;
             decimal calc = pair.RoundToTradable(amount);
             Assert.Equal(corrected, calc);
         }
