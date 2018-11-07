@@ -123,7 +123,7 @@ namespace SpreadShare.Tests.Models
         public void GetListOfBalancesEmpty()
         {
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-            Assert.Equal(0, portfolio.AllBalances().Count());
+            Assert.Empty(portfolio.AllBalances());
         }
 
         /// <summary>
