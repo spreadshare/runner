@@ -20,7 +20,7 @@ fi
 dotnet minicover uninstrument --workdir ../SpreadShare
 
 # Create html reports inside folder coverage-html
-dotnet minicover htmlreport --workdir ../SpreadShare --threshold 90
+dotnet minicover htmlreport --workdir ../SpreadShare --threshold 50
 
 # Print console report
 # This command returns failure if the coverage is lower than the threshold
