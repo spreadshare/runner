@@ -23,7 +23,7 @@ namespace SpreadShare.Models.Trading
         /// Modifies the allocation based on the executed trade.
         /// </summary>
         /// <param name="trade">The trade proposal</param>
-        public void ApplyTradeExecution(TradeExecution trade)
+        public void ApplyTradeExecution(Type algo, TradeExecution trade)
         {
             if (trade == null)
             {
@@ -31,25 +31,14 @@ namespace SpreadShare.Models.Trading
             }
 
             // Algorithm should always be in _allocations
-            if (!_allocations.ContainsKey(trade.Algorithm))
+            if (!_allocations.ContainsKey(algo))
             {
                 throw new ArgumentException(
-                    $"{trade.Algorithm} did not receive any funds during allocation but is trying to change its portfolio.");
+                    $"{algo} did not receive any funds during allocation but is trying to change its portfolio.");
             }
 
             // Substract spent funds
-            _allocations[trade.Algorithm].UpdateAllocation(trade);
-        }
-
-        /// <summary>
-        /// Determines of a portfolio matches the exchange report within a margin.
-        /// </summary>
-        /// <param name="remote">Remote assets to compare with</param>
-        /// <returns>Whether or not the situations can be considered equal</returns>
-        public List<Balance> GetDifferenceWithRemote(Portfolio remote)
-        {
-            var sum = _allocations.Values.Aggregate((a, b) => Portfolio.Add(a, b));
-            return Portfolio.AbsoluteDifferences(sum, remote);
+            _allocations[algo].UpdateAllocation(trade);
         }
 
         /// <summary>
@@ -88,6 +77,16 @@ namespace SpreadShare.Models.Trading
             }
 
             _allocations.Add(alg, alloc);
+        }
+
+        /// <summary>
+        /// Returns a new portfolio containing the sum of all allocated portfolios
+        /// In other words, all the assets for the particular exchange.
+        /// </summary>
+        /// <returns>Summed portfolio</returns>
+        public Portfolio GetSummedChildren()
+        {
+            return _allocations.Values.Aggregate((a, b) => Portfolio.Add(a, b));
         }
     }
 }

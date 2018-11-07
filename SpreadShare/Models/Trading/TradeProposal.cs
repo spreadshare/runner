@@ -11,21 +11,14 @@ namespace SpreadShare.Models.Trading
         /// Initializes a new instance of the <see cref="TradeProposal"/> class.
         /// </summary>
         /// <param name="from">The asset value on the left side of the trade</param>
-        /// <param name="algorithm">The type of the algorithm that proposes</param>
-        public TradeProposal(Balance from, Type algorithm)
+        public TradeProposal(Balance from)
         {
             From = from;
-            Algorithm = algorithm;
         }
 
         /// <summary>
         /// Gets the left side of the proposed trade
         /// </summary>
         public Balance From { get; }
-
-        /// <summary>
-        /// Gets the type of the algorithm that proposed the trade
-        /// </summary>
-        public Type Algorithm { get; }
     }
 }
