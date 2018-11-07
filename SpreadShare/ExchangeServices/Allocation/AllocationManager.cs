@@ -175,6 +175,7 @@ namespace SpreadShare.ExchangeServices.Allocation
 
             // Let the provider execute the trade and save the execution report
             var exec = tradeCallback();
+
             // TradingProvider can give a null execution report, if this happens the portfolio will be checked
             // against the remote using an 'empty' or 'monoid' trade execution.
             if (exec is null)
