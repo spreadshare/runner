@@ -9,7 +9,6 @@ namespace SpreadShare.Models.Trading
     internal class TradingPair
     {
         private static readonly Dictionary<string, TradingPair> Table = new Dictionary<string, TradingPair>();
-        private readonly int _decimals;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TradingPair"/> class.
@@ -26,7 +25,7 @@ namespace SpreadShare.Models.Trading
 
             Left = left;
             Right = right;
-            _decimals = decimals;
+            Decimals = decimals;
         }
 
         /// <summary>
@@ -38,11 +37,8 @@ namespace SpreadShare.Models.Trading
         /// Gets the right side of the currency pair
         /// </summary>
         public Currency Right { get; }
-
-        /// <summary>
-        /// Gets a flipped version of the currency pair
-        /// </summary>
-        public TradingPair Flipped => new TradingPair(Right, Left, _decimals);
+        
+        public int Decimals { get; }
 
         /// <summary>
         /// This function adds a parse option tot the table, this should only be used to initialize the environment
@@ -77,7 +73,7 @@ namespace SpreadShare.Models.Trading
         /// <returns>Rounded amount</returns>
         public decimal RoundToTradable(decimal amount)
         {
-            decimal lotSize = (decimal)Math.Pow(10, _decimals);
+            decimal lotSize = (decimal)Math.Pow(10, Decimals);
             return Math.Floor(amount * lotSize) / lotSize;
         }
 
