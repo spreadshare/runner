@@ -17,7 +17,7 @@ namespace SpreadShare.Models
         /// <param name="low">Lowest price during time period</param>
         /// <param name="volume">Volume in the time period</param>
         /// <param name="tradingPair">Tradingpair of the candle</param>
-        public BacktestingCandle(uint timestamp, decimal open, decimal close, decimal high, decimal low, decimal volume, string tradingPair)
+        public BacktestingCandle(long timestamp, decimal open, decimal close, decimal high, decimal low, decimal volume, string tradingPair)
         {
             Timestamp = timestamp;
             Open = open;
@@ -32,7 +32,7 @@ namespace SpreadShare.Models
         /// Gets or sets the timestamp of the candle.
         /// </summary>
         [Key]
-        public uint Timestamp { get; set; }
+        public long Timestamp { get; set; }
 
         /// <summary>
         /// Gets or sets the opening price of the candle.
