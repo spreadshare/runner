@@ -22,6 +22,7 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Modifies the allocation based on the executed trade.
         /// </summary>
+        /// <param name="algo">The algorithm to attribute the trade to</param>
         /// <param name="trade">The trade proposal</param>
         public void ApplyTradeExecution(Type algo, TradeExecution trade)
         {
