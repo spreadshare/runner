@@ -96,7 +96,7 @@ namespace SpreadShare.Models.Trading
         {
             var temp0 = c ?? throw new ArgumentNullException(nameof(c));
             return _dict.GetValueOrDefault(c, Balance.Empty(c));
-        }    
+        }
 
         /// <summary>
         /// Update the allocation of an algorithm
@@ -105,6 +105,7 @@ namespace SpreadShare.Models.Trading
         public void UpdateAllocation(TradeExecution trade)
         {
             var temp0 = trade ?? throw new ArgumentNullException(nameof(trade));
+
             // TODO: Offset for dust?
             if (_dict[trade.From.Symbol].Free < trade.From.Free || _dict[trade.From.Symbol].Locked < trade.From.Locked)
             {
