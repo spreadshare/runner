@@ -44,6 +44,12 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
+        public void MonoidConstructorNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => Balance.Empty(null));
+        }
+
+        [Fact]
         public void IsValueType()
         {
             // Balance should be pass by value

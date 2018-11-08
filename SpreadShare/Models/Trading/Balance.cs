@@ -1,4 +1,5 @@
 using System;
+using Dawn;
 
 namespace SpreadShare.Models.Trading
 {
@@ -37,20 +38,18 @@ namespace SpreadShare.Models.Trading
 
         public static Balance operator -(Balance a, Balance b)
         {
-            if (!(a.Symbol == b.Symbol))
-            {
-                throw new InvalidOperationException("Balances with different symbols cannot be subtracted");
-            }
+            Guard.Argument(a).Require<InvalidOperationException>(
+                _ => a.Symbol == b.Symbol,
+                _ => $"Balances with different symbols cannot be subtracted ({a}-{b})");
 
             return new Balance(a.Symbol, a.Free - b.Free, a.Locked - b.Locked);
         }
 
         public static Balance operator +(Balance a, Balance b)
         {
-            if (!(a.Symbol == b.Symbol))
-            {
-                throw new InvalidOperationException("Balances with different symbols cannot be added");
-            }
+            Guard.Argument(a).Require<InvalidOperationException>(
+                _ => a.Symbol == b.Symbol,
+                _ => $"Balances with different symbols cannot be added ({a}+{b})");
 
             return new Balance(a.Symbol, a.Free + b.Free, a.Locked + b.Locked);
         }

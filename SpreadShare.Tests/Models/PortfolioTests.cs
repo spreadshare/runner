@@ -4,6 +4,7 @@ using System.Linq;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace SpreadShare.Tests.Models
 {
@@ -25,7 +26,7 @@ namespace SpreadShare.Tests.Models
         /// Tests valid parsing of values after the constructor
         /// </summary>
         [Fact]
-        public void Constructor()
+        public void ConstructorHappyFlow()
         {
             Currency c = new Currency("ETH");
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
@@ -34,6 +35,12 @@ namespace SpreadShare.Tests.Models
             });
 
             Assert.Equal(1.0M, portfolio.GetAllocation(new Currency("ETH")).Free);
+        }
+
+        [Fact]
+        public void ConstructorNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => new Portfolio(null));
         }
 
         [Fact]
@@ -66,10 +73,9 @@ namespace SpreadShare.Tests.Models
         /// <param name="locked2">Locked balance for the second</param>
         [Theory]
         [InlineData("ETH", 1.0, 0.0, 3.0, 5.0)]
-        [InlineData("BTC", 0.000002, 0.0, 0.0, 0.0)]
-        [InlineData("DOGE", 0.0, 0.0, 0.0, 0.0)]
+        [InlineData("BTC", 0.000002, -4, 9943043.234, -343.232)]
         [InlineData("VET", 1.00000000001, 100000, 3.9999999, 1000000)]
-        public void BalancesAreSummed(string currency, decimal free1, decimal locked1, decimal free2, decimal locked2)
+        public void BalancesAreSummedHappyFlow(string currency, decimal free1, decimal locked1, decimal free2, decimal locked2)
         {
             Currency c = new Currency(currency);
             var first = new Portfolio(new Dictionary<Currency, Balance>()
@@ -95,7 +101,7 @@ namespace SpreadShare.Tests.Models
         /// Tests if partial overlapping portfolios are summed together correctly.
         /// </summary>
         [Fact]
-        public void PartialOverlappingBalancesAreSummed()
+        public void BalancesAreSummedPartialOverlap()
         {
             Currency c1 = new Currency("ETH");
             Currency c2 = new Currency("BTC");
@@ -121,6 +127,14 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(5.5M, result.GetAllocation(c2).Locked);
             Assert.Equal(66.5M, result.GetAllocation(c3).Free);
             Assert.Equal(0.0000000004M, result.GetAllocation(c3).Locked);
+        }
+
+        [Fact]
+        public void BalancesAreSummedNull()
+        {
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
+            Assert.Throws<ArgumentNullException>(() => Portfolio.Add(portfolio, null));
+            Assert.Throws<ArgumentNullException>(() => Portfolio.Add(null, portfolio));
         }
 
         [Fact]
@@ -215,11 +229,31 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(0.0007M, scaled.GetAllocation(c2).Locked);
         }
 
+        [Fact]
+        public void DuplicateWithScaleExactlyOne()
+        {
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
+            Portfolio.DuplicateWithScale(portfolio, 1);
+        }
+
+        [Fact]
+        public void DuplicateWithScaleInvalidScale()
+        {
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
+            Assert.Throws<ArgumentException>(() => Portfolio.DuplicateWithScale(portfolio, -1));
+        }
+
+        [Fact]
+        public void DuplicateWithScaleNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => Portfolio.DuplicateWithScale(null, 1));
+        }
+
         /// <summary>
         /// Tests if the difference between to portfolios is correct
         /// </summary>
         [Fact]
-        public void SubstractionIsCorrect()
+        public void BalancesAreSubtractedHappyFlow()
         {
             Currency c1 = new Currency("BTC");
             Currency c2 = new Currency("ETH");
@@ -266,9 +300,14 @@ namespace SpreadShare.Tests.Models
             }
         }
 
-        /// <summary>
-        /// Tests the JSON serializing capabilities of the portfolio model
-        /// </summary>
+        [Fact]
+        public void BalancesAreSubtractedNull()
+        {
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
+            Assert.Throws<ArgumentNullException>(() => Portfolio.SubtractedDifferences(portfolio, null));
+            Assert.Throws<ArgumentNullException>(() => Portfolio.SubtractedDifferences(null, portfolio));
+        }
+
         [Fact]
         public void JsonString()
         {

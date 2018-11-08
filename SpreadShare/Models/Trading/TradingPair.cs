@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dawn;
 
 namespace SpreadShare.Models.Trading
 {
@@ -19,20 +20,8 @@ namespace SpreadShare.Models.Trading
         /// <param name="decimals">Amount of decimals the trading pair can be expressed in</param>
         public TradingPair(Currency left, Currency right, int decimals)
         {
-            if (!(decimals >= 0))
-            {
-                throw new ArgumentException("Decimals should be larger than 0");
-            }
-
-            if (left == null || right == null)
-            {
-                throw new ArgumentException("Either currency cannot be null");
-            }
-
-            if (left == right)
-            {
-                throw new ArgumentException("TradingPairs cannot contain the same currency twice.");
-            }
+            Guard.Argument(left).NotNull().NotEqual(Guard.Argument(right).NotNull());
+            Guard.Argument(decimals).NotNegative();
 
             Left = left;
             Right = right;
@@ -61,10 +50,8 @@ namespace SpreadShare.Models.Trading
         /// <param name="tradingPair">The trading pair</param>
         public static void AddParseEntry(string tradingPairString, TradingPair tradingPair)
         {
-            if (string.IsNullOrWhiteSpace(tradingPairString) || tradingPair == null)
-            {
-                throw new ArgumentException("Key and/or value cannot be null");
-            }
+            Guard.Argument(tradingPairString).NotNull().NotEmpty().NotWhiteSpace();
+            Guard.Argument(tradingPair).NotNull();
 
             // Clean the pair string of all whitespace
             string cleanedPairString = RemoveAllWhiteSpace(tradingPairString);
@@ -85,10 +72,7 @@ namespace SpreadShare.Models.Trading
         /// <returns>The trading pair matching the string</returns>
         public static TradingPair Parse(string tradingPairString)
         {
-            if (string.IsNullOrWhiteSpace(tradingPairString))
-            {
-                throw new ArgumentException("Trading pair string must not be null or whitespace");
-            }
+            Guard.Argument(tradingPairString).NotNull().NotEmpty().NotWhiteSpace();
 
             // Clean the pair string of all whitespace
             string cleanedPairString = RemoveAllWhiteSpace(tradingPairString);

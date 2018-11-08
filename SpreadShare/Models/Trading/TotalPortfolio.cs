@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dawn;
 using SpreadShare.Algorithms;
 
 namespace SpreadShare.Models.Trading
@@ -27,22 +28,19 @@ namespace SpreadShare.Models.Trading
         /// <param name="trade">The trade proposal</param>
         public void ApplyTradeExecution(Type algo, TradeExecution trade)
         {
-            var temp0 = trade ?? throw new ArgumentNullException(nameof(trade));
-            var temp1 = algo ?? throw new ArgumentNullException(nameof(algo));
-
-            if (!algo.IsSubclassOf(typeof(BaseAlgorithm)))
-            {
-                throw new ArgumentException(nameof(algo) + " must be a subclass of BaseAlgorithm");
-            }
+            Guard.Argument(algo).NotNull().Require(
+                a => a.IsSubclassOf(typeof(BaseAlgorithm)),
+                a => $"{a} is not a subclass of BaseAlgorithm");
+            Guard.Argument(trade).NotNull();
 
             // Algorithm should always be in _allocations
-            if (!_allocations.ContainsKey(algo))
+            if (!IsAllocated(algo))
             {
                 throw new ArgumentException(
                     $"{algo} did not receive any funds during allocation but is trying to change its portfolio.");
             }
 
-            // Substract spent funds
+            // Subtract spent funds
             _allocations[algo].UpdateAllocation(trade);
         }
 
@@ -60,14 +58,11 @@ namespace SpreadShare.Models.Trading
         /// <returns>The algorithm's portfolio</returns>
         public Portfolio GetAlgorithmAllocation(Type algo)
         {
-            var temp0 = algo ?? throw new ArgumentNullException(nameof(algo));
+            Guard.Argument(algo).NotNull().Require(
+                a => a.IsSubclassOf(typeof(BaseAlgorithm)),
+                a => $"{a} is not a subclass of BaseAlgorithm");
 
-            if (!algo.IsSubclassOf(typeof(BaseAlgorithm)))
-            {
-                throw new ArgumentException(nameof(algo) + " must be a subclass of BaseAlgorithm");
-            }
-
-            if (!_allocations.ContainsKey(algo))
+            if (!IsAllocated(algo))
             {
                 return Portfolio.Empty;
             }
@@ -82,15 +77,12 @@ namespace SpreadShare.Models.Trading
         /// <param name="alloc">The allocation as assets</param>
         public void SetAlgorithmAllocation(Type algo, Portfolio alloc)
         {
-            var temp0 = algo ?? throw new ArgumentNullException(nameof(algo));
-            var temp1 = alloc ?? throw new ArgumentNullException(nameof(alloc));
+            Guard.Argument(algo).NotNull().Require(
+                a => a.IsSubclassOf(typeof(BaseAlgorithm)),
+                a => $"{a} is not a subclass of BaseAlgorithm");
+            Guard.Argument(alloc).NotNull();
 
-            if (!algo.IsSubclassOf(typeof(BaseAlgorithm)))
-            {
-                throw new ArgumentException(nameof(algo) + " must be a subclass of BaseAlgorithm");
-            }
-
-            if (_allocations.ContainsKey(algo))
+            if (IsAllocated(algo))
             {
                 _allocations[algo] = alloc;
                 return;
