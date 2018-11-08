@@ -42,9 +42,9 @@ namespace SpreadShare.Tests.Models
             Currency c = new Currency("ETH");
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>
             {
-                { c, new Balance(c, 4, 0.0001M )}
+                { c, new Balance(c, 4, 0.0001M) }
             });
-            
+
             Assert.Equal(4, portfolio.GetAllocation(c).Free);
             Assert.Equal(0.0001M, portfolio.GetAllocation(c).Locked);
         }
