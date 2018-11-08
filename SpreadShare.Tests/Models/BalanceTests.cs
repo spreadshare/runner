@@ -89,5 +89,12 @@ namespace SpreadShare.Tests.Models
             Assert.Throws<InvalidOperationException>(() => left + right);
             Assert.Throws<InvalidOperationException>(() => left - right);
         }
+
+        [Fact]
+        public void ToStringTest()
+        {
+            Balance balance = new Balance(new Currency("ETH"), 3, 5.5M);
+            Assert.Equal("ETH -> 3|5.5", balance.ToString());
+        }
     }
 }
