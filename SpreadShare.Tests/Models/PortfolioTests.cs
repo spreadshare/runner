@@ -169,6 +169,25 @@ namespace SpreadShare.Tests.Models
             Assert.Throws<InvalidOperationException>(() => portfolio.UpdateAllocation(trade));
         }
 
+        [Fact]
+        public void DuplicateWithScale()
+        {
+            Currency c1 = new Currency("BTC");
+            Currency c2 = new Currency("ETH");
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 4, 8) },
+                { c2, new Balance(c2, 5, 0.001M) }
+            });
+
+            var scaled = Portfolio.DuplicateWithScale(portfolio, 0.7M);
+
+            Assert.Equal(2.8M, scaled.GetAllocation(c1).Free);
+            Assert.Equal(5.6M, scaled.GetAllocation(c1).Locked);
+            Assert.Equal(3.5M, scaled.GetAllocation(c2).Free);
+            Assert.Equal(0.0007M, scaled.GetAllocation(c2).Locked);
+        }
+
         /// <summary>
         /// Tests if the difference between to portfolios is correct
         /// </summary>
