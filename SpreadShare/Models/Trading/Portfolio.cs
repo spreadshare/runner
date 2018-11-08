@@ -94,8 +94,9 @@ namespace SpreadShare.Models.Trading
         /// <returns>Allocated funds</returns>
         public Balance GetAllocation(Currency c)
         {
+            var temp0 = c ?? throw new ArgumentNullException(nameof(c));
             return _dict.GetValueOrDefault(c, Balance.Empty(c));
-        }
+        }    
 
         /// <summary>
         /// Update the allocation of an algorithm
@@ -103,11 +104,12 @@ namespace SpreadShare.Models.Trading
         /// <param name="trade">The trade proposal to digest</param>
         public void UpdateAllocation(TradeExecution trade)
         {
+            var temp0 = trade ?? throw new ArgumentNullException(nameof(trade));
             // TODO: Offset for dust?
             if (_dict[trade.From.Symbol].Free < trade.From.Free || _dict[trade.From.Symbol].Locked < trade.From.Locked)
             {
                 // TODO: Report a critical error that shutdowns all algorithms
-                throw new InvalidOperationException("Trade proposal was invalid with respect to the allocation!");
+                throw new InvalidOperationException("Trade was invalid with respect to the allocation!");
             }
 
             // Substract left side of the trade

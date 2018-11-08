@@ -36,6 +36,26 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(1.0M, portfolio.GetAllocation(new Currency("ETH")).Free);
         }
 
+        [Fact]
+        public void GetAllocationHappyFlow()
+        {
+            Currency c = new Currency("ETH");
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c, new Balance(c, 4, 0.0001M )}
+            });
+            
+            Assert.Equal(4, portfolio.GetAllocation(c).Free);
+            Assert.Equal(0.0001M, portfolio.GetAllocation(c).Locked);
+        }
+
+        [Fact]
+        public void GetAllocationNull()
+        {
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
+            Assert.Throws<ArgumentNullException>(() => portfolio.GetAllocation(null));
+        }
+
         /// <summary>
         /// Tests a number of cases to see of adding to portfolio adds the balances correctly
         /// </summary>
@@ -146,6 +166,13 @@ namespace SpreadShare.Tests.Models
 
             Assert.Equal(0.5M, portfolio.GetAllocation(c1).Free);
             Assert.Equal(11.2422359M, portfolio.GetAllocation(c2).Free);
+        }
+
+        [Fact]
+        public void TradeIsDigestedNull()
+        {
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
+            Assert.Throws<ArgumentNullException>(() => portfolio.UpdateAllocation(null));
         }
 
         /// <summary>
