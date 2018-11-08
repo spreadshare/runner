@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using SpreadShare.Algorithms;
 using SpreadShare.Algorithms.Implementations;
+using SpreadShare.ExchangeServices;
+using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.SettingsServices;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -35,14 +38,28 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
+        public void GetAlgorithmAllocationNull()
+        {
+            var total = new TotalPortfolio();
+            Assert.Throws<ArgumentNullException>(() => total.GetAlgorithmAllocation(null));
+        }
+
+        [Fact]
+        public void GetAlgorithmAllocationInvalid()
+        {
+            var total = new TotalPortfolio();
+            Assert.Throws<ArgumentException>(() => total.GetAlgorithmAllocation(typeof(bool)));
+        }
+
+        [Fact]
         public void GetAlgorithmAllocationNone()
         {
             var total = GetDefaultPortfolio();
-            var algo = typeof(bool);
+            var algo = typeof(TestAlgorithm);
 
             var allocation = total.GetAlgorithmAllocation(algo);
             Assert.NotNull(allocation);
-            Assert.True(!allocation.AllBalances().Any(), "Algorithm 'bool' should not be allocated");
+            Assert.True(!allocation.AllBalances().Any(), "Algorithm 'TestAlgorithm' should not be allocated");
         }
 
         [Fact]
@@ -50,7 +67,7 @@ namespace SpreadShare.Tests.Models
         {
             var total = new TotalPortfolio();
             Type algo1 = typeof(SimpleBandWagonAlgorithm);
-            Type algo2 = typeof(bool); // Any type will do for now
+            Type algo2 = typeof(TestAlgorithm); // Any type will do for now
             total.SetAlgorithmAllocation(algo1, new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 2.001M, 4) },
@@ -72,6 +89,29 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(40, total.GetAlgorithmAllocation(algo2).GetAllocation(new Currency("ETH")).Locked);
             Assert.Equal(-6, total.GetAlgorithmAllocation(algo2).GetAllocation(new Currency("BTC")).Free);
             Assert.Equal(32.00000000001M, total.GetAlgorithmAllocation(algo2).GetAllocation(new Currency("BTC")).Locked);
+        }
+
+        [Fact]
+        public void SetAllocationNull()
+        {
+            var total = new TotalPortfolio();
+            Type algo = typeof(TestAlgorithm);
+
+            Assert.Throws<ArgumentNullException>(() => total.SetAlgorithmAllocation(
+                null,
+                new Portfolio(new Dictionary<Currency, Balance>())));
+
+            Assert.Throws<ArgumentNullException>(() => total.SetAlgorithmAllocation(algo, null));
+        }
+
+        [Fact]
+        public void SetAllocationInvalid()
+        {
+            var total = new TotalPortfolio();
+            Type algo = typeof(bool);
+
+            Assert.Throws<ArgumentException>(() =>
+                total.SetAlgorithmAllocation(algo, new Portfolio(new Dictionary<Currency, Balance>())));
         }
 
         [Fact]
@@ -123,7 +163,7 @@ namespace SpreadShare.Tests.Models
 
             Assert.False(total.IsAllocated(algo));
 
-            total.SetAlgorithmAllocation(typeof(bool), new Portfolio(new Dictionary<Currency, Balance>
+            total.SetAlgorithmAllocation(typeof(TestAlgorithm), new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 2.001M, 4) },
                 { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) }
@@ -161,10 +201,22 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
+        public void TradeIsDigestedInvalidAlgorithm()
+        {
+            var total = new TotalPortfolio();
+            Type algo = typeof(bool);
+            var trade = new TradeExecution(
+                new Balance(new Currency("ETH"), 2, 0),
+                new Balance(new Currency("VET"), 100, 0));
+
+            Assert.Throws<ArgumentException>(() => total.ApplyTradeExecution(algo, trade));
+        }
+
+        [Fact]
         public void ChildrenAreSummed()
         {
             var total = GetDefaultPortfolio();
-            Type algo = typeof(bool);
+            Type algo = typeof(TestAlgorithm);
 
             total.SetAlgorithmAllocation(algo, new Portfolio(new Dictionary<Currency, Balance>
             {
@@ -196,5 +248,17 @@ namespace SpreadShare.Tests.Models
 
             return total;
         }
+
+        #pragma warning disable CA1812
+        internal abstract class TestAlgorithm : BaseAlgorithm
+        {
+            public override Type GetSettingsType { get; }
+
+            public override ResponseObject Start(AlgorithmSettings settings, ExchangeProvidersContainer container)
+            {
+                throw new NotImplementedException();
+            }
+        }
+        #pragma warning restore CA1812
     }
 }

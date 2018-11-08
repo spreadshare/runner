@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpreadShare.Algorithms;
 
 namespace SpreadShare.Models.Trading
 {
@@ -29,6 +30,11 @@ namespace SpreadShare.Models.Trading
             var temp0 = trade ?? throw new ArgumentNullException(nameof(trade));
             var temp1 = algo ?? throw new ArgumentNullException(nameof(algo));
 
+            if (!algo.IsSubclassOf(typeof(BaseAlgorithm)))
+            {
+                throw new ArgumentException(nameof(algo) + " must be a subclass of BaseAlgorithm");
+            }
+
             // Algorithm should always be in _allocations
             if (!_allocations.ContainsKey(algo))
             {
@@ -50,32 +56,47 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Returns the allocation of a certain algorithm
         /// </summary>
-        /// <param name="alg">The algorithm type to evaluate</param>
+        /// <param name="algo">The algorithm type to evaluate</param>
         /// <returns>The algorithm's portfolio</returns>
-        public Portfolio GetAlgorithmAllocation(Type alg)
+        public Portfolio GetAlgorithmAllocation(Type algo)
         {
-            if (!_allocations.ContainsKey(alg))
+            var temp0 = algo ?? throw new ArgumentNullException(nameof(algo));
+
+            if (!algo.IsSubclassOf(typeof(BaseAlgorithm)))
+            {
+                throw new ArgumentException(nameof(algo) + " must be a subclass of BaseAlgorithm");
+            }
+
+            if (!_allocations.ContainsKey(algo))
             {
                 return Portfolio.Empty;
             }
 
-            return _allocations[alg];
+            return _allocations[algo];
         }
 
         /// <summary>
         /// Set the allocation of a certain algorithm using an assets representation.
         /// </summary>
-        /// <param name="alg">The algorithm type to evaluate</param>
+        /// <param name="algo">The algorithm type to evaluate</param>
         /// <param name="alloc">The allocation as assets</param>
-        public void SetAlgorithmAllocation(Type alg, Portfolio alloc)
+        public void SetAlgorithmAllocation(Type algo, Portfolio alloc)
         {
-            if (_allocations.ContainsKey(alg))
+            var temp0 = algo ?? throw new ArgumentNullException(nameof(algo));
+            var temp1 = alloc ?? throw new ArgumentNullException(nameof(alloc));
+
+            if (!algo.IsSubclassOf(typeof(BaseAlgorithm)))
             {
-                _allocations[alg] = alloc;
+                throw new ArgumentException(nameof(algo) + " must be a subclass of BaseAlgorithm");
+            }
+
+            if (_allocations.ContainsKey(algo))
+            {
+                _allocations[algo] = alloc;
                 return;
             }
 
-            _allocations.Add(alg, alloc);
+            _allocations.Add(algo, alloc);
         }
 
         /// <summary>
