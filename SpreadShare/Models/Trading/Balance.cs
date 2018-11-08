@@ -61,5 +61,11 @@ namespace SpreadShare.Models.Trading
         /// <param name="c">Currency to represent</param>
         /// <returns>A zero initiated balance object</returns>
         public static Balance Empty(Currency c) => new Balance(c, 0.0M, 0.0M);
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{Symbol} -> {Free}|{Locked}";
+        }
     }
 }
