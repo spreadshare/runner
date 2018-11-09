@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms.Implementations;
@@ -33,6 +34,35 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         public void ConstructorHappyFlow()
         {
             var allocationManager = new AllocationManager(LoggerFactory, _fetcher);
+        }
+
+        [Fact]
+        public void ValidateAllocationsRequired()
+        {
+            var allocationManager = new AllocationManager(LoggerFactory, _fetcher);
+
+            Currency c = new Currency("ETH");
+
+            Assert.Throws<ArgumentNullException>(() => allocationManager.CheckFunds(
+                Exchange.Backtesting,
+                typeof(SimpleBandWagonAlgorithm),
+                c,
+                10));
+
+            Assert.Throws<ArgumentNullException>(() => allocationManager.GetAvailableFunds(
+                Exchange.Backtesting,
+                typeof(SimpleBandWagonAlgorithm),
+                c));
+
+            Assert.Throws<ArgumentNullException>(() => allocationManager.GetAllFunds(
+                Exchange.Backtesting,
+                typeof(SimpleBandWagonAlgorithm)));
+
+            Assert.Throws<ArgumentNullException>(() => allocationManager.QueueTrade(
+                new TradeProposal(new Balance(c, 10, 10)),
+                typeof(SimpleBandWagonAlgorithm),
+                Exchange.Backtesting,
+                () => new TradeExecution(Balance.Empty(c), Balance.Empty(c))));
         }
 
         /// <summary>
@@ -120,7 +150,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
             var proposal = new TradeProposal(balance);
 
-            bool result = alloc.QueueTrade(proposal, () => { return null; });
+            bool result = alloc.QueueTrade(proposal, () => null);
             Assert.True(result, "Valid proposal was not executed");
 
             // Assert that the allocation was not mutated
