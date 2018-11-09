@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {

@@ -29,6 +29,9 @@ Each time the database schema changes, the following command needs to be ran.
 dotnet ef migrations add [MigrationTitle]
 ```
 
+### Dawn's Guard plugin
+For argument checking, the project consistenly uses the Guard plugin from Dawn. This plugin requires at least C#7.2. You can review the documentation here https://github.com/safakgur/guard
+
 ### Code coverage report
 To generate a html code coverage report using minicover, you can run the `generate-report.sh` script from within the /SpreadShare.Tests folder. You can enter the exact name of a test class as filter as an optional first argument. When it has finished it will open /SpreadShare/coverage-html/index.html in the default browser using python.
 

@@ -3,13 +3,14 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
     /// <summary>
     /// Provides trading capabilities for Binance.
     /// </summary>
-    internal class BinanceTradingProvider : AbstractTradingProvider, IExchangeSpecification
+    internal class BinanceTradingProvider : AbstractTradingProvider
     {
         private readonly BinanceCommunicationsService _communications;
 
@@ -25,24 +26,24 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject PlaceFullMarketOrder(CurrencyPair pair, Models.OrderSide side, decimal amount)
+        public override ResponseObject<decimal> PlaceFullMarketOrder(TradingPair pair, Models.OrderSide side, decimal amount)
         {
             var client = _communications.Client;
 
             var query = client.PlaceOrder(pair.ToString(), BinanceUtilities.ToExternal(side), OrderType.Market, amount);
             if (query.Success)
             {
-                return new ResponseObject(ResponseCode.Success);
+                return new ResponseObject<decimal>(ResponseCode.Success, query.Data.ExecutedQuantity);
             }
 
             Logger.LogWarning(query.ToString());
 
             Logger.LogWarning($"Placing market order {side} {amount}{pair} failed");
-            return new ResponseObject(ResponseCode.Error);
+            return new ResponseObject<decimal>(ResponseCode.Error, 0.0M);
         }
 
         /// <inheritdoc />
-        public override ResponseObject CancelOrder(CurrencyPair pair, long orderId)
+        public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
             // set alias for more readable code
             var client = _communications.Client;
@@ -55,8 +56,5 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
 
             return new ResponseObject(ResponseCode.Success);
         }
-
-        /// <inheritdoc />
-        public Exchange GetExchangeType() => Exchange.Binance;
     }
 }

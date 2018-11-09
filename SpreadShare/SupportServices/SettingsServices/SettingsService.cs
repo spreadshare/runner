@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 
 namespace SpreadShare.SupportServices.SettingsServices
 {
@@ -57,6 +58,11 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// </summary>
         public SimpleBandWagonAlgorithmSettings SimpleBandWagonAlgorithmSettings { get; private set; }
 
+        /// <summary>
+        /// Gets the initial portfolio representing the state of the backtesting exchange.
+        /// </summary>
+        public Portfolio BacktestInitialPortfolio { get; private set; }
+
         /// <inheritdoc />
         public ResponseObject Start()
         {
@@ -67,6 +73,7 @@ namespace SpreadShare.SupportServices.SettingsServices
                 DownloadCurrencies();
                 ParseSimpleBandwagonSettings();
                 BinanceSettings = _configuration.GetSection("BinanceClientSettings").Get<BinanceSettings>();
+                BacktestInitialPortfolio = ParseBacktestPortfolio();
             }
             catch (Exception e)
             {
@@ -176,10 +183,10 @@ namespace SpreadShare.SupportServices.SettingsServices
 
                     // Add the instance to the parseTable to make it available for parsing
                     int decimals = -(int)Math.Log10((double)stepSize);
-                    var result = new CurrencyPair(new Currency(left), new Currency(right), decimals);
+                    var result = new TradingPair(new Currency(left), new Currency(right), decimals);
                     try
                     {
-                        CurrencyPair.AddParseEntry(pair.Value, result);
+                        TradingPair.AddParseEntry(pair.Value, result);
                     }
                     catch (ArgumentException)
                     {
@@ -201,7 +208,7 @@ namespace SpreadShare.SupportServices.SettingsServices
                 .Get<List<string>>();
 
             // Map the trading pairs to currencies by parsing and assign to the settings.
-            SimpleBandWagonAlgorithmSettings.ActiveTradingPairs = currencies.Select(CurrencyPair.Parse).ToList();
+            SimpleBandWagonAlgorithmSettings.ActiveTradingPairs = currencies.Select(TradingPair.Parse).ToList();
 
             // Parse the base currency string to a Currency type
             var baseStr = _configuration.GetSection("SimpleBandWagonAlgorithm:BaseCurrency").Get<string>();
@@ -259,6 +266,18 @@ namespace SpreadShare.SupportServices.SettingsServices
                     AllocationSettings[exchangeEnum].Add(algorithmType, allocation);
                 }
             }
+        }
+
+        private Portfolio ParseBacktestPortfolio()
+        {
+            var rawJson = _configuration.GetSection("BacktestPortfolio").GetChildren();
+            var parsed = rawJson.ToDictionary(
+                x => new Currency(x.Key.ToString(CultureInfo.InvariantCulture)),
+                x => new Balance(
+                    new Currency(x.Key.ToString(CultureInfo.InvariantCulture)),
+                    x.GetValue<decimal>("Free"),
+                    x.GetValue<decimal>("Locked")));
+            return new Portfolio(parsed);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using SpreadShare.ExchangeServices.Providers;
 
 namespace SpreadShare.ExchangeServices.Allocation
 {
@@ -12,7 +11,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// Trigger an update in the observer.
         /// </summary>
         /// <param name="algorithm">Algorithm that has traded</param>
-        /// <param name="exchangeSpecification">Specifies which exchange is used</param>
-        void Update(Type algorithm, IExchangeSpecification exchangeSpecification);
+        /// <param name="exchange">Specifies which exchange is used</param>
+        void Update(Type algorithm, Exchange exchange);
     }
 }

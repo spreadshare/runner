@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using CommandLine;
-using CSharpx;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
-using SpreadShare.ZeroMQ;
 
 namespace SpreadShare
 {

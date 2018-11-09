@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.ExchangeServices.ProvidersBinance;
-using SpreadShare.Models;
 using SpreadShare.SupportServices;
 
 namespace SpreadShare.ExchangeServices
@@ -18,18 +18,24 @@ namespace SpreadShare.ExchangeServices
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly BinanceCommunicationsService _binanceCommunications;
+        private readonly BacktestCommunicationService _backtestCommunicationService;
         private readonly DatabaseContext _databaseContext;
+        private readonly AllocationManager _allocationManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExchangeFactoryService"/> class.
         /// </summary>
         /// <param name="loggerFactory">Provides logging</param>
         /// <param name="context">Injected database context</param>
+        /// <param name="alloc">Injected AllocationManager service</param>
         /// <param name="binanceComm">Injected binance communication service</param>
+        /// <param name="backtestCom">Injected backtest communication service</param>
         public ExchangeFactoryService(
             ILoggerFactory loggerFactory,
             DatabaseContext context,
-            BinanceCommunicationsService binanceComm)
+            AllocationManager alloc,
+            BinanceCommunicationsService binanceComm,
+            BacktestCommunicationService backtestCom)
         {
             _logger = loggerFactory.CreateLogger<ExchangeFactoryService>();
             _loggerFactory = loggerFactory;
@@ -38,6 +44,9 @@ namespace SpreadShare.ExchangeServices
 
             // Link communication services
             _binanceCommunications = binanceComm;
+            _backtestCommunicationService = backtestCom;
+
+            _allocationManager = alloc;
         }
 
         /// <summary>
@@ -45,12 +54,10 @@ namespace SpreadShare.ExchangeServices
         /// </summary>
         /// <param name="exchange">Specifies which container to create</param>
         /// <param name="algorithm">The type of the algorithm</param>
-        /// <param name="allocationManager">Provides portfolio access</param>
         /// <returns>Binance container with providers</returns>
         public ExchangeProvidersContainer BuildContainer(
             Exchange exchange,
-            Type algorithm,
-            WeakAllocationManager allocationManager)
+            Type algorithm)
         {
             AbstractDataProvider dataProviderImplementation;
             AbstractTradingProvider tradingProviderImplementation;
@@ -67,14 +74,15 @@ namespace SpreadShare.ExchangeServices
                     // Override timer provider to backtest variant
                     timerProvider = new BacktestTimerProvider(_loggerFactory, DateTimeOffset.Now);
 
-                    dataProviderImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, timerProvider as BacktestTimerProvider);
-                    tradingProviderImplementation = new BacktestTradingProvider(_loggerFactory, timerProvider as BacktestTimerProvider);
+                    dataProviderImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, (BacktestTimerProvider)timerProvider);
+                    tradingProviderImplementation = new BacktestTradingProvider(_loggerFactory, (BacktestTimerProvider)timerProvider);
                     break;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);
             }
 
+            var allocationManager = _allocationManager.GetWeakAllocationManager(algorithm, exchange);
             var dataProvider = new DataProvider(dataProviderImplementation);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingProviderImplementation, dataProvider, allocationManager, algorithm, exchange);
 

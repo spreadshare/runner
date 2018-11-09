@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
@@ -47,62 +48,77 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <returns>Response object indicating success or not</returns>
         /// TODO: Make method algorithm specific
-        public ResponseObject<Assets> GetPortfolio()
+        public Portfolio GetPortfolio()
         {
-            throw new NotImplementedException();
+            return _allocationManager.GetAllFunds();
         }
 
         /// <summary>
         /// Places market order with the full amount of given pair
         /// </summary>
-        /// <param name="pair">Currency pair to trade with</param>
+        /// <param name="pair">trading pair to trade with</param>
         /// <param name="side">Whether to buy or sell</param>
         /// <returns>A response object indicating the status of the market order</returns>
-        public ResponseObject PlaceFullMarketOrder(CurrencyPair pair, OrderSide side)
+        public ResponseObject PlaceFullMarketOrder(TradingPair pair, OrderSide side)
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            decimal amount = _allocationManager.GetAvailableFunds(_exchange, _algorithm, currency);
+            Balance amount = _allocationManager.GetAvailableFunds(currency);
+            var proposal = new TradeProposal(new Balance(currency, amount.Free, 0.0M));
 
-            // Calculate amount of non base currency to buy
-            if (side == OrderSide.Buy)
+            var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                var query = _dataProvider.GetCurrentPriceTopAsk(pair);
-                if (!query.Success)
+                ResponseObject<decimal> query = null;
+                decimal tradeAmount = proposal.From.Free;
+                for (uint retries = 0; retries < 5; retries++)
                 {
+                    // Estimate the value that will be obtained from the order when buying.
+                    tradeAmount = side == OrderSide.Buy ? GetBuyAmountEstimate(pair, proposal.From.Free) : proposal.From.Free;
+                    query = _implementation.PlaceFullMarketOrder(pair, side, tradeAmount);
+                    if (query.Success)
+                    {
+                        break;
+                    }
+
                     _logger.LogWarning(query.ToString());
-                    return new ResponseObject(ResponseCode.Success);
                 }
 
-                amount /= query.Data;
-            }
-
-            uint retries = 0;
-
-            while (retries++ < 5)
-            {
-                var query = _implementation.PlaceFullMarketOrder(pair, side, amount);
                 if (!query.Success)
                 {
-                    _logger.LogWarning(query.ToString());
-                    continue;
+                    _logger.LogError($"Trade for {pair} failed after 5 retries");
+                    return null;
                 }
 
-                return new ResponseObject(ResponseCode.Success);
-            }
+                // Report the trade with the actual amount as communicated by the exchange.
+                // TODO: Is this correct???
+                return new TradeExecution(
+                    new Balance(pair.Left, proposal.From.Free, 0.0M),
+                    new Balance(pair.Right, query.Data, 0.0M));
+            });
 
-            _logger.LogError($"Trade for {pair} failed after 5 retries");
-            return new ResponseObject(ResponseCode.Error);
+            return tradeSuccess ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);
         }
 
         /// <summary>
         /// Cancels order
         /// </summary>
-        /// <param name="pair">Currency pair in which the order is found</param>
+        /// <param name="pair">trading pair in which the order is found</param>
         /// <param name="orderId">Id of the order</param>
         /// <returns>A response object with the results of the action</returns>
-        public ResponseObject CancelOrder(CurrencyPair pair, long orderId)
+        public ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
             return _implementation.CancelOrder(pair, orderId);
+        }
+
+        private decimal GetBuyAmountEstimate(TradingPair pair, decimal baseAmount)
+        {
+            var query = _dataProvider.GetCurrentPriceTopAsk(pair);
+            if (!query.Success)
+            {
+                _logger.LogWarning(query.ToString());
+                return 0.0M;
+            }
+
+            return baseAmount / query.Data;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+using System;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
@@ -42,10 +41,12 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run()
             {
                 Logger.LogInformation("Started the simple bandwagon algorithm");
-                SwitchState(new CheckPositionValidityState());
+
+                // SwitchState(new CheckPositionValidityState());
             }
         }
 
+        /*
         /// <summary>
         /// Checks if the winner is not already the majority share of the portfolio.
         /// </summary>
@@ -96,10 +97,10 @@ namespace SpreadShare.Algorithms.Implementations
                 // 2. Order by this newgained value, making the last element the most valuable.
                 var sorted = assets.ToArray().Select(x =>
                 {
-                    CurrencyPair pair;
+                    TradingPair pair;
                     try
                     {
-                        pair = CurrencyPair.Parse($"{x.Symbol}{baseSymbol}");
+                        pair = TradingPair.Parse($"{x.Symbol}{baseSymbol}");
                     }
                     catch
                     {
@@ -160,10 +161,10 @@ namespace SpreadShare.Algorithms.Implementations
                     }
 
                     // Try to get a valid pair against the base assets
-                    CurrencyPair pair;
+                    TradingPair pair;
                     try
                     {
-                        pair = CurrencyPair.Parse($"{asset.Symbol}{baseSymbol}");
+                        pair = TradingPair.Parse($"{asset.Symbol}{baseSymbol}");
                     }
                     catch (Exception)
                     {
@@ -320,6 +321,6 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 SetTimer(_idleTime);
             }
-        }
+        }*/
     }
 }

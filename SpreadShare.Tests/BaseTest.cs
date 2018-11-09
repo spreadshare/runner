@@ -1,7 +1,6 @@
 ﻿using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
 using SpreadShare.SupportServices.SettingsServices;
 using Xunit.Abstractions;
 
