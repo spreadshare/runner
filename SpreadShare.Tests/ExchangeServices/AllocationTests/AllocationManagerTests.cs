@@ -37,17 +37,11 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         }
 
         [Fact]
-        public void ValidateAllocationsRequired()
+        public void ValidateAllocationsSetRequired()
         {
             var allocationManager = new AllocationManager(LoggerFactory, _fetcher);
 
             Currency c = new Currency("ETH");
-
-            Assert.Throws<ArgumentNullException>(() => allocationManager.CheckFunds(
-                Exchange.Backtesting,
-                typeof(SimpleBandWagonAlgorithm),
-                c,
-                10));
 
             Assert.Throws<ArgumentNullException>(() => allocationManager.GetAvailableFunds(
                 Exchange.Backtesting,
@@ -65,10 +59,6 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                 () => new TradeExecution(Balance.Empty(c), Balance.Empty(c))));
         }
 
-        /// <summary>
-        /// Tests if the remote portfolio is allocated correctly
-        /// </summary>
-        /// <param name="factor">Allocation factor</param>
         [Theory]
         [InlineData(1)]
         [InlineData(0.001)]
@@ -90,6 +80,25 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             var local = SettingsService.BacktestInitialPortfolio.GetAllocation(c);
             var amount = alloc.GetAvailableFunds(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithm), c);
             Assert.Equal(local.Free * factor, amount.Free);
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(-0.0001)]
+        [InlineData(2.5)]
+        public void SetAllocationInvalidFactor(decimal factor)
+        {
+            var alloc = new AllocationManager(LoggerFactory, _fetcher);
+            Assert.Throws<ArgumentException>(() => alloc.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>
+            {
+                {
+                    Exchange.Backtesting,
+                    new Dictionary<Type, decimal>
+                    {
+                        { typeof(SimpleBandWagonAlgorithm), factor }
+                    }
+                }
+            }));
         }
 
         [Fact]
@@ -143,6 +152,14 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         }
 
         [Fact]
+        public void QueueTradeNull()
+        {
+            Type algo = typeof(SimpleBandWagonAlgorithm);
+            var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
+            Assert.Throws<ArgumentNullException>(() => alloc.QueueTrade(null, () => null));
+        }
+
+        [Fact]
         public void QueueTradeReportNull()
         {
             Type algo = typeof(SimpleBandWagonAlgorithm);
@@ -156,6 +173,31 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             // Assert that the allocation was not mutated
             Assert.Equal(proposal.From.Free, alloc.GetAvailableFunds(proposal.From.Symbol).Free);
             Assert.Equal(proposal.From.Locked, alloc.GetAvailableFunds(proposal.From.Symbol).Locked);
+        }
+
+        [Fact]
+        public void GetAllFundsHappyFlow()
+        {
+            Type algo = typeof(SimpleBandWagonAlgorithm);
+            var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
+            var funds = alloc.GetAllFunds();
+            Assert.NotNull(funds);
+            Assert.Equal(SortedSettingsBalances.Count(), funds.AllBalances().Count());
+        }
+
+        [Fact]
+        public void GetAllFundEmpty()
+        {
+            Type algo = typeof(SimpleBandWagonAlgorithm);
+            var totalalloc = new AllocationManager(LoggerFactory, _fetcher);
+            totalalloc.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>
+            {
+                { Exchange.Backtesting, new Dictionary<Type, decimal>() }
+            });
+            var alloc = totalalloc.GetWeakAllocationManager(algo, Exchange.Backtesting);
+            var funds = alloc.GetAllFunds();
+            Assert.NotNull(funds);
+            Assert.Empty(funds.AllBalances());
         }
 
         private AllocationManager MakeDefaultAllocation(decimal scale = 1.0M)

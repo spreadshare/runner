@@ -26,15 +26,6 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <summary>
-        /// Check if algorithm has enough of certain currency
-        /// </summary>
-        /// <param name="currency">The currency to be sold</param>
-        /// <param name="fundsToTrade">The amount to be sold of given currency</param>
-        /// <returns>Returns if enough funds are present to execute the trade</returns>
-        public bool CheckFunds(Currency currency, decimal fundsToTrade)
-            => _allocationManager.CheckFunds(_exchange, _algorithm, currency, fundsToTrade);
-
-        /// <summary>
         /// Get available funds for a given algorithm and currency.
         /// </summary>
         /// <param name="currency">Currency to get funds for</param>
