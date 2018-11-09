@@ -4,7 +4,6 @@ using System.Linq;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace SpreadShare.Tests.Models
 {
@@ -97,9 +96,6 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(locked2, second.GetAllocation(c).Locked);
         }
 
-        /// <summary>
-        /// Tests if partial overlapping portfolios are summed together correctly.
-        /// </summary>
         [Fact]
         public void BalancesAreSummedPartialOverlap()
         {
@@ -130,6 +126,30 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
+        public void BalancesAreSummedNoOverlap()
+        {
+            Currency c1 = new Currency("ETH");
+            Currency c2 = new Currency("BTC");
+
+            var first = new Portfolio(new Dictionary<Currency, Balance>()
+            {
+                { c1, new Balance(c1, 4.0M, 1M) }
+            });
+
+            var second = new Portfolio(new Dictionary<Currency, Balance>()
+            {
+                { c2, new Balance(c2, 1.0M, 5.5M) }
+            });
+
+            var result = Portfolio.Add(first, second);
+
+            Assert.Equal(4.0M, result.GetAllocation(c1).Free);
+            Assert.Equal(1.0M, result.GetAllocation(c1).Locked);
+            Assert.Equal(1.0M, result.GetAllocation(c2).Free);
+            Assert.Equal(5.5M, result.GetAllocation(c2).Locked);
+        }
+
+        [Fact]
         public void BalancesAreSummedNull()
         {
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
@@ -147,7 +167,7 @@ namespace SpreadShare.Tests.Models
             });
 
             var balances = portfolio.AllBalances().ToList();
-            Assert.Equal(2, balances.Count());
+            Assert.Equal(2, balances.Count);
             Assert.Contains(new Balance(new Currency("VET"), 0, 0), balances);
             Assert.Contains(new Balance(new Currency("BTC"), 0, 0), balances);
         }
@@ -160,10 +180,10 @@ namespace SpreadShare.Tests.Models
         }
 
         /// <summary>
-        /// Tests if a trade execution is digested correctly.
+        /// Tests if a trade execution is Processed correctly.
         /// </summary>
         [Fact]
-        public void TradeIsDigested()
+        public void TradeIsProcessed()
         {
             Currency c1 = new Currency("BTC");
             Currency c2 = new Currency("ETH");
@@ -183,35 +203,33 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
-        public void TradeIsDigestedNull()
+        public void TradeIsProcessedFreeToLocked()
+        {
+            Currency c1 = new Currency("BTC");
+            var trade = new TradeExecution(
+                new Balance(c1, 2.0M, 0.0M),
+                new Balance(c1, 0.0M, 2.0M));
+
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
+            {
+                { c1, new Balance(c1, 2.5M, 0.0M) }
+            });
+
+            portfolio.UpdateAllocation(trade);
+
+            Assert.Equal(0.5M, portfolio.GetAllocation(c1).Free);
+            Assert.Equal(2.0M, portfolio.GetAllocation(c1).Locked);
+        }
+
+        [Fact]
+        public void TradeIsProcessedNull()
         {
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
             Assert.Throws<ArgumentNullException>(() => portfolio.UpdateAllocation(null));
         }
 
-        /// <summary>
-        /// Checks if an invalid trade execution throws
-        /// (This should have been mitigated by using a TradeProposal before hand)
-        /// </summary>
         [Fact]
-        public void InvalidTradeIsRejected()
-        {
-            Currency c1 = new Currency("BTC");
-            Currency c2 = new Currency("ETH");
-            var trade = new TradeExecution(
-                new Balance(c1, 0.6M, 0.0M),
-                new Balance(c2, 11.0M, 0.0M));
-
-            var portfolio = new Portfolio(new Dictionary<Currency, Balance>
-            {
-                { c1, new Balance(c1, 0.57M, 0.0M) }
-            });
-
-            Assert.Throws<InvalidOperationException>(() => portfolio.UpdateAllocation(trade));
-        }
-
-        [Fact]
-        public void DuplicateWithScale()
+        public void DuplicateWithScaleHappyFlow()
         {
             Currency c1 = new Currency("BTC");
             Currency c2 = new Currency("ETH");
@@ -233,7 +251,8 @@ namespace SpreadShare.Tests.Models
         public void DuplicateWithScaleExactlyOne()
         {
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-            Portfolio.DuplicateWithScale(portfolio, 1);
+            var scaled = Portfolio.DuplicateWithScale(portfolio, 1);
+            Assert.True(!scaled.AllBalances().Any());
         }
 
         [Fact]
@@ -262,7 +281,7 @@ namespace SpreadShare.Tests.Models
             var first = new Portfolio(new Dictionary<Currency, Balance>
             {
                 { c1, new Balance(c1, 0.4M, 10M) },
-                { c2, new Balance(c2, 0.45M, 0) },
+                { c2, new Balance(c2, -0.45M, 0) },
                 { c3, new Balance(c3, 0.66M, 1.0M) }
             });
 
@@ -285,7 +304,7 @@ namespace SpreadShare.Tests.Models
                          Assert.Equal(0.0M, balance.Locked);
                          break;
                     case "ETH":
-                        Assert.Equal(-0.15M, balance.Free);
+                        Assert.Equal(-1.05M, balance.Free);
                         Assert.Equal(0.0M, balance.Locked);
                         break;
                      case "VET":
@@ -313,15 +332,18 @@ namespace SpreadShare.Tests.Models
         {
             Currency c1 = new Currency("ETH");
             Currency c2 = new Currency("BTC");
+            Currency c3 = new Currency("VET");
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
             {
                 { c1, new Balance(c1, 1.0M, 2.0M) },
-                { c2, new Balance(c2, 99.0M, 0.0M) }
+                { c2, new Balance(c2, 99.0M, 0.0M) },
+                { c3, new Balance(c3, 0.0M, 0.0M) }
             });
 
             string str = portfolio.ToJson();
             Assert.Contains("\"ETH\"", str, StringComparison.Ordinal);
             Assert.Contains("\"BTC\"", str, StringComparison.Ordinal);
+            Assert.DoesNotContain("\"VET\"", str, StringComparison.Ordinal);
             Assert.Contains("\"Free\"", str, StringComparison.Ordinal);
             Assert.Contains("\"Locked\"", str, StringComparison.Ordinal);
             Assert.Contains(".", str, StringComparison.Ordinal);

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata;
 using Dawn;
 using Newtonsoft.Json;
 
@@ -39,13 +38,13 @@ namespace SpreadShare.Models.Trading
         {
             Guard.Argument(first).NotNull();
             Guard.Argument(second).NotNull();
-            var foo = first._dict;
-            var bar = second._dict;
-            var allKeys = foo.Keys.Union(bar.Keys);
+            var firstDict = first._dict;
+            var secondDict = second._dict;
+            var allKeys = firstDict.Keys.Union(secondDict.Keys);
             var res = allKeys.ToDictionary(key => key, key => new Balance(
                 key,
-                (foo.Keys.Contains(key) ? foo[key].Free : 0.0M) + (bar.Keys.Contains(key) ? bar[key].Free : 0.0M),
-                (foo.Keys.Contains(key) ? foo[key].Locked : 0.0M) + (bar.Keys.Contains(key) ? bar[key].Locked : 0.0M)));
+                (firstDict.Keys.Contains(key) ? firstDict[key].Free : 0.0M) + (secondDict.Keys.Contains(key) ? secondDict[key].Free : 0.0M),
+                (firstDict.Keys.Contains(key) ? firstDict[key].Locked : 0.0M) + (secondDict.Keys.Contains(key) ? secondDict[key].Locked : 0.0M)));
             return new Portfolio(res);
         }
 
@@ -111,13 +110,6 @@ namespace SpreadShare.Models.Trading
         public void UpdateAllocation(TradeExecution trade)
         {
             Guard.Argument(trade).NotNull();
-
-            // TODO: Offset for dust?
-            if (_dict[trade.From.Symbol].Free < trade.From.Free || _dict[trade.From.Symbol].Locked < trade.From.Locked)
-            {
-                // TODO: Report a critical error that shutdowns all algorithms
-                throw new InvalidOperationException("Trade was invalid with respect to the allocation!");
-            }
 
             // Substract left side of the trade
             _dict[trade.From.Symbol] -= trade.From;

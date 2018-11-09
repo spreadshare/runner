@@ -67,7 +67,7 @@ namespace SpreadShare.Tests.Models
         {
             var total = new TotalPortfolio();
             Type algo1 = typeof(SimpleBandWagonAlgorithm);
-            Type algo2 = typeof(TestAlgorithm); // Any type will do for now
+            Type algo2 = typeof(TestAlgorithm);
             total.SetAlgorithmAllocation(algo1, new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 2.001M, 4) },
@@ -173,7 +173,7 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
-        public void TradeIsDigestedHappyFlow()
+        public void TradeIsProcessedHappyFlow()
         {
             var total = GetDefaultPortfolio();
             Type algo = typeof(SimpleBandWagonAlgorithm);
@@ -188,7 +188,7 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
-        public void TradeIsDigestedNull()
+        public void TradeIsProcessedNull()
         {
             var total = GetDefaultPortfolio();
             Type algo = typeof(SimpleBandWagonAlgorithm);
@@ -201,7 +201,7 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
-        public void TradeIsDigestedInvalidAlgorithm()
+        public void TradeIsProcessedInvalidAlgorithm()
         {
             var total = new TotalPortfolio();
             Type algo = typeof(bool);
@@ -250,7 +250,7 @@ namespace SpreadShare.Tests.Models
         }
 
         #pragma warning disable CA1812
-        internal abstract class TestAlgorithm : BaseAlgorithm
+        private abstract class TestAlgorithm : BaseAlgorithm
         {
             public override Type GetSettingsType { get; }
 
