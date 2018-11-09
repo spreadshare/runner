@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <ApplicationIcon />
     <StartupObject>SpreadShare.Program</StartupObject>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -16,6 +17,7 @@
     <PackageReference Include="Binance.Net" Version="3.2.8" />
     <PackageReference Include="CommandLineParser" Version="2.3.0" />
     <PackageReference Include="Cron" Version="1.0.2" />
+    <PackageReference Include="Dawn.Guard" Version="1.6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

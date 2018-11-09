@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models.Trading;
 
@@ -83,6 +84,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <returns>Returns if enough funds are present to execute the trade</returns>
         public bool CheckFunds(Exchange exchange, Type algorithm, Currency currency, decimal fundsToTrade)
         {
+            Guard.Argument(_allocations).NotNull("Initialise allocations first");
+
             // Check if exchange is used
             if (!_allocations.ContainsKey(exchange))
             {
@@ -108,6 +111,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <returns>Portfolio containing all available funds</returns>
         public Portfolio GetAllFunds(Exchange exchange, Type algorithm)
         {
+            Guard.Argument(_allocations).NotNull("Initialise allocations first");
+
             return _allocations[exchange].GetAlgorithmAllocation(algorithm);
         }
 
@@ -120,6 +125,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <returns>Available funds or -1 if not available</returns>
         public Balance GetAvailableFunds(Exchange exchange, Type algorithm, Currency currency)
         {
+            Guard.Argument(_allocations).NotNull("Initialise allocations first");
+
             // Check if exchange is used
             if (!_allocations.ContainsKey(exchange))
             {
@@ -164,6 +171,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <returns>Boolean indicating successful execution of the callback</returns>
         public bool QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<TradeExecution> tradeCallback)
         {
+            Guard.Argument(_allocations).NotNull("Initialise allocations first");
+
             var alloc = GetAvailableFunds(exchange, algorithm, p.From.Symbol);
             if (alloc.Free < p.From.Free || alloc.Locked < p.From.Locked)
             {

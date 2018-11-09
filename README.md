@@ -29,6 +29,9 @@ Each time the database schema changes, the following command needs to be ran.
 dotnet ef migrations add [MigrationTitle]
 ```
 
+### Dawn's Guard plugin
+For argument checking, the project consistenly uses the Guard plugin from Dawn. This plugin requires at least C#7.2. You can review the documentation here https://github.com/safakgur/guard
+
 ### Architecture
 This is a console application written in [ASP.Net Core 2.1](https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-2.1). [Dependency injection](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1) is used for injecting common dependencies (such as database context and logger factories). Different modules are separated in services which are registered in `Startup.cs` and can be accessed via a `ServiceCollection`. A [PostgreSQL](https://www.postgresql.org/) database is connected with a database context. This database runs in a separate Docker container. There are three Docker containers in total: SpreadShare, the database and a ZeroMQ-enabled python application.
 

@@ -29,8 +29,8 @@ namespace SpreadShare.Tests.Models
         public void ConstructorNull()
         {
             var currency = new Currency("ETH");
-            Assert.Throws<ArgumentException>(() => new TradingPair(null, currency, 0));
-            Assert.Throws<ArgumentException>(() => new TradingPair(currency, null, 0));
+            Assert.Throws<ArgumentNullException>(() => new TradingPair(null, currency, 0));
+            Assert.Throws<ArgumentNullException>(() => new TradingPair(currency, null, 0));
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace SpreadShare.Tests.Models
             var left = new Currency("BNB");
             var right = new Currency("ETH");
             int decimals = -1;
-            Assert.Throws<ArgumentException>(() => new TradingPair(left, right, decimals));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new TradingPair(left, right, decimals));
         }
 
         [Fact]
@@ -92,8 +92,8 @@ namespace SpreadShare.Tests.Models
         {
             var pair = GetTradingPair("BNB", "ETH");
 
-            Assert.Throws<ArgumentException>(() => TradingPair.AddParseEntry("BNBETH", null));
-            Assert.Throws<ArgumentException>(() => TradingPair.AddParseEntry(null, pair));
+            Assert.Throws<ArgumentNullException>(() => TradingPair.AddParseEntry("BNBETH", null));
+            Assert.Throws<ArgumentNullException>(() => TradingPair.AddParseEntry(null, pair));
         }
 
         [Fact]
@@ -121,7 +121,7 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void ParseFromStringNull()
         {
-            Assert.Throws<ArgumentException>(() => TradingPair.Parse(null));
+            Assert.Throws<ArgumentNullException>(() => TradingPair.Parse(null));
         }
 
         [Fact]
