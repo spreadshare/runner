@@ -33,6 +33,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public long CurrentMinuteEpoc => CurrentTime.ToUnixTimeMilliseconds() - (CurrentTime.ToUnixTimeMilliseconds() % 60000);
 
         /// <inheritdoc />
+        public DateTimeOffset GetCurrentTime() => CurrentTime;
+
+        /// <inheritdoc />
         public void SetTimer(uint minutes, Action callback)
         {
             CurrentTime += TimeSpan.FromMinutes(minutes);
@@ -42,7 +45,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public void StopTimer()
         {
-            throw new NotImplementedException();
+            _logger.LogWarning("Backtesting timer was stopped, but this has no effect, as the timer elapses instantly");
         }
     }
 }

@@ -77,6 +77,7 @@ namespace SpreadShare.Algorithms
             _logger.LogInformation($"STATE SWITCH: {CurrentState} ---> {child.GetType().ToString().Split('+').Last()}");
 
             Interlocked.Exchange(ref _activeState, child);
+
             child.Activate(AlgorithmSettings, Container.TradingProvider, _loggerFactory);
         }
     }
