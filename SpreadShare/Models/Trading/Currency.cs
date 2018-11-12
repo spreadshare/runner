@@ -1,4 +1,5 @@
 using System;
+using Dawn;
 using Newtonsoft.Json;
 using SpreadShare.Models.Serializers;
 
@@ -16,11 +17,7 @@ namespace SpreadShare.Models.Trading
         /// <param name="symbol">The symbol of a currency</param>
         public Currency(string symbol)
         {
-            if (string.IsNullOrWhiteSpace(symbol))
-            {
-                throw new ArgumentException("Currency symbol can't be an empty string");
-            }
-
+            Guard.Argument(symbol).NotNull().NotEmpty().NotWhiteSpace();
             Symbol = symbol.ToUpperInvariant().Trim();
         }
 

@@ -1,6 +1,4 @@
 using System;
-using System.Numerics;
-using Microsoft.Extensions.Logging;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
@@ -43,6 +41,12 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(currency, balance.Symbol);
             Assert.Equal(0, balance.Free);
             Assert.Equal(0, balance.Locked);
+        }
+
+        [Fact]
+        public void MonoidConstructorNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => Balance.Empty(null));
         }
 
         [Fact]
@@ -90,6 +94,13 @@ namespace SpreadShare.Tests.Models
             Balance right = new Balance(new Currency("BTC"), 0, 0);
             Assert.Throws<InvalidOperationException>(() => left + right);
             Assert.Throws<InvalidOperationException>(() => left - right);
+        }
+
+        [Fact]
+        public void ToStringTest()
+        {
+            Balance balance = new Balance(new Currency("ETH"), 3, 5.5M);
+            Assert.Equal("ETH -> 3|5.5", balance.ToString());
         }
     }
 }

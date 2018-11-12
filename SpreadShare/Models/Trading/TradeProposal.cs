@@ -1,5 +1,3 @@
-using System;
-
 namespace SpreadShare.Models.Trading
 {
     /// <summary>

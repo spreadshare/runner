@@ -40,7 +40,7 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void ConstructorNull()
         {
-            Assert.Throws<ArgumentException>(() => new Currency(null));
+            Assert.Throws<ArgumentNullException>(() => new Currency(null));
         }
 
         /// <summary>

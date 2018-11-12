@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models.Trading;
 
@@ -37,10 +38,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         public void SetInitialConfiguration(Dictionary<Exchange, Dictionary<Type, decimal>> initialAllocations)
         {
             // Make sure AllocationManager is not already configured
-            if (_allocations != null)
-            {
-                throw new Exception("AllocationManager already configured");
-            }
+            Guard.Argument(_allocations).Null(_ => "Allocation manager is already configured");
 
             // Initialise _allocations
             _allocations = new Dictionary<Exchange, TotalPortfolio>();
@@ -74,33 +72,6 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <summary>
-        /// Check if algorithm has enough of certain currency
-        /// </summary>
-        /// <param name="exchange">Exchange to trade on</param>
-        /// <param name="algorithm">The algorithm that wants to execute a trade</param>
-        /// <param name="currency">The currency to be sold</param>
-        /// <param name="fundsToTrade">The amount to be sold of given currency</param>
-        /// <returns>Returns if enough funds are present to execute the trade</returns>
-        public bool CheckFunds(Exchange exchange, Type algorithm, Currency currency, decimal fundsToTrade)
-        {
-            // Check if exchange is used
-            if (!_allocations.ContainsKey(exchange))
-            {
-                _logger.LogTrace($"CheckFunds: Exchange {exchange} not available.");
-                return false;
-            }
-
-            // Check if algorithm is allocated
-            if (!_allocations[exchange].IsAllocated(algorithm))
-            {
-                _logger.LogTrace($"CheckFunds: Algorithm {algorithm} not available.");
-                return false;
-            }
-
-            return _allocations[exchange].GetAlgorithmAllocation(algorithm).GetAllocation(currency).Free >= fundsToTrade;
-        }
-
-        /// <summary>
         /// Gives the entire portfolio of a certain algorithm on a certain exchange
         /// </summary>
         /// <param name="exchange">The exchange in question</param>
@@ -108,6 +79,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <returns>Portfolio containing all available funds</returns>
         public Portfolio GetAllFunds(Exchange exchange, Type algorithm)
         {
+            Guard.Argument(_allocations).NotNull("Initialise allocations first");
+
             return _allocations[exchange].GetAlgorithmAllocation(algorithm);
         }
 
@@ -120,6 +93,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <returns>Available funds or -1 if not available</returns>
         public Balance GetAvailableFunds(Exchange exchange, Type algorithm, Currency currency)
         {
+            Guard.Argument(_allocations).NotNull("Initialise allocations first");
+
             // Check if exchange is used
             if (!_allocations.ContainsKey(exchange))
             {
@@ -164,6 +139,9 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <returns>Boolean indicating successful execution of the callback</returns>
         public bool QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<TradeExecution> tradeCallback)
         {
+            Guard.Argument(_allocations).NotNull("Initialise allocations first");
+            Guard.Argument(p).NotNull();
+
             var alloc = GetAvailableFunds(exchange, algorithm, p.From.Symbol);
             if (alloc.Free < p.From.Free || alloc.Locked < p.From.Locked)
             {

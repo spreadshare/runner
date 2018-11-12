@@ -53,5 +53,7 @@
     <Rule Id="SA1600" Action="None" />
     <!--Changed rule CS1591: Elements must be documented-->
     <Rule Id="CS1591" Action="None" />
+    <!--Changed rule SA1118: The parameter spans multiple lines-->
+    <Rule Id="SA1118" Action="None" />
   </Rules>
 </RuleSet>
