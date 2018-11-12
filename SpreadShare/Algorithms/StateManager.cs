@@ -19,7 +19,6 @@ namespace SpreadShare.Algorithms
         private readonly ILoggerFactory _loggerFactory;
 
         private State<T> _activeState;
-        private Timer _activeTimer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateManager{T}"/> class.
@@ -88,8 +87,9 @@ namespace SpreadShare.Algorithms
         public void SetTimer(uint minutes)
         {
             // Ensure the previous timer has gone out.
-            _activeTimer?.Stop();
-            _activeTimer = new Timer(minutes, _loggerFactory, () =>
+            Container.TimerProvider.StopTimer();
+
+            Container.TimerProvider.SetTimer(minutes, () =>
             {
                 // Callback returned after waiting period
                 lock (_lock)
@@ -121,7 +121,6 @@ namespace SpreadShare.Algorithms
         {
             if (disposing)
             {
-                _activeTimer.Dispose();
                 _loggerFactory.Dispose();
             }
         }

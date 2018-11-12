@@ -30,6 +30,11 @@ namespace SpreadShare.Algorithms
         protected DataProvider DataProvider => _stateManager.Container.DataProvider as DataProvider;
 
         /// <summary>
+        /// Gets a user service instance
+        /// </summary>
+        protected ITimerProvider TimerProvider => _stateManager.Container.TimerProvider;
+
+        /// <summary>
         /// Gets a link to the parent algorithm settings
         /// </summary>
         protected T AlgorithmSettings { get; private set; }
@@ -66,14 +71,5 @@ namespace SpreadShare.Algorithms
         /// Validates if all the required parameters exist within the context
         /// </summary>
         protected abstract void Run();
-
-        /// <summary>
-        /// Sets the timer in the StateManager
-        /// </summary>
-        /// <param name="ms">Timer duration</param>
-        protected void SetTimer(uint ms)
-        {
-            _stateManager.SetTimer(ms);
-        }
     }
 }
