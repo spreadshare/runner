@@ -19,7 +19,6 @@ namespace SpreadShare.Algorithms
         private readonly ILoggerFactory _loggerFactory;
 
         private State<T> _activeState;
-        private Timer _activeTimer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateManager{T}"/> class.
@@ -122,7 +121,6 @@ namespace SpreadShare.Algorithms
         {
             if (disposing)
             {
-                _activeTimer.Dispose();
                 _loggerFactory.Dispose();
             }
         }
