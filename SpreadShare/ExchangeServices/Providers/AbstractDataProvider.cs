@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 
@@ -9,7 +10,7 @@ namespace SpreadShare.ExchangeServices.Providers
     /// <summary>
     /// Abstract specification of a data provider.
     /// </summary>
-    internal abstract class AbstractDataProvider
+    internal abstract class AbstractDataProvider : Observable<OrderUpdate>
     {
         /// <summary>: IExchangeDataProvider
         /// Create identifiable output
