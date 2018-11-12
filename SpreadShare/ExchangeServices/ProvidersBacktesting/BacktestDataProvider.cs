@@ -35,7 +35,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair)
         {
-            var candle = FindCandle(pair, _timer.CurrentMinuteEpoc);
+            var candle = FindCandle(pair, _timer.GetCurrentTimeAsLong());
             return new ResponseObject<decimal>(ResponseCode.Success, candle.Average);
         }
 

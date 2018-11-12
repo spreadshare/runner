@@ -9,10 +9,16 @@ namespace SpreadShare.ExchangeServices.Providers
     internal interface ITimerProvider
     {
         /// <summary>
-        /// Gets the current time of the backtest universe.
+        /// Gets the current time as DateTimeOffset.
         /// </summary>
         /// <returns>Current UTC time</returns>
         DateTimeOffset GetCurrentTime();
+
+        /// <summary>
+        /// Gets the current time as long
+        /// </summary>
+        /// <returns>Current UTC time</returns>
+        long GetCurrentTimeAsLong();
 
         /// <summary>
         /// Set a timer before executing a certain callback
