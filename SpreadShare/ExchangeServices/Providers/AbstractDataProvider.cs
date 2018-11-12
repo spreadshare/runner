@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService;
+using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 
@@ -9,21 +11,31 @@ namespace SpreadShare.ExchangeServices.Providers
     /// <summary>
     /// Abstract specification of a data provider.
     /// </summary>
-    internal abstract class AbstractDataProvider
+    internal abstract class AbstractDataProvider : IObservable<OrderUpdate>
     {
-        /// <summary>: IExchangeDataProvider
+        /// <summary>
         /// Create identifiable output
         /// </summary>
         protected readonly ILogger Logger;
 
         /// <summary>
+        /// Create identifiable output
+        /// </summary>
+        protected readonly ExchangeCommunications ExchangeCommunications;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AbstractDataProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output stream </param>
-        protected AbstractDataProvider(ILoggerFactory loggerFactory)
+        /// <param name="exchangeCommunications">Communicates with the exchange</param>
+        protected AbstractDataProvider(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
         {
+            ExchangeCommunications = exchangeCommunications;
             Logger = loggerFactory.CreateLogger(GetType());
         }
+
+        /// <inheritdoc />
+        public IDisposable Subscribe(IObserver<OrderUpdate> observer) => ExchangeCommunications.Subscribe(observer);
 
         /// <summary>
         /// Gets the current price of a trading pair by checking the last trade

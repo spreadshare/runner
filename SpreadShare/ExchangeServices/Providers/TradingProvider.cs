@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
+using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 
@@ -9,7 +10,7 @@ namespace SpreadShare.ExchangeServices.Providers
     /// <summary>
     /// Provides trading capabilities.
     /// </summary>
-    internal class TradingProvider
+    internal class TradingProvider : Observer<OrderUpdate>
     {
         private readonly ILogger _logger;
         private readonly AbstractTradingProvider _implementation;
@@ -34,6 +35,7 @@ namespace SpreadShare.ExchangeServices.Providers
             WeakAllocationManager allocationManager,
             Type algorithm,
             Exchange exchange)
+            : base(dataProvider)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _implementation = implementation;
@@ -41,6 +43,13 @@ namespace SpreadShare.ExchangeServices.Providers
             _dataProvider = dataProvider;
             _algorithm = algorithm;
             _exchange = exchange;
+        }
+
+        /// <inheritdoc />
+        public override void OnNext(OrderUpdate value)
+        {
+            // TODO: Let each func evaluate the order update
+            throw new NotImplementedException();
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
@@ -10,7 +11,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
     /// <summary>
     /// Binance implementantion of the communication service.
     /// </summary>
-    internal class BinanceCommunicationsService : IDisposable
+    internal class BinanceCommunicationsService : ExchangeCommunications, IDisposable
     {
         private readonly ILogger _logger;
         private readonly ListenKeyManager _listenKeyManager;
@@ -92,10 +93,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 {
                     // TODO: Implement AccountInfoUpdate callback
                 },
-                orderInfoUpdate =>
-                {
-                    // TODO: Information not currently used.
-                });
+                orderInfoUpdate => UpdateObservers(new OrderUpdate(orderInfoUpdate.Price)));
 
             // Set error handlers
             succesOrderBook.Data.Closed += () =>

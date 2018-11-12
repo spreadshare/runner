@@ -23,7 +23,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <param name="loggerFactory">Used to create output stream</param>
         /// <param name="communications">For communication with Binance</param>
         public BinanceDataProvider(ILoggerFactory loggerFactory, BinanceCommunicationsService communications)
-            : base(loggerFactory)
+            : base(loggerFactory, communications)
         {
             _communications = communications;
         }

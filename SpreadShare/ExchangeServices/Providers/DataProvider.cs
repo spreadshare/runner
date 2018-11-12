@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 
@@ -8,7 +9,7 @@ namespace SpreadShare.ExchangeServices.Providers
     /// <summary>
     /// Provides data gathering capabilities.
     /// </summary>
-    internal class DataProvider
+    internal class DataProvider : IObservable<OrderUpdate>
     {
         private readonly AbstractDataProvider _implementation;
 
@@ -20,6 +21,9 @@ namespace SpreadShare.ExchangeServices.Providers
         {
             _implementation = implementation;
         }
+
+        /// <inheritdoc />
+        public IDisposable Subscribe(IObserver<OrderUpdate> observer) => _implementation.Subscribe(observer);
 
         /// <summary>
         /// Gets the current price of a trading pair by checking the last trade
