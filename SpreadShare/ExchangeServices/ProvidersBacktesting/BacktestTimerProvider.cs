@@ -27,11 +27,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         public DateTimeOffset CurrentTime { get; private set; }
 
-        /// <inheritdoc />
-        public DateTimeOffset GetCurrentTime() => CurrentTime;
+        /// <summary>
+        /// Gets the unix timestamp as potential index of database entries
+        /// </summary>
+        public long CurrentMinuteEpoc => CurrentTime.ToUnixTimeMilliseconds() - (CurrentTime.ToUnixTimeMilliseconds() % 60000);
 
         /// <inheritdoc />
-        public long GetCurrentTimeAsLong() => CurrentTime.UtcTicks;
+        public DateTimeOffset GetCurrentTime() => CurrentTime;
 
         /// <inheritdoc />
         public void SetTimer(uint minutes, Action callback)

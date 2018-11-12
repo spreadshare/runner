@@ -14,11 +14,15 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private uint _count;
 
-        /// <inheritdoc />
-        public DateTimeOffset GetCurrentTime() => DateTimeOffset.UtcNow;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExchangeTimerProvider"/> class.
+        /// </summary>
+        public ExchangeTimerProvider()
+        {
+        }
 
         /// <inheritdoc />
-        public long GetCurrentTimeAsLong() => GetCurrentTime().UtcTicks;
+        public DateTimeOffset GetCurrentTime() => DateTimeOffset.UtcNow;
 
         /// <summary>
         /// Set a timer before executing a callback.
