@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
@@ -25,8 +26,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="loggerFactory">Used to create output</param>
         /// <param name="database">The backtest database database</param>
         /// <param name="timerProvider">Used to keep track of time</param>
-        public BacktestDataProvider(ILoggerFactory loggerFactory, DatabaseContext database, BacktestTimerProvider timerProvider)
-            : base(loggerFactory)
+        /// <param name="backtestCommunicationService">Communicates with backtesting and provides order updates</param>
+        public BacktestDataProvider(ILoggerFactory loggerFactory, DatabaseContext database, BacktestTimerProvider timerProvider, BacktestCommunicationService backtestCommunicationService)
+            : base(loggerFactory, backtestCommunicationService)
         {
             _database = database;
             _timer = timerProvider;

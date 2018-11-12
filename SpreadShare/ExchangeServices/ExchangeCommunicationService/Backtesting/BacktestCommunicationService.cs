@@ -7,7 +7,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting
     /// <summary>
     /// Mocking class for faking communication with a remote exchange
     /// </summary>
-    internal class BacktestCommunicationService
+    internal class BacktestCommunicationService : ExchangeCommunications
     {
         private readonly ILogger _logger;
 
