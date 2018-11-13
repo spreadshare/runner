@@ -49,7 +49,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public override void OnNext(OrderUpdate value)
         {
             // TODO: Let each func evaluate the order update
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -99,9 +99,22 @@ namespace SpreadShare.ExchangeServices.Providers
 
                 // Report the trade with the actual amount as communicated by the exchange.
                 // TODO: Is this correct???
-                return new TradeExecution(
-                    new Balance(pair.Left, proposal.From.Free, 0.0M),
-                    new Balance(pair.Right, query.Data, 0.0M));
+                if (side == OrderSide.Buy)
+                {
+                    return new TradeExecution(
+                        new Balance(pair.Right, proposal.From.Free, 0.0M),
+                        new Balance(pair.Left, query.Data, 0.0M));
+                }
+
+                if (side == OrderSide.Sell)
+                {
+                    decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
+                    return new TradeExecution(
+                        new Balance(pair.Left, proposal.From.Free, 0.0M),
+                        new Balance(pair.Right, query.Data * priceEstimate, 0.0M));
+                }
+
+                return null;
             });
 
             return tradeSuccess ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);
