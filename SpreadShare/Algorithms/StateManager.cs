@@ -4,6 +4,7 @@ using System.Threading;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
 
@@ -19,6 +20,7 @@ namespace SpreadShare.Algorithms
         private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly ConfigurableObserver<long> _periodicObserver;
 
         private State<T> _activeState;
 
@@ -45,6 +47,13 @@ namespace SpreadShare.Algorithms
                 AlgorithmSettings = algorithmSettings;
 
                 Container = container;
+
+                // Setup observing
+                _periodicObserver = new ConfigurableObserver<long>(
+                    time => OnMarketConditionEval(),
+                    () => { },
+                    e => { });
+                container.TimerProvider.Subscribe(_periodicObserver);
 
                 // Setup initial state
                 _activeState = initial;
