@@ -1,4 +1,4 @@
-﻿namespace SpreadShare.ExchangeServices.Providers.Observing
+﻿namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Return value of websockets

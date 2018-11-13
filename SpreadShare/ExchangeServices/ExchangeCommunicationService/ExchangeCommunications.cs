@@ -1,4 +1,5 @@
 ﻿using SpreadShare.ExchangeServices.Providers.Observing;
+using SpreadShare.Models.Trading;
 
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService
 {
