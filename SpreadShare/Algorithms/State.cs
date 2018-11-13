@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.Providers.Observing;
-using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms
@@ -47,13 +46,13 @@ namespace SpreadShare.Algorithms
         /// </summary>
         /// <param name="data">The data provider</param>
         /// <returns>State to switch to</returns>
-        protected virtual State<T> OnMarketCondition(DataProvider data) => new NothingState<T>();
+        public virtual State<T> OnMarketCondition(DataProvider data) => new NothingState<T>();
 
         /// <summary>
         /// Evaluates if the order condition is met.
         /// </summary>
         /// <param name="order">The order update</param>
         /// <returns>State to switch to</returns>
-        protected virtual State<T> OnOrderUpdate(OrderUpdate order) => new NothingState<T>();
+        public virtual State<T> OnOrderUpdate(OrderUpdate order) => new NothingState<T>();
     }
 }
