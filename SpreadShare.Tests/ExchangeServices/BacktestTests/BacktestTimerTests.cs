@@ -23,7 +23,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestTests
         /// Test if the the timer keeps track of its current time element
         /// </summary>
         /// <param name="minutes">Minutes to mock the timer for</param>
-        [Theory]
+        [Theory(Skip = "Runs forever because of the asynchronous job")]
         [InlineData(1000)]
         [InlineData(0)]
         [InlineData(69696969)]

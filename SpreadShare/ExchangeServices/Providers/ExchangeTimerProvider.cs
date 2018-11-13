@@ -16,13 +16,6 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private uint _count;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExchangeTimerProvider"/> class.
-        /// </summary>
-        public ExchangeTimerProvider()
-        {
-        }
-
         /// <inheritdoc />
         public override DateTimeOffset GetCurrentTime() => DateTimeOffset.UtcNow;
 
