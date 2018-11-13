@@ -82,6 +82,7 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Evaluates the active state's order update condition.
         /// </summary>
+        /// <param name="order">update of a certain order</param>
         public void OnOrderUpdateEval(OrderUpdate order)
         {
             lock (_lock)
