@@ -49,7 +49,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public override void OnNext(OrderUpdate value)
         {
             // TODO: Let each func evaluate the order update
-            //throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <summary>
