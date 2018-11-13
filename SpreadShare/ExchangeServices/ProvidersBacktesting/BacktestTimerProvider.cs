@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
@@ -21,6 +22,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             _logger = loggerFactory.CreateLogger(GetType());
             CurrentTime = startDate;
+            RunPeriodicTimer();
         }
 
         /// <summary>
@@ -48,6 +50,18 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public override void StopTimer()
         {
             _logger.LogWarning("Backtesting timer was stopped, but this has no effect, as the timer elapses instantly");
+        }
+
+        /// <summary>
+        /// Notifies the observers every few seconds
+        /// </summary>
+        private async void RunPeriodicTimer()
+        {
+            while (true)
+            {
+                UpdateObservers(GetCurrentTime().ToUnixTimeMilliseconds());
+                await Task.Delay(2000);
+            }
         }
     }
 }

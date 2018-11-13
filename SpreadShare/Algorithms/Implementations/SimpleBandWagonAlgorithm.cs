@@ -43,6 +43,12 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 Logger.LogInformation("Started the simple bandwagon algorithm");
             }
+
+            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+            {
+                Logger.LogInformation("Market condition is being evaluated");
+                return new NothingState<SimpleBandWagonAlgorithmSettings>();
+            }
         }
 
         /*
