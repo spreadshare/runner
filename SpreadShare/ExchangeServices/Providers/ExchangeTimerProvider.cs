@@ -1,12 +1,13 @@
 using System;
 using Cron;
+using SpreadShare.ExchangeServices.Providers.Observing;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
     /// Exchange implementation of the TimerProvider
     /// </summary>
-    internal class ExchangeTimerProvider : ITimerProvider
+    internal class ExchangeTimerProvider : TimerProvider
     {
         private CronDaemon _daemon;
         private Action _callback;
@@ -22,7 +23,7 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <inheritdoc />
-        public DateTimeOffset GetCurrentTime() => DateTimeOffset.UtcNow;
+        public override DateTimeOffset GetCurrentTime() => DateTimeOffset.UtcNow;
 
         /// <summary>
         /// Set a timer before executing a callback.
@@ -30,7 +31,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="minutes">the minimum amount of minutes to wait</param>
         /// <param name="callback">the method to execute after given time</param>
-        public void SetTimer(uint minutes, Action callback)
+        public override void SetTimer(uint minutes, Action callback)
         {
             _callback = callback ?? throw new ArgumentException("Callback can't be null");
 
@@ -45,7 +46,7 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <inheritdoc />
-        public void StopTimer()
+        public override void StopTimer()
         {
             _daemon.Stop();
         }

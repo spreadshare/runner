@@ -1,4 +1,6 @@
 using System;
+using System.Reflection.Metadata.Ecma335;
+using SpreadShare.ExchangeServices.Providers.Observing;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
@@ -6,24 +8,25 @@ namespace SpreadShare.ExchangeServices.Providers
     /// Abstract defnition of the timer provider
     /// This object is used inside an ExchangeProviderContainer
     /// </summary>
-    internal interface ITimerProvider
+    /// TODO: Make sure that periodic signals are send out to the observers.
+    internal abstract class TimerProvider : Observable<long>
     {
         /// <summary>
         /// Gets the current time of the backtest universe.
         /// </summary>
         /// <returns>Current UTC time</returns>
-        DateTimeOffset GetCurrentTime();
+        public abstract DateTimeOffset GetCurrentTime();
 
         /// <summary>
         /// Set a timer before executing a certain callback
         /// </summary>
         /// <param name="minutes">The amount of minutes to wait</param>
         /// <param name="callback">The method to execute after given time</param>
-        void SetTimer(uint minutes, Action callback);
+        public abstract void SetTimer(uint minutes, Action callback);
 
         /// <summary>
         /// Stop the timer
         /// </summary>
-        void StopTimer();
+        public abstract void StopTimer();
     }
 }
