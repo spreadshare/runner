@@ -60,7 +60,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             while (true)
             {
                 UpdateObservers(GetCurrentTime().ToUnixTimeMilliseconds());
-                await Task.Delay(2000);
+                await Task.Delay(2000).ConfigureAwait(false);
             }
         }
     }
