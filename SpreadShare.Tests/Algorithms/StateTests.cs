@@ -14,7 +14,8 @@ namespace SpreadShare.Tests.Algorithms
         private TradingProvider _trading;
         private DataProvider _data;
 
-        public StateTests(ITestOutputHelper outputHelper) : base(outputHelper)
+        public StateTests(ITestOutputHelper outputHelper)
+            : base(outputHelper)
         {
             var container = ExchangeFactoryService
                 .BuildContainer(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithmSettings));
@@ -25,7 +26,7 @@ namespace SpreadShare.Tests.Algorithms
         [Fact]
         public void ConstructorHappyFlow()
         {
-            new TestState();
+            var state = new TestState();
         }
 
         [Fact]

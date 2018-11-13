@@ -36,12 +36,6 @@ namespace SpreadShare.Algorithms
         }
 
         /// <summary>
-        /// Validates if all the required parameters exist within the context
-        /// </summary>
-        /// <param name="trading">Trading Provider</param>
-        protected abstract void Run(TradingProvider trading);
-
-        /// <summary>
         /// Evaluates if the market condition is met.
         /// </summary>
         /// <param name="data">The data provider</param>
@@ -54,5 +48,11 @@ namespace SpreadShare.Algorithms
         /// <param name="order">The order update</param>
         /// <returns>State to switch to</returns>
         public virtual State<T> OnOrderUpdate(OrderUpdate order) => new NothingState<T>();
+
+        /// <summary>
+        /// Validates if all the required parameters exist within the context
+        /// </summary>
+        /// <param name="trading">Trading Provider</param>
+        protected abstract void Run(TradingProvider trading);
     }
 }
