@@ -1,5 +1,6 @@
 using System;
 using System.Reflection.Metadata.Ecma335;
+using System.Threading.Tasks;
 using SpreadShare.ExchangeServices.Providers.Observing;
 
 namespace SpreadShare.ExchangeServices.Providers
@@ -11,6 +12,11 @@ namespace SpreadShare.ExchangeServices.Providers
     /// TODO: Make sure that periodic signals are send out to the observers.
     internal abstract class TimerProvider : Observable<long>
     {
+        protected TimerProvider()
+        {
+            RunPeriodicTimer();
+        }
+
         /// <summary>
         /// Gets the current time of the backtest universe.
         /// </summary>
@@ -28,5 +34,17 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Stop the timer
         /// </summary>
         public abstract void StopTimer();
+
+        /// <summary>
+        /// Notifies the observers every few seconds
+        /// </summary>
+        private async void RunPeriodicTimer()
+        {
+            while (true)
+            {
+                UpdateObservers(GetCurrentTime().ToUnixTimeMilliseconds());
+                await Task.Delay(2000).ConfigureAwait(false);
+            }
+        }
     }
 }
