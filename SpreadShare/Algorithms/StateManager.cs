@@ -4,6 +4,7 @@ using System.Threading;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms
@@ -33,18 +34,22 @@ namespace SpreadShare.Algorithms
             State<T> initial,
             ExchangeProvidersContainer container)
         {
-            // Setup logging
-            _logger = container.LoggerFactory.CreateLogger("StateManager");
-            _loggerFactory = container.LoggerFactory;
+            Guard.Argument(initial).NotNull();
+            lock (_lock)
+            {
+                // Setup logging
+                _logger = container.LoggerFactory.CreateLogger("StateManager");
+                _loggerFactory = container.LoggerFactory;
 
-            // Link the parent algorithm setting
-            AlgorithmSettings = algorithmSettings;
+                // Link the parent algorithm setting
+                AlgorithmSettings = algorithmSettings;
 
-            Container = container;
+                Container = container;
 
-            // Setup initial state
-            _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
-            initial.Activate(algorithmSettings, Container.TradingProvider, _loggerFactory);
+                // Setup initial state
+                _activeState = initial;
+                _activeState.Activate(algorithmSettings, Container.TradingProvider, _loggerFactory);
+            }
         }
 
         /// <summary>
@@ -77,11 +82,12 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Evaluates the active state's order update condition.
         /// </summary>
-        public void OnOrderUpdateEval()
+        public void OnOrderUpdateEval(OrderUpdate order)
         {
             lock (_lock)
             {
-                // TODO: Pass order update to state.
+                var next = _activeState.OnOrderUpdate(order);
+                SwitchState(next);
             }
         }
 
@@ -103,7 +109,7 @@ namespace SpreadShare.Algorithms
 
             Interlocked.Exchange(ref _activeState, child);
 
-            child.Activate(AlgorithmSettings, Container.TradingProvider, _loggerFactory);
+            _activeState.Activate(AlgorithmSettings, Container.TradingProvider, _loggerFactory);
         }
     }
 }
