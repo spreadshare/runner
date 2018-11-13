@@ -1,5 +1,6 @@
 using System;
 using Cron;
+using Dawn;
 using SpreadShare.ExchangeServices.Providers.Observing;
 
 namespace SpreadShare.ExchangeServices.Providers
@@ -33,7 +34,8 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="callback">the method to execute after given time</param>
         public override void SetTimer(uint minutes, Action callback)
         {
-            _callback = callback ?? throw new ArgumentException("Callback can't be null");
+            Guard.Argument(callback);
+            _callback = callback;
 
             // Set starting values
             _count = 0;

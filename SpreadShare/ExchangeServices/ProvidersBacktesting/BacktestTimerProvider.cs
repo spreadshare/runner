@@ -1,4 +1,5 @@
 using System;
+using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 
@@ -38,6 +39,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override void SetTimer(uint minutes, Action callback)
         {
+            Guard.Argument(callback).NotNull();
             CurrentTime += TimeSpan.FromMinutes(minutes);
             _logger.LogInformation($"Skipping time for {minutes} minutes, new time: {CurrentTime.ToUniversalTime()}");
         }

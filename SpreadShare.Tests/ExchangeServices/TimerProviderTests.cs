@@ -28,7 +28,7 @@ namespace SpreadShare.Tests.ExchangeServices
         [Fact]
         public void NoCallbackThrows()
         {
-            Assert.Throws<ArgumentException>(() => _time.SetTimer(0, null));
+            Assert.Throws<ArgumentNullException>(() => _time.SetTimer(0, null));
         }
 
         [Fact]
