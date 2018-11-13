@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.SupportServices.SettingsServices;
@@ -14,7 +15,7 @@ namespace SpreadShare.Algorithms
     internal class StateManager<T>
         where T : AlgorithmSettings
     {
-        // private readonly object _lock = new object();
+        private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
 
@@ -62,16 +63,40 @@ namespace SpreadShare.Algorithms
         private string CurrentState => _activeState.GetType().ToString().Split('+').Last();
 
         /// <summary>
+        /// Evaluates the active state's market condition predicate
+        /// </summary>
+        public void OnMarketConditionEval()
+        {
+            lock (_lock)
+            {
+                var next = _activeState.OnMarketCondition(Container.DataProvider);
+                SwitchState(next);
+            }
+        }
+
+        /// <summary>
+        /// Evaluates the active state's order update condition.
+        /// </summary>
+        public void OnOrderUpdateEval()
+        {
+            lock (_lock)
+            {
+                // TODO: Pass order update to state.
+            }
+        }
+
+        /// <summary>
         /// Switches the active state to the given state, only to be used by states
         /// </summary>
         /// <param name="child">State to switch to</param>
         /// <exception cref="Exception">Child can't be null</exception>
-        public void SwitchState(State<T> child)
+        private void SwitchState(State<T> child)
         {
             // This function is safe because it is executed in the locked context of the OnX callback functions
-            if (child == null)
+            Guard.Argument(child).NotNull();
+            if (child is NothingState<T>)
             {
-                throw new Exception("Given child state is null. State manager may only contain non-null states");
+                return;
             }
 
             _logger.LogInformation($"STATE SWITCH: {CurrentState} ---> {child.GetType().ToString().Split('+').Last()}");
