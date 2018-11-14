@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;

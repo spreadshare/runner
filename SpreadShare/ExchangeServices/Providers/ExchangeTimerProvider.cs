@@ -1,7 +1,6 @@
 using System;
 using Cron;
 using Dawn;
-using SpreadShare.ExchangeServices.Providers.Observing;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
