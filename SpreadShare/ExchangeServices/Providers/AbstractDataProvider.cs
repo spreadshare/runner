@@ -66,7 +66,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>A response object with the performance on success</returns>
-        public abstract ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack, DateTimeOffset endTime);
+        public abstract ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack);
 
         /// <summary>
         /// Gets the top performing trading pair
@@ -75,6 +75,6 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>Top performing trading pair</returns>
-        public abstract ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack, DateTime endTime);
+        public abstract ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack);
     }
 }

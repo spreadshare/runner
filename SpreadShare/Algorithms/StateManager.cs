@@ -40,7 +40,7 @@ namespace SpreadShare.Algorithms
             lock (_lock)
             {
                 // Setup logging
-                _logger = container.LoggerFactory.CreateLogger("StateManager");
+                _logger = container.LoggerFactory.CreateLogger(GetType());
                 _loggerFactory = container.LoggerFactory;
 
                 // Link the parent algorithm setting

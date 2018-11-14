@@ -79,7 +79,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>A response object with the performance on success</returns>
-        public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack, DateTimeOffset endTime)
+        public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack)
         {
             if (hoursBack <= 0)
             {
@@ -88,7 +88,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
 
             var client = _communications.Client;
 
-            var startTime = endTime.AddHours(-hoursBack);
+            var startTime = DateTimeOffset.Now - TimeSpan.FromHours(hoursBack);
+            var endTime = DateTimeOffset.Now;
             var response = client.GetKlines(pair.ToString(), KlineInterval.OneMinute, startTime.UtcDateTime, endTime.UtcDateTime);
 
             if (response.Success)
@@ -111,7 +112,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <param name="hoursBack">Amount of hours to look back</param>
         /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>Top performing trading pair</returns>
-        public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack, DateTime endTime)
+        public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
         {
             if (hoursBack <= 0)
             {
@@ -123,7 +124,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
 
             foreach (var tradingPair in pairs)
             {
-                var performanceQuery = GetPerformancePastHours(tradingPair, hoursBack, endTime);
+                var performanceQuery = GetPerformancePastHours(tradingPair, hoursBack);
                 decimal performance;
                 if (performanceQuery.Code == ResponseCode.Success)
                 {

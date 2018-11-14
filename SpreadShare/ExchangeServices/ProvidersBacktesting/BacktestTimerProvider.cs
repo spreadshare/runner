@@ -32,11 +32,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         public DateTimeOffset CurrentTime { get; private set; }
 
-        /// <summary>
-        /// Gets the unix timestamp as potential index of database entries
-        /// </summary>
-        public long CurrentMinuteEpoc => CurrentTime.ToUnixTimeMilliseconds() - (CurrentTime.ToUnixTimeMilliseconds() % 60000);
-
         /// <inheritdoc />
         public override DateTimeOffset GetCurrentTime() => CurrentTime;
 
@@ -62,10 +57,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             DateTimeOffset start = DateTimeOffset.Now;
             while (CurrentTime < _target)
             {
-                if (CurrentTime.ToUnixTimeMilliseconds() % (60000 * 1000) == 0)
-                {
-                    _logger.LogWarning(CurrentTime.ToString());
-                }
                 _logger.LogInformation($"It is now {CurrentTime}");
                 CurrentTime += TimeSpan.FromMinutes(1);
                 UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
