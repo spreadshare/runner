@@ -50,5 +50,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             _logger.LogWarning("Backtesting timer was stopped, but this has no effect, as the timer elapses instantly");
         }
+
+        /// <inheritdoc />
+        public override void RunPeriodicTimer()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

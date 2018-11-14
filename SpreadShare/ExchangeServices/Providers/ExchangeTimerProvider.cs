@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Cron;
 using Dawn;
 
@@ -54,6 +55,16 @@ namespace SpreadShare.ExchangeServices.Providers
 
             _daemon.Stop();
             _callback();
+        }
+
+        /// <inheritdoc />
+        public override async void RunPeriodicTimer()
+        {
+            while (true)
+            {
+                UpdateObservers(GetCurrentTime().ToUnixTimeMilliseconds());
+                await Task.Delay(2000).ConfigureAwait(false);
+            }
         }
     }
 }

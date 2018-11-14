@@ -38,15 +38,8 @@ namespace SpreadShare.ExchangeServices.Providers
         public abstract void StopTimer();
 
         /// <summary>
-        /// Notifies the observers every few seconds
+        /// Notifies the observers periodically
         /// </summary>
-        private async void RunPeriodicTimer()
-        {
-            while (true)
-            {
-                UpdateObservers(GetCurrentTime().ToUnixTimeMilliseconds());
-                await Task.Delay(2000).ConfigureAwait(false);
-            }
-        }
+        public abstract void RunPeriodicTimer();
     }
 }
