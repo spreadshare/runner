@@ -10,12 +10,11 @@ namespace SpreadShare.ExchangeServices.Providers
     /// </summary>
     internal class ExchangeTimerProvider : TimerProvider
     {
-        private CronDaemon _daemon;
         private Action _callback;
-        private uint _targetCount;
 
-        private uint _count;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExchangeTimerProvider"/> class.
+        /// </summary>
         public ExchangeTimerProvider()
         {
             RunPeriodicTimer();
@@ -34,16 +33,11 @@ namespace SpreadShare.ExchangeServices.Providers
         {
             Guard.Argument(callback);
             _callback = callback;
-
-            // Set starting values
-            _count = 0;
-            _targetCount = minutes;
         }
 
         /// <inheritdoc />
         public override void StopTimer()
         {
-            _daemon.Stop();
         }
 
         /// <summary>
@@ -56,17 +50,6 @@ namespace SpreadShare.ExchangeServices.Providers
                 UpdateObservers(GetCurrentTime().ToUnixTimeMilliseconds());
                 await Task.Delay(2000).ConfigureAwait(false);
             }
-        }
-
-        private void Execute()
-        {
-            if (_count++ < _targetCount)
-            {
-                return;
-            }
-
-            _daemon.Stop();
-            _callback();
         }
     }
 }
