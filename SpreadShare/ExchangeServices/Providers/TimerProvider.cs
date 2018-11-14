@@ -1,8 +1,6 @@
 using System;
 using SpreadShare.ExchangeServices.Providers.Observing;
 
-#pragma warning disable CA2214
-
 namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
@@ -12,14 +10,6 @@ namespace SpreadShare.ExchangeServices.Providers
     /// TODO: Make sure that periodic signals are send out to the observers.
     internal abstract class TimerProvider : Observable<long>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TimerProvider"/> class.
-        /// </summary>
-        public TimerProvider()
-        {
-            RunPeriodicTimer();
-        }
-
         /// <summary>
         /// Gets the current time of the backtest universe.
         /// </summary>
@@ -44,5 +34,3 @@ namespace SpreadShare.ExchangeServices.Providers
         protected abstract void RunPeriodicTimer();
     }
 }
-
-#pragma warning restore CA2214

@@ -13,6 +13,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     /// </summary>
     internal class BacktestTradingProvider : AbstractTradingProvider, IObserver<long>
     {
+        private readonly ILogger _logger;
         private readonly BacktestOutputLogger _backtestOutputLogger;
         private readonly BacktestTimerProvider _timer;
         private readonly BacktestDataProvider _dataProvider;
@@ -27,6 +28,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public BacktestTradingProvider(ILoggerFactory loggerFactory, BacktestTimerProvider timer, BacktestDataProvider data)
             : base(loggerFactory)
         {
+            _logger = loggerFactory.CreateLogger(GetType());
             _timer = timer;
             _dataProvider = data;
             timer.Subscribe(this);

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
@@ -21,6 +22,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             _logger = loggerFactory.CreateLogger(GetType());
             CurrentTime = startDate;
+            RunPeriodicTimer();
         }
 
         /// <summary>
@@ -51,9 +53,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        protected override void RunPeriodicTimer()
+        protected async override void RunPeriodicTimer()
         {
-            // TODO: Implement this
+            // Make sure all constructor processes are finished
+            await Task.Delay(1000).ConfigureAwait(false);
+            while (CurrentTime < DateTimeOffset.Now)
+            {
+                _logger.LogInformation($"It is now {CurrentTime}");
+                CurrentTime += TimeSpan.FromMinutes(1);
+                UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
+            }
         }
     }
 }

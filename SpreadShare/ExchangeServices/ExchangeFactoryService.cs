@@ -72,7 +72,7 @@ namespace SpreadShare.ExchangeServices
 
                 case Exchange.Backtesting:
                     // Override timer provider to backtest variant
-                    timerProvider = new BacktestTimerProvider(_loggerFactory, DateTimeOffset.Now);
+                    timerProvider = new BacktestTimerProvider(_loggerFactory, DateTimeOffset.Now - TimeSpan.FromMinutes(100));
 
                     dataProviderImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, (BacktestTimerProvider)timerProvider, _backtestCommunicationService);
                     tradingProviderImplementation = new BacktestTradingProvider(_loggerFactory, (BacktestTimerProvider)timerProvider, (BacktestDataProvider)dataProviderImplementation);

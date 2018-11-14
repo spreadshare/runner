@@ -38,6 +38,8 @@ namespace SpreadShare.ExchangeServices.Providers
             _daemon = new CronDaemon();
             _daemon.Add("* * * * * *", Execute);
             _daemon.Start();
+
+            RunPeriodicTimer();
         }
 
         /// <inheritdoc />
