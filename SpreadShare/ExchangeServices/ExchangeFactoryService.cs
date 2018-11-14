@@ -75,7 +75,7 @@ namespace SpreadShare.ExchangeServices
                     timerProvider = new BacktestTimerProvider(_loggerFactory, DateTimeOffset.Now);
 
                     dataProviderImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, (BacktestTimerProvider)timerProvider, _backtestCommunicationService);
-                    tradingProviderImplementation = new BacktestTradingProvider(_loggerFactory, (BacktestTimerProvider)timerProvider);
+                    tradingProviderImplementation = new BacktestTradingProvider(_loggerFactory, (BacktestTimerProvider)timerProvider, (BacktestDataProvider)dataProviderImplementation);
                     break;
 
                 default:

@@ -3,6 +3,7 @@ using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
 
@@ -93,7 +94,11 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 {
                     // TODO: Implement AccountInfoUpdate callback
                 },
-                orderInfoUpdate => UpdateObservers(new OrderUpdate(orderInfoUpdate.Price)));
+                orderInfoUpdate => UpdateObservers(new OrderUpdate(
+                    orderInfoUpdate.Price,
+                    BinanceUtilities.ToInternal(orderInfoUpdate.Side),
+                    BinanceUtilities.ToInternal(orderInfoUpdate.Status),
+                    TradingPair.Parse(orderInfoUpdate.Symbol))));
 
             // Set error handlers
             succesOrderBook.Data.Closed += () =>

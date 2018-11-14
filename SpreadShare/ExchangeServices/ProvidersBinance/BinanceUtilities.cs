@@ -1,5 +1,7 @@
 using System;
-using SpreadShare.Models;
+using Binance.Net.Objects;
+using SpreadShare.Models.Trading;
+using OrderSide = SpreadShare.Models.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
@@ -41,6 +43,34 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     return Binance.Net.Objects.OrderSide.Sell;
                 default:
                     throw new ArgumentException($"{side} not a known order side");
+            }
+        }
+
+        /// <summary>
+        /// Covert Binance.Net to SpreadShare.Models
+        /// </summary>
+        /// <param name="status">Binance.Net.OrderStatus</param>
+        /// <returns>SpreadShare.Models.OrderUpdate.OrderStatus</returns>
+        public static OrderUpdate.OrderStatus ToInternal(Binance.Net.Objects.OrderStatus status)
+        {
+            switch (status)
+            {
+                case OrderStatus.New:
+                    return OrderUpdate.OrderStatus.New;
+                case OrderStatus.PartiallyFilled:
+                    return OrderUpdate.OrderStatus.PartiallyFilled;
+                case OrderStatus.Filled:
+                    return OrderUpdate.OrderStatus.Filled;
+                case OrderStatus.Canceled:
+                    return OrderUpdate.OrderStatus.Canceled;
+                case OrderStatus.PendingCancel:
+                    return OrderUpdate.OrderStatus.Canceled;
+                case OrderStatus.Rejected:
+                    return OrderUpdate.OrderStatus.Rejected;
+                case OrderStatus.Expired:
+                    return OrderUpdate.OrderStatus.Expired;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(status), status, null);
             }
         }
     }

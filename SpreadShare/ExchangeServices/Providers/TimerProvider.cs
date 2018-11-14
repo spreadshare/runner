@@ -1,6 +1,7 @@
 using System;
-using System.Threading.Tasks;
 using SpreadShare.ExchangeServices.Providers.Observing;
+
+#pragma warning disable CA2214
 
 namespace SpreadShare.ExchangeServices.Providers
 {
@@ -14,7 +15,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Initializes a new instance of the <see cref="TimerProvider"/> class.
         /// </summary>
-        protected TimerProvider()
+        public TimerProvider()
         {
             RunPeriodicTimer();
         }
@@ -38,15 +39,10 @@ namespace SpreadShare.ExchangeServices.Providers
         public abstract void StopTimer();
 
         /// <summary>
-        /// Notifies the observers every few seconds
+        /// Notify the observers periodically
         /// </summary>
-        private async void RunPeriodicTimer()
-        {
-            while (true)
-            {
-                UpdateObservers(GetCurrentTime().ToUnixTimeMilliseconds());
-                await Task.Delay(2000).ConfigureAwait(false);
-            }
-        }
+        protected abstract void RunPeriodicTimer();
     }
 }
+
+#pragma warning restore CA2214

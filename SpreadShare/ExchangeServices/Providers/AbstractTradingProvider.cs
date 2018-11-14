@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 
@@ -7,7 +8,7 @@ namespace SpreadShare.ExchangeServices.Providers
     /// <summary>
     /// Abstract specification of a trading provider.
     /// </summary>
-    internal abstract class AbstractTradingProvider
+    internal abstract class AbstractTradingProvider : Observable<OrderUpdate>
     {
         /// <summary>
         /// Create identifiable output.

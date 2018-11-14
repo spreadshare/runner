@@ -10,7 +10,7 @@ namespace SpreadShare.ExchangeServices.Providers
     /// <summary>
     /// Provides trading capabilities.
     /// </summary>
-    internal class TradingProvider : Observer<OrderUpdate>
+    internal class TradingProvider : Observable<OrderUpdate>
     {
         private readonly ILogger _logger;
         private readonly AbstractTradingProvider _implementation;
@@ -35,7 +35,6 @@ namespace SpreadShare.ExchangeServices.Providers
             WeakAllocationManager allocationManager,
             Type algorithm,
             Exchange exchange)
-            : base(dataProvider)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _implementation = implementation;
@@ -43,13 +42,10 @@ namespace SpreadShare.ExchangeServices.Providers
             _dataProvider = dataProvider;
             _algorithm = algorithm;
             _exchange = exchange;
-        }
-
-        /// <inheritdoc />
-        public override void OnNext(OrderUpdate value)
-        {
-            // TODO: Let each func evaluate the order update
-            throw new NotImplementedException();
+            _implementation.Subscribe(new ConfigurableObserver<OrderUpdate>(
+                UpdateObservers,
+                () => { },
+                e => { }));
         }
 
         /// <summary>
