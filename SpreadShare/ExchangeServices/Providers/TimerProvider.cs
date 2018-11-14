@@ -5,7 +5,7 @@ using SpreadShare.ExchangeServices.Providers.Observing;
 namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
-    /// Abstract defnition of the timer provider
+    /// Abstract definition of the timer provider
     /// This object is used inside an ExchangeProviderContainer
     /// </summary>
     /// TODO: Make sure that periodic signals are send out to the observers.
