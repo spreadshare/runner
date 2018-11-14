@@ -61,7 +61,7 @@ namespace SpreadShare.ExchangeServices
         {
             AbstractDataProvider dataProviderImplementation;
             AbstractTradingProvider tradingProviderImplementation;
-            ITimerProvider timerProvider = new ExchangeTimerProvider();
+            TimerProvider timerProvider = new ExchangeTimerProvider();
 
             switch (exchange)
             {

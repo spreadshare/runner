@@ -3,7 +3,7 @@ using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.Providers.Observing;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance

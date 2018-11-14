@@ -18,7 +18,7 @@ namespace SpreadShare.ExchangeServices
         public ExchangeProvidersContainer(
             ILoggerFactory loggerFactory,
             DataProvider dataProvider,
-            ITimerProvider timerProvider,
+            TimerProvider timerProvider,
             TradingProvider tradingProvider)
         {
             LoggerFactory = loggerFactory;
@@ -40,7 +40,7 @@ namespace SpreadShare.ExchangeServices
         /// <summary>
         /// Gets the provider for timer and scheduling capabilities.
         /// </summary>
-        public ITimerProvider TimerProvider { get; }
+        public TimerProvider TimerProvider { get; }
 
         /// <summary>
         /// Gets the provider for trading capabilities.

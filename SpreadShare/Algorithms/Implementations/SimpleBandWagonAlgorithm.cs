@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.SettingsServices;
 
@@ -37,12 +38,16 @@ namespace SpreadShare.Algorithms.Implementations
         /// </summary>
         private class EntryState : State<SimpleBandWagonAlgorithmSettings>
         {
+            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+            {
+                Logger.LogInformation("Market condition is being evaluated");
+                return new NothingState<SimpleBandWagonAlgorithmSettings>();
+            }
+
             /// <inheritdoc />
-            protected override void Run()
+            protected override void Run(TradingProvider trading)
             {
                 Logger.LogInformation("Started the simple bandwagon algorithm");
-
-                // SwitchState(new CheckPositionValidityState());
             }
         }
 

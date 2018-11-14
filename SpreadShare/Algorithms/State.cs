@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms
@@ -12,27 +12,10 @@ namespace SpreadShare.Algorithms
     internal abstract class State<T>
         where T : AlgorithmSettings
     {
-        private StateManager<T> _stateManager;
-
         /// <summary>
         /// Gets the logger of the state
         /// </summary>
         protected ILogger Logger { get; private set; }
-
-        /// <summary>
-        /// Gets a trading service instance
-        /// </summary>
-        protected TradingProvider TradingProvider => _stateManager.Container.TradingProvider as TradingProvider;
-
-        /// <summary>
-        /// Gets a user service instance
-        /// </summary>
-        protected DataProvider DataProvider => _stateManager.Container.DataProvider as DataProvider;
-
-        /// <summary>
-        /// Gets a user service instance
-        /// </summary>
-        protected ITimerProvider TimerProvider => _stateManager.Container.TimerProvider;
 
         /// <summary>
         /// Gets a link to the parent algorithm settings
@@ -42,34 +25,34 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Initialise the state
         /// </summary>
-        /// <param name="stateManager">StateManager controlling this state</param>
+        /// <param name="settings">Algorithm settings object</param>
+        /// <param name="trading">Trading Provider</param>
         /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        public void Activate(StateManager<T> stateManager, ILoggerFactory loggerFactory)
+        public void Activate(T settings, TradingProvider trading, ILoggerFactory loggerFactory)
         {
-            _stateManager = stateManager;
             Logger = loggerFactory.CreateLogger(GetType());
-            AlgorithmSettings = _stateManager.AlgorithmSettings;
-            Run();
+            AlgorithmSettings = settings;
+            Run(trading);
         }
 
         /// <summary>
-        /// Callback when the timer elapses (fired by StateManager)
+        /// Evaluates if the market condition is met.
         /// </summary>
-        /// <returns>Whether the specified callback was successful</returns>
-        public virtual ResponseObject OnTimer() => new ResponseObject(ResponseCode.NotDefined);
+        /// <param name="data">The data provider</param>
+        /// <returns>State to switch to</returns>
+        public virtual State<T> OnMarketCondition(DataProvider data) => new NothingState<T>();
 
         /// <summary>
-        /// Switching states
+        /// Evaluates if the order condition is met.
         /// </summary>
-        /// <param name="s">State to switch to</param>
-        protected void SwitchState(State<T> s)
-        {
-            _stateManager.SwitchState(s);
-        }
+        /// <param name="order">The order update</param>
+        /// <returns>State to switch to</returns>
+        public virtual State<T> OnOrderUpdate(OrderUpdate order) => new NothingState<T>();
 
         /// <summary>
         /// Validates if all the required parameters exist within the context
         /// </summary>
-        protected abstract void Run();
+        /// <param name="trading">Trading Provider</param>
+        protected abstract void Run(TradingProvider trading);
     }
 }

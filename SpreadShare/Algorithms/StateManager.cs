@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Providers.Observing;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms
@@ -11,12 +14,13 @@ namespace SpreadShare.Algorithms
     /// Object managing the active state and related resources
     /// </summary>
     /// <typeparam name="T">The type of the parent algorithm settings</typeparam>
-    internal class StateManager<T> : IDisposable
+    internal class StateManager<T>
         where T : AlgorithmSettings
     {
         private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly ConfigurableObserver<long> _periodicObserver;
 
         private State<T> _activeState;
 
@@ -32,29 +36,40 @@ namespace SpreadShare.Algorithms
             State<T> initial,
             ExchangeProvidersContainer container)
         {
-            // Setup logging
-            _logger = container.LoggerFactory.CreateLogger("StateManager");
-            _loggerFactory = container.LoggerFactory;
+            Guard.Argument(initial).NotNull();
+            lock (_lock)
+            {
+                // Setup logging
+                _logger = container.LoggerFactory.CreateLogger("StateManager");
+                _loggerFactory = container.LoggerFactory;
 
-            // Link the parent algorithm setting
-            AlgorithmSettings = algorithmSettings;
+                // Link the parent algorithm setting
+                AlgorithmSettings = algorithmSettings;
 
-            Container = container;
+                Container = container;
 
-            // Setup initial state
-            _activeState = initial ?? throw new Exception("Given initial state is null. State manager may only contain non-null states");
-            initial.Activate(this, _loggerFactory);
+                // Setup observing
+                _periodicObserver = new ConfigurableObserver<long>(
+                    time => OnMarketConditionEval(),
+                    () => { },
+                    e => { });
+                container.TimerProvider.Subscribe(_periodicObserver);
+
+                // Setup initial state
+                _activeState = initial;
+                _activeState.Activate(algorithmSettings, Container.TradingProvider, _loggerFactory);
+            }
         }
 
         /// <summary>
         /// Gets the container with exchange service providers
         /// </summary>
-        public ExchangeProvidersContainer Container { get; }
+        private ExchangeProvidersContainer Container { get; }
 
         /// <summary>
         /// Gets a link to the algorithm settings.
         /// </summary>
-        public T AlgorithmSettings { get; }
+        private T AlgorithmSettings { get; }
 
         /// <summary>
         /// Gets the current active state
@@ -62,67 +77,49 @@ namespace SpreadShare.Algorithms
         private string CurrentState => _activeState.GetType().ToString().Split('+').Last();
 
         /// <summary>
+        /// Evaluates the active state's market condition predicate
+        /// </summary>
+        public void OnMarketConditionEval()
+        {
+            lock (_lock)
+            {
+                var next = _activeState.OnMarketCondition(Container.DataProvider);
+                SwitchState(next);
+            }
+        }
+
+        /// <summary>
+        /// Evaluates the active state's order update condition.
+        /// </summary>
+        /// <param name="order">update of a certain order</param>
+        public void OnOrderUpdateEval(OrderUpdate order)
+        {
+            lock (_lock)
+            {
+                var next = _activeState.OnOrderUpdate(order);
+                SwitchState(next);
+            }
+        }
+
+        /// <summary>
         /// Switches the active state to the given state, only to be used by states
         /// </summary>
         /// <param name="child">State to switch to</param>
         /// <exception cref="Exception">Child can't be null</exception>
-        public void SwitchState(State<T> child)
+        private void SwitchState(State<T> child)
         {
             // This function is safe because it is executed in the locked context of the OnX callback functions
-            if (child == null)
+            Guard.Argument(child).NotNull();
+            if (child is NothingState<T>)
             {
-                throw new Exception("Given child state is null. State manager may only contain non-null states");
+                return;
             }
 
             _logger.LogInformation($"STATE SWITCH: {CurrentState} ---> {child.GetType().ToString().Split('+').Last()}");
 
             Interlocked.Exchange(ref _activeState, child);
-            child.Activate(this, _loggerFactory);
-        }
 
-        /// <summary>
-        /// Creates new Timer object that waits and then executes callback
-        /// </summary>
-        /// <param name="minutes">Time to wait</param>
-        public void SetTimer(uint minutes)
-        {
-            // Ensure the previous timer has gone out.
-            Container.TimerProvider.StopTimer();
-
-            Container.TimerProvider.SetTimer(minutes, () =>
-            {
-                // Callback returned after waiting period
-                lock (_lock)
-                {
-                    /* State.OnTimer should return Success, while states without implementing a timer
-                     * will return NotDefined by default.
-                    */
-                    var response = _activeState.OnTimer();
-                    if (!response.Success)
-                    {
-                        _logger.LogInformation($"Timer callback was not used by state. Response Code: {response}");
-                    }
-                }
-            });
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Disposes the current object's resource
-        /// </summary>
-        /// <param name="disposing">Whether to dispose the resources of the object</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _loggerFactory.Dispose();
-            }
+            _activeState.Activate(AlgorithmSettings, Container.TradingProvider, _loggerFactory);
         }
     }
 }

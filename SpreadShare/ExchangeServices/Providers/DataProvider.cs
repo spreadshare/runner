@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 
