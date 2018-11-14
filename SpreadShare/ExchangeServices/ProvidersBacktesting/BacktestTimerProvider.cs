@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
@@ -51,10 +50,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _logger.LogWarning("Backtesting timer was stopped, but this has no effect, as the timer elapses instantly");
         }
 
-        /// <inheritdoc />
-        public override void RunPeriodicTimer()
+        protected override void RunPeriodicTimer()
         {
-            throw new NotImplementedException();
+            // TODO: Implement this
         }
     }
 }

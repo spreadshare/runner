@@ -46,6 +46,18 @@ namespace SpreadShare.ExchangeServices.Providers
             _daemon.Stop();
         }
 
+        /// <summary>
+        /// Notifies the observer periodically
+        /// </summary>
+        protected override async void RunPeriodicTimer()
+        {
+            while (true)
+            {
+                UpdateObservers(GetCurrentTime().ToUnixTimeMilliseconds());
+                await Task.Delay(2000).ConfigureAwait(false);
+            }
+        }
+
         private void Execute()
         {
             if (_count++ < _targetCount)
@@ -55,16 +67,6 @@ namespace SpreadShare.ExchangeServices.Providers
 
             _daemon.Stop();
             _callback();
-        }
-
-        /// <inheritdoc />
-        public override async void RunPeriodicTimer()
-        {
-            while (true)
-            {
-                UpdateObservers(GetCurrentTime().ToUnixTimeMilliseconds());
-                await Task.Delay(2000).ConfigureAwait(false);
-            }
         }
     }
 }
