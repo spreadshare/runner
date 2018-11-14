@@ -16,6 +16,11 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private uint _count;
 
+        public ExchangeTimerProvider()
+        {
+            RunPeriodicTimer();
+        }
+
         /// <inheritdoc />
         public override DateTimeOffset GetCurrentTime() => DateTimeOffset.UtcNow;
 
@@ -33,13 +38,6 @@ namespace SpreadShare.ExchangeServices.Providers
             // Set starting values
             _count = 0;
             _targetCount = minutes;
-
-            // Create cron timer with one minute time interval.
-            _daemon = new CronDaemon();
-            _daemon.Add("* * * * * *", Execute);
-            _daemon.Start();
-
-            RunPeriodicTimer();
         }
 
         /// <inheritdoc />
