@@ -103,7 +103,7 @@ namespace SpreadShare.Algorithms
             throw new NotImplementedException();
         }
 
-        /// <summary>
+        /// <summary>    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
         /// Sets the initial allocation in AllocationManager
         /// </summary>
         private void SetInitialAllocation()

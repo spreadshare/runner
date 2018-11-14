@@ -42,6 +42,7 @@ namespace SpreadShare.Algorithms.Implementations
             public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
             {
                 Logger.LogInformation("Market condition is being evaluated");
+                Logger.LogInformation($"Price of EOS  is {data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH"))}");
                 return new NothingState<SimpleBandWagonAlgorithmSettings>();
             }
 
