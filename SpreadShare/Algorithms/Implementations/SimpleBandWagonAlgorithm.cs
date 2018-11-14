@@ -38,6 +38,12 @@ namespace SpreadShare.Algorithms.Implementations
         /// </summary>
         private class EntryState : State<SimpleBandWagonAlgorithmSettings>
         {
+            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+            {
+                Logger.LogInformation("Market condition is being evaluated");
+                return new NothingState<SimpleBandWagonAlgorithmSettings>();
+            }
+
             /// <inheritdoc />
             protected override void Run(TradingProvider trading)
             {

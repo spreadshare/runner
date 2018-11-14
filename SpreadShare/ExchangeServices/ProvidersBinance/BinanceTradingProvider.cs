@@ -29,16 +29,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         public override ResponseObject<decimal> PlaceFullMarketOrder(TradingPair pair, Models.OrderSide side, decimal amount)
         {
             var client = _communications.Client;
+            decimal rounded = pair.RoundToTradable(amount);
 
-            var query = client.PlaceOrder(pair.ToString(), BinanceUtilities.ToExternal(side), OrderType.Market, amount);
+            var query = client.PlaceOrder(pair.ToString(), BinanceUtilities.ToExternal(side), OrderType.Market, rounded);
             if (query.Success)
             {
                 return new ResponseObject<decimal>(ResponseCode.Success, query.Data.ExecutedQuantity);
             }
 
-            Logger.LogWarning(query.ToString());
+            Logger.LogWarning(query.Error.Message);
 
-            Logger.LogWarning($"Placing market order {side} {amount}{pair} failed");
+            Logger.LogWarning($"Placing market order {side} {rounded}{pair} failed");
             return new ResponseObject<decimal>(ResponseCode.Error, 0.0M);
         }
 
