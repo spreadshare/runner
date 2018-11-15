@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms.Implementations
@@ -48,6 +49,8 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run(TradingProvider trading)
             {
                 Logger.LogInformation($"Portfolio is {trading.GetPortfolio().ToJson()}");
+                trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy, 1, 0.0105M);
+                Logger.LogInformation($"Porfolio is now {trading.GetPortfolio().ToJson()}");
             }
         }
 

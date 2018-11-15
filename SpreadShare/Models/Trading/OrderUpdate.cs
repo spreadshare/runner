@@ -64,7 +64,7 @@
         /// <summary>
         /// Gets the price of the order.
         /// </summary>
-        public decimal Price { get; }
+        public decimal Price { get; set; }
 
         /// <summary>
         /// Gets the side of the order.

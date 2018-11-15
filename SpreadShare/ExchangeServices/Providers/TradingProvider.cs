@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
@@ -118,7 +119,22 @@ namespace SpreadShare.ExchangeServices.Providers
 
         public ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
         {
-            return _implementation.PlaceLimitOrder(pair, side, amount, price);
+            var currency = side == OrderSide.Buy ? pair.Right : pair.Left;
+            var proposal = new TradeProposal(new Balance(currency, amount, 0));
+            bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
+            {
+                bool success = RetryMethod(() => _implementation.PlaceLimitOrder(pair, side, amount, price));
+                if (!success)
+                {
+                    return null;
+                }
+
+                var exec = new TradeExecution(
+                    new Balance(currency, amount, 0),
+                    new Balance(currency, 0, amount));
+                return exec;
+            });
+            return tradeSucces ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);
         }
 
         /// <summary>
@@ -142,6 +158,23 @@ namespace SpreadShare.ExchangeServices.Providers
             }
 
             return baseAmount / query.Data;
+        }
+
+        private bool RetryMethod(Func<ResponseObject> method)
+        {
+            int retries = 0;
+            for (int i = 0; i < 5; i++)
+            {
+                var result = method();
+                if (result.Success)
+                {
+                    return true;
+                }
+
+                _logger.LogWarning($"{result.Message} - attempt {retries}/5");
+            }
+
+            return false;
         }
     }
 }

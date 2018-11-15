@@ -1,6 +1,7 @@
 using System;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
+using Remotion.Linq.Utilities;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
@@ -68,7 +69,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
         public override ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
         {
-            throw new NotImplementedException();
+            // Keep the remote updated by mocking a trade execution
+            Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
+            decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
+            TradeExecution exec = new TradeExecution(
+                    new Balance(pair.Right, amount, 0),
+                    new Balance(pair.Right, 0, amount));
+            _comm.RemotePortfolio.UpdateAllocation(exec);
+            _watchList.Add(new OrderUpdate(price, side, OrderUpdate.OrderStatus.New, pair));
+            return new ResponseObject(ResponseCode.Success);
         }
 
         /// <inheritdoc />
@@ -91,10 +100,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 var query = _dataProvider.GetCurrentPriceLastTrade(order.Pair);
                 if (query.Success)
                 {
-                    bool filled = order.Side == OrderSide.Buy ? query.Data < order.Price : query.Data > order.Price;
+                    Logger.LogInformation($"Checking the orders..., price is {query.Data}");
+                    bool filled = order.Side == OrderSide.Buy ? query.Data <= order.Price : query.Data >= order.Price;
                     if (filled)
                     {
+                        Logger.LogInformation($"Order confirmed at {_timer.CurrentTime}");
                         order.Status = OrderUpdate.OrderStatus.Filled;
+                        // Set the actual price for the order
+                        order.Price = query.Data;
                         UpdateObservers(order);
                     }
                 }
