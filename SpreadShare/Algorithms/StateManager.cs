@@ -20,7 +20,6 @@ namespace SpreadShare.Algorithms
         private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly ConfigurableObserver<long> _periodicObserver;
 
         private State<T> _activeState;
 
@@ -49,11 +48,17 @@ namespace SpreadShare.Algorithms
                 Container = container;
 
                 // Setup observing
-                _periodicObserver = new ConfigurableObserver<long>(
+                var _periodicObserver = new ConfigurableObserver<long>(
                     time => OnMarketConditionEval(),
                     () => { },
                     e => { });
                 container.TimerProvider.Subscribe(_periodicObserver);
+                
+                var _orderObserver = new ConfigurableObserver<OrderUpdate>(
+                    OnOrderUpdateEval,
+                    () => { },
+                    e => { });
+                container.TradingProvider.Subscribe(_orderObserver);
 
                 // Setup initial state
                 _activeState = initial;
