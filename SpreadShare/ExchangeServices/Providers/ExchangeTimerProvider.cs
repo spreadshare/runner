@@ -8,9 +8,6 @@ namespace SpreadShare.ExchangeServices.Providers
     /// </summary>
     internal class ExchangeTimerProvider : TimerProvider
     {
-        /// <inheritdoc />
-        public override DateTimeOffset GetCurrentTime() => DateTimeOffset.UtcNow;
-
         /// <summary>
         /// Set a timer before executing a callback.
         /// Has an inaccuracy of 60 seconds.
@@ -35,7 +32,7 @@ namespace SpreadShare.ExchangeServices.Providers
         {
             while (true)
             {
-                UpdateObservers(GetCurrentTime().ToUnixTimeMilliseconds());
+                UpdateObservers(DateTimeOffset.Now.ToUnixTimeMilliseconds());
                 await Task.Delay(2000).ConfigureAwait(false);
             }
         }

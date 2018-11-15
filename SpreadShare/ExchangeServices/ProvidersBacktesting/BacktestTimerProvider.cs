@@ -31,8 +31,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         public DateTimeOffset CurrentTime { get; private set; }
 
-        /// <inheritdoc />
-        public override DateTimeOffset GetCurrentTime() => CurrentTime;
+        /// <summary>
+        /// Get the current time of the backtest universe
+        /// </summary>
+        /// <returns></returns>
+        public DateTimeOffset GetCurrentTime() => CurrentTime;
 
         /// <inheritdoc />
         public override void SetTimer(uint minutes, Action callback)

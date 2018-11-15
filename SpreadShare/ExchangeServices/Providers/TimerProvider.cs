@@ -10,12 +10,6 @@ namespace SpreadShare.ExchangeServices.Providers
     internal abstract class TimerProvider : Observable<long>
     {
         /// <summary>
-        /// Gets the current time of the backtest universe.
-        /// </summary>
-        /// <returns>Current UTC time</returns>
-        public abstract DateTimeOffset GetCurrentTime();
-
-        /// <summary>
         /// Set a timer before executing a certain callback
         /// </summary>
         /// <param name="minutes">The amount of minutes to wait</param>
