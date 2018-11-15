@@ -24,7 +24,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _logger = loggerFactory.CreateLogger(GetType());
             CurrentTime = startDate;
             _target = DateTimeOffset.FromUnixTimeMilliseconds(1540198260000);
-            RunPeriodicTimer();
         }
 
         /// <summary>
@@ -50,7 +49,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        protected async override void RunPeriodicTimer()
+        public async override void RunPeriodicTimer()
         {
             // Make sure all constructor processes are finished
             await Task.Delay(1000).ConfigureAwait(false);

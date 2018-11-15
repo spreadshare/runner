@@ -49,7 +49,7 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run(TradingProvider trading)
             {
                 Logger.LogInformation($"Portfolio before buying is {trading.GetPortfolio().ToJson()}");
-                trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy);
+                //trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy);
             }
         }
 
@@ -63,7 +63,7 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run(TradingProvider trading)
             {
                 Logger.LogInformation($"Portfolio before selling is {trading.GetPortfolio().ToJson()}");
-                trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell);
+                //trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell);
             }
         }
 

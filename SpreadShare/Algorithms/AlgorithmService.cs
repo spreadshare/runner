@@ -75,6 +75,10 @@ namespace SpreadShare.Algorithms
             var container = _exchangeFactoryService.BuildContainer(
                 exchangeEnum,
                 algorithmType);
+            
+            // Start the timer provider
+            container.TimerProvider.RunPeriodicTimer();
+            
 
             // Initialise algorithm with container
             var startResponse = algorithm.Start(settings, container);

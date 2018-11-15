@@ -12,14 +12,6 @@ namespace SpreadShare.ExchangeServices.Providers
     {
         private Action _callback;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExchangeTimerProvider"/> class.
-        /// </summary>
-        public ExchangeTimerProvider()
-        {
-            RunPeriodicTimer();
-        }
-
         /// <inheritdoc />
         public override DateTimeOffset GetCurrentTime() => DateTimeOffset.UtcNow;
 
@@ -43,7 +35,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Notifies the observer periodically
         /// </summary>
-        protected override async void RunPeriodicTimer()
+        public override async void RunPeriodicTimer()
         {
             while (true)
             {

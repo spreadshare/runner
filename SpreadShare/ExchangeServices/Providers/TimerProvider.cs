@@ -31,6 +31,6 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Notify the observers periodically
         /// </summary>
-        protected abstract void RunPeriodicTimer();
+        public abstract void RunPeriodicTimer();
     }
 }
