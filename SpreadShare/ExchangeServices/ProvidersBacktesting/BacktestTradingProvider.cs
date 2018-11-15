@@ -14,7 +14,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     internal class BacktestTradingProvider : AbstractTradingProvider, IObserver<long>
     {
         private readonly ILogger _logger;
-        private readonly BacktestOutputLogger _backtestOutputLogger;
         private readonly BacktestTimerProvider _timer;
         private readonly BacktestDataProvider _dataProvider;
         private readonly BacktestCommunicationService _comm;
@@ -38,15 +37,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _dataProvider = data;
             _comm = comm;
             timer.Subscribe(this);
-
-            // Output backtestOutputLogger for writing backtest report
-            _backtestOutputLogger = new BacktestOutputLogger();
         }
 
         /// <inheritdoc />
         public override ResponseObject<decimal> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount)
         {
-            _backtestOutputLogger.RegisterTradeEvent(_timer.CurrentTime, pair.Right, pair.Left, side, amount, new Currency("BNB"), 69);
             decimal executed = side == OrderSide.Buy
                 ? amount
                 : amount * _dataProvider.GetCurrentPriceLastTrade(pair).Data;
