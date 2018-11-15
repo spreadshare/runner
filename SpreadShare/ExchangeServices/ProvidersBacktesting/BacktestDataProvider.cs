@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,9 +17,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     /// </summary>
     internal class BacktestDataProvider : AbstractDataProvider
     {
-        private const int HalfCandleInterval = 30000;
         private readonly BacktestTimerProvider _timer;
         private readonly DatabaseContext _database;
+        private Dictionary<string, BacktestingCandle[]> _buffers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestDataProvider"/> class.
@@ -32,12 +33,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             _database = database;
             _timer = timerProvider;
+            _buffers = new Dictionary<string, BacktestingCandle[]>();
         }
 
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair)
         {
-            var candle = FindCandle(pair, _timer.CurrentMinuteEpoc);
+            var candle = FindCandle(pair, _timer.CurrentTime.ToUnixTimeMilliseconds());
             return new ResponseObject<decimal>(ResponseCode.Success, candle.Average);
         }
 
@@ -48,9 +50,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public override ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair) => GetCurrentPriceLastTrade(pair);
 
         /// <inheritdoc />
-        public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack, DateTimeOffset endTime)
+        public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack)
         {
-            long timestamp = endTime.ToUnixTimeMilliseconds();
+            long timestamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
             var candleNow = FindCandle(pair, timestamp);
             var candleBack = FindCandle(pair, timestamp - (long)(hoursBack * 3600 * 1000));
 
@@ -58,7 +60,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack, DateTime endTime)
+        public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
         {
             if (hoursBack <= 0)
             {
@@ -70,7 +72,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             foreach (var tradingPair in pairs)
             {
-                var performanceQuery = GetPerformancePastHours(tradingPair, hoursBack, endTime);
+                var performanceQuery = GetPerformancePastHours(tradingPair, hoursBack);
                 decimal performance;
                 if (performanceQuery.Code == ResponseCode.Success)
                 {
@@ -108,12 +110,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             /* Throws exception if no or multiple candles are returned. This is expected behaviour as the backtesting data
              * should have fixed timestamps.
              */
-            return _database.Candles
-                .AsNoTracking()
-                .Single(c =>
-                       timestamp - HalfCandleInterval <= c.Timestamp
-                    && c.Timestamp <= timestamp + HalfCandleInterval
-                    && c.TradingPair == pair.ToString());
+            if (!_buffers.ContainsKey(pair.ToString()))
+            {
+                Logger.LogCritical($"Building a new buffer for {pair}");
+                _buffers.Add(pair.ToString(), _database.Candles.AsNoTracking().OrderBy(x => x.Timestamp).ToArray());
+                Logger.LogCritical("Done building the buffer");
+            }
+
+            return _buffers[pair.ToString()][(int)((timestamp - _buffers[pair.ToString()][0].Timestamp) / 60000)];
         }
     }
 }

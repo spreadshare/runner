@@ -76,6 +76,9 @@ namespace SpreadShare.Algorithms
                 exchangeEnum,
                 algorithmType);
 
+            // Start the timer provider
+            container.TimerProvider.RunPeriodicTimer();
+
             // Initialise algorithm with container
             var startResponse = algorithm.Start(settings, container);
 
@@ -103,7 +106,7 @@ namespace SpreadShare.Algorithms
             throw new NotImplementedException();
         }
 
-        /// <summary>
+        /// <summary>    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
         /// Sets the initial allocation in AllocationManager
         /// </summary>
         private void SetInitialAllocation()
