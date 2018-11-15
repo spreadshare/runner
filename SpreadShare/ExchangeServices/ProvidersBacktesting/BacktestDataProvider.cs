@@ -113,7 +113,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 Logger.LogCritical("Done building the buffer");
             }
 
-            long index = timestamp - _buffers[pair.ToString()][0].Timestamp / 60000;
+            long index = (timestamp - _buffers[pair.ToString()][0].Timestamp) / 60000;
             return _buffers[pair.ToString()][index];
         }
     }
