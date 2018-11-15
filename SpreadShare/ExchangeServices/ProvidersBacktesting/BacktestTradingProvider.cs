@@ -42,10 +42,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject<decimal> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount)
         {
-            decimal executed = side == OrderSide.Buy
-                ? amount
-                : amount * _dataProvider.GetCurrentPriceLastTrade(pair).Data;
-
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             var proposal = new TradeProposal(new Balance(currency, amount, 0.0M));
 
@@ -78,7 +74,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
