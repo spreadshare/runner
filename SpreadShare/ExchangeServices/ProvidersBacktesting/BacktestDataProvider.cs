@@ -17,7 +17,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     /// </summary>
     internal class BacktestDataProvider : AbstractDataProvider
     {
-        private const int HalfCandleInterval = 30000;
         private readonly BacktestTimerProvider _timer;
         private readonly DatabaseContext _database;
         private Dictionary<string, BacktestingCandle[]> _buffers;
@@ -117,6 +116,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 _buffers.Add(pair.ToString(), _database.Candles.AsNoTracking().OrderBy(x => x.Timestamp).ToArray());
                 Logger.LogCritical("Done building the buffer");
             }
+
             return _buffers[pair.ToString()][(int)((timestamp - _buffers[pair.ToString()][0].Timestamp) / 60000)];
         }
     }

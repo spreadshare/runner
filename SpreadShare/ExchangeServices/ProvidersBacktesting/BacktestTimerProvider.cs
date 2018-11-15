@@ -61,6 +61,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 CurrentTime += TimeSpan.FromMinutes(1);
                 UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
             }
+
             _logger.LogCritical($"STOP THE TIMERS! Backtest took {(DateTimeOffset.Now - start).TotalMilliseconds}ms");
         }
     }

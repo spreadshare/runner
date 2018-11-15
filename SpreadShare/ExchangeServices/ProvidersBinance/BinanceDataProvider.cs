@@ -72,13 +72,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             return new ResponseObject<decimal>(ResponseCode.Success, ret);
         }
 
-        /// <summary>
-        /// Gets past performance in the past hours
-        /// </summary>
-        /// <param name="pair">Trading pair to obtain performance of</param>
-        /// <param name="hoursBack">Amount of hours to look back</param>
-        /// <param name="endTime">DateTime marking the end of the period</param>
-        /// <returns>A response object with the performance on success</returns>
+        /// <inheritdoc />
         public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack)
         {
             if (hoursBack <= 0)
@@ -105,13 +99,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             return new ResponseObject<decimal>(ResponseCode.Error);
         }
 
-        /// <summary>
-        /// Gets the top performing trading pair
-        /// </summary>
-        /// <param name="pairs">A list of trading pairs to evaluate</param>
-        /// <param name="hoursBack">Amount of hours to look back</param>
-        /// <param name="endTime">DateTime marking the end of the period</param>
-        /// <returns>Top performing trading pair</returns>
+        /// <inheritdoc />
         public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
         {
             if (hoursBack <= 0)

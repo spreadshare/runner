@@ -41,15 +41,41 @@ namespace SpreadShare.Algorithms.Implementations
         {
             public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
             {
-                Logger.LogInformation("Market condition is being evaluated");
-                Logger.LogInformation($"Price of EOS  is {data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH"))}");
-                return new NothingState<SimpleBandWagonAlgorithmSettings>();
+               // Logger.LogInformation("Market condition is being evaluated");
+                return new OtherState();
             }
 
             /// <inheritdoc />
             protected override void Run(TradingProvider trading)
             {
-                Logger.LogInformation("Started the simple bandwagon algorithm");
+                Logger.LogInformation($"Portfolio before buying is {trading.GetPortfolio().ToJson()}");
+                trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy);
+            }
+        }
+
+        private class OtherState : State<SimpleBandWagonAlgorithmSettings>
+        {
+            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+            {
+                return new EntryState();
+            }
+
+            protected override void Run(TradingProvider trading)
+            {
+                Logger.LogInformation($"Portfolio before selling is {trading.GetPortfolio().ToJson()}");
+                trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell);
+            }
+        }
+
+        private class BounceState : State<SimpleBandWagonAlgorithmSettings>
+        {
+            protected override void Run(TradingProvider trading)
+            {
+            }
+
+            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+            {
+                return new OtherState();
             }
         }
 

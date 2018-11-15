@@ -61,7 +61,6 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">trading pair to obtain performance of</param>
         /// <param name="hoursBack">Amount of hours to look back</param>
-        /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>A response object with the performance on success</returns>
         public ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack)
         {
@@ -73,7 +72,6 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pairs">A list of trading pairs to evaluate</param>
         /// <param name="hoursBack">Amount of hours to look back</param>
-        /// <param name="endTime">DateTime marking the end of the period</param>
         /// <returns>Top performing trading pair</returns>
         public ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
         {
