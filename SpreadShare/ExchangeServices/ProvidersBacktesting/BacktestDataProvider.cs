@@ -107,9 +107,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <returns>Candle matching timestamp most closely</returns>
         private BacktestingCandle FindCandle(TradingPair pair, long timestamp)
         {
-            /* Throws exception if no or multiple candles are returned. This is expected behaviour as the backtesting data
-             * should have fixed timestamps.
-             */
             if (!_buffers.ContainsKey(pair.ToString()))
             {
                 Logger.LogCritical($"Building a new buffer for {pair}");
