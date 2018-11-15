@@ -4,6 +4,7 @@ using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using OrderSide = SpreadShare.Models.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
@@ -41,6 +42,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
 
             Logger.LogWarning($"Placing market order {side} {rounded}{pair} failed");
             return new ResponseObject<decimal>(ResponseCode.Error, 0.0M);
+        }
+
+        public override ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
+        {
+            throw new System.NotImplementedException();
         }
 
         /// <inheritdoc />

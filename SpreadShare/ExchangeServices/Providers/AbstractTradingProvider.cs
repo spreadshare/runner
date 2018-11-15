@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
@@ -14,6 +15,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Create identifiable output.
         /// </summary>
         protected readonly ILogger Logger;
+        protected List<OrderUpdate> _watchList;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractTradingProvider"/> class.
@@ -22,6 +24,7 @@ namespace SpreadShare.ExchangeServices.Providers
         protected AbstractTradingProvider(ILoggerFactory loggerFactory)
         {
             Logger = loggerFactory.CreateLogger(GetType());
+            _watchList = new List<OrderUpdate>();
         }
 
         /// <summary>
@@ -32,6 +35,8 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="amount">The amount to buy or sell</param>
         /// <returns>A response object indicating the status of the market order</returns>
         public abstract ResponseObject<decimal> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount);
+
+        public abstract ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price);
 
         /// <summary>
         /// Cancels order

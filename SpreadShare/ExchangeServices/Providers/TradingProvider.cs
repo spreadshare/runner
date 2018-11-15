@@ -116,6 +116,11 @@ namespace SpreadShare.ExchangeServices.Providers
             return tradeSuccess ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);
         }
 
+        public ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
+        {
+            return _implementation.PlaceLimitOrder(pair, side, amount, price);
+        }
+
         /// <summary>
         /// Cancels order
         /// </summary>

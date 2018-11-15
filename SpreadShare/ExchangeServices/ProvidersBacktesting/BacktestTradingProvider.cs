@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
@@ -19,7 +18,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private readonly BacktestTimerProvider _timer;
         private readonly BacktestDataProvider _dataProvider;
         private readonly BacktestCommunicationService _comm;
-        private List<OrderUpdate> _orderList;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestTradingProvider"/> class.
@@ -43,7 +41,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             // Output backtestOutputLogger for writing backtest report
             _backtestOutputLogger = new BacktestOutputLogger();
-            _orderList = new List<OrderUpdate>();
         }
 
         /// <inheritdoc />
@@ -80,6 +77,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             return new ResponseObject<decimal>(ResponseCode.Success, amount);
         }
 
+        public override ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
@@ -95,7 +97,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public void OnNext(long value)
         {
-            foreach (var order in _orderList)
+            foreach (var order in _watchList)
             {
                 var query = _dataProvider.GetCurrentPriceLastTrade(order.Pair);
                 if (query.Success)
