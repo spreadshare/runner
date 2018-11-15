@@ -179,10 +179,6 @@ namespace SpreadShare.ExchangeServices.Allocation
             var remote = query.Data;
             var local = _allocations[exchange].GetSummedChildren();
             var diff = Portfolio.SubtractedDifferences(remote, local);
-            foreach (var balance in diff)
-            {
-                _logger.LogCritical($"Help    -    {balance}");
-            }
 
             if (diff.Any(x => Math.Abs(x.Free) > DustThreshold || Math.Abs(x.Locked) > DustThreshold))
             {
