@@ -47,7 +47,7 @@ namespace SpreadShare.Algorithms.Implementations
             /// <inheritdoc />
             protected override void Run(TradingProvider trading)
             {
-                Logger.LogInformation("Started the simple bandwagon algorithm");
+                Logger.LogInformation($"Portfolio is {trading.GetPortfolio().ToJson()}");
             }
         }
 

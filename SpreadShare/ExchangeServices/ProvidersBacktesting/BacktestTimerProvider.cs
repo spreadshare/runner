@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
@@ -11,6 +12,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     internal class BacktestTimerProvider : TimerProvider
     {
         private readonly ILogger _logger;
+        private DateTimeOffset _target;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestTimerProvider"/> class.
@@ -21,17 +23,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             _logger = loggerFactory.CreateLogger(GetType());
             CurrentTime = startDate;
+            _target = DateTimeOffset.FromUnixTimeMilliseconds(1540198260000);
         }
 
         /// <summary>
         /// Gets the current time of the backtest universe.
         /// </summary>
         public DateTimeOffset CurrentTime { get; private set; }
-
-        /// <summary>
-        /// Gets the unix timestamp as potential index of database entries
-        /// </summary>
-        public long CurrentMinuteEpoc => CurrentTime.ToUnixTimeMilliseconds() - (CurrentTime.ToUnixTimeMilliseconds() % 60000);
 
         /// <inheritdoc />
         public override DateTimeOffset GetCurrentTime() => CurrentTime;
@@ -51,9 +49,19 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        protected override void RunPeriodicTimer()
+        public async override void RunPeriodicTimer()
         {
-            // TODO: Implement this
+            // Make sure all constructor processes are finished
+            await Task.Delay(1000).ConfigureAwait(false);
+            DateTimeOffset start = DateTimeOffset.Now;
+            while (CurrentTime < _target)
+            {
+                _logger.LogInformation($"It is now {CurrentTime}");
+                CurrentTime += TimeSpan.FromMinutes(1);
+                UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
+            }
+
+            _logger.LogCritical($"STOP THE TIMERS! Backtest took {(DateTimeOffset.Now - start).TotalMilliseconds}ms");
         }
     }
 }

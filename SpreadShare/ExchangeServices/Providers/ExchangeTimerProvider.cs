@@ -1,7 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Cron;
-using Dawn;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
@@ -10,12 +8,6 @@ namespace SpreadShare.ExchangeServices.Providers
     /// </summary>
     internal class ExchangeTimerProvider : TimerProvider
     {
-        private CronDaemon _daemon;
-        private Action _callback;
-        private uint _targetCount;
-
-        private uint _count;
-
         /// <inheritdoc />
         public override DateTimeOffset GetCurrentTime() => DateTimeOffset.UtcNow;
 
@@ -27,46 +19,25 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="callback">the method to execute after given time</param>
         public override void SetTimer(uint minutes, Action callback)
         {
-            Guard.Argument(callback);
-            _callback = callback;
-
-            // Set starting values
-            _count = 0;
-            _targetCount = minutes;
-
-            // Create cron timer with one minute time interval.
-            _daemon = new CronDaemon();
-            _daemon.Add("* * * * * *", Execute);
-            _daemon.Start();
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
         public override void StopTimer()
         {
-            _daemon.Stop();
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Notifies the observer periodically
         /// </summary>
-        protected override async void RunPeriodicTimer()
+        public override async void RunPeriodicTimer()
         {
             while (true)
             {
                 UpdateObservers(GetCurrentTime().ToUnixTimeMilliseconds());
                 await Task.Delay(2000).ConfigureAwait(false);
             }
-        }
-
-        private void Execute()
-        {
-            if (_count++ < _targetCount)
-            {
-                return;
-            }
-
-            _daemon.Stop();
-            _callback();
         }
     }
 }
