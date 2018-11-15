@@ -70,8 +70,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     new Balance(pair.Left, amount, 0.0M),
                     new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M));
             }
-
-            _logger.LogWarning($"Trade exec is {exec.From} -> {exec.To}");
             _comm.RemotePortfolio.UpdateAllocation(exec);
 
             return new ResponseObject<decimal>(ResponseCode.Success, amount);
