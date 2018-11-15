@@ -54,7 +54,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             decimal executed = side == OrderSide.Buy
                 ? amount
                 : amount * _dataProvider.GetCurrentPriceLastTrade(pair).Data;
-            
+
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             var proposal = new TradeProposal(new Balance(currency, amount, 0.0M));
 
@@ -74,6 +74,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     new Balance(pair.Left, amount, 0.0M),
                     new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M));
             }
+
             _logger.LogWarning($"Trade exec is {exec.From} -> {exec.To}");
             _comm.RemotePortfolio.UpdateAllocation(exec);
 

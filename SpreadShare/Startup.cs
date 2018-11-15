@@ -97,7 +97,6 @@ namespace SpreadShare
             services.AddLogging(loggingBuilder => loggingBuilder
                 .AddConsole(opt => opt.DisableColors = true)
                 .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
-                .AddFilter("SpreadShare", LogLevel.Warning)
                 .SetMinimumLevel(LogLevel.Information));
 
             // Add Configuration dependency (provides access to appsettings.json)
