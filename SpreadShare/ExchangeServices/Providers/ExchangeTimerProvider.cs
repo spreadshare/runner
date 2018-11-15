@@ -1,7 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Cron;
-using Dawn;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
