@@ -10,8 +10,6 @@ namespace SpreadShare.ExchangeServices.Providers
     /// </summary>
     internal class ExchangeTimerProvider : TimerProvider
     {
-        private Action _callback;
-
         /// <inheritdoc />
         public override DateTimeOffset GetCurrentTime() => DateTimeOffset.UtcNow;
 
@@ -23,13 +21,13 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="callback">the method to execute after given time</param>
         public override void SetTimer(uint minutes, Action callback)
         {
-            Guard.Argument(callback);
-            _callback = callback;
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
         public override void StopTimer()
         {
+            throw new NotImplementedException();
         }
 
         /// <summary>

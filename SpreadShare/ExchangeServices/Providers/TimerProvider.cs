@@ -7,7 +7,6 @@ namespace SpreadShare.ExchangeServices.Providers
     /// Abstract definition of the timer provider
     /// This object is used inside an ExchangeProviderContainer
     /// </summary>
-    /// TODO: Make sure that periodic signals are send out to the observers.
     internal abstract class TimerProvider : Observable<long>
     {
         /// <summary>
