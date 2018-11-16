@@ -112,8 +112,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 _buffers.Add(
                     pair.ToString(),
                     _database.Candles.AsNoTracking()
-                        .OrderBy(x => x.Timestamp)
                         .Where(x => x.TradingPair == pair.ToString())
+                        .OrderBy(x => x.Timestamp)
                         .ToArray());
                 Logger.LogCritical("Done building the buffer");
             }
