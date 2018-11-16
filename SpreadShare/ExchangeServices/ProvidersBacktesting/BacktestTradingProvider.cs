@@ -56,8 +56,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M),
                     new Balance(pair.Left, amount, 0.0M));
             }
-
-            if (side == OrderSide.Sell)
+            else
             {
                 exec = new TradeExecution(
                     new Balance(pair.Left, amount, 0.0M),
@@ -75,6 +74,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Keep the remote updated by mocking a trade execution
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             TradeExecution exec = null;
+            
+            // Mock the remote portfolio by providing it an update
             if (side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
@@ -90,6 +91,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             }
 
             _comm.RemotePortfolio.UpdateAllocation(exec);
+
+            // Add the order to the watchlist
             _watchList.Add(new OrderUpdate(price, side, OrderUpdate.OrderStatus.New, pair, amount));
             return new ResponseObject(ResponseCode.Success);
         }

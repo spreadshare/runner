@@ -72,42 +72,36 @@ namespace SpreadShare.ExchangeServices.Providers
 
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                ResponseObject<decimal> query = null;
-                decimal tradeAmount = proposal.From.Free;
-                for (uint retries = 0; retries < 5; retries++)
+                var query = RetryMethod(() =>
                 {
-                    // Estimate the value that will be obtained from the order when buying.
-                    tradeAmount = side == OrderSide.Buy ? GetBuyAmountEstimate(pair, proposal.From.Free) : proposal.From.Free;
-                    query = _implementation.PlaceFullMarketOrder(pair, side, tradeAmount);
-                    if (query.Success)
-                    {
-                        break;
-                    }
-
-                    _logger.LogWarning(query.ToString());
-                }
+                    decimal tradeAmount = side == OrderSide.Buy
+                        ? GetBuyAmountEstimate(pair, proposal.From.Free)
+                        : proposal.From.Free;
+                    return _implementation.PlaceFullMarketOrder(pair, side, tradeAmount);
+                });
 
                 if (!query.Success)
                 {
-                    _logger.LogError($"Trade for {pair} failed after 5 retries");
                     return null;
                 }
 
                 // Report the trade with the actual amount as communicated by the exchange.
-                // TODO: Is this correct???
+                TradeExecution exec;
                 if (side == OrderSide.Buy)
                 {
-                    return new TradeExecution(
+                    exec = new TradeExecution(
                         new Balance(pair.Right, proposal.From.Free, 0.0M),
                         new Balance(pair.Left, query.Data, 0.0M));
                 }
                 else
                 {
                     decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
-                    return new TradeExecution(
+                    exec = new TradeExecution(
                         new Balance(pair.Left, proposal.From.Free, 0.0M),
                         new Balance(pair.Right, query.Data * priceEstimate, 0.0M));
                 }
+
+                return exec;
             });
 
             return tradeSuccess ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);
@@ -128,13 +122,13 @@ namespace SpreadShare.ExchangeServices.Providers
             var proposal = new TradeProposal(new Balance(currency, proposedAmount, 0));
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
             {
-                bool success = RetryMethod(() => _implementation.PlaceLimitOrder(pair, side, amount, price));
-                if (!success)
+                var query = RetryMethod(() => _implementation.PlaceLimitOrder(pair, side, amount, price));
+                if (!query.Success)
                 {
                     return null;
                 }
 
-                TradeExecution exec = null;
+                TradeExecution exec;
                 if (side == OrderSide.Buy)
                 {
                     exec = new TradeExecution(
@@ -176,7 +170,7 @@ namespace SpreadShare.ExchangeServices.Providers
             return baseAmount / query.Data;
         }
 
-        private bool RetryMethod(Func<ResponseObject> method)
+        private ResponseObject<T> RetryMethod<T>(Func<ResponseObject<T>> method)
         {
             int retries = 0;
             for (int i = 0; i < 5; i++)
@@ -184,13 +178,13 @@ namespace SpreadShare.ExchangeServices.Providers
                 var result = method();
                 if (result.Success)
                 {
-                    return true;
+                    return result;
                 }
 
                 _logger.LogWarning($"{result.Message} - attempt {retries}/5");
             }
 
-            return false;
+            return new ResponseObject<T>(ResponseCode.Error);
         }
 
         private void UpdateAllocation(OrderUpdate order)
