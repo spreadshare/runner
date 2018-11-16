@@ -12,7 +12,7 @@ namespace SpreadShare.Algorithms
         where T : AlgorithmSettings
     {
         /// <inheritdoc />
-        protected override void Run(TradingProvider trading)
+        protected override void Run(TradingProvider trading, DataProvider data)
         {
             throw new InvalidOperationException("Nothing state should not be executed");
         }

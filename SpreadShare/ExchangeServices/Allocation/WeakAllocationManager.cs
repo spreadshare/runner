@@ -34,11 +34,18 @@ namespace SpreadShare.ExchangeServices.Allocation
             => _allocationManager.GetAvailableFunds(_exchange, _algorithm, currency);
 
         /// <summary>
-        /// Get all available funds for a given algorithm as portfolio.
+        /// Get all available funds as portfolio.
         /// </summary>
         /// <returns>Portfolio containing available funds</returns>
         public Portfolio GetAllFunds()
             => _allocationManager.GetAllFunds(_exchange, _algorithm);
+
+        /// <summary>
+        /// Updates the allocation given an trade execution
+        /// </summary>
+        /// <param name="exec">Trade Execution</param>
+        public void UpdateAllocation(TradeExecution exec)
+            => _allocationManager.UpdateAllocation(_exchange, _algorithm, exec);
 
         /// <summary>
         /// Queue a trade based on a proposal, the callback must return the trade execution

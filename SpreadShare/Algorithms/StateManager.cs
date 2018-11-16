@@ -20,7 +20,6 @@ namespace SpreadShare.Algorithms
         private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly ConfigurableObserver<long> _periodicObserver;
 
         private State<T> _activeState;
 
@@ -49,15 +48,25 @@ namespace SpreadShare.Algorithms
                 Container = container;
 
                 // Setup observing
-                _periodicObserver = new ConfigurableObserver<long>(
-                    time => OnMarketConditionEval(),
+                var periodicObserver = new ConfigurableObserver<long>(
+                    time =>
+                    {
+                        OnMarketConditionEval();
+                        EvaluateStateTimer();
+                    },
                     () => { },
                     e => { });
-                container.TimerProvider.Subscribe(_periodicObserver);
+                container.TimerProvider.Subscribe(periodicObserver);
+
+                var orderObserver = new ConfigurableObserver<OrderUpdate>(
+                    OnOrderUpdateEval,
+                    () => { },
+                    e => { });
+                container.TradingProvider.Subscribe(orderObserver);
 
                 // Setup initial state
                 _activeState = initial;
-                _activeState.Activate(algorithmSettings, Container.TradingProvider, _loggerFactory);
+                _activeState.Activate(algorithmSettings, container, _loggerFactory);
             }
         }
 
@@ -119,7 +128,23 @@ namespace SpreadShare.Algorithms
 
             Interlocked.Exchange(ref _activeState, child);
 
-            _activeState.Activate(AlgorithmSettings, Container.TradingProvider, _loggerFactory);
+            _activeState.Activate(AlgorithmSettings, Container, _loggerFactory);
+        }
+
+        /// <summary>
+        /// Evaluate the timer of the current state.
+        /// </summary>
+        private void EvaluateStateTimer()
+        {
+            lock (_lock)
+            {
+                if (!_activeState.TimerTriggered && _activeState.EndTime <= Container.TimerProvider.CurrentTime)
+                {
+                    _activeState.TimerTriggered = true;
+                    var next = _activeState.OnTimerElapsed();
+                    SwitchState(next);
+                }
+            }
         }
     }
 }

@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
 using SpreadShare.Tests.ExchangeServices;
 using Xunit;
@@ -11,16 +13,13 @@ namespace SpreadShare.Tests.Algorithms
 {
     public class StateTests : BaseProviderTests
     {
-        private TradingProvider _trading;
-        private DataProvider _data;
+        private readonly ExchangeProvidersContainer _container;
 
         public StateTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            var container = ExchangeFactoryService
+            _container = ExchangeFactoryService
                 .BuildContainer(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithmSettings));
-            _trading = container.TradingProvider;
-            _data = container.DataProvider;
         }
 
         [Fact]
@@ -33,14 +32,14 @@ namespace SpreadShare.Tests.Algorithms
         public void RunHappyFlow()
         {
             var state = new TestState();
-            state.Activate(new TestSettings() { Value = 1 }, _trading, LoggerFactory);
+            state.Activate(new TestSettings() { Value = 1 }, _container, LoggerFactory);
         }
 
         [Fact]
         public void MarketPredicateDefaultNothing()
         {
             var state = new TestState();
-            var next = state.OnMarketCondition(_data);
+            var next = state.OnMarketCondition(_container.DataProvider);
             Assert.IsType<NothingState<TestSettings>>(next);
         }
 
@@ -52,17 +51,19 @@ namespace SpreadShare.Tests.Algorithms
             Assert.IsType<NothingState<TestSettings>>(next);
         }
 
-        internal class TestState : State<TestSettings>
+        private class TestState : State<TestSettings>
         {
-            protected override void Run(TradingProvider trading)
+            protected override void Run(TradingProvider trading, DataProvider data)
             {
                 Logger.LogInformation($"Running, value is {AlgorithmSettings.Value}");
             }
         }
 
-        internal class TestSettings : AlgorithmSettings
+        private class TestSettings : AlgorithmSettings
         {
             public override Exchange Exchange { get; set; }
+
+            public override List<TradingPair> ActiveTradingPairs { get; set; }
 
             public decimal Value { get; set; }
         }

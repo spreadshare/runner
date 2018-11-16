@@ -10,7 +10,7 @@ namespace SpreadShare.ExchangeServices.Providers
     /// <summary>
     /// Abstract specification of a data provider.
     /// </summary>
-    internal abstract class AbstractDataProvider : IObservable<OrderUpdate>
+    internal abstract class AbstractDataProvider
     {
         /// <summary>
         /// Create identifiable output
@@ -32,9 +32,6 @@ namespace SpreadShare.ExchangeServices.Providers
             ExchangeCommunications = exchangeCommunications;
             Logger = loggerFactory.CreateLogger(GetType());
         }
-
-        /// <inheritdoc />
-        public IDisposable Subscribe(IObserver<OrderUpdate> observer) => ExchangeCommunications.Subscribe(observer);
 
         /// <summary>
         /// Gets the current price of a trading pair by checking the last trade

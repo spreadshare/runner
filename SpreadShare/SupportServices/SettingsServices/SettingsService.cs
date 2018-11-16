@@ -23,16 +23,20 @@ namespace SpreadShare.SupportServices.SettingsServices
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+        private readonly DatabaseContext _databaseContext;
+        private AlgorithmSettings _backtestedAlgorithm;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsService"/> class.
         /// </summary>
         /// <param name="configuration">Configuration of the application</param>
         /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        public SettingsService(IConfiguration configuration, ILoggerFactory loggerFactory)
+        /// <param name="databaseContext">The database context</param>
+        public SettingsService(IConfiguration configuration, ILoggerFactory loggerFactory, DatabaseContext databaseContext)
         {
             _configuration = configuration;
             _logger = loggerFactory.CreateLogger<SettingsService>();
+            _databaseContext = databaseContext;
         }
 
         /// <summary>
@@ -59,9 +63,9 @@ namespace SpreadShare.SupportServices.SettingsServices
         public SimpleBandWagonAlgorithmSettings SimpleBandWagonAlgorithmSettings { get; private set; }
 
         /// <summary>
-        /// Gets the initial portfolio representing the state of the backtesting exchange.
+        /// Gets the settings for the backtests
         /// </summary>
-        public Portfolio BacktestInitialPortfolio { get; private set; }
+        public BacktestSettings BackTestSettings { get; private set; }
 
         /// <inheritdoc />
         public ResponseObject Start()
@@ -72,8 +76,13 @@ namespace SpreadShare.SupportServices.SettingsServices
                 ParseAllocationSettings();
                 DownloadCurrencies();
                 ParseSimpleBandwagonSettings();
+                if (SimpleBandWagonAlgorithmSettings.Exchange == Exchange.Backtesting)
+                {
+                    _backtestedAlgorithm = SimpleBandWagonAlgorithmSettings;
+                }
+
                 BinanceSettings = _configuration.GetSection("BinanceClientSettings").Get<BinanceSettings>();
-                BacktestInitialPortfolio = ParseBacktestPortfolio();
+                BackTestSettings = ParseBacktestSettings();
             }
             catch (Exception e)
             {
@@ -268,16 +277,81 @@ namespace SpreadShare.SupportServices.SettingsServices
             }
         }
 
-        private Portfolio ParseBacktestPortfolio()
+        private BacktestSettings ParseBacktestSettings()
         {
-            var rawJson = _configuration.GetSection("BacktestPortfolio").GetChildren();
+            BacktestSettings result = new BacktestSettings();
+            var rawJson = _configuration.GetSection("BacktestSettings:BacktestPortfolio").GetChildren();
             var parsed = rawJson.ToDictionary(
                 x => new Currency(x.Key.ToString(CultureInfo.InvariantCulture)),
                 x => new Balance(
                     new Currency(x.Key.ToString(CultureInfo.InvariantCulture)),
                     x.GetValue<decimal>("Free"),
                     x.GetValue<decimal>("Locked")));
-            return new Portfolio(parsed);
+            result.InitialPortfolio = new Portfolio(parsed);
+            string beginValStr = _configuration.GetSection("BacktestSettings:BeginTimeStamp").Get<string>();
+            string endValStr = _configuration.GetSection("BacktestSettings:EndTimeStamp").Get<string>();
+            if (_backtestedAlgorithm == null)
+            {
+                return result;
+            }
+
+            var edges = GetTimeStampEdges();
+            result.BeginTimeStamp = beginValStr == "auto" ? edges.Item1 : long.Parse(beginValStr, NumberFormatInfo.InvariantInfo);
+            result.EndTimeStamp = endValStr == "auto" ? edges.Item2 : long.Parse(endValStr, NumberFormatInfo.InvariantInfo);
+
+            if (result.BeginTimeStamp % 60000 != 0 || result.EndTimeStamp % 60000 != 0)
+            {
+                _logger.LogError("Timestamps must be a multiple of 60000ms (1 minute)");
+                throw new ArgumentException("BeginTimeStamp or EndTimeStamp");
+            }
+
+            if (result.BeginTimeStamp < edges.Item1)
+            {
+                _logger.LogError("BeginTimestamp was smaller than one or more of the trading pairs available data");
+                throw new ArgumentException("BeginTimestamp");
+            }
+
+            if (result.EndTimeStamp > edges.Item2)
+            {
+                _logger.LogError("EndTimestamp was larger than one or more of the trading pairs available data");
+                throw new ArgumentException("EndTimeStamp");
+            }
+
+            _logger.LogCritical($"Minimum {result.BeginTimeStamp} ------- Maximum {result.EndTimeStamp}");
+
+            return result;
+        }
+
+        private Tuple<long, long> GetTimeStampEdges()
+        {
+            var pairs = _backtestedAlgorithm.ActiveTradingPairs;
+            long minBeginVal = 0;
+            long minEndVal = long.MaxValue;
+            foreach (var pair in pairs)
+            {
+                try
+                {
+                    long first = _databaseContext.Candles.OrderBy(x => x.Timestamp)
+                        .First(x => x.TradingPair == pair.ToString()).Timestamp;
+                    if (first > minBeginVal)
+                    {
+                        minBeginVal = first;
+                    }
+
+                    long last = _databaseContext.Candles.OrderBy(x => x.Timestamp)
+                        .Last(x => x.TradingPair == pair.ToString()).Timestamp;
+                    if (last < minEndVal)
+                    {
+                        minEndVal = last;
+                    }
+                }
+                catch
+                {
+                    throw new ArgumentException($"{pair} was not available in the database!");
+                }
+            }
+
+            return new Tuple<long, long>(minBeginVal, minEndVal);
         }
     }
 }

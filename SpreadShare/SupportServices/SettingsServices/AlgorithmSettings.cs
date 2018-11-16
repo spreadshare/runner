@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using SpreadShare.ExchangeServices;
+using SpreadShare.Models.Trading;
 
 namespace SpreadShare.SupportServices.SettingsServices
 {
@@ -11,5 +13,10 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// Gets or sets the exchange the algorithm uses
         /// </summary>
         public abstract Exchange Exchange { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of active trading pairs
+        /// </summary>
+        public abstract List<TradingPair> ActiveTradingPairs { get; set; }
     }
 }

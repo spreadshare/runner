@@ -27,7 +27,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         }
 
         private static IEnumerable<Balance> SortedSettingsBalances =>
-            SettingsService.BacktestInitialPortfolio.AllBalances().OrderByDescending(x => x.Free);
+            SettingsService.BackTestSettings.InitialPortfolio.AllBalances().OrderByDescending(x => x.Free);
 
         [Fact]
         public void ConstructorHappyFlow()
@@ -76,7 +76,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             });
 
             Currency c = new Currency("ETH");
-            var local = SettingsService.BacktestInitialPortfolio.GetAllocation(c);
+            var local = SettingsService.BackTestSettings.InitialPortfolio.GetAllocation(c);
             var amount = alloc.GetAvailableFunds(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithm), c);
             Assert.Equal(local.Free * factor, amount.Free);
         }

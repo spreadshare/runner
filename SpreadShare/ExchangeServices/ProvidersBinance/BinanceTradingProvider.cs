@@ -1,9 +1,10 @@
-﻿using Binance.Net.Objects;
+﻿using System;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using OrderSide = SpreadShare.Models.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
@@ -26,8 +27,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<decimal> PlaceFullMarketOrder(TradingPair pair, Models.OrderSide side, decimal amount)
+        public override ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, Models.OrderSide side, decimal amount)
         {
+            throw new NotImplementedException();
+            /*
             var client = _communications.Client;
             decimal rounded = pair.RoundToTradable(amount);
 
@@ -40,7 +43,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             Logger.LogWarning(query.Error.Message);
 
             Logger.LogWarning($"Placing market order {side} {rounded}{pair} failed");
-            return new ResponseObject<decimal>(ResponseCode.Error, 0.0M);
+            return new ResponseObject<decimal>(ResponseCode.Error, 0.0M); */
+        }
+
+        /// <inheritdoc />
+        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
+        {
+            throw new System.NotImplementedException();
         }
 
         /// <inheritdoc />

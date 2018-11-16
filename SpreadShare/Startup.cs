@@ -95,7 +95,7 @@ namespace SpreadShare
 
             // Add Logging dependency
             services.AddLogging(loggingBuilder => loggingBuilder
-                .AddConsole(opt => opt.DisableColors = true)
+                .AddConsole(opt => opt.DisableColors = false)
                 .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
                 .SetMinimumLevel(LogLevel.Information));
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
@@ -16,12 +17,18 @@ namespace SpreadShare.ExchangeServices.Providers
         protected readonly ILogger Logger;
 
         /// <summary>
+        /// A list of orders pending events.
+        /// </summary>
+        protected Dictionary<long, OrderUpdate> _watchList;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AbstractTradingProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output stream</param>
         protected AbstractTradingProvider(ILoggerFactory loggerFactory)
         {
             Logger = loggerFactory.CreateLogger(GetType());
+            _watchList = new Dictionary<long, OrderUpdate>();
         }
 
         /// <summary>
@@ -31,7 +38,17 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="side">Whether to buy or sell</param>
         /// <param name="amount">The amount to buy or sell</param>
         /// <returns>A response object indicating the status of the market order</returns>
-        public abstract ResponseObject<decimal> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount);
+        public abstract ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount);
+
+        /// <summary>
+        /// Place a limit order at the given price.
+        /// </summary>
+        /// <param name="pair">trading pair</param>
+        /// <param name="side">buy or sell order</param>
+        /// <param name="amount">amount of non base currency</param>
+        /// <param name="price">price to set the order at</param>
+        /// <returns>A response object indicating the status of the limit order    </returns>
+        public abstract ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price);
 
         /// <summary>
         /// Cancels order

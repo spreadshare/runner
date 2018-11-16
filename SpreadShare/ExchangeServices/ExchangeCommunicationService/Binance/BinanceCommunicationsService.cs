@@ -97,8 +97,12 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 orderInfoUpdate => UpdateObservers(new OrderUpdate(
                     orderInfoUpdate.Price,
                     BinanceUtilities.ToInternal(orderInfoUpdate.Side),
-                    BinanceUtilities.ToInternal(orderInfoUpdate.Status),
-                    TradingPair.Parse(orderInfoUpdate.Symbol))));
+                    TradingPair.Parse(orderInfoUpdate.Symbol),
+                    orderInfoUpdate.Quantity,
+                    orderInfoUpdate.OrderId)
+                {
+                    Status = BinanceUtilities.ToInternal(orderInfoUpdate.Status)
+                }));
 
             // Set error handlers
             succesOrderBook.Data.Closed += () =>

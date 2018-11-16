@@ -1,4 +1,3 @@
-using System;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
@@ -22,12 +21,6 @@ namespace SpreadShare.Tests.ExchangeServices
             var container =
                 ExchangeFactoryService.BuildContainer(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithm));
             _time = container.TimerProvider;
-        }
-
-        [Fact]
-        public void NoCallbackThrows()
-        {
-            Assert.Throws<ArgumentNullException>(() => _time.SetTimer(0, null));
         }
 
         [Fact]

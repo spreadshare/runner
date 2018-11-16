@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms.Implementations
@@ -38,16 +39,41 @@ namespace SpreadShare.Algorithms.Implementations
         /// </summary>
         private class EntryState : State<SimpleBandWagonAlgorithmSettings>
         {
-            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
             {
-                Logger.LogInformation("Market condition is being evaluated");
                 return new NothingState<SimpleBandWagonAlgorithmSettings>();
             }
 
+            public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
+            {
+                Logger.LogCritical($"Order update in buy was called with id {order.OrderId}");
+                return new SellState();
+            }
+
             /// <inheritdoc />
-            protected override void Run(TradingProvider trading)
+            protected override void Run(TradingProvider trading, DataProvider data)
             {
                 Logger.LogInformation($"Portfolio is {trading.GetPortfolio().ToJson()}");
+                decimal price = data.GetCurrentPriceTopAsk(TradingPair.Parse("EOSETH")).Data;
+                trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy, 1000, price * 0.95M);
+                Logger.LogInformation($"Porfolio is now {trading.GetPortfolio().ToJson()}");
+                SetTimer(TimeSpan.FromHours(5));
+            }
+        }
+
+        private class SellState : State<SimpleBandWagonAlgorithmSettings>
+        {
+            public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
+            {
+                Logger.LogCritical($"Order update in sell was called with id {order.OrderId}");
+                return new EntryState();
+            }
+
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
+                Logger.LogInformation($"Portfolio after order is {trading.GetPortfolio().ToJson()}");
+                decimal price = data.GetCurrentPriceTopBid(TradingPair.Parse("EOSETH")).Data;
+                trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell, 1000, price * 1.05M);
             }
         }
 

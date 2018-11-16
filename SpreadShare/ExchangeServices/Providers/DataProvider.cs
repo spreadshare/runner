@@ -8,7 +8,7 @@ namespace SpreadShare.ExchangeServices.Providers
     /// <summary>
     /// Provides data gathering capabilities.
     /// </summary>
-    internal class DataProvider : IObservable<OrderUpdate>
+    internal class DataProvider
     {
         private readonly AbstractDataProvider _implementation;
 
@@ -20,9 +20,6 @@ namespace SpreadShare.ExchangeServices.Providers
         {
             _implementation = implementation;
         }
-
-        /// <inheritdoc />
-        public IDisposable Subscribe(IObserver<OrderUpdate> observer) => _implementation.Subscribe(observer);
 
         /// <summary>
         /// Gets the current price of a trading pair by checking the last trade

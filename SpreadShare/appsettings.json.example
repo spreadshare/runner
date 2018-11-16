@@ -37,7 +37,11 @@
             "SimpleBandWagonAlgorithm": 1.0
         }
     },
-    "BacktestPortfolio" : {
-        "ETH" : { "Symbol": "ETH", "Free" : 11.0, "Locked": 0.0 }
+    "BacktestSettings" : {
+        "BacktestPortfolio" : {
+            "ETH" : { "Symbol": "ETH", "Free" : 11.0, "Locked": 0.0 }
+        },
+        "BeginTimeStamp" : "auto",
+        "EndTimeStamp" : "auto"
     }
 }
