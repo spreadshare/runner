@@ -13,7 +13,7 @@ namespace SpreadShare.Tests.Algorithms
 {
     public class StateTests : BaseProviderTests
     {
-        private ExchangeProvidersContainer _container;
+        private readonly ExchangeProvidersContainer _container;
 
         public StateTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
@@ -51,7 +51,7 @@ namespace SpreadShare.Tests.Algorithms
             Assert.IsType<NothingState<TestSettings>>(next);
         }
 
-        internal class TestState : State<TestSettings>
+        private class TestState : State<TestSettings>
         {
             protected override void Run(TradingProvider trading, DataProvider data)
             {
@@ -59,9 +59,10 @@ namespace SpreadShare.Tests.Algorithms
             }
         }
 
-        internal class TestSettings : AlgorithmSettings
+        private class TestSettings : AlgorithmSettings
         {
             public override Exchange Exchange { get; set; }
+
             public override List<TradingPair> ActiveTradingPairs { get; set; }
 
             public decimal Value { get; set; }

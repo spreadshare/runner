@@ -12,6 +12,9 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// <inheritdoc />
         public override Exchange Exchange { get; set; }
 
+        /// <summary>
+        /// Gets or sets the trading pairs for this algorithm.
+        /// </summary>
         public override List<TradingPair> ActiveTradingPairs { get; set; }
 
         /// <summary>

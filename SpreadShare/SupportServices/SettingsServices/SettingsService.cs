@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Binance.Net;
 using Binance.Net.Objects;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
@@ -25,6 +24,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
         private readonly DatabaseContext _databaseContext;
+        private AlgorithmSettings _backtestedAlgorithm;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsService"/> class.
@@ -57,8 +57,6 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// </summary>
         public BinanceSettings BinanceSettings { get; private set; }
 
-        private AlgorithmSettings BacktestedAlgorithm = null;
-
         /// <summary>
         /// Gets the settings for the simple bandwagon algorithm
         /// </summary>
@@ -80,7 +78,7 @@ namespace SpreadShare.SupportServices.SettingsServices
                 ParseSimpleBandwagonSettings();
                 if (SimpleBandWagonAlgorithmSettings.Exchange == Exchange.Backtesting)
                 {
-                    BacktestedAlgorithm = SimpleBandWagonAlgorithmSettings;
+                    _backtestedAlgorithm = SimpleBandWagonAlgorithmSettings;
                 }
 
                 BinanceSettings = _configuration.GetSection("BinanceClientSettings").Get<BinanceSettings>();
@@ -292,31 +290,31 @@ namespace SpreadShare.SupportServices.SettingsServices
             result.InitialPortfolio = new Portfolio(parsed);
             string beginValStr = _configuration.GetSection("BacktestSettings:BeginTimeStamp").Get<string>();
             string endValStr = _configuration.GetSection("BacktestSettings:EndTimeStamp").Get<string>();
-            if (BacktestedAlgorithm == null)
+            if (_backtestedAlgorithm == null)
             {
                 return result;
             }
 
             var edges = GetTimeStampEdges();
-            result.BeginTimeStamp = beginValStr == "auto" ? edges.Item1 : long.Parse(beginValStr);
-            result.EndTimeStamp = endValStr == "auto" ? edges.Item2 : long.Parse(endValStr);
+            result.BeginTimeStamp = beginValStr == "auto" ? edges.Item1 : long.Parse(beginValStr, NumberFormatInfo.InvariantInfo);
+            result.EndTimeStamp = endValStr == "auto" ? edges.Item2 : long.Parse(endValStr, NumberFormatInfo.InvariantInfo);
 
             if (result.BeginTimeStamp % 60000 != 0 || result.EndTimeStamp % 60000 != 0)
             {
                 _logger.LogError("Timestamps must be a multiple of 60000ms (1 minute)");
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentException("BeginTimeStamp or EndTimeStamp");
             }
 
             if (result.BeginTimeStamp < edges.Item1)
             {
                 _logger.LogError("BeginTimestamp was smaller than one or more of the trading pairs available data");
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentException("BeginTimestamp");
             }
-            
+
             if (result.EndTimeStamp > edges.Item2)
             {
                 _logger.LogError("EndTimestamp was larger than one or more of the trading pairs available data");
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentException("EndTimeStamp");
             }
 
             _logger.LogCritical($"Minimum {result.BeginTimeStamp} ------- Maximum {result.EndTimeStamp}");
@@ -326,23 +324,24 @@ namespace SpreadShare.SupportServices.SettingsServices
 
         private Tuple<long, long> GetTimeStampEdges()
         {
-            var pairs = BacktestedAlgorithm.ActiveTradingPairs;
+            var pairs = _backtestedAlgorithm.ActiveTradingPairs;
             long minBeginVal = 0;
             long minEndVal = long.MaxValue;
             foreach (var pair in pairs)
             {
-                long first = _databaseContext.Candles.OrderBy(x => x.Timestamp).First().Timestamp;
+                long first = _databaseContext.Candles.OrderBy(x => x.Timestamp).First(x => x.TradingPair == pair.ToString()).Timestamp;
                 if (first > minBeginVal)
                 {
                     minBeginVal = first;
                 }
 
-                long last = _databaseContext.Candles.OrderBy(x => x.Timestamp).Last().Timestamp;
+                long last = _databaseContext.Candles.OrderBy(x => x.Timestamp).Last(x => x.TradingPair == pair.ToString()).Timestamp;
                 if (last < minEndVal)
                 {
                     minEndVal = last;
                 }
             }
+
             return new Tuple<long, long>(minBeginVal, minEndVal);
         }
     }

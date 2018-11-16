@@ -13,7 +13,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// Gets or sets the exchange the algorithm uses
         /// </summary>
         public abstract Exchange Exchange { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the list of active trading pairs
         /// </summary>

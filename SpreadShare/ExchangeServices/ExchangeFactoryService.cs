@@ -30,6 +30,7 @@ namespace SpreadShare.ExchangeServices
         /// <param name="loggerFactory">Provides logging</param>
         /// <param name="context">Injected database context</param>
         /// <param name="alloc">Injected AllocationManager service</param>
+        /// <param name="settingsService">Injected settings</param>
         /// <param name="binanceComm">Injected binance communication service</param>
         /// <param name="backtestCom">Injected backtest communication service</param>
         public ExchangeFactoryService(
@@ -76,7 +77,8 @@ namespace SpreadShare.ExchangeServices
 
                 case Exchange.Backtesting:
                     // Override timer provider to backtest variant
-                    timerProvider = new BacktestTimerProvider(_loggerFactory,
+                    timerProvider = new BacktestTimerProvider(
+                        _loggerFactory,
                         DateTimeOffset.FromUnixTimeMilliseconds(_settingsService.BackTestSettings.BeginTimeStamp),
                         DateTimeOffset.FromUnixTimeMilliseconds(_settingsService.BackTestSettings.EndTimeStamp));
 

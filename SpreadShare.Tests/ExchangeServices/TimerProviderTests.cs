@@ -1,4 +1,3 @@
-using System;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;

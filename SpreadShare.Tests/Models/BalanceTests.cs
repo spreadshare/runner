@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Extensions.Logging;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;

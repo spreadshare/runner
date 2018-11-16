@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 
@@ -12,7 +11,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     internal class BacktestTimerProvider : TimerProvider
     {
         private readonly ILogger _logger;
-        private DateTimeOffset _endDate;
+        private readonly DateTimeOffset _endDate;
         private DateTimeOffset _currentTime;
 
         /// <summary>
@@ -20,6 +19,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         /// <param name="loggerFactory">Used to create output</param>
         /// <param name="startDate">The starting moment of the backtest (in UTC)</param>
+        /// <param name="endDate">Runs the timer till end date</param>
         public BacktestTimerProvider(ILoggerFactory loggerFactory, DateTimeOffset startDate, DateTimeOffset endDate)
         {
             _logger = loggerFactory.CreateLogger(GetType());
