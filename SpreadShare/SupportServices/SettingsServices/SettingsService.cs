@@ -329,16 +329,25 @@ namespace SpreadShare.SupportServices.SettingsServices
             long minEndVal = long.MaxValue;
             foreach (var pair in pairs)
             {
-                long first = _databaseContext.Candles.OrderBy(x => x.Timestamp).First(x => x.TradingPair == pair.ToString()).Timestamp;
-                if (first > minBeginVal)
+                try
                 {
-                    minBeginVal = first;
-                }
+                    long first = _databaseContext.Candles.OrderBy(x => x.Timestamp)
+                        .First(x => x.TradingPair == pair.ToString()).Timestamp;
+                    if (first > minBeginVal)
+                    {
+                        minBeginVal = first;
+                    }
 
-                long last = _databaseContext.Candles.OrderBy(x => x.Timestamp).Last(x => x.TradingPair == pair.ToString()).Timestamp;
-                if (last < minEndVal)
+                    long last = _databaseContext.Candles.OrderBy(x => x.Timestamp)
+                        .Last(x => x.TradingPair == pair.ToString()).Timestamp;
+                    if (last < minEndVal)
+                    {
+                        minEndVal = last;
+                    }
+                }
+                catch
                 {
-                    minEndVal = last;
+                    throw new ArgumentException($"{pair} was not available in the database!");
                 }
             }
 
