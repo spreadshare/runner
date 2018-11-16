@@ -43,7 +43,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<decimal> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount)
+        public override ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount)
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             var proposal = new TradeProposal(new Balance(currency, amount, 0.0M));
@@ -66,7 +66,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             _comm.RemotePortfolio.UpdateAllocation(exec);
 
-            return new ResponseObject<decimal>(ResponseCode.Success, amount);
+            return new ResponseObject<OrderUpdate>(
+                ResponseCode.Success,
+                new OrderUpdate(priceEstimate, side, pair, amount, _mockOrderCounter++));
         }
 
         /// <inheritdoc />
@@ -75,7 +77,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Keep the remote updated by mocking a trade execution
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             TradeExecution exec = null;
-            
+
             // Mock the remote portfolio by providing it an update
             if (side == OrderSide.Buy)
             {

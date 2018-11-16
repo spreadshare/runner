@@ -79,7 +79,7 @@
         public long OrderId { get; }
 
         /// <summary>
-        /// Get the price at which the order was set.
+        /// Gets the price at which the order was set.
         /// </summary>
         public decimal SetPrice { get; }
 

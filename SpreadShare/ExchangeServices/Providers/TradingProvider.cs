@@ -64,15 +64,16 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">trading pair to trade with</param>
         /// <param name="side">Whether to buy or sell</param>
         /// <returns>A response object indicating the status of the market order</returns>
-        public ResponseObject PlaceFullMarketOrder(TradingPair pair, OrderSide side)
+        public ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side)
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             Balance amount = _allocationManager.GetAvailableFunds(currency);
             var proposal = new TradeProposal(new Balance(currency, amount.Free, 0.0M));
 
+            ResponseObject<OrderUpdate> query = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                var query = RetryMethod(() =>
+                query = RetryMethod(() =>
                 {
                     decimal tradeAmount = side == OrderSide.Buy
                         ? GetBuyAmountEstimate(pair, proposal.From.Free)
@@ -91,20 +92,20 @@ namespace SpreadShare.ExchangeServices.Providers
                 {
                     exec = new TradeExecution(
                         new Balance(pair.Right, proposal.From.Free, 0.0M),
-                        new Balance(pair.Left, query.Data, 0.0M));
+                        new Balance(pair.Left, query.Data.Amount, 0.0M));
                 }
                 else
                 {
                     decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
                     exec = new TradeExecution(
                         new Balance(pair.Left, proposal.From.Free, 0.0M),
-                        new Balance(pair.Right, query.Data * priceEstimate, 0.0M));
+                        new Balance(pair.Right, query.Data.Amount * priceEstimate, 0.0M));
                 }
 
                 return exec;
             });
 
-            return tradeSuccess ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);
+            return query;
         }
 
         /// <summary>
@@ -204,7 +205,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     new Balance(order.Pair.Left, 0, order.LastFillIncrement),
                     new Balance(order.Pair.Right, order.Amount * order.SetPrice, 0));
             }
-    
+
             _allocationManager.UpdateAllocation(exec);
             UpdateObservers(order);
         }
