@@ -67,7 +67,7 @@ namespace SpreadShare
             ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
 
             // Read settings from appsettings.json
-            SettingsService settings = (SettingsService)serviceProvider.GetService<ISettingsService>();
+            SettingsService settings = serviceProvider.GetService<SettingsService>();
             var settingsReponse = settings.Start();
             if (!settingsReponse.Success)
             {

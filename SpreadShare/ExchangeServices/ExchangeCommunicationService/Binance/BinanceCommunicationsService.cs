@@ -22,10 +22,10 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         /// </summary>
         /// <param name="loggerFactory">Used to create a logger to create output</param>
         /// <param name="settings">Used to extract the binance settings</param>
-        public BinanceCommunicationsService(ILoggerFactory loggerFactory, ISettingsService settings)
+        public BinanceCommunicationsService(ILoggerFactory loggerFactory, SettingsService settings)
         {
             _logger = loggerFactory.CreateLogger(GetType());
-            var authy = ((SettingsService)settings).BinanceSettings.Credentials;
+            var authy = settings.BinanceSettings.Credentials;
 
             Client = new BinanceClient();
             Client.SetApiCredentials(authy.Key, authy.Secret);

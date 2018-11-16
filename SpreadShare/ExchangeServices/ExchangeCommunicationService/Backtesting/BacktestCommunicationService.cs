@@ -16,10 +16,10 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting
         /// </summary>
         /// <param name="settings">Injected settings service</param>
         /// <param name="factory">Injected loggin service</param>
-        public BacktestCommunicationService(ISettingsService settings, ILoggerFactory factory)
+        public BacktestCommunicationService(SettingsService settings, ILoggerFactory factory)
         {
             _logger = factory.CreateLogger(GetType());
-            RemotePortfolio = (settings as SettingsService).BackTestSettings.InitialPortfolio;
+            RemotePortfolio = settings.BackTestSettings.InitialPortfolio;
         }
 
         /// <summary>

@@ -16,7 +16,7 @@ namespace SpreadShare.Algorithms
     internal class AlgorithmService : IAlgorithmService
     {
         private readonly ILogger _logger;
-        private readonly ISettingsService _settingsService;
+        private readonly SettingsService _settingsService;
         private readonly AllocationManager _allocationManager;
         private readonly ExchangeFactoryService _exchangeFactoryService;
         private readonly Dictionary<Type, bool> _algorithms;
@@ -30,7 +30,7 @@ namespace SpreadShare.Algorithms
         /// <param name="exchangeFactoryService">Provides containers for algorithms</param>
         public AlgorithmService(
             ILoggerFactory loggerFactory,
-            ISettingsService settingsService,
+            SettingsService settingsService,
             AllocationManager allocationManager,
             ExchangeFactoryService exchangeFactoryService)
         {
@@ -112,7 +112,7 @@ namespace SpreadShare.Algorithms
         private void SetInitialAllocation()
         {
             // Sets initial configuration
-            _allocationManager.SetInitialConfiguration((_settingsService as SettingsService).AllocationSettings);
+            _allocationManager.SetInitialConfiguration(_settingsService.AllocationSettings);
         }
 
         /// <summary>
