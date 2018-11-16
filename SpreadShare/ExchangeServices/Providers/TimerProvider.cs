@@ -10,16 +10,9 @@ namespace SpreadShare.ExchangeServices.Providers
     internal abstract class TimerProvider : Observable<long>
     {
         /// <summary>
-        /// Set a timer before executing a certain callback
+        /// Gets the current time
         /// </summary>
-        /// <param name="minutes">The amount of minutes to wait</param>
-        /// <param name="callback">The method to execute after given time</param>
-        public abstract void SetTimer(uint minutes, Action callback);
-
-        /// <summary>
-        /// Stop the timer
-        /// </summary>
-        public abstract void StopTimer();
+        public abstract DateTimeOffset CurrentTime { get; }
 
         /// <summary>
         /// Notify the observers periodically

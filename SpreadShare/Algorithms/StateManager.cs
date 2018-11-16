@@ -49,7 +49,11 @@ namespace SpreadShare.Algorithms
 
                 // Setup observing
                 var periodicObserver = new ConfigurableObserver<long>(
-                    time => OnMarketConditionEval(),
+                    time =>
+                    {
+                        OnMarketConditionEval();
+                        EvaluateStateTimer();
+                    },
                     () => { },
                     e => { });
                 container.TimerProvider.Subscribe(periodicObserver);
@@ -62,7 +66,7 @@ namespace SpreadShare.Algorithms
 
                 // Setup initial state
                 _activeState = initial;
-                _activeState.Activate(algorithmSettings, Container.TradingProvider, Container.DataProvider, _loggerFactory);
+                _activeState.Activate(algorithmSettings, container, _loggerFactory);
             }
         }
 
@@ -124,7 +128,23 @@ namespace SpreadShare.Algorithms
 
             Interlocked.Exchange(ref _activeState, child);
 
-            _activeState.Activate(AlgorithmSettings, Container.TradingProvider, Container.DataProvider, _loggerFactory);
+            _activeState.Activate(AlgorithmSettings, Container, _loggerFactory);
+        }
+
+        /// <summary>
+        /// Evaluate the timer of the current state.
+        /// </summary>
+        private void EvaluateStateTimer()
+        {
+            lock (_lock)
+            {
+                if (!_activeState.TimerTriggered && _activeState.EndTime <= Container.TimerProvider.CurrentTime)
+                {
+                    _activeState.TimerTriggered = true;
+                    var next = _activeState.OnTimerElapsed();
+                    SwitchState(next);
+                }
+            }
         }
     }
 }

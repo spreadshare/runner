@@ -11,16 +11,13 @@ namespace SpreadShare.Tests.Algorithms
 {
     public class StateTests : BaseProviderTests
     {
-        private TradingProvider _trading;
-        private DataProvider _data;
+        private ExchangeProvidersContainer _container;
 
         public StateTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            var container = ExchangeFactoryService
+            _container = ExchangeFactoryService
                 .BuildContainer(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithmSettings));
-            _trading = container.TradingProvider;
-            _data = container.DataProvider;
         }
 
         [Fact]
@@ -33,14 +30,14 @@ namespace SpreadShare.Tests.Algorithms
         public void RunHappyFlow()
         {
             var state = new TestState();
-            state.Activate(new TestSettings() { Value = 1 }, _trading, _data, LoggerFactory);
+            state.Activate(new TestSettings() { Value = 1 }, _container, LoggerFactory);
         }
 
         [Fact]
         public void MarketPredicateDefaultNothing()
         {
             var state = new TestState();
-            var next = state.OnMarketCondition(_data);
+            var next = state.OnMarketCondition(_container.DataProvider);
             Assert.IsType<NothingState<TestSettings>>(next);
         }
 

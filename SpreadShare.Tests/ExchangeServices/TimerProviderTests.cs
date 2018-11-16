@@ -25,12 +25,6 @@ namespace SpreadShare.Tests.ExchangeServices
         }
 
         [Fact]
-        public void NoCallbackThrows()
-        {
-            Assert.Throws<ArgumentNullException>(() => _time.SetTimer(0, null));
-        }
-
-        [Fact]
         public void SubscribeObserverHappyFlow()
         {
             var observer = new ConfigurableObserver<long>(x => { }, () => { }, e => { });

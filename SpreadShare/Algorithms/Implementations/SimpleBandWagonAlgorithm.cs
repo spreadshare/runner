@@ -39,6 +39,11 @@ namespace SpreadShare.Algorithms.Implementations
         /// </summary>
         private class EntryState : State<SimpleBandWagonAlgorithmSettings>
         {
+            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
+            {
+                return new NothingState<SimpleBandWagonAlgorithmSettings>();
+            }
+
             public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
             {
                 Logger.LogCritical($"Order update in buy was called with id {order.OrderId}");
@@ -52,6 +57,7 @@ namespace SpreadShare.Algorithms.Implementations
                 decimal price = data.GetCurrentPriceTopAsk(TradingPair.Parse("EOSETH")).Data;
                 trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy, 1000, price * 0.95M);
                 Logger.LogInformation($"Porfolio is now {trading.GetPortfolio().ToJson()}");
+                SetTimer(TimeSpan.FromHours(5));
             }
         }
 

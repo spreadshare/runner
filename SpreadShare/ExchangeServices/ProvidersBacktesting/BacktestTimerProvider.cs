@@ -13,6 +13,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private readonly ILogger _logger;
         private DateTimeOffset _target;
+        private DateTimeOffset _currentTime;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestTimerProvider"/> class.
@@ -22,28 +23,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public BacktestTimerProvider(ILoggerFactory loggerFactory, DateTimeOffset startDate)
         {
             _logger = loggerFactory.CreateLogger(GetType());
-            CurrentTime = startDate;
+            _currentTime = startDate;
             _target = DateTimeOffset.FromUnixTimeMilliseconds(1540198260000);
         }
 
         /// <summary>
         /// Gets the current time of the backtest universe.
         /// </summary>
-        public DateTimeOffset CurrentTime { get; private set; }
-
-        /// <inheritdoc />
-        public override void SetTimer(uint minutes, Action callback)
-        {
-            Guard.Argument(callback).NotNull();
-            CurrentTime += TimeSpan.FromMinutes(minutes);
-            _logger.LogInformation($"Skipping time for {minutes} minutes, new time: {CurrentTime.ToUniversalTime()}");
-        }
-
-        /// <inheritdoc />
-        public override void StopTimer()
-        {
-            _logger.LogWarning("Backtesting timer was stopped, but this has no effect, as the timer elapses instantly");
-        }
+        public override DateTimeOffset CurrentTime => _currentTime;
 
         /// <inheritdoc />
         public async override void RunPeriodicTimer()
@@ -53,7 +40,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             DateTimeOffset start = DateTimeOffset.Now;
             while (CurrentTime < _target)
             {
-                CurrentTime += TimeSpan.FromMinutes(1);
+                _currentTime += TimeSpan.FromMinutes(1);
                 UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
             }
 
