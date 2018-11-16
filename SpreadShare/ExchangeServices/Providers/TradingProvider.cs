@@ -101,16 +101,13 @@ namespace SpreadShare.ExchangeServices.Providers
                         new Balance(pair.Right, proposal.From.Free, 0.0M),
                         new Balance(pair.Left, query.Data, 0.0M));
                 }
-
-                if (side == OrderSide.Sell)
+                else
                 {
                     decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
                     return new TradeExecution(
                         new Balance(pair.Left, proposal.From.Free, 0.0M),
                         new Balance(pair.Right, query.Data * priceEstimate, 0.0M));
                 }
-
-                return null;
             });
 
             return tradeSuccess ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);
@@ -144,7 +141,7 @@ namespace SpreadShare.ExchangeServices.Providers
                         new Balance(currency, amount * price, 0),
                         new Balance(currency, 0, amount * price));
                 }
-                if (side == OrderSide.Sell)
+                else
                 {
                     exec = new TradeExecution(
                         new Balance(currency, amount, 0),
@@ -205,8 +202,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     new Balance(order.Pair.Right, 0, order.Amount * order.SetPrice),
                     new Balance(order.Pair.Left, order.LastFillIncrement, 0));
             }
-
-            if (order.Side == OrderSide.Sell)
+            else
             {
                 exec = new TradeExecution(
                     new Balance(order.Pair.Left, 0, order.LastFillIncrement),

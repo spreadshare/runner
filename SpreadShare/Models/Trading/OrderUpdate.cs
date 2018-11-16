@@ -8,7 +8,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="OrderUpdate"/> class.
         /// </summary>
-        /// <param name="averagePrice">AveragePrice of the order update</param>
+        /// <param name="setPrice">Price at which the order was set</param>
         /// <param name="side">Side of the order</param>
         /// <param name="status">Status of the order</param>
         /// <param name="pair">The pair of order</param>
