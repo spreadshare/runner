@@ -127,7 +127,8 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
         {
             var currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            var proposal = new TradeProposal(new Balance(currency, amount, 0));
+            decimal proposedAmount = side == OrderSide.Buy ? amount * price : amount;
+            var proposal = new TradeProposal(new Balance(currency, proposedAmount, 0));
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
             {
                 bool success = RetryMethod(() => _implementation.PlaceLimitOrder(pair, side, amount, price));
@@ -201,16 +202,17 @@ namespace SpreadShare.ExchangeServices.Providers
             if (order.Side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(order.Pair.Right, 0, order.LastFillIncrement * order.LastFillPrice),
+                    new Balance(order.Pair.Right, 0, order.Amount * order.SetPrice),
                     new Balance(order.Pair.Left, order.LastFillIncrement, 0));
             }
-            else
+
+            if (order.Side == OrderSide.Sell)
             {
                 exec = new TradeExecution(
                     new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                    new Balance(order.Pair.Right, order.LastFillIncrement * order.LastFillPrice, 0));
+                    new Balance(order.Pair.Right, order.Amount * order.SetPrice, 0));
             }
-
+    
             _allocationManager.UpdateAllocation(exec);
             UpdateObservers(order);
         }

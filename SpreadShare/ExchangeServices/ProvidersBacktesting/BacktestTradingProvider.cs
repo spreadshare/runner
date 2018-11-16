@@ -74,13 +74,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             // Keep the remote updated by mocking a trade execution
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
             TradeExecution exec = null;
             if (side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(pair.Right, amount * priceEstimate, 0),
-                    new Balance(pair.Right, 0, amount * priceEstimate));
+                    new Balance(pair.Right, amount * price, 0),
+                    new Balance(pair.Right, 0, amount * price));
             }
 
             if (side == OrderSide.Sell)
@@ -110,14 +109,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public void OnNext(long value)
         {
-            foreach (var order in _watchList)
+            foreach (var order in _watchList.ToList())
             {
                 var query = _dataProvider.GetCurrentPriceLastTrade(order.Pair);
                 if (query.Success)
                 {
-                    Logger.LogInformation($"Checking the orders..., price is {query.Data}");
-                    bool filled = order.Side == OrderSide.Buy ? query.Data <= order.AveragePrice : query.Data >= order.AveragePrice;
-                    if (filled)
+                    bool filled = order.Side == OrderSide.Buy ? query.Data <= order.SetPrice : query.Data >= order.SetPrice;
+                    if (filled && order.Status != OrderUpdate.OrderStatus.Filled)
                     {
                         Logger.LogInformation($"Order confirmed at {_timer.CurrentTime}");
                         order.Status = OrderUpdate.OrderStatus.Filled;
@@ -126,19 +124,20 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                         order.AveragePrice = query.Data;
                         order.TotalFilled = order.Amount;
                         order.LastFillIncrement = order.Amount;
+                        order.LastFillIncrement = order.Amount;
                         order.LastFillPrice = query.Data;
                         TradeExecution exec = null;
                         if (order.Side == OrderSide.Buy)
                         {
                             exec = new TradeExecution(
-                                new Balance(order.Pair.Right, 0, order.LastFillIncrement * order.LastFillPrice),
+                                new Balance(order.Pair.Right, 0, order.Amount * order.SetPrice),
                                 new Balance(order.Pair.Left, order.LastFillIncrement, 0));
                         }
                         else
                         {
                             exec = new TradeExecution(
                                 new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                                new Balance(order.Pair.Right, order.LastFillIncrement * order.LastFillPrice, 0));
+                                new Balance(order.Pair.Right, order.Amount * order.SetPrice, 0));
                         }
 
                         _comm.RemotePortfolio.UpdateAllocation(exec);

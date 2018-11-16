@@ -14,17 +14,18 @@
         /// <param name="pair">The pair of order</param>
         /// <param name="amount">The quantity of the order</param>
         public OrderUpdate(
-            decimal averagePrice,
+            decimal setPrice,
             OrderSide side,
             OrderStatus status,
             TradingPair pair,
             decimal amount)
         {
-            AveragePrice = averagePrice;
+            SetPrice = setPrice;
             Side = side;
             Status = status;
             Pair = pair;
             Amount = amount;
+            SetPrice = setPrice;
             TotalFilled = 0;
             LastFillIncrement = 0;
             LastFillPrice = 0;
@@ -70,6 +71,11 @@
             /// </summary>
             Expired,
         }
+        
+        /// <summary>
+        /// Get the price at which the order was set.
+        /// </summary>
+        public decimal SetPrice { get; }
 
         /// <summary>
         /// Gets or sets the average price of the order.

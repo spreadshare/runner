@@ -53,10 +53,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             DateTimeOffset start = DateTimeOffset.Now;
             while (CurrentTime < _target)
             {
-                _logger.LogInformation($"It is now {CurrentTime}");
                 CurrentTime += TimeSpan.FromMinutes(1);
                 UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
-                await Task.Delay(200).ConfigureAwait(false);
             }
 
             _logger.LogCritical($"STOP THE TIMERS! Backtest took {(DateTimeOffset.Now - start).TotalMilliseconds}ms");

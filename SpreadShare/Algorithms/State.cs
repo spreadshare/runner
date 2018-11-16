@@ -51,7 +51,7 @@ namespace SpreadShare.Algorithms
         public virtual State<T> OnOrderUpdate(OrderUpdate order) => new NothingState<T>();
 
         /// <summary>
-        /// Validates if all the required parameters exist within the context
+        /// Sets the post condition of a state
         /// </summary>
         /// <param name="trading">Trading Provider</param>
         /// <param name="data">Data provider</param>

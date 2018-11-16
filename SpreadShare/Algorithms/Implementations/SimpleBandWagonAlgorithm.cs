@@ -39,16 +39,10 @@ namespace SpreadShare.Algorithms.Implementations
         /// </summary>
         private class EntryState : State<SimpleBandWagonAlgorithmSettings>
         {
-            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
-            {
-                Logger.LogInformation("Market condition is being evaluated");
-                return new NothingState<SimpleBandWagonAlgorithmSettings>();
-            }
-
             public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
             {
                 Logger.LogCritical($"Order update in algorithm was called with a price of {order.AveragePrice}{order.Pair.Right} and an amount of {order.Amount}");
-                return new PrintState();
+                return new SellState();
             }
 
             /// <inheritdoc />
@@ -56,19 +50,24 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 Logger.LogInformation($"Portfolio is {trading.GetPortfolio().ToJson()}");
                 decimal price = data.GetCurrentPriceTopAsk(TradingPair.Parse("EOSETH")).Data;
-                trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy, 1, price * 0.95M);
+                trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy, 1000, price * 0.95M);
                 Logger.LogInformation($"Porfolio is now {trading.GetPortfolio().ToJson()}");
             }
         }
 
-        private class PrintState : State<SimpleBandWagonAlgorithmSettings>
+        private class SellState : State<SimpleBandWagonAlgorithmSettings>
         {
+            public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
+            {
+                Logger.LogCritical($"Order update in sell was called");
+                return new EntryState();
+            }
+
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 Logger.LogInformation($"Portfolio after order is {trading.GetPortfolio().ToJson()}");
-                while (true)
-                {
-                }
+                decimal price = data.GetCurrentPriceTopBid(TradingPair.Parse("EOSETH")).Data;
+                trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell, 1000, price * 1.05M);
             }
         }
 
