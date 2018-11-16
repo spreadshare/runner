@@ -124,6 +124,7 @@ namespace SpreadShare.ExchangeServices.Providers
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
             {
                 query = RetryMethod(() => _implementation.PlaceLimitOrder(pair, side, amount, price));
+
                 if (!query.Success)
                 {
                     return null;

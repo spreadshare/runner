@@ -117,46 +117,52 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             foreach (var order in _watchList.Values.ToList())
             {
-                var query = _dataProvider.GetCurrentPriceLastTrade(order.Pair);
-                if (query.Success)
+                decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
+                if (!FilledLimitOrder(order))
                 {
-                    bool filled = order.Side == OrderSide.Buy ? query.Data <= order.SetPrice : query.Data >= order.SetPrice;
-                    if (filled && order.Status != OrderUpdate.OrderStatus.Filled)
-                    {
-                        Logger.LogInformation($"Order confirmed at {_timer.CurrentTime}");
-                        order.Status = OrderUpdate.OrderStatus.Filled;
-
-                        // Set the actual price for the order
-                        order.AveragePrice = query.Data;
-                        order.TotalFilled = order.Amount;
-                        order.LastFillIncrement = order.Amount;
-                        order.LastFillIncrement = order.Amount;
-                        order.LastFillPrice = query.Data;
-                        TradeExecution exec = null;
-                        if (order.Side == OrderSide.Buy)
-                        {
-                            exec = new TradeExecution(
-                                new Balance(order.Pair.Right, 0, order.Amount * order.SetPrice),
-                                new Balance(order.Pair.Left, order.LastFillIncrement, 0));
-                        }
-                        else
-                        {
-                            exec = new TradeExecution(
-                                new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                                new Balance(order.Pair.Right, order.Amount * order.AveragePrice, 0));
-                        }
-
-                        _comm.RemotePortfolio.UpdateAllocation(exec);
-
-                        // TODO: Remove the order from the watch list.
-                        UpdateObservers(order);
-                    }
+                    continue;
                 }
+
+                Logger.LogInformation($"Order {order.OrderId} confirmed at {_timer.CurrentTime}");
+                order.Status = OrderUpdate.OrderStatus.Filled;
+
+                // Set the actual price for the order
+                order.AveragePrice = price;
+                order.TotalFilled = order.Amount;
+                order.LastFillIncrement = order.Amount;
+                order.LastFillPrice = price;
+
+                // Calculate a trade execution to keep the remote portfolio up-to-date
+                TradeExecution exec;
+                if (order.Side == OrderSide.Buy)
+                {
+                    exec = new TradeExecution(
+                        new Balance(order.Pair.Right, 0, order.Amount * order.SetPrice),
+                        new Balance(order.Pair.Left, order.LastFillIncrement, 0));
+                }
+                else
+                {
+                    exec = new TradeExecution(
+                        new Balance(order.Pair.Left, 0, order.LastFillIncrement),
+                        new Balance(order.Pair.Right, order.Amount * order.AveragePrice, 0));
+                }
+
+                _comm.RemotePortfolio.UpdateAllocation(exec);
+
+                UpdateObservers(order);
             }
 
             // Clean up filled orders
             _watchList = _watchList.Where(keyPair => keyPair.Value.Status != OrderUpdate.OrderStatus.Filled)
                 .ToDictionary(p => p.Key, p => p.Value);
+        }
+
+        private bool FilledLimitOrder(OrderUpdate order)
+        {
+            decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
+            return order.Side == OrderSide.Buy
+                ? price <= order.SetPrice
+                : price >= order.SetPrice;
         }
     }
 }
