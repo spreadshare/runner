@@ -145,7 +145,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 {
                     exec = new TradeExecution(
                         new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                        new Balance(order.Pair.Right, order.Amount * order.SetPrice, 0));
+                        new Balance(order.Pair.Right, order.Amount * order.AveragePrice, 0));
                 }
 
                 _comm.RemotePortfolio.UpdateAllocation(exec);
