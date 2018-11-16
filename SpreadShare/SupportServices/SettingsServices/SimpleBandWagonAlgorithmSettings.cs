@@ -12,10 +12,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// <inheritdoc />
         public override Exchange Exchange { get; set; }
 
-        /// <summary>
-        /// Gets or sets the list of active trading pairs
-        /// </summary>
-        public List<TradingPair> ActiveTradingPairs { get; set; }
+        public override List<TradingPair> ActiveTradingPairs { get; set; }
 
         /// <summary>
         /// Gets or sets the base currency to trade in

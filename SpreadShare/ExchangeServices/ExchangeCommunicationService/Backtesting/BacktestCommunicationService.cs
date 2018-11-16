@@ -19,7 +19,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting
         public BacktestCommunicationService(ISettingsService settings, ILoggerFactory factory)
         {
             _logger = factory.CreateLogger(GetType());
-            RemotePortfolio = (settings as SettingsService).BacktestInitialPortfolio;
+            RemotePortfolio = (settings as SettingsService).BackTestSettings.InitialPortfolio;
         }
 
         /// <summary>

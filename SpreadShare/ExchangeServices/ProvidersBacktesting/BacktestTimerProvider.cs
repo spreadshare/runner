@@ -12,7 +12,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     internal class BacktestTimerProvider : TimerProvider
     {
         private readonly ILogger _logger;
-        private DateTimeOffset _target;
+        private DateTimeOffset _endDate;
         private DateTimeOffset _currentTime;
 
         /// <summary>
@@ -20,11 +20,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         /// <param name="loggerFactory">Used to create output</param>
         /// <param name="startDate">The starting moment of the backtest (in UTC)</param>
-        public BacktestTimerProvider(ILoggerFactory loggerFactory, DateTimeOffset startDate)
+        public BacktestTimerProvider(ILoggerFactory loggerFactory, DateTimeOffset startDate, DateTimeOffset endDate)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _currentTime = startDate;
-            _target = DateTimeOffset.FromUnixTimeMilliseconds(1540198260000);
+            _endDate = endDate;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Make sure all constructor processes are finished
             await Task.Delay(1000).ConfigureAwait(false);
             DateTimeOffset start = DateTimeOffset.Now;
-            while (CurrentTime < _target)
+            while (CurrentTime < _endDate)
             {
                 _currentTime += TimeSpan.FromMinutes(1);
                 UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());

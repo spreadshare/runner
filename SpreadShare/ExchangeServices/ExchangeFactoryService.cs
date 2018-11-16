@@ -7,6 +7,7 @@ using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.ExchangeServices
 {
@@ -17,6 +18,7 @@ namespace SpreadShare.ExchangeServices
     {
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly SettingsService _settingsService;
         private readonly BinanceCommunicationsService _binanceCommunications;
         private readonly BacktestCommunicationService _backtestCommunicationService;
         private readonly DatabaseContext _databaseContext;
@@ -34,6 +36,7 @@ namespace SpreadShare.ExchangeServices
             ILoggerFactory loggerFactory,
             DatabaseContext context,
             AllocationManager alloc,
+            ISettingsService settingsService,
             BinanceCommunicationsService binanceComm,
             BacktestCommunicationService backtestCom)
         {
@@ -41,6 +44,7 @@ namespace SpreadShare.ExchangeServices
             _loggerFactory = loggerFactory;
 
             _databaseContext = context;
+            _settingsService = settingsService as SettingsService;
 
             // Link communication services
             _binanceCommunications = binanceComm;
@@ -72,7 +76,9 @@ namespace SpreadShare.ExchangeServices
 
                 case Exchange.Backtesting:
                     // Override timer provider to backtest variant
-                    timerProvider = new BacktestTimerProvider(_loggerFactory, DateTimeOffset.FromUnixTimeMilliseconds(1498929120000) + TimeSpan.FromHours(10));
+                    timerProvider = new BacktestTimerProvider(_loggerFactory,
+                        DateTimeOffset.FromUnixTimeMilliseconds(_settingsService.BackTestSettings.BeginTimeStamp),
+                        DateTimeOffset.FromUnixTimeMilliseconds(_settingsService.BackTestSettings.EndTimeStamp));
 
                     dataProviderImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, (BacktestTimerProvider)timerProvider, _backtestCommunicationService);
                     tradingProviderImplementation = new BacktestTradingProvider(
