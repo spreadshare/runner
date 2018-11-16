@@ -47,3 +47,5 @@ On top of the algorithm parameters, the following should be configurable.
 * Percentage of losing and winning trades
 * Highest amount of consecutive losses and wins
 * Average size and standard deviation of winning and losing trades
+
+Statistics about whether trades are profitible are based upon the portfolio value since the last filled trade
