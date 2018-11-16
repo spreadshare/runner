@@ -27,12 +27,13 @@ namespace SpreadShare.Algorithms
         /// </summary>
         /// <param name="settings">Algorithm settings object</param>
         /// <param name="trading">Trading Provider</param>
+        /// <param name="data">Data Provider</param>
         /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        public void Activate(T settings, TradingProvider trading, ILoggerFactory loggerFactory)
+        public void Activate(T settings, TradingProvider trading, DataProvider data, ILoggerFactory loggerFactory)
         {
             Logger = loggerFactory.CreateLogger(GetType());
             AlgorithmSettings = settings;
-            Run(trading);
+            Run(trading, data);
         }
 
         /// <summary>
@@ -53,6 +54,7 @@ namespace SpreadShare.Algorithms
         /// Validates if all the required parameters exist within the context
         /// </summary>
         /// <param name="trading">Trading Provider</param>
-        protected abstract void Run(TradingProvider trading);
+        /// <param name="data">Data provider</param>
+        protected abstract void Run(TradingProvider trading, DataProvider data);
     }
 }

@@ -31,12 +31,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         public DateTimeOffset CurrentTime { get; private set; }
 
-        /// <summary>
-        /// Get the current time of the backtest universe
-        /// </summary>
-        /// <returns></returns>
-        public DateTimeOffset GetCurrentTime() => CurrentTime;
-
         /// <inheritdoc />
         public override void SetTimer(uint minutes, Action callback)
         {
@@ -62,6 +56,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 _logger.LogInformation($"It is now {CurrentTime}");
                 CurrentTime += TimeSpan.FromMinutes(1);
                 UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
+                await Task.Delay(200).ConfigureAwait(false);
             }
 
             _logger.LogCritical($"STOP THE TIMERS! Backtest took {(DateTimeOffset.Now - start).TotalMilliseconds}ms");

@@ -33,7 +33,7 @@ namespace SpreadShare.Tests.Algorithms
         public void RunHappyFlow()
         {
             var state = new TestState();
-            state.Activate(new TestSettings() { Value = 1 }, _trading, LoggerFactory);
+            state.Activate(new TestSettings() { Value = 1 }, _trading, _data, LoggerFactory);
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace SpreadShare.Tests.Algorithms
 
         internal class TestState : State<TestSettings>
         {
-            protected override void Run(TradingProvider trading)
+            protected override void Run(TradingProvider trading, DataProvider data)
             {
                 Logger.LogInformation($"Running, value is {AlgorithmSettings.Value}");
             }

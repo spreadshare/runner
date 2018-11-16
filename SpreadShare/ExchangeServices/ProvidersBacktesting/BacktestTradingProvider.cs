@@ -1,7 +1,8 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
-using Remotion.Linq.Utilities;
+using Remotion.Linq.Clauses;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
@@ -62,21 +63,35 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     new Balance(pair.Left, amount, 0.0M),
                     new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M));
             }
+
             _comm.RemotePortfolio.UpdateAllocation(exec);
 
             return new ResponseObject<decimal>(ResponseCode.Success, amount);
         }
 
+        /// <inheritdoc />
         public override ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
         {
             // Keep the remote updated by mocking a trade execution
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
-            TradeExecution exec = new TradeExecution(
-                    new Balance(pair.Right, amount, 0),
-                    new Balance(pair.Right, 0, amount));
+            TradeExecution exec = null;
+            if (side == OrderSide.Buy)
+            {
+                exec = new TradeExecution(
+                    new Balance(pair.Right, amount * priceEstimate, 0),
+                    new Balance(pair.Right, 0, amount * priceEstimate));
+            }
+
+            if (side == OrderSide.Sell)
+            {
+                exec = new TradeExecution(
+                    new Balance(pair.Left, amount, 0),
+                    new Balance(pair.Left, 0, amount));
+            }
+
             _comm.RemotePortfolio.UpdateAllocation(exec);
-            _watchList.Add(new OrderUpdate(price, side, OrderUpdate.OrderStatus.New, pair));
+            _watchList.Add(new OrderUpdate(price, side, OrderUpdate.OrderStatus.New, pair, amount));
             return new ResponseObject(ResponseCode.Success);
         }
 
@@ -101,13 +116,34 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 if (query.Success)
                 {
                     Logger.LogInformation($"Checking the orders..., price is {query.Data}");
-                    bool filled = order.Side == OrderSide.Buy ? query.Data <= order.Price : query.Data >= order.Price;
+                    bool filled = order.Side == OrderSide.Buy ? query.Data <= order.AveragePrice : query.Data >= order.AveragePrice;
                     if (filled)
                     {
                         Logger.LogInformation($"Order confirmed at {_timer.CurrentTime}");
                         order.Status = OrderUpdate.OrderStatus.Filled;
+
                         // Set the actual price for the order
-                        order.Price = query.Data;
+                        order.AveragePrice = query.Data;
+                        order.TotalFilled = order.Amount;
+                        order.LastFillIncrement = order.Amount;
+                        order.LastFillPrice = query.Data;
+                        TradeExecution exec = null;
+                        if (order.Side == OrderSide.Buy)
+                        {
+                            exec = new TradeExecution(
+                                new Balance(order.Pair.Right, 0, order.LastFillIncrement * order.LastFillPrice),
+                                new Balance(order.Pair.Left, order.LastFillIncrement, 0));
+                        }
+                        else
+                        {
+                            exec = new TradeExecution(
+                                new Balance(order.Pair.Left, 0, order.LastFillIncrement),
+                                new Balance(order.Pair.Right, order.LastFillIncrement * order.LastFillPrice, 0));
+                        }
+
+                        _comm.RemotePortfolio.UpdateAllocation(exec);
+
+                        // TODO: Remove the order from the watch list.
                         UpdateObservers(order);
                     }
                 }

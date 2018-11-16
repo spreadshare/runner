@@ -48,21 +48,21 @@ namespace SpreadShare.Algorithms
                 Container = container;
 
                 // Setup observing
-                var _periodicObserver = new ConfigurableObserver<long>(
+                var periodicObserver = new ConfigurableObserver<long>(
                     time => OnMarketConditionEval(),
                     () => { },
                     e => { });
-                container.TimerProvider.Subscribe(_periodicObserver);
-                
-                var _orderObserver = new ConfigurableObserver<OrderUpdate>(
+                container.TimerProvider.Subscribe(periodicObserver);
+
+                var orderObserver = new ConfigurableObserver<OrderUpdate>(
                     OnOrderUpdateEval,
                     () => { },
                     e => { });
-                container.TradingProvider.Subscribe(_orderObserver);
+                container.TradingProvider.Subscribe(orderObserver);
 
                 // Setup initial state
                 _activeState = initial;
-                _activeState.Activate(algorithmSettings, Container.TradingProvider, _loggerFactory);
+                _activeState.Activate(algorithmSettings, Container.TradingProvider, Container.DataProvider, _loggerFactory);
             }
         }
 
@@ -124,7 +124,7 @@ namespace SpreadShare.Algorithms
 
             Interlocked.Exchange(ref _activeState, child);
 
-            _activeState.Activate(AlgorithmSettings, Container.TradingProvider, _loggerFactory);
+            _activeState.Activate(AlgorithmSettings, Container.TradingProvider, Container.DataProvider, _loggerFactory);
         }
     }
 }

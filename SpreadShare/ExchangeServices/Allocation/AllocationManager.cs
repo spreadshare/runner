@@ -120,6 +120,18 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <summary>
+        /// Updates the allocation of a given algorithm, on a certain exchange given a trade execution
+        /// </summary>
+        /// <param name="exchange">The exchange to represent</param>
+        /// <param name="algo">The algorithm to represent</param>
+        /// <param name="exec">The trade execution to process</param>
+        public void UpdateAllocation(Exchange exchange, Type algo, TradeExecution exec)
+        {
+            _allocations[exchange].ApplyTradeExecution(algo, exec);
+            UpdatePortfolioUsingRemote(exchange, algo);
+        }
+
+        /// <summary>
         /// Gets a weakened version of allocation manager for the trading provider.
         /// </summary>
         /// <param name="algorithm">The algorithm to represent</param>
@@ -167,13 +179,20 @@ namespace SpreadShare.ExchangeServices.Allocation
             // Update the local information
             _allocations[exchange].ApplyTradeExecution(algorithm, exec);
 
+           UpdatePortfolioUsingRemote(exchange, algorithm);
+
+           return true;
+        }
+
+        private void UpdatePortfolioUsingRemote(Exchange exchange, Type algorithm)
+        {
             // Fetch the remote portfolio
             var query = _portfolioFetcherService.GetPortfolio(exchange);
             if (!query.Success)
             {
                 _logger.LogWarning("Remote portfolio could not be fetched and the not trade could confirmed, " +
                                    "Assuming local version for now.");
-                return true;
+                return;
             }
 
             var remote = query.Data;
@@ -183,9 +202,9 @@ namespace SpreadShare.ExchangeServices.Allocation
             if (diff.Any(x => Math.Abs(x.Free) > DustThreshold || Math.Abs(x.Locked) > DustThreshold))
             {
                 _logger.LogWarning("There was a significant discrepancy between the remote and local portfolio, " +
-                                  $"Assuming the remote portfolio as truth value whilst blaming {algorithm}.\n" +
-                                  $"local portfolio: {local.ToJson()}\n" +
-                                  $"remote portfolio: {remote.ToJson()}\n");
+                                   $"Assuming the remote portfolio as truth value whilst blaming {algorithm}.\n" +
+                                   $"local portfolio: {local.ToJson()}\n" +
+                                   $"remote portfolio: {remote.ToJson()}\n");
             }
 
             // Compensate discrepancy by blaming and correcting the local allocation for the current algorithm.
@@ -193,8 +212,6 @@ namespace SpreadShare.ExchangeServices.Allocation
             var old = _allocations[exchange].GetAlgorithmAllocation(algorithm);
             var diffPortfolio = new Portfolio(diff.ToDictionary(x => x.Symbol, x => x));
             _allocations[exchange].SetAlgorithmAllocation(algorithm, Portfolio.Add(old, diffPortfolio));
-
-            return true;
         }
     }
 }

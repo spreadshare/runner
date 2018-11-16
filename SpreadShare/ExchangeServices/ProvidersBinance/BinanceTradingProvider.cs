@@ -44,6 +44,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             return new ResponseObject<decimal>(ResponseCode.Error, 0.0M);
         }
 
+        /// <inheritdoc />
         public override ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
         {
             throw new System.NotImplementedException();

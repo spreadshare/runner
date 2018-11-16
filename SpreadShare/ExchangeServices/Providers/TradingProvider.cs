@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
@@ -44,7 +43,7 @@ namespace SpreadShare.ExchangeServices.Providers
             _algorithm = algorithm;
             _exchange = exchange;
             _implementation.Subscribe(new ConfigurableObserver<OrderUpdate>(
-                UpdateObservers,
+                UpdateAllocation,
                 () => { },
                 e => { }));
         }
@@ -117,6 +116,14 @@ namespace SpreadShare.ExchangeServices.Providers
             return tradeSuccess ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);
         }
 
+        /// <summary>
+        /// Place a limit order at a certain price
+        /// </summary>
+        /// <param name="pair">Trading Pair</param>
+        /// <param name="side">Buy or sell</param>
+        /// <param name="amount">The amount of non base currency</param>
+        /// <param name="price">The price to place the order at</param>
+        /// <returns>A Response object indicating the status of the order</returns>
         public ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
         {
             var currency = side == OrderSide.Buy ? pair.Right : pair.Left;
@@ -129,9 +136,20 @@ namespace SpreadShare.ExchangeServices.Providers
                     return null;
                 }
 
-                var exec = new TradeExecution(
-                    new Balance(currency, amount, 0),
-                    new Balance(currency, 0, amount));
+                TradeExecution exec = null;
+                if (side == OrderSide.Buy)
+                {
+                    exec = new TradeExecution(
+                        new Balance(currency, amount * price, 0),
+                        new Balance(currency, 0, amount * price));
+                }
+                if (side == OrderSide.Sell)
+                {
+                    exec = new TradeExecution(
+                        new Balance(currency, amount, 0),
+                        new Balance(currency, 0, amount));
+                }
+
                 return exec;
             });
             return tradeSucces ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);
@@ -175,6 +193,26 @@ namespace SpreadShare.ExchangeServices.Providers
             }
 
             return false;
+        }
+
+        private void UpdateAllocation(OrderUpdate order)
+        {
+            TradeExecution exec = null;
+            if (order.Side == OrderSide.Buy)
+            {
+                exec = new TradeExecution(
+                    new Balance(order.Pair.Right, 0, order.LastFillIncrement * order.LastFillPrice),
+                    new Balance(order.Pair.Left, order.LastFillIncrement, 0));
+            }
+            else
+            {
+                exec = new TradeExecution(
+                    new Balance(order.Pair.Left, 0, order.LastFillIncrement),
+                    new Balance(order.Pair.Right, order.LastFillIncrement * order.LastFillPrice, 0));
+            }
+
+            _allocationManager.UpdateAllocation(exec);
+            UpdateObservers(order);
         }
     }
 }

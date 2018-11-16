@@ -45,12 +45,30 @@ namespace SpreadShare.Algorithms.Implementations
                 return new NothingState<SimpleBandWagonAlgorithmSettings>();
             }
 
+            public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
+            {
+                Logger.LogCritical($"Order update in algorithm was called with a price of {order.AveragePrice}{order.Pair.Right} and an amount of {order.Amount}");
+                return new PrintState();
+            }
+
             /// <inheritdoc />
-            protected override void Run(TradingProvider trading)
+            protected override void Run(TradingProvider trading, DataProvider data)
             {
                 Logger.LogInformation($"Portfolio is {trading.GetPortfolio().ToJson()}");
-                trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy, 1, 0.0105M);
+                decimal price = data.GetCurrentPriceTopAsk(TradingPair.Parse("EOSETH")).Data;
+                trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy, 1, price * 0.95M);
                 Logger.LogInformation($"Porfolio is now {trading.GetPortfolio().ToJson()}");
+            }
+        }
+
+        private class PrintState : State<SimpleBandWagonAlgorithmSettings>
+        {
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
+                Logger.LogInformation($"Portfolio after order is {trading.GetPortfolio().ToJson()}");
+                while (true)
+                {
+                }
             }
         }
 

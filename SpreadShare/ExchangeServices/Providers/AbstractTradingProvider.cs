@@ -15,6 +15,10 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Create identifiable output.
         /// </summary>
         protected readonly ILogger Logger;
+
+        /// <summary>
+        /// A list of orders pending events.
+        /// </summary>
         protected List<OrderUpdate> _watchList;
 
         /// <summary>
@@ -36,6 +40,14 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>A response object indicating the status of the market order</returns>
         public abstract ResponseObject<decimal> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount);
 
+        /// <summary>
+        /// Place a limit order at the given price.
+        /// </summary>
+        /// <param name="pair">trading pair</param>
+        /// <param name="side">buy or sell order</param>
+        /// <param name="amount">amount of non base currency</param>
+        /// <param name="price">price to set the order at</param>
+        /// <returns>A response object indicating the status of the limit order    </returns>
         public abstract ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price);
 
         /// <summary>
