@@ -1,10 +1,8 @@
 using System;
-using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.Providers.Observing;
-using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
 
