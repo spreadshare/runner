@@ -35,15 +35,5 @@ namespace SpreadShare.Tests.ExchangeServices
             Assert.Throws<ArgumentNullException>(() => new ConfigurableObserver<bool>(x => { }, null, e => { }));
             Assert.Throws<ArgumentNullException>(() => new ConfigurableObserver<bool>(x => { }, () => { }, null));
         }
-
-        [Fact]
-        public void SubscribeOrderUpdateHappyFlow()
-        {
-            var observer = new ConfigurableObserver<OrderUpdate>(
-                x => { Logger.LogInformation("Observed trade update"); },
-                () => { },
-                e => { });
-            _data.Subscribe(observer);
-        }
     }
 }
