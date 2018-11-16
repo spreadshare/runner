@@ -192,7 +192,7 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private void UpdateAllocation(OrderUpdate order)
         {
-            TradeExecution exec = null;
+            TradeExecution exec;
             if (order.Side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
