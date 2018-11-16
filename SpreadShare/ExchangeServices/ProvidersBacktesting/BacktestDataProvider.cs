@@ -109,7 +109,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             if (!_buffers.ContainsKey(pair.ToString()))
             {
                 Logger.LogCritical($"Building a new buffer for {pair}");
-                _buffers.Add(pair.ToString(), _database.Candles.AsNoTracking().OrderBy(x => x.Timestamp).ToArray());
+                _buffers.Add(
+                    pair.ToString(),
+                    _database.Candles.AsNoTracking()
+                        .OrderBy(x => x.Timestamp)
+                        .Where(x => x.TradingPair == pair.ToString())
+                        .ToArray());
                 Logger.LogCritical("Done building the buffer");
             }
 
