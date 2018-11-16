@@ -41,7 +41,7 @@ namespace SpreadShare.Algorithms.Implementations
         {
             public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
             {
-                Logger.LogCritical($"Order update in algorithm was called with a price of {order.AveragePrice}{order.Pair.Right} and an amount of {order.Amount}");
+                Logger.LogCritical($"Order update in buy was called with id {order.OrderId}");
                 return new SellState();
             }
 
@@ -59,7 +59,7 @@ namespace SpreadShare.Algorithms.Implementations
         {
             public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
             {
-                Logger.LogCritical($"Order update in sell was called");
+                Logger.LogCritical($"Order update in sell was called with id {order.OrderId}");
                 return new EntryState();
             }
 

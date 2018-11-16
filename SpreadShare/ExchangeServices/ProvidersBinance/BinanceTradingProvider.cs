@@ -45,7 +45,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
+        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
         {
             throw new System.NotImplementedException();
         }

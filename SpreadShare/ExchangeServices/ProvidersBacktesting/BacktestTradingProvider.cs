@@ -19,6 +19,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private readonly BacktestTimerProvider _timer;
         private readonly BacktestDataProvider _dataProvider;
         private readonly BacktestCommunicationService _comm;
+        private long _mockOrderCounter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestTradingProvider"/> class.
@@ -69,7 +70,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
+        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
         {
             // Keep the remote updated by mocking a trade execution
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
@@ -93,8 +94,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _comm.RemotePortfolio.UpdateAllocation(exec);
 
             // Add the order to the watchlist
-            _watchList.Add(new OrderUpdate(price, side, OrderUpdate.OrderStatus.New, pair, amount));
-            return new ResponseObject(ResponseCode.Success);
+            OrderUpdate order = new OrderUpdate(price, side, pair, amount, _mockOrderCounter);
+            _watchList.Add(_mockOrderCounter, order);
+            _mockOrderCounter++;
+            return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
         }
 
         /// <inheritdoc />
@@ -112,7 +115,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public void OnNext(long value)
         {
-            foreach (var order in _watchList.ToList())
+            foreach (var order in _watchList.Values.ToList())
             {
                 var query = _dataProvider.GetCurrentPriceLastTrade(order.Pair);
                 if (query.Success)
@@ -150,6 +153,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     }
                 }
             }
+
+            // Clean up filled orders
+            _watchList = _watchList.Where(keyPair => keyPair.Value.Status != OrderUpdate.OrderStatus.Filled)
+                .ToDictionary(p => p.Key, p => p.Value);
         }
     }
 }

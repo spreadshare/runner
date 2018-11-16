@@ -10,21 +10,22 @@
         /// </summary>
         /// <param name="setPrice">Price at which the order was set</param>
         /// <param name="side">Side of the order</param>
-        /// <param name="status">Status of the order</param>
         /// <param name="pair">The pair of order</param>
         /// <param name="amount">The quantity of the order</param>
+        /// <param name="orderId">The unique id of the order</param>
         public OrderUpdate(
             decimal setPrice,
             OrderSide side,
-            OrderStatus status,
             TradingPair pair,
-            decimal amount)
+            decimal amount,
+            long orderId)
         {
             SetPrice = setPrice;
             Side = side;
-            Status = status;
+            Status = OrderStatus.New;
             Pair = pair;
             Amount = amount;
+            OrderId = orderId;
             SetPrice = setPrice;
             TotalFilled = 0;
             LastFillIncrement = 0;
@@ -71,7 +72,12 @@
             /// </summary>
             Expired,
         }
-        
+
+        /// <summary>
+        /// Gets the unique id of the order
+        /// </summary>
+        public long OrderId { get; }
+
         /// <summary>
         /// Get the price at which the order was set.
         /// </summary>

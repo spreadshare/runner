@@ -115,14 +115,15 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="amount">The amount of non base currency</param>
         /// <param name="price">The price to place the order at</param>
         /// <returns>A Response object indicating the status of the order</returns>
-        public ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
+        public ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
         {
             var currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             decimal proposedAmount = side == OrderSide.Buy ? amount * price : amount;
             var proposal = new TradeProposal(new Balance(currency, proposedAmount, 0));
+            ResponseObject<OrderUpdate> query = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
             {
-                var query = RetryMethod(() => _implementation.PlaceLimitOrder(pair, side, amount, price));
+                query = RetryMethod(() => _implementation.PlaceLimitOrder(pair, side, amount, price));
                 if (!query.Success)
                 {
                     return null;
@@ -144,7 +145,7 @@ namespace SpreadShare.ExchangeServices.Providers
 
                 return exec;
             });
-            return tradeSucces ? new ResponseObject(ResponseCode.Success) : new ResponseObject(ResponseCode.Error);
+            return tradeSucces ? query : new ResponseObject<OrderUpdate>(ResponseCode.Error);
         }
 
         /// <summary>

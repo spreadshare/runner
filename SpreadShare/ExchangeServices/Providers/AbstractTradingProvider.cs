@@ -19,7 +19,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// A list of orders pending events.
         /// </summary>
-        protected List<OrderUpdate> _watchList;
+        protected Dictionary<long, OrderUpdate> _watchList;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractTradingProvider"/> class.
@@ -28,7 +28,7 @@ namespace SpreadShare.ExchangeServices.Providers
         protected AbstractTradingProvider(ILoggerFactory loggerFactory)
         {
             Logger = loggerFactory.CreateLogger(GetType());
-            _watchList = new List<OrderUpdate>();
+            _watchList = new Dictionary<long, OrderUpdate>();
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="amount">amount of non base currency</param>
         /// <param name="price">price to set the order at</param>
         /// <returns>A response object indicating the status of the limit order    </returns>
-        public abstract ResponseObject PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price);
+        public abstract ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price);
 
         /// <summary>
         /// Cancels order
