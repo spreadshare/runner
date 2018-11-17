@@ -18,7 +18,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private readonly BacktestTimerProvider _timer;
         private readonly DatabaseContext _database;
-        private Dictionary<string, BacktestingCandle[]> _buffers;
+        private readonly Dictionary<string, BacktestingCandle[]> _buffers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestDataProvider"/> class.
@@ -53,7 +53,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             long timestamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
             var candleNow = FindCandle(pair, timestamp);
-            var candleBack = FindCandle(pair, timestamp - (long)(hoursBack * 3600 * 1000));
+            var candleBack = FindCandle(pair, timestamp - (long)(hoursBack * 3600L * 1000L));
 
             return new ResponseObject<decimal>(ResponseCode.Success, candleNow.Average / candleBack.Average);
         }
@@ -115,10 +115,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                         .Where(x => x.TradingPair == pair.ToString())
                         .OrderBy(x => x.Timestamp)
                         .ToArray());
-                Logger.LogCritical("Done building the buffer");
+                Logger.LogCritical($"Done building the buffer for {pair}");
             }
 
-            long index = (timestamp - _buffers[pair.ToString()][0].Timestamp) / 60000;
+            long index = (timestamp - _buffers[pair.ToString()][0].Timestamp) / 60000L;
+            if (index < 0)
+            {
+                Logger.LogError("Got request for a candle that exists before the scope of available data," +
+                                "Did you use GetTopPerformance without allowing enough time offset?");
+                throw new InvalidOperationException("Tried to read outside backtest data buffer");
+            }
+
             return _buffers[pair.ToString()][index];
         }
     }
