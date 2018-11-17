@@ -19,7 +19,7 @@ namespace SpreadShare.SupportServices.SettingsServices
     /// <summary>
     /// Service for managing settings
     /// </summary>
-    internal class SettingsService : ISettingsService
+    internal class SettingsService
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
@@ -67,7 +67,10 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// </summary>
         public BacktestSettings BackTestSettings { get; private set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Starts the settings service
+        /// </summary>
+        /// <returns>Response object indicating success</returns>
         public ResponseObject Start()
         {
             try

@@ -37,7 +37,7 @@ namespace SpreadShare.ExchangeServices
             ILoggerFactory loggerFactory,
             DatabaseContext context,
             AllocationManager alloc,
-            ISettingsService settingsService,
+            SettingsService settingsService,
             BinanceCommunicationsService binanceComm,
             BacktestCommunicationService backtestCom)
         {
@@ -45,7 +45,7 @@ namespace SpreadShare.ExchangeServices
             _loggerFactory = loggerFactory;
 
             _databaseContext = context;
-            _settingsService = settingsService as SettingsService;
+            _settingsService = settingsService;
 
             // Link communication services
             _binanceCommunications = binanceComm;

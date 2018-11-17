@@ -66,7 +66,7 @@ namespace SpreadShare
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
 
             // Setup Settings service
-            var settings = serviceProvider.GetService<ISettingsService>();
+            var settings = serviceProvider.GetService<SettingsService>();
             var settingsResult = settings.Start();
             if (!settingsResult.Success)
             {
@@ -106,7 +106,7 @@ namespace SpreadShare
             services.AddSingleton<IDatabaseMigrationService, DatabaseMigrationService>();
 
             // Configuration files globals
-            services.AddSingleton<ISettingsService, SettingsService>();
+            services.AddSingleton<SettingsService, SettingsService>();
 
             // Add Portfolio fetching
             services.AddSingleton<IPortfolioFetcherService, PortfolioFetcherService>();
