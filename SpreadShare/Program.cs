@@ -66,15 +66,7 @@ namespace SpreadShare
         {
             ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
 
-            // Read settings from appsettings.json
             SettingsService settings = serviceProvider.GetService<SettingsService>();
-            var settingsReponse = settings.Start();
-            if (!settingsReponse.Success)
-            {
-                logger.LogError("The program will exit as SettingsService could not be started properly. " +
-                                "Please check your configuration in SpreadShare/appsettings.json");
-                return false;
-            }
 
             // TODO: Check if allocation either completely set as backtesting, or the _commandLineArgs.Trading is enabled.
             if (!_commandLineArgs.Trading)

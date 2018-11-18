@@ -124,7 +124,7 @@ namespace SpreadShare.Algorithms
                 return;
             }
 
-            _logger.LogInformation($"STATE SWITCH: {CurrentState} ---> {child.GetType().ToString().Split('+').Last()}");
+            _logger.LogInformation($"STATE SWITCH: {CurrentState} ---> {child.GetType().ToString().Split('+').Last()} at {Container.TimerProvider.CurrentTime}");
 
             Interlocked.Exchange(ref _activeState, child);
 
