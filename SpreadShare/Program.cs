@@ -68,7 +68,7 @@ namespace SpreadShare
 
             SettingsService settings = serviceProvider.GetService<SettingsService>();
 
-            // TODO: Check if allocation either completely set as backtesting, or the _commandLineArgs.Trading is enabled.
+            // Check if allocation either completely set as backtesting, or the --trading flag was used
             if (!_commandLineArgs.Trading)
             {
                 decimal sum = 0.0M;
