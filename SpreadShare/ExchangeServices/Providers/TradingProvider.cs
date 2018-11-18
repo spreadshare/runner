@@ -16,8 +16,6 @@ namespace SpreadShare.ExchangeServices.Providers
         private readonly AbstractTradingProvider _implementation;
         private readonly WeakAllocationManager _allocationManager;
         private readonly DataProvider _dataProvider;
-        private readonly Type _algorithm;
-        private readonly Exchange _exchange;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TradingProvider"/> class.
@@ -32,16 +30,12 @@ namespace SpreadShare.ExchangeServices.Providers
             ILoggerFactory loggerFactory,
             AbstractTradingProvider implementation,
             DataProvider dataProvider,
-            WeakAllocationManager allocationManager,
-            Type algorithm,
-            Exchange exchange)
+            WeakAllocationManager allocationManager)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _implementation = implementation;
             _allocationManager = allocationManager;
             _dataProvider = dataProvider;
-            _algorithm = algorithm;
-            _exchange = exchange;
             _implementation.Subscribe(new ConfigurableObserver<OrderUpdate>(
                 UpdateAllocation,
                 () => { },

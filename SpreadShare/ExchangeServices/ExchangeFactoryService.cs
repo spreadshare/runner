@@ -96,7 +96,7 @@ namespace SpreadShare.ExchangeServices
 
             var allocationManager = _allocationManager.GetWeakAllocationManager(algorithm, exchange);
             var dataProvider = new DataProvider(dataProviderImplementation);
-            var tradingProvider = new TradingProvider(_loggerFactory, tradingProviderImplementation, dataProvider, allocationManager, algorithm, exchange);
+            var tradingProvider = new TradingProvider(_loggerFactory, tradingProviderImplementation, dataProvider, allocationManager);
 
             return new ExchangeProvidersContainer(
                 _loggerFactory,
