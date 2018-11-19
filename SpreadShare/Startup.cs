@@ -80,6 +80,11 @@ namespace SpreadShare
             {
                 logger.LogError("Could not migrate database");
             }
+            
+            // Clear the trades table
+            var db = serviceProvider.GetService<DatabaseContext>();
+            db.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"Trades\"");
+            db.SaveChanges();
         }
 
         /// <summary>

@@ -79,6 +79,7 @@ namespace SpreadShare.ExchangeServices
                     // Override timer provider to backtest variant
                     timerProvider = new BacktestTimerProvider(
                         _loggerFactory,
+                        _databaseContext,
                         DateTimeOffset.FromUnixTimeMilliseconds(_settingsService.BackTestSettings.BeginTimeStamp),
                         DateTimeOffset.FromUnixTimeMilliseconds(_settingsService.BackTestSettings.EndTimeStamp));
 
@@ -87,7 +88,8 @@ namespace SpreadShare.ExchangeServices
                         _loggerFactory,
                         (BacktestTimerProvider)timerProvider,
                         (BacktestDataProvider)dataProviderImplementation,
-                        _backtestCommunicationService);
+                        _backtestCommunicationService,
+                        _databaseContext);
                     break;
 
                 default:

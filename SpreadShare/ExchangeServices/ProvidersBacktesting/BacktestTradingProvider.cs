@@ -6,6 +6,7 @@ using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
@@ -18,6 +19,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private readonly BacktestTimerProvider _timer;
         private readonly BacktestDataProvider _dataProvider;
         private readonly BacktestCommunicationService _comm;
+        private readonly DatabaseContext _database;
         private long _mockOrderCounter;
 
         /// <summary>
@@ -27,17 +29,20 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="timer">timer provider for registering trades</param>
         /// <param name="data">data provider for confirming trades</param>
         /// <param name="comm">communication service for updating remote portfolio</param>
+        /// <param name="database">Database context for logging trades</param>
         public BacktestTradingProvider(
             ILoggerFactory loggerFactory,
             BacktestTimerProvider timer,
             BacktestDataProvider data,
-            BacktestCommunicationService comm)
+            BacktestCommunicationService comm,
+            DatabaseContext database)
             : base(loggerFactory)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _timer = timer;
             _dataProvider = data;
             _comm = comm;
+            _database = database;
             timer.Subscribe(this);
         }
 
@@ -149,6 +154,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 }
 
                 _comm.RemotePortfolio.UpdateAllocation(exec);
+
+                _database.Trades.Add(new DatabaseTrade(
+                    _timer.CurrentTime.ToUnixTimeMilliseconds(),
+                    order.Pair.ToString(),
+                    order.Amount,
+                    order.AveragePrice,
+                    order.Side.ToString(),
+                    _comm.RemotePortfolio.ToJson(),
+                    0));
 
                 UpdateObservers(order);
             }
