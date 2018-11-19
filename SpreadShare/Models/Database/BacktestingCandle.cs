@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SpreadShare.Models
+namespace SpreadShare.Models.Database
 {
     /// <summary>
     /// Data structure for representing candles.

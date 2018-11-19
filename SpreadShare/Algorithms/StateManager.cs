@@ -5,7 +5,9 @@ using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers.Observing;
+using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms
@@ -20,6 +22,7 @@ namespace SpreadShare.Algorithms
         private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly DatabaseContext _database;
 
         private State<T> _activeState;
 
@@ -30,10 +33,12 @@ namespace SpreadShare.Algorithms
         /// <param name="algorithmSettings">The settings of the algorithm settings</param>
         /// <param name="initial">Initial state of the algorithm</param>
         /// <param name="container">Exchange service container</param>
+        /// <param name="database">The database context for logging state switches</param>
         public StateManager(
             T algorithmSettings,
             State<T> initial,
-            ExchangeProvidersContainer container)
+            ExchangeProvidersContainer container,
+            DatabaseContext database)
         {
             Guard.Argument(initial).NotNull();
             lock (_lock)
@@ -63,6 +68,9 @@ namespace SpreadShare.Algorithms
                     () => { },
                     e => { });
                 container.TradingProvider.Subscribe(orderObserver);
+
+                // Bind the database
+                _database = database;
 
                 // Setup initial state
                 _activeState = initial;
@@ -125,6 +133,12 @@ namespace SpreadShare.Algorithms
             }
 
             _logger.LogInformation($"STATE SWITCH: {CurrentState} ---> {child.GetType().ToString().Split('+').Last()} at {Container.TimerProvider.CurrentTime}");
+
+            // Add state switch event to the database
+            _database.StateSwitchEvents.Add(new StateSwitchEvent(
+                Container.TimerProvider.CurrentTime.ToUnixTimeMilliseconds(),
+                CurrentState,
+                child.GetType().ToString().Split('+').Last()));
 
             Interlocked.Exchange(ref _activeState, child);
 

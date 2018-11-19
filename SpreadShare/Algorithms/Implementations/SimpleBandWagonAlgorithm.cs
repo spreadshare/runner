@@ -4,6 +4,7 @@ using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms.Implementations
@@ -24,12 +25,14 @@ namespace SpreadShare.Algorithms.Implementations
         /// <inheritdoc />
         public override ResponseObject Start(
             AlgorithmSettings settings,
-            ExchangeProvidersContainer container)
+            ExchangeProvidersContainer container,
+            DatabaseContext database)
         {
             var stateManager = new StateManager<SimpleBandWagonAlgorithmSettings>(
                 settings as SimpleBandWagonAlgorithmSettings,
                 new EntryState(),
-                container);
+                container,
+                database);
 
             return new ResponseObject(ResponseCode.Success);
         }

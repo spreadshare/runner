@@ -6,6 +6,7 @@ using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
 using Xunit;
 using Xunit.Abstractions;
@@ -254,7 +255,7 @@ namespace SpreadShare.Tests.Models
         {
             public override Type GetSettingsType { get; }
 
-            public override ResponseObject Start(AlgorithmSettings settings, ExchangeProvidersContainer container)
+            public override ResponseObject Start(AlgorithmSettings settings, ExchangeProvidersContainer container, DatabaseContext database)
             {
                 throw new NotImplementedException();
             }

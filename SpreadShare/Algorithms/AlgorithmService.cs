@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
+using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms
@@ -20,21 +21,25 @@ namespace SpreadShare.Algorithms
         private readonly AllocationManager _allocationManager;
         private readonly ExchangeFactoryService _exchangeFactoryService;
         private readonly Dictionary<Type, bool> _algorithms;
+        private readonly DatabaseContext _database;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AlgorithmService"/> class.
         /// </summary>
         /// <param name="loggerFactory">Provides logging capabilities</param>
         /// <param name="settingsService">Provides allocation and algorithm settings</param>
+        /// <param name="database">The database context</param>
         /// <param name="allocationManager">Provides allocation management</param>
         /// <param name="exchangeFactoryService">Provides containers for algorithms</param>
         public AlgorithmService(
             ILoggerFactory loggerFactory,
             SettingsService settingsService,
+            DatabaseContext database,
             AllocationManager allocationManager,
             ExchangeFactoryService exchangeFactoryService)
         {
             _logger = loggerFactory.CreateLogger<AlgorithmService>();
+            _database = database;
             _allocationManager = allocationManager;
             _exchangeFactoryService = exchangeFactoryService;
             _settingsService = settingsService;
@@ -80,7 +85,7 @@ namespace SpreadShare.Algorithms
             container.TimerProvider.RunPeriodicTimer();
 
             // Initialise algorithm with container
-            var startResponse = algorithm.Start(settings, container);
+            var startResponse = algorithm.Start(settings, container, _database);
 
             if (!startResponse.Success)
             {
