@@ -97,6 +97,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 orderInfoUpdate => UpdateObservers(new OrderUpdate(
                     orderInfoUpdate.OrderId,
                     BinanceUtilities.ToInternal(orderInfoUpdate.Type),
+                    // TODO: Is this correct?
                     DateTimeOffset.FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime()).ToUnixTimeMilliseconds(),
                     orderInfoUpdate.Price,
                     BinanceUtilities.ToInternal(orderInfoUpdate.Side),
