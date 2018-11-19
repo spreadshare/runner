@@ -31,6 +31,7 @@ namespace SpreadShare.Models.Database
             long filledTimeStamp,
             string pair,
             decimal setQuantity,
+            decimal filledQuantity,
             decimal price,
             string side,
             string assets,
@@ -44,6 +45,7 @@ namespace SpreadShare.Models.Database
             Pair = pair;
             Price = price;
             SetQuantity = setQuantity;
+            FilledQuantity = filledQuantity;
             Side = side;
             Assets = assets;
             Value = value;

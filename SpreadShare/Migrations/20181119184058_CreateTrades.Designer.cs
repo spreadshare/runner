@@ -9,7 +9,7 @@ using SpreadShare.SupportServices;
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20181119182635_CreateTrades")]
+    [Migration("20181119184058_CreateTrades")]
     partial class CreateTrades
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
