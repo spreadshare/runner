@@ -39,7 +39,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public void Output()
         {
             // Set name of folder
-            OutputFolder = Path.Combine(OutputFolder, $"Backtest_{DateTimeOffset.Now}");
+            OutputFolder = Path.Combine(OutputFolder, $"Backtest_{DateTimeOffset.Now:yyyy-MM-dd_HH:mm:ss}");
 
             // Create directory
             Directory.CreateDirectory(OutputFolder);
@@ -58,8 +58,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private void OutputConfiguration(string filepath)
         {
             string configuration = ReadAllText("appsettings.json");
-            Regex.Replace(configuration, ".*\"Key\":.*", "            \"Key\": \"api_key\",");
-            Regex.Replace(configuration, ".*\"Secret\":.*", "            \"Secret\": \"api_secret\",");
+            configuration = Regex.Replace(configuration, ".*\"Key\":.*", "            \"Key\": \"api_key\",");
+            configuration = Regex.Replace(configuration, ".*\"Secret\":.*", "            \"Secret\": \"api_secret\",");
             WriteAllText(filepath, configuration);
         }
 

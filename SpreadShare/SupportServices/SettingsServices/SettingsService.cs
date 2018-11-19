@@ -293,6 +293,7 @@ namespace SpreadShare.SupportServices.SettingsServices
             result.InitialPortfolio = new Portfolio(parsed);
             string beginValStr = _configuration.GetSection("BacktestSettings:BeginTimeStamp").Get<string>();
             string endValStr = _configuration.GetSection("BacktestSettings:EndTimeStamp").Get<string>();
+            result.OutputFolder = _configuration.GetSection("BacktestSettings:OutputFolder").Get<string>();
             if (_backtestedAlgorithm == null)
             {
                 return result;
