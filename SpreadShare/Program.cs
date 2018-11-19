@@ -2,14 +2,11 @@
 using System.Linq;
 using System.Threading;
 using CommandLine;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
-using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare
