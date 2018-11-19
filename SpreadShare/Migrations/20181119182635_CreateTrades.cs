@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-#pragma warning disable
-
 namespace SpreadShare.Migrations
 {
     public partial class CreateTrades : Migration
@@ -16,10 +14,12 @@ namespace SpreadShare.Migrations
                     OrderId = table.Column<long>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     OrderType = table.Column<string>(nullable: true),
+                    OrderStatus = table.Column<string>(nullable: true),
                     CreatedTimestamp = table.Column<long>(nullable: false),
                     FilledTimeStamp = table.Column<long>(nullable: false),
                     Pair = table.Column<string>(nullable: true),
-                    Quantity = table.Column<decimal>(nullable: false),
+                    SetQuantity = table.Column<decimal>(nullable: false),
+                    FilledQuantity = table.Column<decimal>(nullable: false),
                     Price = table.Column<decimal>(nullable: false),
                     Side = table.Column<string>(nullable: true),
                     Assets = table.Column<string>(nullable: true),
@@ -38,5 +38,3 @@ namespace SpreadShare.Migrations
         }
     }
 }
-
-#pragma warning restore

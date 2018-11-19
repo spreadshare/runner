@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
@@ -82,6 +84,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 pair,
                 amount)
             {
+                Status = OrderUpdate.OrderStatus.Filled,
                 AveragePrice = priceEstimate,
                 FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds()
             };
@@ -101,8 +104,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
         {
             // Keep the remote updated by mocking a trade execution
-            Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            TradeExecution exec = null;
+            TradeExecution exec;
 
             // Mock the remote portfolio by providing it an update
             if (side == OrderSide.Buy)
@@ -111,8 +113,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     new Balance(pair.Right, amount * price, 0),
                     new Balance(pair.Right, 0, amount * price));
             }
-
-            if (side == OrderSide.Sell)
+            else
             {
                 exec = new TradeExecution(
                     new Balance(pair.Left, amount, 0),
@@ -139,7 +140,48 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
-            throw new NotImplementedException();
+            var order = GetOrderInfo(pair, orderId).Data;
+            order.Status = OrderUpdate.OrderStatus.Cancelled;
+            
+            if (_watchList.ContainsKey(orderId))
+            {
+                _watchList.Remove(orderId);
+            }
+            
+            // Update the remote portfolio
+            TradeExecution exec;
+            if (order.Side == OrderSide.Buy)
+            {
+                exec = new TradeExecution(
+                    new Balance(order.Pair.Right, 0, order.SetAmount * order.SetPrice),
+                    new Balance(order.Pair.Right, order.SetAmount * order.SetPrice, 0));
+            }
+            else
+            {
+                exec = new TradeExecution(
+                    new Balance(order.Pair.Left, 0, order.SetAmount),
+                    new Balance(order.Pair.Left, order.SetAmount, 0));
+            }
+            _logger.LogInformation($"Updating remote with exec {JsonConvert.SerializeObject(exec)}");
+            _comm.RemotePortfolio.UpdateAllocation(exec);
+            
+            // Add cancelled order to the database
+            _database.Trades.Add(new DatabaseTrade(order,
+                _comm.RemotePortfolio.ToJson(),
+                _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
+
+            return new ResponseObject(ResponseCode.Success);
+        }
+
+        /// <inheritdoc />
+        public override ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
+        {
+            if (_watchList.ContainsKey(orderId))
+            {
+                return new ResponseObject<OrderUpdate>(ResponseCode.Success, _watchList[orderId]);
+            }
+
+            return new ResponseObject<OrderUpdate>(ResponseCode.Error, $"Order {orderId} was not found");
         }
 
         /// <inheritdoc />
@@ -164,8 +206,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
                 // Set the actual price for the order
                 order.AveragePrice = price;
-                order.TotalFilled = order.Amount;
-                order.LastFillIncrement = order.Amount;
+                order.FilledAmount = order.SetAmount;
+                order.LastFillIncrement = order.SetAmount;
                 order.LastFillPrice = price;
                 order.FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
 
@@ -174,14 +216,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 if (order.Side == OrderSide.Buy)
                 {
                     exec = new TradeExecution(
-                        new Balance(order.Pair.Right, 0, order.Amount * order.SetPrice),
+                        new Balance(order.Pair.Right, 0, order.SetAmount * order.SetPrice),
                         new Balance(order.Pair.Left, order.LastFillIncrement, 0));
                 }
                 else
                 {
                     exec = new TradeExecution(
                         new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                        new Balance(order.Pair.Right, order.Amount * order.AveragePrice, 0));
+                        new Balance(order.Pair.Right, order.SetAmount* order.AveragePrice, 0));
                 }
 
                 _comm.RemotePortfolio.UpdateAllocation(exec);

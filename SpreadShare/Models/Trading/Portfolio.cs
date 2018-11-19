@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dawn;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Newtonsoft.Json;
 
 namespace SpreadShare.Models.Trading
@@ -109,6 +110,12 @@ namespace SpreadShare.Models.Trading
         public void UpdateAllocation(TradeExecution trade)
         {
             Guard.Argument(trade).NotNull();
+
+            // Only set left side to zero if the trade execution reports zero
+            if (!_dict.ContainsKey(trade.From.Symbol) && trade.From.Free == 0 && trade.From.Locked == 0)
+            {
+                _dict.Add(trade.From.Symbol, Balance.Empty(trade.From.Symbol));
+            }
 
             // Substract left side of the trade
             _dict[trade.From.Symbol] -= trade.From;

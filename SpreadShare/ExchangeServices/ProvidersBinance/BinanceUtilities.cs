@@ -62,9 +62,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 case OrderStatus.Filled:
                     return OrderUpdate.OrderStatus.Filled;
                 case OrderStatus.Canceled:
-                    return OrderUpdate.OrderStatus.Canceled;
+                    return OrderUpdate.OrderStatus.Cancelled;
                 case OrderStatus.PendingCancel:
-                    return OrderUpdate.OrderStatus.Canceled;
+                    return OrderUpdate.OrderStatus.Cancelled;
                 case OrderStatus.Rejected:
                     return OrderUpdate.OrderStatus.Rejected;
                 case OrderStatus.Expired:

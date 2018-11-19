@@ -6,12 +6,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SpreadShare.SupportServices;
 
-#pragma warning disable
-
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20181119110520_CreateTrades")]
+    [Migration("20181119182635_CreateTrades")]
     partial class CreateTrades
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,7 +20,7 @@ namespace SpreadShare.Migrations
                 .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("SpreadShare.Models.BacktestingCandle", b =>
+            modelBuilder.Entity("SpreadShare.Models.Database.BacktestingCandle", b =>
                 {
                     b.Property<long>("Timestamp")
                         .ValueGeneratedOnAdd();
@@ -44,7 +42,7 @@ namespace SpreadShare.Migrations
                     b.ToTable("Candles");
                 });
 
-            modelBuilder.Entity("SpreadShare.Models.DatabaseTrade", b =>
+            modelBuilder.Entity("SpreadShare.Models.Database.DatabaseTrade", b =>
                 {
                     b.Property<long>("OrderId")
                         .ValueGeneratedOnAdd();
@@ -53,7 +51,11 @@ namespace SpreadShare.Migrations
 
                     b.Property<long>("CreatedTimestamp");
 
+                    b.Property<decimal>("FilledQuantity");
+
                     b.Property<long>("FilledTimeStamp");
+
+                    b.Property<string>("OrderStatus");
 
                     b.Property<string>("OrderType");
 
@@ -61,7 +63,7 @@ namespace SpreadShare.Migrations
 
                     b.Property<decimal>("Price");
 
-                    b.Property<decimal>("Quantity");
+                    b.Property<decimal>("SetQuantity");
 
                     b.Property<string>("Side");
 
@@ -71,9 +73,23 @@ namespace SpreadShare.Migrations
 
                     b.ToTable("Trades");
                 });
+
+            modelBuilder.Entity("SpreadShare.Models.Database.StateSwitchEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("From");
+
+                    b.Property<long>("Timestamp");
+
+                    b.Property<string>("To");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StateSwitchEvents");
+                });
 #pragma warning restore 612, 618
         }
     }
 }
-
-#pragma warning restore

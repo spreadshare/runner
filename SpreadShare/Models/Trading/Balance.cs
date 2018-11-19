@@ -14,12 +14,12 @@ namespace SpreadShare.Models.Trading
         public readonly Currency Symbol;
 
         /// <summary>
-        /// Amount of balance that is free
+        /// SetAmount of balance that is free
         /// </summary>
         public decimal Free;
 
         /// <summary>
-        /// Amount of balance that is locked
+        /// SetAmount of balance that is locked
         /// </summary>
         public decimal Locked;
 
@@ -27,8 +27,8 @@ namespace SpreadShare.Models.Trading
         /// Initializes a new instance of the <see cref="Balance"/> struct.
         /// </summary>
         /// <param name="symbol">Symbol of the asset</param>
-        /// <param name="free">Amount of balance that is free</param>
-        /// <param name="locked">Amount of balance that is locked</param>
+        /// <param name="free">SetAmount of balance that is free</param>
+        /// <param name="locked">SetAmount of balance that is locked</param>
         public Balance(Currency symbol, decimal free, decimal locked)
         {
             Symbol = symbol ?? throw new ArgumentNullException(nameof(symbol));

@@ -66,5 +66,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
 
             return new ResponseObject(ResponseCode.Success);
         }
+
+        /// <inheritdoc />
+        public override ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

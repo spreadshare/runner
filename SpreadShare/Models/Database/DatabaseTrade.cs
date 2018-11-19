@@ -13,10 +13,12 @@ namespace SpreadShare.Models.Database
         /// </summary>
         /// <param name="orderId">The orderId of the trade, must be unique</param>
         /// <param name="orderType">Kind of order</param>
+        /// <param name="orderStatus">The status of the order</param>
         /// <param name="createdTimestamp">The unix createdTimestamp in milliseconds</param>
         /// <param name="filledTimeStamp">Time at which the order was filled</param>
         /// <param name="pair">The trading pair</param>
-        /// <param name="quantity">The amount of non base currency</param>
+        /// <param name="setQuantity">The amount of non base currency for which the order was set</param>
+        /// <param name="filledQuantity">The amount of non base currency that was filled</param>
         /// <param name="price">The price of the trade</param>
         /// <param name="side">Buy or sell order</param>
         /// <param name="assets">The portfolio after the trade</param>
@@ -24,10 +26,11 @@ namespace SpreadShare.Models.Database
         public DatabaseTrade(
             long orderId,
             string orderType,
+            string orderStatus,
             long createdTimestamp,
             long filledTimeStamp,
             string pair,
-            decimal quantity,
+            decimal setQuantity,
             decimal price,
             string side,
             string assets,
@@ -35,11 +38,12 @@ namespace SpreadShare.Models.Database
         {
             OrderId = orderId;
             OrderType = orderType;
+            OrderStatus = orderStatus;
             CreatedTimestamp = createdTimestamp;
             FilledTimeStamp = filledTimeStamp;
             Pair = pair;
             Price = price;
-            Quantity = quantity;
+            SetQuantity = setQuantity;
             Side = side;
             Assets = assets;
             Value = value;
@@ -57,11 +61,13 @@ namespace SpreadShare.Models.Database
             decimal value)
         {
             OrderType = order.OrderType.ToString();
+            OrderStatus = order.Status.ToString();
             CreatedTimestamp = order.CreatedTimeStamp;
             FilledTimeStamp = order.FilledTimeStamp;
             Pair = order.Pair.ToString();
             Price = order.AveragePrice;
-            Quantity = order.Amount;
+            SetQuantity = order.SetAmount;
+            FilledQuantity = order.FilledAmount;
             Side = order.Side.ToString();
             Assets = assets;
             Value = value;
@@ -79,6 +85,11 @@ namespace SpreadShare.Models.Database
         public string OrderType { get; set; }
 
         /// <summary>
+        /// Gets or sets the Status of the order.
+        /// </summary>
+        public string OrderStatus { get; set; }
+
+        /// <summary>
         /// Gets or sets the Timestamp at the creation of the trade
         /// </summary>
         public long CreatedTimestamp { get; set; }
@@ -94,9 +105,14 @@ namespace SpreadShare.Models.Database
         public string Pair { get; set; }
 
         /// <summary>
-        /// Gets or sets the quantity of the trade
+        /// Gets or sets the setQuantity of the trade
         /// </summary>
-        public decimal Quantity { get; set; }
+        public decimal SetQuantity { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the filledQuantity of the trade
+        /// </summary>
+        public decimal FilledQuantity { get; set; }
 
         /// <summary>
         /// Gets or sets the price of the trade
@@ -130,7 +146,8 @@ namespace SpreadShare.Models.Database
                    $"{nameof(CreatedTimestamp)}, " +
                    $"{nameof(FilledTimeStamp)}, " +
                    $"{nameof(Pair)}, " +
-                   $"{nameof(Quantity)}, " +
+                   $"{nameof(SetQuantity)}, " +
+                   $"{nameof(FilledQuantity)}" +
                    $"{nameof(Price)}, " +
                    $"{nameof(Value)}, " +
                    $"{nameof(Assets)}";
@@ -145,7 +162,8 @@ namespace SpreadShare.Models.Database
                    $"{CreatedTimestamp}, " +
                    $"{FilledTimeStamp}, " +
                    $"{Pair}, " +
-                   $"{Quantity}, " +
+                   $"{SetQuantity}, " +
+                   $"{FilledQuantity}, " +
                    $"{Price}, " +
                    $"{Value}, " +
                    $"{Assets}";

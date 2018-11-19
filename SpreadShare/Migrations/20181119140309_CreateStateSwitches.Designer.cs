@@ -61,7 +61,7 @@ namespace SpreadShare.Migrations
 
                     b.Property<decimal>("Price");
 
-                    b.Property<decimal>("Quantity");
+                    b.Property<decimal>("SetQuantity");
 
                     b.Property<string>("Side");
 

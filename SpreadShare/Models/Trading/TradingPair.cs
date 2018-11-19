@@ -17,7 +17,7 @@ namespace SpreadShare.Models.Trading
         /// </summary>
         /// <param name="left">Left side of the trading pair</param>
         /// <param name="right">Right side of the trading pair</param>
-        /// <param name="decimals">Amount of decimals the trading pair can be expressed in</param>
+        /// <param name="decimals">SetAmount of decimals the trading pair can be expressed in</param>
         public TradingPair(Currency left, Currency right, int decimals)
         {
             Guard.Argument(left).NotNull().NotEqual(Guard.Argument(right).NotNull());

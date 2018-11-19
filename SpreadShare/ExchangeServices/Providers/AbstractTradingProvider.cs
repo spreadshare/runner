@@ -57,5 +57,13 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="orderId">Id of the order</param>
         /// <returns>A response object with the results of the action</returns>
         public abstract ResponseObject CancelOrder(TradingPair pair, long orderId);
+
+        /// <summary>
+        /// Gets the info regarding an order
+        /// </summary>
+        /// <param name="pair">the trading pair</param>
+        /// <param name="orderId">the id of the order</param>
+        /// <returns></returns>
+        public abstract ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId);
     }
 }

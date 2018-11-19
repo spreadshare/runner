@@ -140,7 +140,7 @@ namespace SpreadShare.Algorithms
                 CurrentState,
                 child.GetType().ToString().Split('+').Last()));
 
-            Interlocked.Exchange(ref _activeState, child);
+            _activeState = child;
 
             _activeState.Activate(AlgorithmSettings, Container, _loggerFactory);
         }

@@ -84,14 +84,14 @@ namespace SpreadShare.ExchangeServices.Providers
                 {
                     exec = new TradeExecution(
                         new Balance(pair.Right, proposal.From.Free, 0.0M),
-                        new Balance(pair.Left, query.Data.Amount, 0.0M));
+                        new Balance(pair.Left, query.Data.SetAmount, 0.0M));
                 }
                 else
                 {
                     decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
                     exec = new TradeExecution(
                         new Balance(pair.Left, proposal.From.Free, 0.0M),
-                        new Balance(pair.Right, query.Data.Amount * priceEstimate, 0.0M));
+                        new Balance(pair.Right, query.Data.SetAmount * priceEstimate, 0.0M));
                 }
 
                 return exec;
@@ -155,7 +155,32 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>A response object with the results of the action</returns>
         public ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
-            return _implementation.CancelOrder(pair, orderId);
+            var order = _implementation.GetOrderInfo(pair, orderId).Data;
+            TradeExecution exec;
+            if (order.Side == OrderSide.Buy)
+            {
+                exec = new TradeExecution(
+                    new Balance(order.Pair.Right, 0, order.SetAmount * order.SetPrice),
+                    new Balance(order.Pair.Right, order.SetAmount * order.SetPrice, 0));
+            }
+            else
+            {
+                exec = new TradeExecution(
+                    new Balance(order.Pair.Left, 0, order.SetAmount),
+                    new Balance(order.Pair.Left, order.SetAmount, 0));
+            }
+            var query = _implementation.CancelOrder(pair, orderId);
+            if (query.Success)
+            {
+                _allocationManager.UpdateAllocation(exec);
+            }
+
+            return query;
+        }
+
+        public ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
+        {
+            return _implementation.GetOrderInfo(pair, orderId);
         }
 
         private decimal GetBuyAmountEstimate(TradingPair pair, decimal baseAmount)
@@ -193,14 +218,14 @@ namespace SpreadShare.ExchangeServices.Providers
             if (order.Side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(order.Pair.Right, 0, order.Amount * order.SetPrice),
+                    new Balance(order.Pair.Right, 0, order.SetAmount * order.SetPrice),
                     new Balance(order.Pair.Left, order.LastFillIncrement, 0));
             }
             else
             {
                 exec = new TradeExecution(
                     new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                    new Balance(order.Pair.Right, order.Amount * order.AveragePrice, 0));
+                    new Balance(order.Pair.Right, order.SetAmount * order.AveragePrice, 0));
             }
 
             _allocationManager.UpdateAllocation(exec);

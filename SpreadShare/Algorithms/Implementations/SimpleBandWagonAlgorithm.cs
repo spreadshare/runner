@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
@@ -30,82 +31,80 @@ namespace SpreadShare.Algorithms.Implementations
         {
             var stateManager = new StateManager<SimpleBandWagonAlgorithmSettings>(
                 settings as SimpleBandWagonAlgorithmSettings,
-                new EntryState(),
+                new BeginState(),
                 container,
                 database);
 
             return new ResponseObject(ResponseCode.Success);
         }
 
-        /// <summary>
-        /// Starting state of the algorithm
-        /// </summary>
-        private class EntryState : State<SimpleBandWagonAlgorithmSettings>
+        private class BeginState : State<SimpleBandWagonAlgorithmSettings>
         {
-            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
-            {
-                var query = data.GetTopPerformance(AlgorithmSettings.ActiveTradingPairs, AlgorithmSettings.CheckTime).Data;
-                if (query.Item2 < 0.98M)
-                {
-                    Logger.LogCritical("Panic detected, let's go");
-                    return new BuyState();
-                }
-
-                return new NothingState<SimpleBandWagonAlgorithmSettings>();
-            }
-
             protected override void Run(TradingProvider trading, DataProvider data)
             {
+            }
+
+            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+            {
+                return new EntryState();
             }
         }
 
-        /// <summary>
-        /// Starting state of the algorithm
-        /// </summary>
-        private class BuyState : State<SimpleBandWagonAlgorithmSettings>
+        private class EntryState : State<SimpleBandWagonAlgorithmSettings>
         {
-            private OrderUpdate _buy;
-
-            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
+            private OrderUpdate _order;
+            protected override void Run(TradingProvider trading, DataProvider data)
             {
-                Logger.LogCritical("Hold time has exceeded, selling.");
-                return new SellState();
+               // decimal price = data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH")).Data;
+                decimal price = data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH")).Data;
+                Logger.LogInformation($"Before: {trading.GetPortfolio().ToJson()}");
+                _order = trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy, 50, price*0.99M).Data;
+                Logger.LogInformation($"After: {trading.GetPortfolio().ToJson()}");
+                SetTimer(TimeSpan.FromHours(10));
             }
 
-            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+            public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
             {
-                decimal price = data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH")).Data;
-                if (price > _buy.SetPrice * 1.005M)
+                if (order.OrderId == _order.OrderId)
                 {
-                    Logger.LogInformation("Price has increased, selling");
-                    return new SellState();
+                    Logger.LogInformation($"Order {order.OrderId} confirmed");
+                    return new SellState(order);
                 }
-
                 return new NothingState<SimpleBandWagonAlgorithmSettings>();
             }
 
-            /// <inheritdoc />
-            protected override void Run(TradingProvider trading, DataProvider data)
+            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
             {
-               Logger.LogInformation($"Portfolio is {trading.GetPortfolio().ToJson()}");
-               _buy = trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy).Data;
-               Logger.LogInformation($"Portfolio is now {trading.GetPortfolio().ToJson()}");
-               SetTimer(TimeSpan.FromHours(AlgorithmSettings.HoldTime));
+                Logger.LogInformation("Cancelling order!");
+                return new SellState(_order);
             }
         }
 
         private class SellState : State<SimpleBandWagonAlgorithmSettings>
         {
-            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
+            private OrderUpdate _buy;
+
+            public SellState(OrderUpdate order)
             {
-                return new EntryState();
+                _buy = order;
             }
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-               Logger.LogInformation("Selling it all, hybernating");
-               trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell);
-               SetTimer(TimeSpan.FromHours(2));
+                if (_buy.Status != OrderUpdate.OrderStatus.Filled)
+                {
+                    trading.CancelOrder(_buy.Pair, _buy.OrderId);
+                }
+                else
+                {
+                    trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell);
+                }
+                SetTimer(TimeSpan.FromDays(2));
+            }
+
+            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
+            {
+                return new EntryState();
             }
         }
 
@@ -172,8 +171,8 @@ namespace SpreadShare.Algorithms.Implementations
                     var query = DataProvider.GetCurrentPriceTopBid(pair);
 
                     // Use a value of zero for assets whose price retrievals fail.
-                    return query.Success ? new AssetValue(x.Symbol, x.Amount * query.Data) : new AssetValue(x.Symbol, 0);
-                }).OrderBy(x => x.Amount);
+                    return query.Success ? new AssetValue(x.Symbol, x.SetAmount * query.Data) : new AssetValue(x.Symbol, 0);
+                }).OrderBy(x => x.SetAmount);
                 Logger.LogInformation($"Most valuable asset in portfolio: {sorted.Last().Symbol}");
 
                 // Construct the most valueble asset as a currency
@@ -248,7 +247,7 @@ namespace SpreadShare.Algorithms.Implementations
                     decimal price = priceQuery.Data;
 
                     // Check if the eth value of the asset exceeds the minimum to be consired relevant
-                    decimal value = price * asset.Amount;
+                    decimal value = price * asset.SetAmount;
                     if (value >= valueMinimum)
                     {
                         Logger.LogInformation($"Reverting for {pair}");
