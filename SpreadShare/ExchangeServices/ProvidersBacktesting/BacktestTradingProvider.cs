@@ -166,6 +166,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 order.TotalFilled = order.Amount;
                 order.LastFillIncrement = order.Amount;
                 order.LastFillPrice = price;
+                order.FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
 
                 // Calculate a trade execution to keep the remote portfolio up-to-date
                 TradeExecution exec;
