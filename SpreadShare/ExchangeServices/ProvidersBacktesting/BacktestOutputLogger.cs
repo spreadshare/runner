@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using SpreadShare.Models;
 using SpreadShare.SupportServices;
 using static System.IO.File;
 
@@ -70,7 +71,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private void OutputTrades(string filepath)
         {
             var builder = new StringBuilder();
-            builder.AppendLine("TradeID, Timestamp, Pair, Quantity, Price, Side, Assets, Value");
+            builder.AppendLine(DatabaseTrade.GetCsvHeader());
             foreach (var trade in DatabaseContext.Trades)
             {
                 builder.AppendLine(trade.ToString());

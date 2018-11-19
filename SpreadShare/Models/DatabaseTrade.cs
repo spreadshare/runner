@@ -118,10 +118,37 @@ namespace SpreadShare.Models
         /// </summary>
         public decimal Value { get; set; }
 
+        /// <summary>
+        /// Get a header matching the format of ToString()
+        /// </summary>
+        /// <returns>string header</returns>
+        public static string GetCsvHeader()
+        {
+            return $"{nameof(OrderId)}, " +
+                   $"{nameof(OrderType)}, " +
+                   $"{nameof(Side)}, " +
+                   $"{nameof(CreatedTimestamp)}, " +
+                   $"{nameof(FilledTimeStamp)}, " +
+                   $"{nameof(Pair)}, " +
+                   $"{nameof(Quantity)}, " +
+                   $"{nameof(Price)}, " +
+                   $"{nameof(Value)}, " +
+                   $"{nameof(Assets)}";
+        }
+
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{OrderId}, {FilledTimeStamp}, {Pair}, {Quantity}, {Price}, {Side}, {Assets}, {Value}";
+            return $"{OrderId}, " +
+                   $"{OrderType}, " +
+                   $"{Side}, " +
+                   $"{CreatedTimestamp}, " +
+                   $"{FilledTimeStamp}, " +
+                   $"{Pair}, " +
+                   $"{Quantity}, " +
+                   $"{Price}, " +
+                   $"{Value}, " +
+                   $"{Assets}";
         }
     }
 }

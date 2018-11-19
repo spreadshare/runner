@@ -88,6 +88,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
             var listenKey = response.Data;
 
             // Start socket connection
+            // TODO: Is this correct?
             var succesOrderBook = Socket.SubscribeToUserStream(
                 listenKey,
                 accountInfoUpdate =>
@@ -97,7 +98,6 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 orderInfoUpdate => UpdateObservers(new OrderUpdate(
                     orderInfoUpdate.OrderId,
                     BinanceUtilities.ToInternal(orderInfoUpdate.Type),
-                    // TODO: Is this correct?
                     DateTimeOffset.FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime()).ToUnixTimeMilliseconds(),
                     orderInfoUpdate.Price,
                     BinanceUtilities.ToInternal(orderInfoUpdate.Side),
