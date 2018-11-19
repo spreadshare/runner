@@ -102,7 +102,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 return query;
             }
 
-            return new ResponseObject<OrderUpdate>(ResponseCode.Success, "Order was refused by AllocationManager");
+            return new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused by AllocationManager");
         }
 
         /// <summary>
