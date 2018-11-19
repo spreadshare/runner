@@ -37,7 +37,7 @@ namespace SpreadShare.Algorithms.Implementations
         /// <summary>
         /// Starting state of the algorithm
         /// </summary>
-       private class EntryState : State<SimpleBandWagonAlgorithmSettings>
+        private class EntryState : State<SimpleBandWagonAlgorithmSettings>
         {
             public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
             {
