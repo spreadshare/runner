@@ -17,6 +17,8 @@ services:
       dockerfile: SpreadShare/Dockerfile
     depends_on:
       - db
+    volumes:
+      - ./backtesting-output:/app/backtesting-output # Path-based volume
 
   datapump:
     build:

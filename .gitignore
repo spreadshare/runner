@@ -37,9 +37,10 @@ build.txt
 # Rider
 .idea/
 
-# Postgres data
+# Docker volumes
 postgres-data
 input-data
+backtesting-output
 
 # Environment secrets
 .env

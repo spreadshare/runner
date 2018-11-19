@@ -43,6 +43,6 @@
         },
         "BeginTimeStamp" : "auto",
         "EndTimeStamp" : "auto",
-        "OutputFolder" : "./"
+        "OutputFolder" : "./backtesting-output"
     }
 }
