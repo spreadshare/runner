@@ -14,17 +14,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private readonly ILogger _logger;
         private readonly DateTimeOffset _endDate;
-        private DateTimeOffset _currentTime;
-        private DatabaseContext _database;
+        private readonly DatabaseContext _database;
         private readonly string _outputFolder;
+        private DateTimeOffset _currentTime;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestTimerProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output</param>
         /// <param name="database">The database context for flushing</param>
-        /// <param name="startDate">The starting moment of the backtest (in UTC)</param>
-        /// <param name="endDate">Runs the timer till end date</param>
+        /// <param name="settings">Provides startDate, endDate and outputFolder</param>
         public BacktestTimerProvider(ILoggerFactory loggerFactory, DatabaseContext database, BacktestSettings settings)
         {
             _logger = loggerFactory.CreateLogger(GetType());
@@ -56,6 +55,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _logger.LogCritical("Flushing the trades to the database...");
             _database.SaveChanges();
             _logger.LogCritical("...DONE");
+
+            // Output to database
             var outputLogger = new BacktestOutputLogger(_database, _outputFolder);
             outputLogger.Output();
         }

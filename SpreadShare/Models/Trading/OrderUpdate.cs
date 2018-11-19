@@ -93,49 +93,49 @@
             /// A limit order
             /// </summary>
             Limit,
-            
+
             /// <summary>
             /// A stoploss order
             /// </summary>
             StopLoss,
-            
+
             /// <summary>
             /// A stoploss limit order
             /// </summary>
             StopLossLimit,
-            
+
             /// <summary>
             /// A take profit order
             /// </summary>
             TakeProfit,
-            
+
             /// <summary>
             /// A take profit limit order
             /// </summary>
             TakeProfitLimit,
-            
+
             /// <summary>
             /// A limit maker order
             /// </summary>
             LimitMaker
-            
+
         }
 
         /// <summary>
         /// Gets the unique id of the order
         /// </summary>
         public long OrderId { get; }
-        
+
         /// <summary>
         /// Gets the type fo the order
         /// </summary>
         public OrderTypes OrderType { get; }
-        
+
         /// <summary>
         /// Gets the timestamp at which the order was created
         /// </summary>
         public long CreatedTimeStamp { get; }
-        
+
         /// <summary>
         /// Gets the timestamp at which the order was filled
         /// </summary>

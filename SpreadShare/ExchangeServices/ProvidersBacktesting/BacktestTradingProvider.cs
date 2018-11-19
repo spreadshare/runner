@@ -71,7 +71,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             }
 
             _comm.RemotePortfolio.UpdateAllocation(exec);
-            
+
             var orderUpdate = new OrderUpdate(
                 _mockOrderCounter++,
                 OrderUpdate.OrderTypes.Market,
@@ -80,7 +80,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 side,
                 pair,
                 amount);
-            
+
             // Write the trade to the database
             _database.Trades.Add(new DatabaseTrade(
                 orderUpdate, _comm.RemotePortfolio.ToJson(), 0));

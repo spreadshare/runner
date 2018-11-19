@@ -23,7 +23,7 @@ namespace SpreadShare.SupportServices
         /// Gets or sets the backtesting candles.
         /// </summary>
         public DbSet<BacktestingCandle> Candles { get; set; }
-        
+
         public DbSet<DatabaseTrade> Trades { get; set; }
     }
 }

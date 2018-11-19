@@ -73,7 +73,7 @@ namespace SpreadShare.Models
         /// </summary>
         [Key]
         public long OrderId { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the Type of order.
         /// </summary>
@@ -83,7 +83,7 @@ namespace SpreadShare.Models
         /// Gets or sets the Timestamp at the creation of the trade
         /// </summary>
         public long CreatedTimestamp { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the Timestamp at the moment the trade was filled
         /// </summary>
@@ -98,7 +98,7 @@ namespace SpreadShare.Models
         /// Gets or sets the quantity of the trade
         /// </summary>
         public decimal Quantity { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the price of the trade
         /// </summary>

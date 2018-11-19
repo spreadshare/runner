@@ -42,7 +42,7 @@ namespace SpreadShare.Algorithms.Implementations
            protected override void Run(TradingProvider trading, DataProvider data)
            {
            }
-        
+
            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
            {
                var query = data.GetTopPerformance(AlgorithmSettings.ActiveTradingPairs, AlgorithmSettings.CheckTime).Data;
@@ -51,22 +51,24 @@ namespace SpreadShare.Algorithms.Implementations
                    Logger.LogCritical("Panic detected, let's go");
                    return new BuyState();
                }
-               return new NothingState<SimpleBandWagonAlgorithmSettings>();   
+
+               return new NothingState<SimpleBandWagonAlgorithmSettings>();
            }
         }
-        
+
         /// <summary>
         /// Starting state of the algorithm
         /// </summary>
         private class BuyState : State<SimpleBandWagonAlgorithmSettings>
         {
            private OrderUpdate _buy;
+
            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
            {
                Logger.LogCritical("Hold time has exceeded, selling.");
                return new SellState();
            }
-        
+
            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
            {
                decimal price = data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH")).Data;
@@ -75,10 +77,10 @@ namespace SpreadShare.Algorithms.Implementations
                    Logger.LogInformation("Price has increased, selling");
                    return new SellState();
                }
-        
+
                return new NothingState<SimpleBandWagonAlgorithmSettings>();
            }
-        
+
            /// <inheritdoc />
            protected override void Run(TradingProvider trading, DataProvider data)
            {
@@ -88,7 +90,7 @@ namespace SpreadShare.Algorithms.Implementations
                SetTimer(TimeSpan.FromHours(AlgorithmSettings.HoldTime));
            }
         }
-        
+
         private class SellState : State<SimpleBandWagonAlgorithmSettings>
         {
            protected override void Run(TradingProvider trading, DataProvider data)
@@ -97,13 +99,12 @@ namespace SpreadShare.Algorithms.Implementations
                trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell);
                SetTimer(TimeSpan.FromHours(2));
            }
-        
+
            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
            {
                return new EntryState();
            }
         }
-
 
         /*
         /// <summary>
