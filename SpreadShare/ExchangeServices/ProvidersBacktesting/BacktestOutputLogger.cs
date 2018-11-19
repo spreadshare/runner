@@ -39,7 +39,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public void Output()
         {
             // Set name of folder
-            OutputFolder = Path.Combine(OutputFolder, $"Backtest_{DateTimeOffset.Now:yyyy-MM-dd_HH:mm:ss}");
+            OutputFolder = Path.Combine(OutputFolder, $"Backtest_{DateTimeOffset.Now:yyyy-MM-dd_HH-mm-ss}");
 
             // Create directory
             Directory.CreateDirectory(OutputFolder);
