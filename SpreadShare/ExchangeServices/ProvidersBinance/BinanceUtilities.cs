@@ -73,5 +73,33 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     throw new ArgumentOutOfRangeException(nameof(status), status, null);
             }
         }
+
+        /// <summary>
+        /// Convert Binance.Net.OrderTypes to internal enum
+        /// </summary>
+        /// <param name="type">Binance.Net.OrderType</param>
+        /// <returns>parsed for internal usage</returns>
+        public static OrderUpdate.OrderTypes ToInternal(Binance.Net.Objects.OrderType type)
+        {
+            switch (type)
+            {
+                case OrderType.Limit:
+                    return OrderUpdate.OrderTypes.Limit;
+                case OrderType.Market:
+                    return OrderUpdate.OrderTypes.Market;
+                case OrderType.StopLoss:
+                    return OrderUpdate.OrderTypes.StopLoss;
+                case OrderType.StopLossLimit:
+                    return OrderUpdate.OrderTypes.StopLossLimit;
+                case OrderType.TakeProfit:
+                    return OrderUpdate.OrderTypes.TakeProfit;
+                case OrderType.TakeProfitLimit:
+                    return OrderUpdate.OrderTypes.TakeProfitLimit;
+                case OrderType.LimitMaker:
+                    return OrderUpdate.OrderTypes.LimitMaker;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
     }
 }

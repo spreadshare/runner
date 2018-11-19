@@ -35,6 +35,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _buffers = new Dictionary<string, BacktestingCandle[]>();
         }
 
+        /// <summary>
+        /// Sets the DataProvider that implements this BackTestTradingProvider
+        /// </summary>
+        public DataProvider ParentImplementation { private get; set; }
+
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair)
         {
@@ -99,10 +104,20 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <summary>
+        /// Get a value of the portfolio using the parent wrapper
+        /// </summary>
+        /// <param name="portfolio">Portfolio to evaluate</param>
+        /// <returns>value of portfolio in base currency</returns>
+        public decimal ValuatePortfolioInBaseCurrency(Portfolio portfolio)
+        {
+            return ParentImplementation.ValuatePortfolioInBaseCurrency(portfolio);
+        }
+
+        /// <summary>
         /// Find candle that matches the timestamp most closely.
         /// </summary>
         /// <param name="pair">Candle's trading pair</param>
-        /// <param name="timestamp">Timestamp to match</param>
+        /// <param name="timestamp">CreatedTimestamp to match</param>
         /// <returns>Candle matching timestamp most closely</returns>
         private BacktestingCandle FindCandle(TradingPair pair, long timestamp)
         {

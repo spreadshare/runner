@@ -6,6 +6,8 @@ using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices;
+using OrderSide = SpreadShare.Models.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
@@ -18,6 +20,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private readonly BacktestTimerProvider _timer;
         private readonly BacktestDataProvider _dataProvider;
         private readonly BacktestCommunicationService _comm;
+        private readonly DatabaseContext _database;
+
         private long _mockOrderCounter;
 
         /// <summary>
@@ -27,17 +31,20 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="timer">timer provider for registering trades</param>
         /// <param name="data">data provider for confirming trades</param>
         /// <param name="comm">communication service for updating remote portfolio</param>
+        /// <param name="database">Database context for logging trades</param>
         public BacktestTradingProvider(
             ILoggerFactory loggerFactory,
             BacktestTimerProvider timer,
             BacktestDataProvider data,
-            BacktestCommunicationService comm)
+            BacktestCommunicationService comm,
+            DatabaseContext database)
             : base(loggerFactory)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _timer = timer;
             _dataProvider = data;
             _comm = comm;
+            _database = database;
             timer.Subscribe(this);
         }
 
@@ -65,9 +72,28 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             _comm.RemotePortfolio.UpdateAllocation(exec);
 
+            var orderUpdate = new OrderUpdate(
+                _mockOrderCounter++,
+                OrderUpdate.OrderTypes.Market,
+                _timer.CurrentTime.ToUnixTimeMilliseconds(),
+                priceEstimate,
+                side,
+                pair,
+                amount)
+            {
+                AveragePrice = priceEstimate,
+                FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds()
+            };
+
+            // Write the trade to the database
+            _database.Trades.Add(new DatabaseTrade(
+                orderUpdate,
+                _comm.RemotePortfolio.ToJson(),
+                _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
+
             return new ResponseObject<OrderUpdate>(
                 ResponseCode.Success,
-                new OrderUpdate(priceEstimate, side, pair, amount, _mockOrderCounter++));
+                orderUpdate);
         }
 
         /// <inheritdoc />
@@ -95,9 +121,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _comm.RemotePortfolio.UpdateAllocation(exec);
 
             // Add the order to the watchlist
-            OrderUpdate order = new OrderUpdate(price, side, pair, amount, _mockOrderCounter);
+            OrderUpdate order = new OrderUpdate(
+                _mockOrderCounter,
+                OrderUpdate.OrderTypes.Limit,
+                _timer.CurrentTime.ToUnixTimeMilliseconds(),
+                price,
+                side,
+                pair,
+                amount);
             _watchList.Add(_mockOrderCounter, order);
             _mockOrderCounter++;
+
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
         }
 
@@ -132,6 +166,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 order.TotalFilled = order.Amount;
                 order.LastFillIncrement = order.Amount;
                 order.LastFillPrice = price;
+                order.FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
 
                 // Calculate a trade execution to keep the remote portfolio up-to-date
                 TradeExecution exec;
@@ -149,6 +184,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 }
 
                 _comm.RemotePortfolio.UpdateAllocation(exec);
+
+                // Write the filled trade to the database
+                _database.Trades.Add(new DatabaseTrade(
+                    order,
+                    _comm.RemotePortfolio.ToJson(),
+                    _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
 
                 UpdateObservers(order);
             }

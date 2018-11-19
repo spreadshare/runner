@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SpreadShare.SupportServices;
 
-#pragma warning disable
-
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
@@ -13,6 +11,7 @@ namespace SpreadShare.Migrations
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
+#pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
@@ -39,7 +38,35 @@ namespace SpreadShare.Migrations
 
                     b.ToTable("Candles");
                 });
-#pragma warning restore
+
+            modelBuilder.Entity("SpreadShare.Models.DatabaseTrade", b =>
+                {
+                    b.Property<long>("OrderId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Assets");
+
+                    b.Property<long>("CreatedTimestamp");
+
+                    b.Property<long>("FilledTimeStamp");
+
+                    b.Property<string>("OrderType");
+
+                    b.Property<string>("Pair");
+
+                    b.Property<decimal>("Price");
+
+                    b.Property<decimal>("Quantity");
+
+                    b.Property<string>("Side");
+
+                    b.Property<decimal>("Value");
+
+                    b.HasKey("OrderId");
+
+                    b.ToTable("Trades");
+                });
+#pragma warning restore 612, 618
         }
     }
 }

@@ -21,5 +21,10 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// Gets or sets the end timestamp of testable timerange.
         /// </summary>
         public long EndTimeStamp { get; set; }
+
+        /// <summary>
+        /// Gets or sets the output folder for the OutputLogger.
+        /// </summary>
+        public string OutputFolder { get; set; }
     }
 }

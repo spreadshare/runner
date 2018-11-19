@@ -42,6 +42,7 @@
             "ETH" : { "Symbol": "ETH", "Free" : 11.0, "Locked": 0.0 }
         },
         "BeginTimeStamp" : "auto",
-        "EndTimeStamp" : "auto"
+        "EndTimeStamp" : "auto",
+        "OutputFolder" : "./backtesting-output"
     }
 }

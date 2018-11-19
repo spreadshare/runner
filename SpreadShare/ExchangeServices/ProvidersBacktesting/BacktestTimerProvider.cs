@@ -1,7 +1,10 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
+using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
@@ -12,19 +15,23 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private readonly ILogger _logger;
         private readonly DateTimeOffset _endDate;
+        private readonly DatabaseContext _database;
+        private readonly string _outputFolder;
         private DateTimeOffset _currentTime;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestTimerProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output</param>
-        /// <param name="startDate">The starting moment of the backtest (in UTC)</param>
-        /// <param name="endDate">Runs the timer till end date</param>
-        public BacktestTimerProvider(ILoggerFactory loggerFactory, DateTimeOffset startDate, DateTimeOffset endDate)
+        /// <param name="database">The database context for flushing</param>
+        /// <param name="settings">Provides startDate, endDate and outputFolder</param>
+        public BacktestTimerProvider(ILoggerFactory loggerFactory, DatabaseContext database, BacktestSettings settings)
         {
             _logger = loggerFactory.CreateLogger(GetType());
-            _currentTime = startDate;
-            _endDate = endDate;
+            _database = database;
+            _currentTime = DateTimeOffset.FromUnixTimeMilliseconds(settings.BeginTimeStamp) + TimeSpan.FromHours(48);
+            _endDate = DateTimeOffset.FromUnixTimeMilliseconds(settings.EndTimeStamp);
+            _outputFolder = settings.OutputFolder;
         }
 
         /// <summary>
@@ -33,10 +40,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public override DateTimeOffset CurrentTime => _currentTime;
 
         /// <inheritdoc />
-        public async override void RunPeriodicTimer()
+        public override async void RunPeriodicTimer()
         {
             // Make sure all constructor processes are finished
             await Task.Delay(1000).ConfigureAwait(false);
+
+            // Clear the trades table
+            _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"Trades\"");
+            _database.SaveChanges();
+
             DateTimeOffset start = DateTimeOffset.Now;
             while (CurrentTime < _endDate)
             {
@@ -45,6 +57,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             }
 
             _logger.LogCritical($"STOP THE TIMERS! Backtest took {(DateTimeOffset.Now - start).TotalMilliseconds}ms");
+            _logger.LogCritical("Flushing the trades to the database...");
+            _database.SaveChanges();
+            _logger.LogCritical("...DONE");
+
+            // Output to database
+            var outputLogger = new BacktestOutputLogger(_database, _outputFolder);
+            outputLogger.Output();
         }
     }
 }

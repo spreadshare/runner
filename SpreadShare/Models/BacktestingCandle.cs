@@ -10,7 +10,7 @@ namespace SpreadShare.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestingCandle"/> class.
         /// </summary>
-        /// <param name="timestamp">Timestamp of the candle</param>
+        /// <param name="timestamp">CreatedTimestamp of the candle</param>
         /// <param name="open">Opening price of candle</param>
         /// <param name="close">Closing price of candle</param>
         /// <param name="high">Highest price during time period</param>

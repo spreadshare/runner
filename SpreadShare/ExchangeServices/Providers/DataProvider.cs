@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
@@ -11,14 +12,17 @@ namespace SpreadShare.ExchangeServices.Providers
     internal class DataProvider
     {
         private readonly AbstractDataProvider _implementation;
+        private readonly AlgorithmSettings _settings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataProvider"/> class.
         /// </summary>
         /// <param name="implementation">Exchange implementation of data provider</param>
-        public DataProvider(AbstractDataProvider implementation)
+        /// <param name="settings">The settings of the algorithm</param>
+        public DataProvider(AbstractDataProvider implementation, AlgorithmSettings settings)
         {
             _implementation = implementation;
+            _settings = settings;
         }
 
         /// <summary>
@@ -73,6 +77,31 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
         {
             return _implementation.GetTopPerformance(pairs, hoursBack);
+        }
+
+        /// <summary>
+        /// Gets a value estimation of a portfolio
+        /// </summary>
+        /// <param name="portfolio">portfolio</param>
+        /// <returns>value in base currency</returns>
+        public decimal ValuatePortfolioInBaseCurrency(Portfolio portfolio)
+        {
+            var balances = portfolio.AllBalances();
+            decimal sum = 0;
+            foreach (var balance in balances)
+            {
+                if (balance.Symbol == _settings.BaseCurrency)
+                {
+                    sum += balance.Free + balance.Locked;
+                    continue;
+                }
+
+                TradingPair pair = TradingPair.Parse(balance.Symbol, _settings.BaseCurrency);
+                decimal price = _implementation.GetCurrentPriceLastTrade(pair).Data;
+                sum += (balance.Free + balance.Locked) * price;
+            }
+
+            return sum;
         }
     }
 }

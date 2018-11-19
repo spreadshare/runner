@@ -17,6 +17,8 @@ services:
       dockerfile: SpreadShare/Dockerfile
     depends_on:
       - db
+    volumes:
+      - ./backtesting-output:/app/backtesting-output # Path-based volume
 
   datapump:
     build:
@@ -41,8 +43,8 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql # Named volume
     # Expose for pgAdmin or remote access
-    # ports:
-    #   - "5432:5432"
+    ports:
+      - "5432:5432"
 
 volumes:
   postgres-data:
