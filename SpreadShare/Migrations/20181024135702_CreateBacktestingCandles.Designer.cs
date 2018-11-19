@@ -23,7 +23,7 @@ namespace SpreadShare.Migrations
 
             modelBuilder.Entity("SpreadShare.Models.BacktestingCandle", b =>
                 {
-                    b.Property<long>("Timestamp")
+                    b.Property<long>("CreatedTimestamp")
                         .ValueGeneratedOnAdd();
 
                     b.Property<decimal>("Close");
@@ -38,7 +38,7 @@ namespace SpreadShare.Migrations
 
                     b.Property<decimal>("Volume");
 
-                    b.HasKey("Timestamp");
+                    b.HasKey("CreatedTimestamp");
 
                     b.ToTable("Candles");
                 });

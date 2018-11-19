@@ -37,45 +37,73 @@ namespace SpreadShare.Algorithms.Implementations
         /// <summary>
         /// Starting state of the algorithm
         /// </summary>
-        private class EntryState : State<SimpleBandWagonAlgorithmSettings>
+       private class EntryState : State<SimpleBandWagonAlgorithmSettings>
         {
-            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
-            {
-                return new NothingState<SimpleBandWagonAlgorithmSettings>();
-            }
-
-            public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
-            {
-                Logger.LogCritical($"Order update in buy was called with id {order.OrderId}");
-                return new SellState();
-            }
-
-            /// <inheritdoc />
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-                Logger.LogInformation($"Portfolio is {trading.GetPortfolio().ToJson()}");
-                decimal price = data.GetCurrentPriceTopAsk(TradingPair.Parse("EOSETH")).Data;
-                trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy, 1000, price * 0.95M);
-                Logger.LogInformation($"Porfolio is now {trading.GetPortfolio().ToJson()}");
-                SetTimer(TimeSpan.FromHours(5));
-            }
+           protected override void Run(TradingProvider trading, DataProvider data)
+           {
+           }
+        
+           public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+           {
+               var query = data.GetTopPerformance(AlgorithmSettings.ActiveTradingPairs, AlgorithmSettings.CheckTime).Data;
+               if (query.Item2 < 0.98M)
+               {
+                   Logger.LogCritical("Panic detected, let's go");
+                   return new BuyState();
+               }
+               return new NothingState<SimpleBandWagonAlgorithmSettings>();   
+           }
         }
-
+        
+        /// <summary>
+        /// Starting state of the algorithm
+        /// </summary>
+        private class BuyState : State<SimpleBandWagonAlgorithmSettings>
+        {
+           private OrderUpdate _buy;
+           public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
+           {
+               Logger.LogCritical("Hold time has exceeded, selling.");
+               return new SellState();
+           }
+        
+           public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+           {
+               decimal price = data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH")).Data;
+               if (price > _buy.SetPrice * 1.005M)
+               {
+                   Logger.LogInformation("Price has increased, selling");
+                   return new SellState();
+               }
+        
+               return new NothingState<SimpleBandWagonAlgorithmSettings>();
+           }
+        
+           /// <inheritdoc />
+           protected override void Run(TradingProvider trading, DataProvider data)
+           {
+               Logger.LogInformation($"Portfolio is {trading.GetPortfolio().ToJson()}");
+               _buy = trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy).Data;
+               Logger.LogInformation($"Portfolio is now {trading.GetPortfolio().ToJson()}");
+               SetTimer(TimeSpan.FromHours(AlgorithmSettings.HoldTime));
+           }
+        }
+        
         private class SellState : State<SimpleBandWagonAlgorithmSettings>
         {
-            public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
-            {
-                Logger.LogCritical($"Order update in sell was called with id {order.OrderId}");
-                return new EntryState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-                Logger.LogInformation($"Portfolio after order is {trading.GetPortfolio().ToJson()}");
-                decimal price = data.GetCurrentPriceTopBid(TradingPair.Parse("EOSETH")).Data;
-                trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell, 1000, price * 1.05M);
-            }
+           protected override void Run(TradingProvider trading, DataProvider data)
+           {
+               Logger.LogInformation("Selling it all, hybernating");
+               trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell);
+               SetTimer(TimeSpan.FromHours(2));
+           }
+        
+           public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
+           {
+               return new EntryState();
+           }
         }
+
 
         /*
         /// <summary>

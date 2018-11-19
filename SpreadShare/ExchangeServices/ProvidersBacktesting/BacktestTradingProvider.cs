@@ -1,12 +1,14 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
+using OrderSide = SpreadShare.Models.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
@@ -69,10 +71,23 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             }
 
             _comm.RemotePortfolio.UpdateAllocation(exec);
+            
+            var orderUpdate = new OrderUpdate(
+                _mockOrderCounter++,
+                OrderUpdate.OrderTypes.Market,
+                _timer.CurrentTime.ToUnixTimeMilliseconds(),
+                priceEstimate,
+                side,
+                pair,
+                amount);
+            
+            // Write the trade to the database
+            _database.Trades.Add(new DatabaseTrade(
+                orderUpdate, _comm.RemotePortfolio.ToJson(), 0));
 
             return new ResponseObject<OrderUpdate>(
                 ResponseCode.Success,
-                new OrderUpdate(priceEstimate, side, pair, amount, _mockOrderCounter++));
+                orderUpdate);
         }
 
         /// <inheritdoc />
@@ -100,9 +115,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _comm.RemotePortfolio.UpdateAllocation(exec);
 
             // Add the order to the watchlist
-            OrderUpdate order = new OrderUpdate(price, side, pair, amount, _mockOrderCounter);
+            OrderUpdate order = new OrderUpdate(
+                _mockOrderCounter,
+                OrderUpdate.OrderTypes.Limit,
+                _timer.CurrentTime.ToUnixTimeMilliseconds(),
+                price,
+                side,
+                pair,
+                amount);
             _watchList.Add(_mockOrderCounter, order);
             _mockOrderCounter++;
+
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
         }
 
@@ -155,12 +178,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
                 _comm.RemotePortfolio.UpdateAllocation(exec);
 
+                // Write the filled trade to the database
                 _database.Trades.Add(new DatabaseTrade(
-                    _timer.CurrentTime.ToUnixTimeMilliseconds(),
-                    order.Pair.ToString(),
-                    order.Amount,
-                    order.AveragePrice,
-                    order.Side.ToString(),
+                    order,
                     _comm.RemotePortfolio.ToJson(),
                     0));
 

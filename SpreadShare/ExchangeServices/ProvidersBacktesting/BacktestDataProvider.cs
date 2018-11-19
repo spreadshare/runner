@@ -102,7 +102,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// Find candle that matches the timestamp most closely.
         /// </summary>
         /// <param name="pair">Candle's trading pair</param>
-        /// <param name="timestamp">Timestamp to match</param>
+        /// <param name="timestamp">CreatedTimestamp to match</param>
         /// <returns>Candle matching timestamp most closely</returns>
         private BacktestingCandle FindCandle(TradingPair pair, long timestamp)
         {

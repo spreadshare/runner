@@ -12,7 +12,8 @@ namespace SpreadShare.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseTrade"/> class.
         /// </summary>
-        /// <param name="timestamp">The unix timestamp in milliseconds</param>
+        /// <param name="orderId">The orderId of the trade, must be unique</param>
+        /// <param name="createdTimestamp">The unix createdTimestamp in milliseconds</param>
         /// <param name="pair">The trading pair</param>
         /// <param name="quantity">The amount of non base currency</param>
         /// <param name="price">The price of the trade</param>
@@ -20,7 +21,10 @@ namespace SpreadShare.Models
         /// <param name="assets">The portfolio after the trade</param>
         /// <param name="value">The value of the portfolio before the trade</param>
         public DatabaseTrade(
-            long timestamp,
+            long orderId,
+            string orderType,
+            long createdTimestamp,
+            long filledTimeStamp,
             string pair,
             decimal quantity,
             decimal price,
@@ -28,7 +32,10 @@ namespace SpreadShare.Models
             string assets,
             decimal value)
         {
-            Timestamp = timestamp;
+            OrderId = orderId;
+            OrderType = orderType;
+            CreatedTimestamp = createdTimestamp;
+            FilledTimeStamp = filledTimeStamp;
             Pair = pair;
             Price = price;
             Quantity = quantity;
@@ -38,15 +45,49 @@ namespace SpreadShare.Models
         }
 
         /// <summary>
-        /// Gets or sets the ID of the trade
+        /// Initializes a new instance of the <see cref="DatabaseTrade"/> class.
         /// </summary>
-        [Key]
-        public long ID { get; set; }
+        /// <param name="order">The order containing the information</param>
+        /// <param name="assets">JSON string of the assets after the trade</param>
+        /// <param name="value">Total value of the portfolio after the trade</param>
+        public DatabaseTrade(
+            OrderUpdate order,
+            string assets,
+            decimal value)
+        {
+            Console.WriteLine(order.OrderId);
+            OrderId = order.OrderId;
+            OrderType = order.OrderType.ToString();
+            CreatedTimestamp = order.CreatedTimeStamp;
+            FilledTimeStamp = order.FilledTimeStamp;
+            Pair = order.Pair.ToString();
+            Price = order.AveragePrice;
+            Quantity = order.Amount;
+            Side = order.Side.ToString();
+            Assets = assets;
+            Value = value;
+        }
 
         /// <summary>
-        /// Gets or sets the timestamp of the trade
+        /// Gets or sets the ID of the row in the database
         /// </summary>
-        public long Timestamp { get; set; }
+        [Key]
+        public long OrderId { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the Type of order.
+        /// </summary>
+        public string OrderType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Timestamp at the creation of the trade
+        /// </summary>
+        public long CreatedTimestamp { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the Timestamp at the moment the trade was filled
+        /// </summary>
+        public long FilledTimeStamp { get; set; }
 
         /// <summary>
         /// Gets or sets the trading pair of the trade
