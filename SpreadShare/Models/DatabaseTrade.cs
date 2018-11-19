@@ -122,7 +122,7 @@ namespace SpreadShare.Models
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{ID}, {Timestamp}, {Pair}, {Quantity}, {Price}, {Side}, {Assets}, {Value}";
+            return $"{OrderId}, {FilledTimeStamp}, {Pair}, {Quantity}, {Price}, {Side}, {Assets}, {Value}";
         }
     }
 }
