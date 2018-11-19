@@ -189,7 +189,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 _database.Trades.Add(new DatabaseTrade(
                     order,
                     _comm.RemotePortfolio.ToJson(),
-                    0));
+                    _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
 
                 UpdateObservers(order);
             }
