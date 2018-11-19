@@ -21,7 +21,7 @@ namespace SpreadShare.Models.Database
         }
 
         /// <summary>
-        /// Gets or sets the unique idea of the event.
+        /// Gets or sets the unique ID of the event.
         /// </summary>
         [Key]
         public long Id { get; set; }

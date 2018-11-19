@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SpreadShare.Models;
 using SpreadShare.Models.Database;
 
 namespace SpreadShare.SupportServices
