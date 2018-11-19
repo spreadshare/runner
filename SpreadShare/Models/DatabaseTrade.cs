@@ -55,8 +55,6 @@ namespace SpreadShare.Models
             string assets,
             decimal value)
         {
-            Console.WriteLine(order.OrderId);
-            OrderId = order.OrderId;
             OrderType = order.OrderType.ToString();
             CreatedTimestamp = order.CreatedTimeStamp;
             FilledTimeStamp = order.FilledTimeStamp;
