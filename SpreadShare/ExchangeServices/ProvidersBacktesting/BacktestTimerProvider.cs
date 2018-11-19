@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.SupportServices;
@@ -43,6 +44,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             // Make sure all constructor processes are finished
             await Task.Delay(1000).ConfigureAwait(false);
+
+            // Clear the trades table
+            _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"Trades\"");
+            _database.SaveChanges();
 
             DateTimeOffset start = DateTimeOffset.Now;
             while (CurrentTime < _endDate)
