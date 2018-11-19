@@ -77,5 +77,11 @@ namespace SpreadShare.Models
         /// Gets or sets the value of the portfolio in ETH as it was before the trade
         /// </summary>
         public decimal Value { get; set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{ID}, {Timestamp}, {Pair}, {Quantity}, {Price}, {Side}, {Assets}, {Value}";
+        }
     }
 }

@@ -80,8 +80,7 @@ namespace SpreadShare.ExchangeServices
                     timerProvider = new BacktestTimerProvider(
                         _loggerFactory,
                         _databaseContext,
-                        DateTimeOffset.FromUnixTimeMilliseconds(_settingsService.BackTestSettings.BeginTimeStamp),
-                        DateTimeOffset.FromUnixTimeMilliseconds(_settingsService.BackTestSettings.EndTimeStamp));
+                        _settingsService.BackTestSettings);
 
                     dataProviderImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, (BacktestTimerProvider)timerProvider, _backtestCommunicationService);
                     tradingProviderImplementation = new BacktestTradingProvider(
