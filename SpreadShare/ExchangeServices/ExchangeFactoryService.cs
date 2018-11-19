@@ -108,6 +108,7 @@ namespace SpreadShare.ExchangeServices
             var tradingProvider = new TradingProvider(_loggerFactory, tradingProviderImplementation, dataProvider, allocationManager);
 
             // Edge case for the BacktestDataProvider
+            // TODO: This is shit
             if (dataProviderImplementation is BacktestDataProvider)
             {
                 ((BacktestDataProvider)dataProviderImplementation).ParentImplementation = dataProvider;
