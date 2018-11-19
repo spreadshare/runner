@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using SpreadShare.Models.Trading;
 
-namespace SpreadShare.Models
+namespace SpreadShare.Models.Database
 {
     /// <summary>
     /// Models a trade as found in the database

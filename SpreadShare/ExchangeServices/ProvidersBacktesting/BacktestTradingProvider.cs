@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
+using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
 using OrderSide = SpreadShare.Models.OrderSide;

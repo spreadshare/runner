@@ -45,8 +45,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Make sure all constructor processes are finished
             await Task.Delay(1000).ConfigureAwait(false);
 
-            // Clear the trades table
+            // Clear the trades and state switch event table
             _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"Trades\"");
+            _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"StateSwitchEvents\"");
             _database.SaveChanges();
 
             DateTimeOffset start = DateTimeOffset.Now;

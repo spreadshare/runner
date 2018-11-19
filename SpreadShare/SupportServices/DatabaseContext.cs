@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpreadShare.Models;
+using SpreadShare.Models.Database;
 
 namespace SpreadShare.SupportServices
 {
@@ -28,5 +29,10 @@ namespace SpreadShare.SupportServices
         /// Gets or sets the trades.
         /// </summary>
         public DbSet<DatabaseTrade> Trades { get; set; }
+
+        /// <summary>
+        /// Gets or sets the state switch events
+        /// </summary>
+        public DbSet<StateSwitchEvent> StateSwitchEvents { get; set; }
     }
 }
