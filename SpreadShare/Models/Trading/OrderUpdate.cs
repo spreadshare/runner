@@ -174,7 +174,7 @@
         /// Gets the total setAmount of the order
         /// </summary>
         public decimal SetAmount { get; }
-        
+
         /// <summary>
         /// Gets or sets the total filledAmount of the order
         /// </summary>

@@ -110,7 +110,7 @@ namespace SpreadShare.Models.Database
         /// Gets or sets the setQuantity of the trade
         /// </summary>
         public decimal SetQuantity { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the filledQuantity of the trade
         /// </summary>

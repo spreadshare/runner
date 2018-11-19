@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SpreadShare.SupportServices;
 
+#pragma warning disable
+
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
@@ -93,3 +95,5 @@ namespace SpreadShare.Migrations
         }
     }
 }
+
+#pragma warning restore

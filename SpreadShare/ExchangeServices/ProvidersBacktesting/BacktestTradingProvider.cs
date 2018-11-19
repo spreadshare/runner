@@ -142,12 +142,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             var order = GetOrderInfo(pair, orderId).Data;
             order.Status = OrderUpdate.OrderStatus.Cancelled;
-            
+
             if (_watchList.ContainsKey(orderId))
             {
                 _watchList.Remove(orderId);
             }
-            
+
             // Update the remote portfolio
             TradeExecution exec;
             if (order.Side == OrderSide.Buy)
@@ -162,11 +162,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     new Balance(order.Pair.Left, 0, order.SetAmount),
                     new Balance(order.Pair.Left, order.SetAmount, 0));
             }
+
             _logger.LogInformation($"Updating remote with exec {JsonConvert.SerializeObject(exec)}");
             _comm.RemotePortfolio.UpdateAllocation(exec);
-            
+
             // Add cancelled order to the database
-            _database.Trades.Add(new DatabaseTrade(order,
+            _database.Trades.Add(new DatabaseTrade(
+                order,
                 _comm.RemotePortfolio.ToJson(),
                 _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
 
@@ -223,7 +225,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 {
                     exec = new TradeExecution(
                         new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                        new Balance(order.Pair.Right, order.SetAmount* order.AveragePrice, 0));
+                        new Balance(order.Pair.Right, order.SetAmount * order.AveragePrice, 0));
                 }
 
                 _comm.RemotePortfolio.UpdateAllocation(exec);

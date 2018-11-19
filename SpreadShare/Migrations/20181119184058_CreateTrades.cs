@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
+#pragma warning disable
+
 namespace SpreadShare.Migrations
 {
     public partial class CreateTrades : Migration
@@ -38,3 +40,5 @@ namespace SpreadShare.Migrations
         }
     }
 }
+
+#pragma warning restore

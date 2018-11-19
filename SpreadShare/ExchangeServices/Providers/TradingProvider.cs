@@ -169,6 +169,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     new Balance(order.Pair.Left, 0, order.SetAmount),
                     new Balance(order.Pair.Left, order.SetAmount, 0));
             }
+
             var query = _implementation.CancelOrder(pair, orderId);
             if (query.Success)
             {
@@ -178,6 +179,12 @@ namespace SpreadShare.ExchangeServices.Providers
             return query;
         }
 
+        /// <summary>
+        /// Get the info of an order
+        /// </summary>
+        /// <param name="pair">The TradingPair to consider</param>
+        /// <param name="orderId">The order id related</param>
+        /// <returns>OrderUpdate object containing the state of the order</returns>
         public ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
         {
             return _implementation.GetOrderInfo(pair, orderId);

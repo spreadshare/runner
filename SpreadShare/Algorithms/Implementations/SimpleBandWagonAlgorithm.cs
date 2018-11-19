@@ -40,28 +40,19 @@ namespace SpreadShare.Algorithms.Implementations
 
         private class BeginState : State<SimpleBandWagonAlgorithmSettings>
         {
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-            }
-
             public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
             {
                 return new EntryState();
+            }
+
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
             }
         }
 
         private class EntryState : State<SimpleBandWagonAlgorithmSettings>
         {
             private OrderUpdate _order;
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-               // decimal price = data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH")).Data;
-                decimal price = data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH")).Data;
-                Logger.LogInformation($"Before: {trading.GetPortfolio().ToJson()}");
-                _order = trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy, 50, price*0.99M).Data;
-                Logger.LogInformation($"After: {trading.GetPortfolio().ToJson()}");
-                SetTimer(TimeSpan.FromHours(10));
-            }
 
             public override State<SimpleBandWagonAlgorithmSettings> OnOrderUpdate(OrderUpdate order)
             {
@@ -70,6 +61,7 @@ namespace SpreadShare.Algorithms.Implementations
                     Logger.LogInformation($"Order {order.OrderId} confirmed");
                     return new SellState(order);
                 }
+
                 return new NothingState<SimpleBandWagonAlgorithmSettings>();
             }
 
@@ -77,6 +69,16 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 Logger.LogInformation("Cancelling order!");
                 return new SellState(_order);
+            }
+
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
+               // decimal price = data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH")).Data;
+                decimal price = data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH")).Data;
+                Logger.LogInformation($"Before: {trading.GetPortfolio().ToJson()}");
+                _order = trading.PlaceLimitOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy, 50, price * 0.99M).Data;
+                Logger.LogInformation($"After: {trading.GetPortfolio().ToJson()}");
+                SetTimer(TimeSpan.FromHours(10));
             }
         }
 
@@ -89,6 +91,11 @@ namespace SpreadShare.Algorithms.Implementations
                 _buy = order;
             }
 
+            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
+            {
+                return new EntryState();
+            }
+
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 if (_buy.Status != OrderUpdate.OrderStatus.Filled)
@@ -99,12 +106,8 @@ namespace SpreadShare.Algorithms.Implementations
                 {
                     trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell);
                 }
-                SetTimer(TimeSpan.FromDays(2));
-            }
 
-            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
-            {
-                return new EntryState();
+                SetTimer(TimeSpan.FromDays(2));
             }
         }
 

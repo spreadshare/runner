@@ -63,7 +63,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">the trading pair</param>
         /// <param name="orderId">the id of the order</param>
-        /// <returns></returns>
+        /// <returns>OrderUpdate containing the state of an order</returns>
         public abstract ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId);
     }
 }
