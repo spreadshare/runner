@@ -16,8 +16,6 @@ namespace SpreadShare.ExchangeServices.Providers
         private readonly AbstractTradingProvider _implementation;
         private readonly WeakAllocationManager _allocationManager;
         private readonly DataProvider _dataProvider;
-        private readonly Type _algorithm;
-        private readonly Exchange _exchange;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TradingProvider"/> class.
@@ -26,22 +24,16 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="implementation">The implementationt to delegate calls to</param>
         /// <param name="dataProvider">The data provider to manager certain orders with</param>
         /// <param name="allocationManager">The allocation manager to verify orders</param>
-        /// <param name="algorithm">The type of the algorithm</param>
-        /// <param name="exchange">The exchange to provide in question</param>
         public TradingProvider(
             ILoggerFactory loggerFactory,
             AbstractTradingProvider implementation,
             DataProvider dataProvider,
-            WeakAllocationManager allocationManager,
-            Type algorithm,
-            Exchange exchange)
+            WeakAllocationManager allocationManager)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _implementation = implementation;
             _allocationManager = allocationManager;
             _dataProvider = dataProvider;
-            _algorithm = algorithm;
-            _exchange = exchange;
             _implementation.Subscribe(new ConfigurableObserver<OrderUpdate>(
                 UpdateAllocation,
                 () => { },
@@ -105,7 +97,12 @@ namespace SpreadShare.ExchangeServices.Providers
                 return exec;
             });
 
-            return query;
+            if (tradeSuccess)
+            {
+                return query;
+            }
+
+            return new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused by AllocationManager");
         }
 
         /// <summary>
