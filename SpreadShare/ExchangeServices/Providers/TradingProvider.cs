@@ -24,8 +24,6 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="implementation">The implementationt to delegate calls to</param>
         /// <param name="dataProvider">The data provider to manager certain orders with</param>
         /// <param name="allocationManager">The allocation manager to verify orders</param>
-        /// <param name="algorithm">The type of the algorithm</param>
-        /// <param name="exchange">The exchange to provide in question</param>
         public TradingProvider(
             ILoggerFactory loggerFactory,
             AbstractTradingProvider implementation,
