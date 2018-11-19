@@ -24,6 +24,9 @@ namespace SpreadShare.SupportServices
         /// </summary>
         public DbSet<BacktestingCandle> Candles { get; set; }
 
+        /// <summary>
+        /// Gets or sets the trades.
+        /// </summary>
         public DbSet<DatabaseTrade> Trades { get; set; }
     }
 }

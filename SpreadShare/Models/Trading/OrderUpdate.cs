@@ -118,7 +118,6 @@
             /// A limit maker order
             /// </summary>
             LimitMaker
-
         }
 
         /// <summary>
@@ -137,7 +136,7 @@
         public long CreatedTimeStamp { get; }
 
         /// <summary>
-        /// Gets the timestamp at which the order was filled
+        /// Gets or sets the timestamp at which the order was filled
         /// </summary>
         public long FilledTimeStamp { get; set; }
 

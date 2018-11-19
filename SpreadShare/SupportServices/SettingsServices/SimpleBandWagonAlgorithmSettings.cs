@@ -12,15 +12,13 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// <inheritdoc />
         public override Exchange Exchange { get; set; }
 
+        /// <inheritdoc />
+        public override Currency BaseCurrency { get; set; }
+
         /// <summary>
         /// Gets or sets the trading pairs for this algorithm.
         /// </summary>
         public override List<TradingPair> ActiveTradingPairs { get; set; }
-
-        /// <summary>
-        /// Gets or sets the base currency to trade in
-        /// </summary>
-        public Currency BaseCurrency { get; set; }
 
         /// <summary>
         /// Gets or sets the minimal value before reverting to the base currency

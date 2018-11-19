@@ -55,7 +55,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// Output appsettings.json (without credentials) to output folder.
         /// </summary>
         /// <param name="filepath">Filepath to store configuration at</param>
-        private void OutputConfiguration(string filepath)
+        private static void OutputConfiguration(string filepath)
         {
             string configuration = ReadAllText("appsettings.json");
             configuration = Regex.Replace(configuration, ".*\"Key\":.*", "            \"Key\": \"api_key\",");

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
+using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
@@ -95,9 +96,22 @@ namespace SpreadShare.ExchangeServices
                     throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);
             }
 
+            AlgorithmSettings algorithmSettings = null;
+            if (algorithm == typeof(SimpleBandWagonAlgorithm))
+            {
+                algorithmSettings = _settingsService.SimpleBandWagonAlgorithmSettings;
+            }
+
             var allocationManager = _allocationManager.GetWeakAllocationManager(algorithm, exchange);
-            var dataProvider = new DataProvider(dataProviderImplementation);
+            
+            var dataProvider = new DataProvider(dataProviderImplementation, algorithmSettings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingProviderImplementation, dataProvider, allocationManager);
+
+            // Edge case for the BacktestDataProvider
+            if (dataProviderImplementation is BacktestDataProvider)
+            {
+                ((BacktestDataProvider)dataProviderImplementation).ParentImplementation = dataProvider;
+            }
 
             return new ExchangeProvidersContainer(
                 _loggerFactory,

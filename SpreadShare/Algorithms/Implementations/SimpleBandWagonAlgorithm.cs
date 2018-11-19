@@ -39,21 +39,21 @@ namespace SpreadShare.Algorithms.Implementations
         /// </summary>
        private class EntryState : State<SimpleBandWagonAlgorithmSettings>
         {
-           protected override void Run(TradingProvider trading, DataProvider data)
-           {
-           }
+            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+            {
+                var query = data.GetTopPerformance(AlgorithmSettings.ActiveTradingPairs, AlgorithmSettings.CheckTime).Data;
+                if (query.Item2 < 0.98M)
+                {
+                    Logger.LogCritical("Panic detected, let's go");
+                    return new BuyState();
+                }
 
-           public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
-           {
-               var query = data.GetTopPerformance(AlgorithmSettings.ActiveTradingPairs, AlgorithmSettings.CheckTime).Data;
-               if (query.Item2 < 0.98M)
-               {
-                   Logger.LogCritical("Panic detected, let's go");
-                   return new BuyState();
-               }
+                return new NothingState<SimpleBandWagonAlgorithmSettings>();
+            }
 
-               return new NothingState<SimpleBandWagonAlgorithmSettings>();
-           }
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
+            }
         }
 
         /// <summary>
@@ -61,49 +61,49 @@ namespace SpreadShare.Algorithms.Implementations
         /// </summary>
         private class BuyState : State<SimpleBandWagonAlgorithmSettings>
         {
-           private OrderUpdate _buy;
+            private OrderUpdate _buy;
 
-           public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
-           {
-               Logger.LogCritical("Hold time has exceeded, selling.");
-               return new SellState();
-           }
+            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
+            {
+                Logger.LogCritical("Hold time has exceeded, selling.");
+                return new SellState();
+            }
 
-           public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
-           {
-               decimal price = data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH")).Data;
-               if (price > _buy.SetPrice * 1.005M)
-               {
-                   Logger.LogInformation("Price has increased, selling");
-                   return new SellState();
-               }
+            public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
+            {
+                decimal price = data.GetCurrentPriceLastTrade(TradingPair.Parse("EOSETH")).Data;
+                if (price > _buy.SetPrice * 1.005M)
+                {
+                    Logger.LogInformation("Price has increased, selling");
+                    return new SellState();
+                }
 
-               return new NothingState<SimpleBandWagonAlgorithmSettings>();
-           }
+                return new NothingState<SimpleBandWagonAlgorithmSettings>();
+            }
 
-           /// <inheritdoc />
-           protected override void Run(TradingProvider trading, DataProvider data)
-           {
+            /// <inheritdoc />
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
                Logger.LogInformation($"Portfolio is {trading.GetPortfolio().ToJson()}");
                _buy = trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Buy).Data;
                Logger.LogInformation($"Portfolio is now {trading.GetPortfolio().ToJson()}");
                SetTimer(TimeSpan.FromHours(AlgorithmSettings.HoldTime));
-           }
+            }
         }
 
         private class SellState : State<SimpleBandWagonAlgorithmSettings>
         {
-           protected override void Run(TradingProvider trading, DataProvider data)
-           {
+            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
+            {
+                return new EntryState();
+            }
+
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
                Logger.LogInformation("Selling it all, hybernating");
                trading.PlaceFullMarketOrder(TradingPair.Parse("EOSETH"), OrderSide.Sell);
                SetTimer(TimeSpan.FromHours(2));
-           }
-
-           public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
-           {
-               return new EntryState();
-           }
+            }
         }
 
         /*

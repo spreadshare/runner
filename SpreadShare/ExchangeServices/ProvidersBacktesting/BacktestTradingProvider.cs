@@ -22,6 +22,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private readonly BacktestDataProvider _dataProvider;
         private readonly BacktestCommunicationService _comm;
         private readonly DatabaseContext _database;
+
         private long _mockOrderCounter;
 
         /// <summary>
@@ -79,11 +80,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 priceEstimate,
                 side,
                 pair,
-                amount);
+                amount)
+            {
+                AveragePrice = priceEstimate,
+                FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds()
+            };
 
             // Write the trade to the database
             _database.Trades.Add(new DatabaseTrade(
-                orderUpdate, _comm.RemotePortfolio.ToJson(), 0));
+                orderUpdate,
+                _comm.RemotePortfolio.ToJson(),
+                _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
 
             return new ResponseObject<OrderUpdate>(
                 ResponseCode.Success,

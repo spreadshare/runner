@@ -86,6 +86,26 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
+        /// Parse given two currencies
+        /// </summary>
+        /// <param name="left">left currency</param>
+        /// <param name="right">right currency</param>
+        /// <returns>Parsed trading pair</returns>
+        public static TradingPair Parse(Currency left, Currency right)
+        {
+            Guard.Argument(left).NotNull();
+            Guard.Argument(right).NotNull();
+            string str = $"{left}{right}";
+
+            if (Table.ContainsKey(str))
+            {
+                return Table[str];
+            }
+
+            throw new KeyNotFoundException($"{str} not found in parse table");
+        }
+
+        /// <summary>
         /// Round unrounded amount to the tradable amount conform to TradingPair's decimals
         /// </summary>
         /// <param name="amount">Unrounded amount</param>

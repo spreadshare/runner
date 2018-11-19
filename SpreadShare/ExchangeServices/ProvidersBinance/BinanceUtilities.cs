@@ -74,6 +74,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             }
         }
 
+        /// <summary>
+        /// Convert Binance.Net.OrderTypes to internal enum
+        /// </summary>
+        /// <param name="type">Binance.Net.OrderType</param>
+        /// <returns>parsed for internal usage</returns>
         public static OrderUpdate.OrderTypes ToInternal(Binance.Net.Objects.OrderType type)
         {
             switch (type)

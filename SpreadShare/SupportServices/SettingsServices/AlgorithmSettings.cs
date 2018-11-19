@@ -15,6 +15,11 @@ namespace SpreadShare.SupportServices.SettingsServices
         public abstract Exchange Exchange { get; set; }
 
         /// <summary>
+        /// Gets or sets the base currency the algorithm uses.
+        /// </summary>
+        public abstract Currency BaseCurrency { get; set; }
+
+        /// <summary>
         /// Gets or sets the list of active trading pairs
         /// </summary>
         public abstract List<TradingPair> ActiveTradingPairs { get; set; }

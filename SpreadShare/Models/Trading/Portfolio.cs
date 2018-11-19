@@ -139,7 +139,7 @@ namespace SpreadShare.Models.Trading
         public string ToJson()
         {
             return JsonConvert.SerializeObject(_dict.Where(
-                pair => pair.Value.Free + pair.Value.Locked > 0.0M));
+                pair => pair.Value.Free + pair.Value.Locked > 0.0M).ToDictionary(x => x.Key, x => x.Value).Values);
         }
     }
 }

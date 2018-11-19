@@ -13,7 +13,9 @@ namespace SpreadShare.Models
         /// Initializes a new instance of the <see cref="DatabaseTrade"/> class.
         /// </summary>
         /// <param name="orderId">The orderId of the trade, must be unique</param>
+        /// <param name="orderType">Kind of order</param>
         /// <param name="createdTimestamp">The unix createdTimestamp in milliseconds</param>
+        /// <param name="filledTimeStamp">Time at which the order was filled</param>
         /// <param name="pair">The trading pair</param>
         /// <param name="quantity">The amount of non base currency</param>
         /// <param name="price">The price of the trade</param>
