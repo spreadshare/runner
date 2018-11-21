@@ -42,7 +42,7 @@ namespace SpreadShare
         /// <param name="services">Collection of services</param>
         public static void ConfigureBusinessServices(IServiceCollection services)
         {
-            // Exchange Factory dappsettingsependency
+            // Exchange Factory dependency
             services.AddSingleton<ExchangeFactoryService, ExchangeFactoryService>();
 
             // Binance communication dependency
