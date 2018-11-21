@@ -23,10 +23,10 @@ namespace SpreadShare
         /// Initializes a new instance of the <see cref="Startup"/> class.
         /// Sets configuration
         /// </summary>
-        public Startup()
+        public Startup(string filepath)
         {
             Configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile(filepath)
                 .Build();
         }
 
@@ -34,6 +34,8 @@ namespace SpreadShare
         /// Gets the configuration of the application
         /// </summary>
         public IConfiguration Configuration { get; }
+        
+        public string ConfigurationPath { get; set; }
 
         /// <summary>
         /// Configure business logic services such as fetching exchange data
@@ -41,7 +43,7 @@ namespace SpreadShare
         /// <param name="services">Collection of services</param>
         public static void ConfigureBusinessServices(IServiceCollection services)
         {
-            // Exchange Factory dependency
+            // Exchange Factory dappsettingsependency
             services.AddSingleton<ExchangeFactoryService, ExchangeFactoryService>();
 
             // Binance communication dependency

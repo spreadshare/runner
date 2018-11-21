@@ -33,7 +33,8 @@ namespace SpreadShare
             IServiceCollection services = new ServiceCollection();
 
             // Configure services - Provide depencies for services
-            Startup startup = new Startup();
+            Startup startup = new Startup(_commandLineArgs.ConfigurationPath);
+            startup.ConfigurationPath = _commandLineArgs.ConfigurationPath;
             startup.ConfigureServices(services);
             Startup.ConfigureBusinessServices(services);
 

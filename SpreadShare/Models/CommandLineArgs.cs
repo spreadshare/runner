@@ -12,5 +12,8 @@ namespace SpreadShare.Models
         /// </summary>
         [Option("trading", Default = false, HelpText = "Needs to be enabled to actually perform trades.")]
         public bool Trading { get; set; }
+        
+        [Option("configpath", Default = "appsettings.json", HelpText = "The path to the configuration.json file")]
+        public string ConfigurationPath { get; set; }
     }
 }
