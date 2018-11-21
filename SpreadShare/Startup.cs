@@ -23,6 +23,7 @@ namespace SpreadShare
         /// Initializes a new instance of the <see cref="Startup"/> class.
         /// Sets configuration
         /// </summary>
+        /// <param name="filepath">location of the configuration file</param>
         public Startup(string filepath)
         {
             Configuration = new ConfigurationBuilder()
@@ -34,8 +35,6 @@ namespace SpreadShare
         /// Gets the configuration of the application
         /// </summary>
         public IConfiguration Configuration { get; }
-        
-        public string ConfigurationPath { get; set; }
 
         /// <summary>
         /// Configure business logic services such as fetching exchange data
