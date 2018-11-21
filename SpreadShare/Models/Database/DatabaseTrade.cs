@@ -6,7 +6,7 @@ namespace SpreadShare.Models.Database
     /// <summary>
     /// Models a trade as found in the database
     /// </summary>
-    internal class DatabaseTrade
+    internal class DatabaseTrade : ICsvSerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseTrade"/> class.
@@ -140,7 +140,7 @@ namespace SpreadShare.Models.Database
         /// Get a header matching the format of ToString()
         /// </summary>
         /// <returns>string header</returns>
-        public static string GetCsvHeader()
+        public static string GetStaticCsvHeader()
         {
             return $"{nameof(OrderId)}, " +
                    $"{nameof(OrderType)}, " +
@@ -156,7 +156,7 @@ namespace SpreadShare.Models.Database
         }
 
         /// <inheritdoc />
-        public override string ToString()
+        string ICsvSerializable.GetCsvRepresentation()
         {
             return $"{OrderId}, " +
                    $"{OrderType}, " +
@@ -169,6 +169,12 @@ namespace SpreadShare.Models.Database
                    $"{Price}, " +
                    $"{Value}, " +
                    $"{Assets}";
+        }
+
+        /// <inheritdoc />
+        string ICsvSerializable.GetCsvHeader()
+        {
+            return GetStaticCsvHeader();
         }
     }
 }
