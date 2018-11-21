@@ -153,14 +153,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             if (order.Side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(order.Pair.Right, 0, order.SetAmount * order.SetPrice),
-                    new Balance(order.Pair.Right, order.SetAmount * order.SetPrice, 0));
+                    new Balance(order.Pair.Right, 0, order.SetQuantity * order.SetPrice),
+                    new Balance(order.Pair.Right, order.SetQuantity * order.SetPrice, 0));
             }
             else
             {
                 exec = new TradeExecution(
-                    new Balance(order.Pair.Left, 0, order.SetAmount),
-                    new Balance(order.Pair.Left, order.SetAmount, 0));
+                    new Balance(order.Pair.Left, 0, order.SetQuantity),
+                    new Balance(order.Pair.Left, order.SetQuantity, 0));
             }
 
             _logger.LogInformation($"Updating remote with exec {JsonConvert.SerializeObject(exec)}");
@@ -208,8 +208,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
                 // Set the actual price for the order
                 order.AveragePrice = price;
-                order.FilledAmount = order.SetAmount;
-                order.LastFillIncrement = order.SetAmount;
+                order.FilledQuantity = order.SetQuantity;
+                order.LastFillIncrement = order.SetQuantity;
                 order.LastFillPrice = price;
                 order.FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
 
@@ -218,14 +218,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 if (order.Side == OrderSide.Buy)
                 {
                     exec = new TradeExecution(
-                        new Balance(order.Pair.Right, 0, order.SetAmount * order.SetPrice),
+                        new Balance(order.Pair.Right, 0, order.SetQuantity * order.SetPrice),
                         new Balance(order.Pair.Left, order.LastFillIncrement, 0));
                 }
                 else
                 {
                     exec = new TradeExecution(
                         new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                        new Balance(order.Pair.Right, order.SetAmount * order.AveragePrice, 0));
+                        new Balance(order.Pair.Right, order.SetQuantity * order.AveragePrice, 0));
                 }
 
                 _comm.RemotePortfolio.UpdateAllocation(exec);

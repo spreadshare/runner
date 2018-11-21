@@ -68,8 +68,8 @@ namespace SpreadShare.Models.Database
             FilledTimeStamp = order.FilledTimeStamp;
             Pair = order.Pair.ToString();
             Price = order.AveragePrice;
-            SetQuantity = order.SetAmount;
-            FilledQuantity = order.FilledAmount;
+            SetQuantity = order.SetQuantity;
+            FilledQuantity = order.FilledQuantity;
             Side = order.Side.ToString();
             Assets = assets;
             Value = value;

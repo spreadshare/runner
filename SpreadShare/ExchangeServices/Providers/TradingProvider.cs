@@ -84,14 +84,14 @@ namespace SpreadShare.ExchangeServices.Providers
                 {
                     exec = new TradeExecution(
                         new Balance(pair.Right, proposal.From.Free, 0.0M),
-                        new Balance(pair.Left, query.Data.SetAmount, 0.0M));
+                        new Balance(pair.Left, query.Data.SetQuantity, 0.0M));
                 }
                 else
                 {
                     decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
                     exec = new TradeExecution(
                         new Balance(pair.Left, proposal.From.Free, 0.0M),
-                        new Balance(pair.Right, query.Data.SetAmount * priceEstimate, 0.0M));
+                        new Balance(pair.Right, query.Data.SetQuantity * priceEstimate, 0.0M));
                 }
 
                 return exec;
@@ -160,14 +160,14 @@ namespace SpreadShare.ExchangeServices.Providers
             if (order.Side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(order.Pair.Right, 0, order.SetAmount * order.SetPrice),
-                    new Balance(order.Pair.Right, order.SetAmount * order.SetPrice, 0));
+                    new Balance(order.Pair.Right, 0, order.SetQuantity * order.SetPrice),
+                    new Balance(order.Pair.Right, order.SetQuantity * order.SetPrice, 0));
             }
             else
             {
                 exec = new TradeExecution(
-                    new Balance(order.Pair.Left, 0, order.SetAmount),
-                    new Balance(order.Pair.Left, order.SetAmount, 0));
+                    new Balance(order.Pair.Left, 0, order.SetQuantity),
+                    new Balance(order.Pair.Left, order.SetQuantity, 0));
             }
 
             var query = _implementation.CancelOrder(pair, orderId);
@@ -225,14 +225,14 @@ namespace SpreadShare.ExchangeServices.Providers
             if (order.Side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(order.Pair.Right, 0, order.SetAmount * order.SetPrice),
+                    new Balance(order.Pair.Right, 0, order.SetQuantity * order.SetPrice),
                     new Balance(order.Pair.Left, order.LastFillIncrement, 0));
             }
             else
             {
                 exec = new TradeExecution(
                     new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                    new Balance(order.Pair.Right, order.SetAmount * order.AveragePrice, 0));
+                    new Balance(order.Pair.Right, order.SetQuantity * order.AveragePrice, 0));
             }
 
             _allocationManager.UpdateAllocation(exec);

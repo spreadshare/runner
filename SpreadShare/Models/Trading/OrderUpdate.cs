@@ -13,7 +13,7 @@
         /// <param name="setPrice">Price at which the order was set</param>
         /// <param name="side">Side of the order</param>
         /// <param name="pair">The pair of order</param>
-        /// <param name="setAmount">The quantity of the order</param>
+        /// <param name="setQuantity">The quantity of the order</param>
         /// <param name="orderId">The unique id of the order</param>
         public OrderUpdate(
             long orderId,
@@ -22,7 +22,7 @@
             decimal setPrice,
             OrderSide side,
             TradingPair pair,
-            decimal setAmount)
+            decimal setQuantity)
         {
             OrderId = orderId;
             OrderType = orderType;
@@ -31,9 +31,9 @@
             Side = side;
             Status = OrderStatus.New;
             Pair = pair;
-            SetAmount = setAmount;
+            SetQuantity = setQuantity;
             SetPrice = setPrice;
-            FilledAmount = 0;
+            FilledQuantity = 0;
             LastFillIncrement = 0;
             LastFillPrice = 0;
         }
@@ -171,14 +171,14 @@
         public TradingPair Pair { get; }
 
         /// <summary>
-        /// Gets the total setAmount of the order
+        /// Gets the total setQuantity of the order
         /// </summary>
-        public decimal SetAmount { get; }
+        public decimal SetQuantity { get; }
 
         /// <summary>
         /// Gets or sets the total filledAmount of the order
         /// </summary>
-        public decimal FilledAmount { get; set; }
+        public decimal FilledQuantity { get; set; }
 
         /// <summary>
         /// Gets or sets the last filled portion of the order.
