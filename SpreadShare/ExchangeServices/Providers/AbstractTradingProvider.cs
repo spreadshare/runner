@@ -19,7 +19,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// A list of orders pending events.
         /// </summary>
-        protected Dictionary<long, OrderUpdate> _watchList;
+        protected Dictionary<long, OrderUpdate> WatchList;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractTradingProvider"/> class.
@@ -28,27 +28,27 @@ namespace SpreadShare.ExchangeServices.Providers
         protected AbstractTradingProvider(ILoggerFactory loggerFactory)
         {
             Logger = loggerFactory.CreateLogger(GetType());
-            _watchList = new Dictionary<long, OrderUpdate>();
+            WatchList = new Dictionary<long, OrderUpdate>();
         }
 
         /// <summary>
-        /// Places market order with the full amount of given pair
+        /// Places market order with the full quantity of given pair
         /// </summary>
         /// <param name="pair">trading pair to trade with</param>
         /// <param name="side">Whether to buy or sell</param>
-        /// <param name="amount">The amount to buy or sell</param>
+        /// <param name="quantity">The quantity to buy or sell</param>
         /// <returns>A response object indicating the status of the market order</returns>
-        public abstract ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount);
+        public abstract ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal quantity);
 
         /// <summary>
         /// Place a limit order at the given price.
         /// </summary>
         /// <param name="pair">trading pair</param>
         /// <param name="side">buy or sell order</param>
-        /// <param name="amount">amount of non base currency</param>
+        /// <param name="quantity">quantity of non base currency</param>
         /// <param name="price">price to set the order at</param>
         /// <returns>A response object indicating the status of the limit order    </returns>
-        public abstract ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price);
+        public abstract ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price);
 
         /// <summary>
         /// Cancels order

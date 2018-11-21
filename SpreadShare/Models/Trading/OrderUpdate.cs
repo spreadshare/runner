@@ -176,7 +176,7 @@
         public decimal SetQuantity { get; }
 
         /// <summary>
-        /// Gets or sets the total filledAmount of the order
+        /// Gets or sets the total filledQuantity of the order
         /// </summary>
         public decimal FilledQuantity { get; set; }
 

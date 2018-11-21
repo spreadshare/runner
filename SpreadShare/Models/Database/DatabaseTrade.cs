@@ -17,8 +17,8 @@ namespace SpreadShare.Models.Database
         /// <param name="createdTimestamp">The unix createdTimestamp in milliseconds</param>
         /// <param name="filledTimeStamp">Time at which the order was filled</param>
         /// <param name="pair">The trading pair</param>
-        /// <param name="setQuantity">The amount of non base currency for which the order was set</param>
-        /// <param name="filledQuantity">The amount of non base currency that was filled</param>
+        /// <param name="setQuantity">The quantity of non base currency for which the order was set</param>
+        /// <param name="filledQuantity">The quantity of non base currency that was filled</param>
         /// <param name="price">The price of the trade</param>
         /// <param name="side">Buy or sell order</param>
         /// <param name="assets">The portfolio after the trade</param>

@@ -106,10 +106,10 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Round unrounded amount to the tradable amount conform to TradingPair's decimals
+        /// Round unrounded quantity to the tradable quantity conform to TradingPair's decimals
         /// </summary>
         /// <param name="quantity">Unrounded quantity</param>
-        /// <returns>Rounded amount</returns>
+        /// <returns>Rounded quantity</returns>
         public decimal RoundToTradable(decimal quantity)
         {
             long lotSize = IntPow(10, (uint)Decimals);

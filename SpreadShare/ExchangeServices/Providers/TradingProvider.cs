@@ -51,7 +51,7 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Places market order with the full amount of given pair
+        /// Places market order with the full quantity of given pair
         /// </summary>
         /// <param name="pair">trading pair to trade with</param>
         /// <param name="side">Whether to buy or sell</param>
@@ -59,18 +59,18 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side)
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            Balance amount = _allocationManager.GetAvailableFunds(currency);
-            var proposal = new TradeProposal(new Balance(currency, amount.Free, 0.0M));
+            Balance balance = _allocationManager.GetAvailableFunds(currency);
+            var proposal = new TradeProposal(new Balance(currency, balance.Free, 0.0M));
 
             ResponseObject<OrderUpdate> query = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
                 query = RetryMethod(() =>
                 {
-                    decimal tradeAmount = side == OrderSide.Buy
-                        ? GetBuyAmountEstimate(pair, proposal.From.Free)
+                    decimal tradeQuantity = side == OrderSide.Buy
+                        ? GetBuyQuantityEstimate(pair, proposal.From.Free)
                         : proposal.From.Free;
-                    return _implementation.PlaceFullMarketOrder(pair, side, tradeAmount);
+                    return _implementation.PlaceFullMarketOrder(pair, side, tradeQuantity);
                 });
 
                 if (!query.Success)
@@ -78,7 +78,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     return null;
                 }
 
-                // Report the trade with the actual amount as communicated by the exchange.
+                // Report the trade with the actual quantity as communicated by the exchange.
                 TradeExecution exec;
                 if (side == OrderSide.Buy)
                 {
@@ -110,18 +110,18 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">Trading Pair</param>
         /// <param name="side">Buy or sell</param>
-        /// <param name="amount">The amount of non base currency</param>
+        /// <param name="quantity">The quantity of non base currency</param>
         /// <param name="price">The price to place the order at</param>
         /// <returns>A Response object indicating the status of the order</returns>
-        public ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
+        public ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price)
         {
             var currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            decimal proposedAmount = side == OrderSide.Buy ? amount * price : amount;
-            var proposal = new TradeProposal(new Balance(currency, proposedAmount, 0));
+            decimal proposedQuantity = side == OrderSide.Buy ? quantity * price : quantity;
+            var proposal = new TradeProposal(new Balance(currency, proposedQuantity, 0));
             ResponseObject<OrderUpdate> query = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
             {
-                query = RetryMethod(() => _implementation.PlaceLimitOrder(pair, side, amount, price));
+                query = RetryMethod(() => _implementation.PlaceLimitOrder(pair, side, quantity, price));
 
                 if (!query.Success)
                 {
@@ -132,14 +132,14 @@ namespace SpreadShare.ExchangeServices.Providers
                 if (side == OrderSide.Buy)
                 {
                     exec = new TradeExecution(
-                        new Balance(currency, amount * price, 0),
-                        new Balance(currency, 0, amount * price));
+                        new Balance(currency, quantity * price, 0),
+                        new Balance(currency, 0, quantity * price));
                 }
                 else
                 {
                     exec = new TradeExecution(
-                        new Balance(currency, amount, 0),
-                        new Balance(currency, 0, amount));
+                        new Balance(currency, quantity, 0),
+                        new Balance(currency, 0, quantity));
                 }
 
                 return exec;
@@ -190,7 +190,7 @@ namespace SpreadShare.ExchangeServices.Providers
             return _implementation.GetOrderInfo(pair, orderId);
         }
 
-        private decimal GetBuyAmountEstimate(TradingPair pair, decimal baseAmount)
+        private decimal GetBuyQuantityEstimate(TradingPair pair, decimal baseQuantity)
         {
             var query = _dataProvider.GetCurrentPriceTopAsk(pair);
             if (!query.Success)
@@ -199,7 +199,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 return 0.0M;
             }
 
-            return baseAmount / query.Data;
+            return baseQuantity / query.Data;
         }
 
         private ResponseObject<T> RetryMethod<T>(Func<ResponseObject<T>> method)

@@ -51,10 +51,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount)
+        public override ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal quantity)
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            var proposal = new TradeProposal(new Balance(currency, amount, 0.0M));
+            var proposal = new TradeProposal(new Balance(currency, quantity, 0.0M));
 
             // Keep the remote updated by mocking a trade execution and letting the communications know.
             TradeExecution exec = null;
@@ -63,12 +63,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             {
                 exec = new TradeExecution(
                     new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M),
-                    new Balance(pair.Left, amount, 0.0M));
+                    new Balance(pair.Left, quantity, 0.0M));
             }
             else
             {
                 exec = new TradeExecution(
-                    new Balance(pair.Left, amount, 0.0M),
+                    new Balance(pair.Left, quantity, 0.0M),
                     new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M));
             }
 
@@ -81,7 +81,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 priceEstimate,
                 side,
                 pair,
-                amount)
+                quantity)
             {
                 Status = OrderUpdate.OrderStatus.Filled,
                 AveragePrice = priceEstimate,
@@ -100,7 +100,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
+        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price)
         {
             // Keep the remote updated by mocking a trade execution
             TradeExecution exec;
@@ -109,14 +109,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             if (side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(pair.Right, amount * price, 0),
-                    new Balance(pair.Right, 0, amount * price));
+                    new Balance(pair.Right, quantity * price, 0),
+                    new Balance(pair.Right, 0, quantity * price));
             }
             else
             {
                 exec = new TradeExecution(
-                    new Balance(pair.Left, amount, 0),
-                    new Balance(pair.Left, 0, amount));
+                    new Balance(pair.Left, quantity, 0),
+                    new Balance(pair.Left, 0, quantity));
             }
 
             _comm.RemotePortfolio.UpdateAllocation(exec);
@@ -129,8 +129,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 price,
                 side,
                 pair,
-                amount);
-            _watchList.Add(_mockOrderCounter, order);
+                quantity);
+            WatchList.Add(_mockOrderCounter, order);
             _mockOrderCounter++;
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
@@ -142,9 +142,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var order = GetOrderInfo(pair, orderId).Data;
             order.Status = OrderUpdate.OrderStatus.Cancelled;
 
-            if (_watchList.ContainsKey(orderId))
+            if (WatchList.ContainsKey(orderId))
             {
-                _watchList.Remove(orderId);
+                WatchList.Remove(orderId);
             }
 
             // Update the remote portfolio
@@ -177,9 +177,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
         {
-            if (_watchList.ContainsKey(orderId))
+            if (WatchList.ContainsKey(orderId))
             {
-                return new ResponseObject<OrderUpdate>(ResponseCode.Success, _watchList[orderId]);
+                return new ResponseObject<OrderUpdate>(ResponseCode.Success, WatchList[orderId]);
             }
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Error, $"Order {orderId} was not found");
@@ -194,7 +194,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public void OnNext(long value)
         {
-            foreach (var order in _watchList.Values.ToList())
+            foreach (var order in WatchList.Values.ToList())
             {
                 decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
                 if (!FilledLimitOrder(order))
@@ -239,7 +239,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             }
 
             // Clean up filled orders
-            _watchList = _watchList.Where(keyPair => keyPair.Value.Status != OrderUpdate.OrderStatus.Filled)
+            WatchList = WatchList.Where(keyPair => keyPair.Value.Status != OrderUpdate.OrderStatus.Filled)
                 .ToDictionary(p => p.Key, p => p.Value);
         }
 

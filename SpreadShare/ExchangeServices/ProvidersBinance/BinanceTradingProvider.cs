@@ -27,12 +27,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, Models.OrderSide side, decimal amount)
+        public override ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, Models.OrderSide side, decimal quantity)
         {
             throw new NotImplementedException();
             /*
             var client = _communications.Client;
-            decimal rounded = pair.RoundToTradable(amount);
+            decimal rounded = pair.RoundToTradable(quantity);
 
             var query = client.PlaceOrder(pair.ToString(), BinanceUtilities.ToExternal(side), OrderType.Market, rounded);
             if (query.Success)
@@ -47,7 +47,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
+        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price)
         {
             throw new System.NotImplementedException();
         }
