@@ -6,17 +6,19 @@ namespace SpreadShare.Models.Database
     /// <summary>
     /// Models a trade as found in the database
     /// </summary>
-    internal class DatabaseTrade
+    internal class DatabaseTrade : ICsvSerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseTrade"/> class.
         /// </summary>
         /// <param name="orderId">The orderId of the trade, must be unique</param>
         /// <param name="orderType">Kind of order</param>
+        /// <param name="orderStatus">The status of the order</param>
         /// <param name="createdTimestamp">The unix createdTimestamp in milliseconds</param>
         /// <param name="filledTimeStamp">Time at which the order was filled</param>
         /// <param name="pair">The trading pair</param>
-        /// <param name="quantity">The amount of non base currency</param>
+        /// <param name="setQuantity">The quantity of non base currency for which the order was set</param>
+        /// <param name="filledQuantity">The quantity of non base currency that was filled</param>
         /// <param name="price">The price of the trade</param>
         /// <param name="side">Buy or sell order</param>
         /// <param name="assets">The portfolio after the trade</param>
@@ -24,10 +26,12 @@ namespace SpreadShare.Models.Database
         public DatabaseTrade(
             long orderId,
             string orderType,
+            string orderStatus,
             long createdTimestamp,
             long filledTimeStamp,
             string pair,
-            decimal quantity,
+            decimal setQuantity,
+            decimal filledQuantity,
             decimal price,
             string side,
             string assets,
@@ -35,11 +39,13 @@ namespace SpreadShare.Models.Database
         {
             OrderId = orderId;
             OrderType = orderType;
+            OrderStatus = orderStatus;
             CreatedTimestamp = createdTimestamp;
             FilledTimeStamp = filledTimeStamp;
             Pair = pair;
             Price = price;
-            Quantity = quantity;
+            SetQuantity = setQuantity;
+            FilledQuantity = filledQuantity;
             Side = side;
             Assets = assets;
             Value = value;
@@ -57,11 +63,13 @@ namespace SpreadShare.Models.Database
             decimal value)
         {
             OrderType = order.OrderType.ToString();
+            OrderStatus = order.Status.ToString();
             CreatedTimestamp = order.CreatedTimeStamp;
             FilledTimeStamp = order.FilledTimeStamp;
             Pair = order.Pair.ToString();
             Price = order.AveragePrice;
-            Quantity = order.Amount;
+            SetQuantity = order.SetQuantity;
+            FilledQuantity = order.FilledQuantity;
             Side = order.Side.ToString();
             Assets = assets;
             Value = value;
@@ -79,6 +87,11 @@ namespace SpreadShare.Models.Database
         public string OrderType { get; set; }
 
         /// <summary>
+        /// Gets or sets the Status of the order.
+        /// </summary>
+        public string OrderStatus { get; set; }
+
+        /// <summary>
         /// Gets or sets the Timestamp at the creation of the trade
         /// </summary>
         public long CreatedTimestamp { get; set; }
@@ -94,9 +107,14 @@ namespace SpreadShare.Models.Database
         public string Pair { get; set; }
 
         /// <summary>
-        /// Gets or sets the quantity of the trade
+        /// Gets or sets the setQuantity of the trade
         /// </summary>
-        public decimal Quantity { get; set; }
+        public decimal SetQuantity { get; set; }
+
+        /// <summary>
+        /// Gets or sets the filledQuantity of the trade
+        /// </summary>
+        public decimal FilledQuantity { get; set; }
 
         /// <summary>
         /// Gets or sets the price of the trade
@@ -119,36 +137,45 @@ namespace SpreadShare.Models.Database
         public decimal Value { get; set; }
 
         /// <summary>
-        /// Get a header matching the format of ToString()
+        /// Get a header matching the format of the CSV representation
         /// </summary>
-        /// <returns>string header</returns>
-        public static string GetCsvHeader()
+        /// <param name="delimiter">delimiter</param>
+        /// <returns>csv header</returns>
+        public static string GetStaticCsvHeader(char delimiter)
         {
-            return $"{nameof(OrderId)}, " +
-                   $"{nameof(OrderType)}, " +
-                   $"{nameof(Side)}, " +
-                   $"{nameof(CreatedTimestamp)}, " +
-                   $"{nameof(FilledTimeStamp)}, " +
-                   $"{nameof(Pair)}, " +
-                   $"{nameof(Quantity)}, " +
-                   $"{nameof(Price)}, " +
-                   $"{nameof(Value)}, " +
+            return $"{nameof(OrderId)}{delimiter} " +
+                   $"{nameof(OrderType)}{delimiter} " +
+                   $"{nameof(Side)}{delimiter} " +
+                   $"{nameof(CreatedTimestamp)}{delimiter} " +
+                   $"{nameof(FilledTimeStamp)}{delimiter} " +
+                   $"{nameof(Pair)}{delimiter} " +
+                   $"{nameof(SetQuantity)}{delimiter} " +
+                   $"{nameof(FilledQuantity)}{delimiter} " +
+                   $"{nameof(Price)}{delimiter} " +
+                   $"{nameof(Value)}{delimiter} " +
                    $"{nameof(Assets)}";
         }
 
         /// <inheritdoc />
-        public override string ToString()
+        public string GetCsvRepresentation(char delimiter)
         {
-            return $"{OrderId}, " +
-                   $"{OrderType}, " +
-                   $"{Side}, " +
-                   $"{CreatedTimestamp}, " +
-                   $"{FilledTimeStamp}, " +
-                   $"{Pair}, " +
-                   $"{Quantity}, " +
-                   $"{Price}, " +
-                   $"{Value}, " +
+            return $"{OrderId}{delimiter} " +
+                   $"{OrderType}{delimiter} " +
+                   $"{Side}{delimiter} " +
+                   $"{CreatedTimestamp}{delimiter} " +
+                   $"{FilledTimeStamp}{delimiter} " +
+                   $"{Pair}{delimiter} " +
+                   $"{SetQuantity}{delimiter} " +
+                   $"{FilledQuantity}{delimiter} " +
+                   $"{Price}{delimiter} " +
+                   $"{Value}{delimiter} " +
                    $"{Assets}";
+        }
+
+        /// <inheritdoc />
+        public string GetCsvHeader(char delimiter)
+        {
+            return GetStaticCsvHeader(delimiter);
         }
     }
 }

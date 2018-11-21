@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
@@ -50,10 +51,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal amount)
+        public override ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal quantity)
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            var proposal = new TradeProposal(new Balance(currency, amount, 0.0M));
+            var proposal = new TradeProposal(new Balance(currency, quantity, 0.0M));
 
             // Keep the remote updated by mocking a trade execution and letting the communications know.
             TradeExecution exec = null;
@@ -62,12 +63,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             {
                 exec = new TradeExecution(
                     new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M),
-                    new Balance(pair.Left, amount, 0.0M));
+                    new Balance(pair.Left, quantity, 0.0M));
             }
             else
             {
                 exec = new TradeExecution(
-                    new Balance(pair.Left, amount, 0.0M),
+                    new Balance(pair.Left, quantity, 0.0M),
                     new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M));
             }
 
@@ -80,8 +81,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 priceEstimate,
                 side,
                 pair,
-                amount)
+                quantity)
             {
+                Status = OrderUpdate.OrderStatus.Filled,
                 AveragePrice = priceEstimate,
                 FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds()
             };
@@ -98,25 +100,23 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal amount, decimal price)
+        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price)
         {
             // Keep the remote updated by mocking a trade execution
-            Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            TradeExecution exec = null;
+            TradeExecution exec;
 
             // Mock the remote portfolio by providing it an update
             if (side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(pair.Right, amount * price, 0),
-                    new Balance(pair.Right, 0, amount * price));
+                    new Balance(pair.Right, quantity * price, 0),
+                    new Balance(pair.Right, 0, quantity * price));
             }
-
-            if (side == OrderSide.Sell)
+            else
             {
                 exec = new TradeExecution(
-                    new Balance(pair.Left, amount, 0),
-                    new Balance(pair.Left, 0, amount));
+                    new Balance(pair.Left, quantity, 0),
+                    new Balance(pair.Left, 0, quantity));
             }
 
             _comm.RemotePortfolio.UpdateAllocation(exec);
@@ -129,8 +129,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 price,
                 side,
                 pair,
-                amount);
-            _watchList.Add(_mockOrderCounter, order);
+                quantity);
+            WatchList.Add(_mockOrderCounter, order);
             _mockOrderCounter++;
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
@@ -139,7 +139,50 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
-            throw new NotImplementedException();
+            var order = GetOrderInfo(pair, orderId).Data;
+            order.Status = OrderUpdate.OrderStatus.Cancelled;
+
+            if (WatchList.ContainsKey(orderId))
+            {
+                WatchList.Remove(orderId);
+            }
+
+            // Update the remote portfolio
+            TradeExecution exec;
+            if (order.Side == OrderSide.Buy)
+            {
+                exec = new TradeExecution(
+                    new Balance(order.Pair.Right, 0, order.SetQuantity * order.SetPrice),
+                    new Balance(order.Pair.Right, order.SetQuantity * order.SetPrice, 0));
+            }
+            else
+            {
+                exec = new TradeExecution(
+                    new Balance(order.Pair.Left, 0, order.SetQuantity),
+                    new Balance(order.Pair.Left, order.SetQuantity, 0));
+            }
+
+            _logger.LogInformation($"Updating remote with exec {JsonConvert.SerializeObject(exec)}");
+            _comm.RemotePortfolio.UpdateAllocation(exec);
+
+            // Add cancelled order to the database
+            _database.Trades.Add(new DatabaseTrade(
+                order,
+                _comm.RemotePortfolio.ToJson(),
+                _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
+
+            return new ResponseObject(ResponseCode.Success);
+        }
+
+        /// <inheritdoc />
+        public override ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
+        {
+            if (WatchList.ContainsKey(orderId))
+            {
+                return new ResponseObject<OrderUpdate>(ResponseCode.Success, WatchList[orderId]);
+            }
+
+            return new ResponseObject<OrderUpdate>(ResponseCode.Error, $"Order {orderId} was not found");
         }
 
         /// <inheritdoc />
@@ -151,7 +194,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public void OnNext(long value)
         {
-            foreach (var order in _watchList.Values.ToList())
+            foreach (var order in WatchList.Values.ToList())
             {
                 decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
                 if (!FilledLimitOrder(order))
@@ -164,8 +207,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
                 // Set the actual price for the order
                 order.AveragePrice = price;
-                order.TotalFilled = order.Amount;
-                order.LastFillIncrement = order.Amount;
+                order.FilledQuantity = order.SetQuantity;
+                order.LastFillIncrement = order.SetQuantity;
                 order.LastFillPrice = price;
                 order.FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
 
@@ -174,14 +217,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 if (order.Side == OrderSide.Buy)
                 {
                     exec = new TradeExecution(
-                        new Balance(order.Pair.Right, 0, order.Amount * order.SetPrice),
+                        new Balance(order.Pair.Right, 0, order.SetQuantity * order.SetPrice),
                         new Balance(order.Pair.Left, order.LastFillIncrement, 0));
                 }
                 else
                 {
                     exec = new TradeExecution(
                         new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                        new Balance(order.Pair.Right, order.Amount * order.AveragePrice, 0));
+                        new Balance(order.Pair.Right, order.SetQuantity * order.AveragePrice, 0));
                 }
 
                 _comm.RemotePortfolio.UpdateAllocation(exec);
@@ -196,7 +239,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             }
 
             // Clean up filled orders
-            _watchList = _watchList.Where(keyPair => keyPair.Value.Status != OrderUpdate.OrderStatus.Filled)
+            WatchList = WatchList.Where(keyPair => keyPair.Value.Status != OrderUpdate.OrderStatus.Filled)
                 .ToDictionary(p => p.Key, p => p.Value);
         }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dawn;
@@ -110,7 +111,12 @@ namespace SpreadShare.Models.Trading
         {
             Guard.Argument(trade).NotNull();
 
-            // Substract left side of the trade
+            if (!_dict.ContainsKey(trade.From.Symbol))
+            {
+                _dict.Add(trade.From.Symbol, Balance.Empty(trade.From.Symbol));
+            }
+
+            // Subtract left side of the trade
             _dict[trade.From.Symbol] -= trade.From;
 
             // The acquired asset can be a non entry

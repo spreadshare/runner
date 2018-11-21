@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using SpreadShare.Models.Database;
@@ -13,6 +14,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     /// </summary>
     internal class BacktestOutputLogger
     {
+        private const char Delimiter = '|';
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestOutputLogger"/> class.
         /// </summary>
@@ -50,6 +53,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             // Output trades
             OutputTrades(Path.Combine(OutputFolder, "trades.csv"));
+
+            // Output state switches
+            OutputStateSwitches(Path.Combine(OutputFolder, "state_switches.csv"));
         }
 
         /// <summary>
@@ -71,10 +77,26 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private void OutputTrades(string filepath)
         {
             var builder = new StringBuilder();
-            builder.AppendLine(DatabaseTrade.GetCsvHeader());
-            foreach (var trade in DatabaseContext.Trades)
+            builder.AppendLine(DatabaseTrade.GetStaticCsvHeader(Delimiter));
+            foreach (var trade in DatabaseContext.Trades.OrderBy(x => x.FilledTimeStamp))
             {
-                builder.AppendLine(trade.ToString());
+                builder.AppendLine(trade.GetCsvRepresentation(Delimiter));
+            }
+
+            WriteAllText(filepath, builder.ToString());
+        }
+
+        /// <summary>
+        /// Output all executed state switches to filepath.
+        /// </summary>
+        /// <param name="filepath">Filepath to store trades at</param>
+        private void OutputStateSwitches(string filepath)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine(StateSwitchEvent.GetStaticCsvHeader(Delimiter));
+            foreach (var stateSwitch in DatabaseContext.StateSwitchEvents.OrderBy(x => x.Timestamp))
+            {
+                builder.AppendLine(stateSwitch.GetCsvRepresentation(Delimiter));
             }
 
             WriteAllText(filepath, builder.ToString());

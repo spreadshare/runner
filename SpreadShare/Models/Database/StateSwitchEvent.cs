@@ -5,7 +5,7 @@ namespace SpreadShare.Models.Database
     /// <summary>
     /// Models a state switch event in the database
     /// </summary>
-    internal class StateSwitchEvent
+    internal class StateSwitchEvent : ICsvSerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
@@ -40,5 +40,33 @@ namespace SpreadShare.Models.Database
         /// Gets or sets the state to which was switched
         /// </summary>
         public string To { get; set; }
+
+        /// <summary>
+        /// Get a header matching the format of the CSV representation
+        /// </summary>
+        /// <param name="delimiter">delimiter</param>
+        /// <returns>csv header</returns>
+        public static string GetStaticCsvHeader(char delimiter)
+        {
+            return $"{nameof(Id)}{delimiter} " +
+                   $"{nameof(Timestamp)}{delimiter} " +
+                   $"{nameof(From)}{delimiter} " +
+                   $"{nameof(To)}";
+        }
+
+        /// <inheritdoc />
+        public string GetCsvHeader(char delimiter)
+        {
+            return GetStaticCsvHeader(delimiter);
+        }
+
+        /// <inheritdoc />
+        public string GetCsvRepresentation(char delimiter)
+        {
+            return $"{Id}{delimiter} " +
+                   $"{Timestamp}{delimiter} " +
+                   $"{From}{delimiter} " +
+                   $"{To}";
+        }
     }
 }

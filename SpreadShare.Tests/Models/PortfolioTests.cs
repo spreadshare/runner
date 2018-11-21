@@ -222,6 +222,24 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
+        public void TradeIsProcessedZeroQuantityNewCurrency()
+        {
+            Currency c1 = new Currency("BTC");
+            Currency c2 = new Currency("ETH");
+            var trade = new TradeExecution(
+                new Balance(c1, 0, 0),
+                new Balance(c2, 0, 0));
+
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
+
+            portfolio.UpdateAllocation(trade);
+            Assert.Equal(0M, portfolio.GetAllocation(c1).Free);
+            Assert.Equal(0M, portfolio.GetAllocation(c1).Locked);
+            Assert.Equal(0M, portfolio.GetAllocation(c2).Free);
+            Assert.Equal(0M, portfolio.GetAllocation(c2).Locked);
+        }
+
+        [Fact]
         public void TradeIsProcessedNull()
         {
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
