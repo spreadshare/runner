@@ -51,6 +51,7 @@ namespace SpreadShare.Algorithms.Implementations
                     Logger.LogInformation($"Panic detected buying");
                     return new BuyState();
                 }
+
                 return new NothingState<SimpleBandWagonAlgorithmSettings>();
             }
 
@@ -61,28 +62,28 @@ namespace SpreadShare.Algorithms.Implementations
 
         private class BuyState : State<SimpleBandWagonAlgorithmSettings>
         {
+            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
+            {
+                return new SellState();
+            }
+
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 trading.PlaceFullMarketOrder(AlgorithmSettings.ActiveTradingPairs.First(), OrderSide.Buy);
                 SetTimer(TimeSpan.FromHours(AlgorithmSettings.HoldTime));
             }
-
-            public override State<SimpleBandWagonAlgorithmSettings> OnTimerElapsed()
-            {
-                return new SellState();
-            }
         }
 
         private class SellState : State<SimpleBandWagonAlgorithmSettings>
         {
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-                trading.PlaceFullMarketOrder(AlgorithmSettings.ActiveTradingPairs.First(), OrderSide.Sell);
-            }
-
             public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
             {
                 return new EntryState();
+            }
+
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
+                trading.PlaceFullMarketOrder(AlgorithmSettings.ActiveTradingPairs.First(), OrderSide.Sell);
             }
         }
     }

@@ -93,7 +93,8 @@ namespace SpreadShare.Algorithms
         /// </summary>
         private string CurrentState
         {
-            get {
+            get
+            {
                 lock (_lock)
                 {
                     return _activeState.GetType().ToString().Split('+').Last();
