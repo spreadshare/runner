@@ -50,6 +50,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             // Output trades
             OutputTrades(Path.Combine(OutputFolder, "trades.csv"));
+
+            // Output state switches
+            OutputStateSwitches(Path.Combine(OutputFolder, "state_switches.csv"));
         }
 
         /// <summary>
@@ -75,6 +78,22 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             foreach (var trade in DatabaseContext.Trades)
             {
                 builder.AppendLine(trade.ToString());
+            }
+
+            WriteAllText(filepath, builder.ToString());
+        }
+
+        /// <summary>
+        /// Output all executed state switches to filepath.
+        /// </summary>
+        /// <param name="filepath">Filepath to store trades at</param>
+        private void OutputStateSwitches(string filepath)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine(StateSwitchEvent.GetCsvHeader());
+            foreach (var stateSwitch in DatabaseContext.StateSwitchEvents)
+            {
+                builder.AppendLine(stateSwitch.ToString());
             }
 
             WriteAllText(filepath, builder.ToString());

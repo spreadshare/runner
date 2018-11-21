@@ -40,5 +40,26 @@ namespace SpreadShare.Models.Database
         /// Gets or sets the state to which was switched
         /// </summary>
         public string To { get; set; }
+
+        /// <summary>
+        /// Get a header matching the format of ToString()
+        /// </summary>
+        /// <returns>string header</returns>
+        public static string GetCsvHeader()
+        {
+            return $"{nameof(Id)}, " +
+                   $"{nameof(Timestamp)}, " +
+                   $"{nameof(From)}, " +
+                   $"{nameof(To)}";
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{Id}, " +
+                   $"{Timestamp}, " +
+                   $"{From}, " +
+                   $"{To}";
+        }
     }
 }
