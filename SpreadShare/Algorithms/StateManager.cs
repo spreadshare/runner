@@ -91,7 +91,15 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Gets the current active state
         /// </summary>
-        private string CurrentState => _activeState.GetType().ToString().Split('+').Last();
+        private string CurrentState
+        {
+            get {
+                lock (_lock)
+                {
+                    return _activeState.GetType().ToString().Split('+').Last();
+                }
+            }
+        }
 
         /// <summary>
         /// Evaluates the active state's market condition predicate
@@ -132,17 +140,21 @@ namespace SpreadShare.Algorithms
                 return;
             }
 
-            _logger.LogInformation($"STATE SWITCH: {CurrentState} ---> {child.GetType().ToString().Split('+').Last()} at {Container.TimerProvider.CurrentTime}");
+            lock (_lock)
+            {
+                _logger.LogInformation(
+                    $"STATE SWITCH: {CurrentState} ---> {child.GetType().ToString().Split('+').Last()} at {Container.TimerProvider.CurrentTime}");
 
-            // Add state switch event to the database
-            _database.StateSwitchEvents.Add(new StateSwitchEvent(
-                Container.TimerProvider.CurrentTime.ToUnixTimeMilliseconds(),
-                CurrentState,
-                child.GetType().ToString().Split('+').Last()));
+                // Add state switch event to the database
+                _database.StateSwitchEvents.Add(new StateSwitchEvent(
+                    Container.TimerProvider.CurrentTime.ToUnixTimeMilliseconds(),
+                    CurrentState,
+                    child.GetType().ToString().Split('+').Last()));
 
-            _activeState = child;
+                _activeState = child;
 
-            _activeState.Activate(AlgorithmSettings, Container, _loggerFactory);
+                _activeState.Activate(AlgorithmSettings, Container, _loggerFactory);
+            }
         }
 
         /// <summary>
