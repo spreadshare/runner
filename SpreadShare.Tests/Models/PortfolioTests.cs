@@ -240,23 +240,6 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
-        public void TradeIsThrownNonZeroQuantityNewCurrency()
-        {
-            Currency c1 = new Currency("BTC");
-            Currency c2 = new Currency("ETH");
-            var trade1 = new TradeExecution(
-                new Balance(c1, 0, 0.01M),
-                new Balance(c2, 0, 0));
-            var trade2 = new TradeExecution(
-                new Balance(c1, 0.01M, 0),
-                new Balance(c2, 0, 0));
-            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-
-            Assert.Throws<InvalidOperationException>(() => portfolio.UpdateAllocation(trade1));
-            Assert.Throws<InvalidOperationException>(() => portfolio.UpdateAllocation(trade2));
-        }
-
-        [Fact]
         public void TradeIsProcessedNull()
         {
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>());

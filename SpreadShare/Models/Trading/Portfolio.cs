@@ -113,19 +113,10 @@ namespace SpreadShare.Models.Trading
 
             if (!_dict.ContainsKey(trade.From.Symbol))
             {
-                // Edge case where the trade is zero
-                if (trade.From.Free == 0 && trade.From.Locked == 0)
-                {
-                    _dict.Add(trade.From.Symbol, Balance.Empty(trade.From.Symbol));
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Portfolio did not contain allocation for {trade.From.Symbol} " +
-                                                        $"but a TradeExecution with non-zero left side {trade.From} was given.");
-                }
+                _dict.Add(trade.From.Symbol, Balance.Empty(trade.From.Symbol));
             }
 
-            // Substract left side of the trade
+            // Subtract left side of the trade
             _dict[trade.From.Symbol] -= trade.From;
 
             // The acquired asset can be a non entry
