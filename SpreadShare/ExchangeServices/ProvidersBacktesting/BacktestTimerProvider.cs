@@ -50,8 +50,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"StateSwitchEvents\"");
             _database.SaveChanges();
 
-            await Task.Delay(1000).ConfigureAwait(false);
-
             DateTimeOffset start = DateTimeOffset.Now;
             while (CurrentTime < _endDate)
             {
