@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dawn;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Newtonsoft.Json;
 
 namespace SpreadShare.Models.Trading

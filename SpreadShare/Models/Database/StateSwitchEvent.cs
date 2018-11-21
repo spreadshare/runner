@@ -5,7 +5,7 @@ namespace SpreadShare.Models.Database
     /// <summary>
     /// Models a state switch event in the database
     /// </summary>
-    internal class StateSwitchEvent
+    internal class StateSwitchEvent : ICsvSerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
@@ -42,23 +42,30 @@ namespace SpreadShare.Models.Database
         public string To { get; set; }
 
         /// <summary>
-        /// Get a header matching the format of ToString()
+        /// Get a header matching the format of the CSV representation
         /// </summary>
-        /// <returns>string header</returns>
-        public static string GetCsvHeader()
+        /// <param name="delimiter">delimiter</param>
+        /// <returns>csv header</returns>
+        public static string GetStaticCsvHeader(char delimiter)
         {
-            return $"{nameof(Id)}, " +
-                   $"{nameof(Timestamp)}, " +
-                   $"{nameof(From)}, " +
+            return $"{nameof(Id)}{delimiter} " +
+                   $"{nameof(Timestamp)}{delimiter} " +
+                   $"{nameof(From)}{delimiter} " +
                    $"{nameof(To)}";
         }
 
         /// <inheritdoc />
-        public override string ToString()
+        public string GetCsvHeader(char delimiter)
         {
-            return $"{Id}, " +
-                   $"{Timestamp}, " +
-                   $"{From}, " +
+            return GetStaticCsvHeader(delimiter);
+        }
+
+        /// <inheritdoc />
+        public string GetCsvRepresentation(char delimiter)
+        {
+            return $"{Id}{delimiter} " +
+                   $"{Timestamp}{delimiter} " +
+                   $"{From}{delimiter} " +
                    $"{To}";
         }
     }

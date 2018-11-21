@@ -1,12 +1,9 @@
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
-using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
-using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
 

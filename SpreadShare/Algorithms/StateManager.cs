@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;

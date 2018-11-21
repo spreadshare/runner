@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using SpreadShare.Models.Database;
@@ -13,6 +14,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     /// </summary>
     internal class BacktestOutputLogger
     {
+        private const char Delimiter = '|';
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestOutputLogger"/> class.
         /// </summary>
@@ -74,10 +77,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private void OutputTrades(string filepath)
         {
             var builder = new StringBuilder();
-            builder.AppendLine(DatabaseTrade.GetCsvHeader());
-            foreach (var trade in DatabaseContext.Trades)
+            builder.AppendLine(DatabaseTrade.GetStaticCsvHeader(Delimiter));
+            foreach (var trade in DatabaseContext.Trades.OrderBy(x => x.FilledTimeStamp))
             {
-                builder.AppendLine(trade.ToString());
+                builder.AppendLine(trade.GetCsvRepresentation(Delimiter));
             }
 
             WriteAllText(filepath, builder.ToString());
@@ -90,10 +93,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private void OutputStateSwitches(string filepath)
         {
             var builder = new StringBuilder();
-            builder.AppendLine(StateSwitchEvent.GetCsvHeader());
-            foreach (var stateSwitch in DatabaseContext.StateSwitchEvents)
+            builder.AppendLine(StateSwitchEvent.GetStaticCsvHeader(Delimiter));
+            foreach (var stateSwitch in DatabaseContext.StateSwitchEvents.OrderBy(x => x.Timestamp))
             {
-                builder.AppendLine(stateSwitch.ToString());
+                builder.AppendLine(stateSwitch.GetCsvRepresentation(Delimiter));
             }
 
             WriteAllText(filepath, builder.ToString());

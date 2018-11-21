@@ -137,44 +137,45 @@ namespace SpreadShare.Models.Database
         public decimal Value { get; set; }
 
         /// <summary>
-        /// Get a header matching the format of ToString()
+        /// Get a header matching the format of the CSV representation
         /// </summary>
-        /// <returns>string header</returns>
-        public static string GetStaticCsvHeader()
+        /// <param name="delimiter">delimiter</param>
+        /// <returns>csv header</returns>
+        public static string GetStaticCsvHeader(char delimiter)
         {
-            return $"{nameof(OrderId)}, " +
-                   $"{nameof(OrderType)}, " +
-                   $"{nameof(Side)}, " +
-                   $"{nameof(CreatedTimestamp)}, " +
-                   $"{nameof(FilledTimeStamp)}, " +
-                   $"{nameof(Pair)}, " +
-                   $"{nameof(SetQuantity)}, " +
-                   $"{nameof(FilledQuantity)}" +
-                   $"{nameof(Price)}, " +
-                   $"{nameof(Value)}, " +
+            return $"{nameof(OrderId)}{delimiter} " +
+                   $"{nameof(OrderType)}{delimiter} " +
+                   $"{nameof(Side)}{delimiter} " +
+                   $"{nameof(CreatedTimestamp)}{delimiter} " +
+                   $"{nameof(FilledTimeStamp)}{delimiter} " +
+                   $"{nameof(Pair)}{delimiter} " +
+                   $"{nameof(SetQuantity)}{delimiter} " +
+                   $"{nameof(FilledQuantity)}{delimiter} " +
+                   $"{nameof(Price)}{delimiter} " +
+                   $"{nameof(Value)}{delimiter} " +
                    $"{nameof(Assets)}";
         }
 
         /// <inheritdoc />
-        string ICsvSerializable.GetCsvRepresentation()
+        public string GetCsvRepresentation(char delimiter)
         {
-            return $"{OrderId}, " +
-                   $"{OrderType}, " +
-                   $"{Side}, " +
-                   $"{CreatedTimestamp}, " +
-                   $"{FilledTimeStamp}, " +
-                   $"{Pair}, " +
-                   $"{SetQuantity}, " +
-                   $"{FilledQuantity}, " +
-                   $"{Price}, " +
-                   $"{Value}, " +
+            return $"{OrderId}{delimiter} " +
+                   $"{OrderType}{delimiter} " +
+                   $"{Side}{delimiter} " +
+                   $"{CreatedTimestamp}{delimiter} " +
+                   $"{FilledTimeStamp}{delimiter} " +
+                   $"{Pair}{delimiter} " +
+                   $"{SetQuantity}{delimiter} " +
+                   $"{FilledQuantity}{delimiter} " +
+                   $"{Price}{delimiter} " +
+                   $"{Value}{delimiter} " +
                    $"{Assets}";
         }
 
         /// <inheritdoc />
-        string ICsvSerializable.GetCsvHeader()
+        public string GetCsvHeader(char delimiter)
         {
-            return GetStaticCsvHeader();
+            return GetStaticCsvHeader(delimiter);
         }
     }
 }
