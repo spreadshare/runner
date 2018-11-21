@@ -27,8 +27,8 @@ namespace SpreadShare.Models.Trading
         /// Initializes a new instance of the <see cref="Balance"/> struct.
         /// </summary>
         /// <param name="symbol">Symbol of the asset</param>
-        /// <param name="free">SetQuantity of balance that is free</param>
-        /// <param name="locked">SetQuantity of balance that is locked</param>
+        /// <param name="free">Quantity of the balance that is free</param>
+        /// <param name="locked">Quantity of the balance that is locked</param>
         public Balance(Currency symbol, decimal free, decimal locked)
         {
             Symbol = symbol ?? throw new ArgumentNullException(nameof(symbol));

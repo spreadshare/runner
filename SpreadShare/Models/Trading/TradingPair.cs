@@ -17,7 +17,7 @@ namespace SpreadShare.Models.Trading
         /// </summary>
         /// <param name="left">Left side of the trading pair</param>
         /// <param name="right">Right side of the trading pair</param>
-        /// <param name="decimals">SetQuantity of decimals the trading pair can be expressed in</param>
+        /// <param name="decimals">Number of decimals the trading pair can be expressed in</param>
         public TradingPair(Currency left, Currency right, int decimals)
         {
             Guard.Argument(left).NotNull().NotEqual(Guard.Argument(right).NotNull());
@@ -108,12 +108,12 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Round unrounded amount to the tradable amount conform to TradingPair's decimals
         /// </summary>
-        /// <param name="amount">Unrounded amount</param>
+        /// <param name="quantity">Unrounded quantity</param>
         /// <returns>Rounded amount</returns>
-        public decimal RoundToTradable(decimal amount)
+        public decimal RoundToTradable(decimal quantity)
         {
             long lotSize = IntPow(10, (uint)Decimals);
-            return Math.Floor(amount * lotSize) / lotSize;
+            return Math.Floor(quantity * lotSize) / lotSize;
         }
 
         /// <summary>
