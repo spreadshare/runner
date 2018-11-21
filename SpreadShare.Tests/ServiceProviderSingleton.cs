@@ -21,7 +21,7 @@ namespace SpreadShare.Tests
             IServiceCollection services = new ServiceCollection();
 
             // Configure services - Provide depencies for services
-            Startup startup = new Startup();
+            Startup startup = new Startup("appsettings.json");
             startup.ConfigureServices(services);
             Startup.ConfigureBusinessServices(services);
 

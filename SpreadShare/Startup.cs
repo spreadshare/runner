@@ -23,10 +23,11 @@ namespace SpreadShare
         /// Initializes a new instance of the <see cref="Startup"/> class.
         /// Sets configuration
         /// </summary>
-        public Startup()
+        /// <param name="filepath">location of the configuration file</param>
+        public Startup(string filepath)
         {
             Configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile(filepath)
                 .Build();
         }
 
