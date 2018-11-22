@@ -143,32 +143,32 @@ namespace SpreadShare.Models.Database
         /// <returns>csv header</returns>
         public static string GetStaticCsvHeader(char delimiter)
         {
-            return $"{nameof(OrderId)}{delimiter} " +
-                   $"{nameof(OrderType)}{delimiter} " +
-                   $"{nameof(Side)}{delimiter} " +
-                   $"{nameof(CreatedTimestamp)}{delimiter} " +
-                   $"{nameof(FilledTimeStamp)}{delimiter} " +
-                   $"{nameof(Pair)}{delimiter} " +
-                   $"{nameof(SetQuantity)}{delimiter} " +
-                   $"{nameof(FilledQuantity)}{delimiter} " +
-                   $"{nameof(Price)}{delimiter} " +
-                   $"{nameof(Value)}{delimiter} " +
+            return $"{nameof(OrderId)}{delimiter}" +
+                   $"{nameof(OrderType)}{delimiter}" +
+                   $"{nameof(Side)}{delimiter}" +
+                   $"{nameof(CreatedTimestamp)}{delimiter}" +
+                   $"{nameof(FilledTimeStamp)}{delimiter}" +
+                   $"{nameof(Pair)}{delimiter}" +
+                   $"{nameof(SetQuantity)}{delimiter}" +
+                   $"{nameof(FilledQuantity)}{delimiter}" +
+                   $"{nameof(Price)}{delimiter}" +
+                   $"{nameof(Value)}{delimiter}" +
                    $"{nameof(Assets)}";
         }
 
         /// <inheritdoc />
         public string GetCsvRepresentation(char delimiter)
         {
-            return $"{OrderId}{delimiter} " +
-                   $"{OrderType}{delimiter} " +
-                   $"{Side}{delimiter} " +
-                   $"{CreatedTimestamp}{delimiter} " +
-                   $"{FilledTimeStamp}{delimiter} " +
-                   $"{Pair}{delimiter} " +
-                   $"{SetQuantity}{delimiter} " +
-                   $"{FilledQuantity}{delimiter} " +
-                   $"{Price}{delimiter} " +
-                   $"{Value}{delimiter} " +
+            return $"{OrderId}{delimiter}" +
+                   $"{OrderType}{delimiter}" +
+                   $"{Side}{delimiter}" +
+                   $"{CreatedTimestamp}{delimiter}" +
+                   $"{FilledTimeStamp}{delimiter}" +
+                   $"{Pair}{delimiter}" +
+                   $"{SetQuantity}{delimiter}" +
+                   $"{FilledQuantity}{delimiter}" +
+                   $"{Price}{delimiter}" +
+                   $"{Value}{delimiter}" +
                    $"{Assets}";
         }
 

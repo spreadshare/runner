@@ -48,9 +48,9 @@ namespace SpreadShare.Models.Database
         /// <returns>csv header</returns>
         public static string GetStaticCsvHeader(char delimiter)
         {
-            return $"{nameof(Id)}{delimiter} " +
-                   $"{nameof(Timestamp)}{delimiter} " +
-                   $"{nameof(From)}{delimiter} " +
+            return $"{nameof(Id)}{delimiter}" +
+                   $"{nameof(Timestamp)}{delimiter}" +
+                   $"{nameof(From)}{delimiter}" +
                    $"{nameof(To)}";
         }
 
@@ -63,9 +63,9 @@ namespace SpreadShare.Models.Database
         /// <inheritdoc />
         public string GetCsvRepresentation(char delimiter)
         {
-            return $"{Id}{delimiter} " +
-                   $"{Timestamp}{delimiter} " +
-                   $"{From}{delimiter} " +
+            return $"{Id}{delimiter}" +
+                   $"{Timestamp}{delimiter}" +
+                   $"{From}{delimiter}" +
                    $"{To}";
         }
     }
