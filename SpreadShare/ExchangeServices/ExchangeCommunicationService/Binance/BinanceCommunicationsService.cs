@@ -15,7 +15,9 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
     internal class BinanceCommunicationsService : ExchangeCommunications, IDisposable
     {
         private readonly ILogger _logger;
-        private readonly ListenKeyManager _listenKeyManager;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly BinanceCredentials _authy;
+        private ListenKeyManager _listenKeyManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceCommunicationsService"/> class.
@@ -25,29 +27,19 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         public BinanceCommunicationsService(ILoggerFactory loggerFactory, SettingsService settings)
         {
             _logger = loggerFactory.CreateLogger(GetType());
-            var authy = settings.BinanceSettings.Credentials;
-
-            Client = new BinanceClient();
-            Client.SetApiCredentials(authy.Key, authy.Secret);
-
-            var options = new BinanceSocketClientOptions { LogVerbosity = LogVerbosity.Debug };
-            Socket = new BinanceSocketClient(options);
-
-            // Setup ListenKeyManager
-            _listenKeyManager = new ListenKeyManager(loggerFactory, Client);
-
-            EnableStreams();
+            _loggerFactory = loggerFactory;
+            _authy = settings.BinanceSettings.Credentials;
         }
 
         /// <summary>
         /// Gets the instance of the binance client
         /// </summary>
-        public BinanceClient Client { get; }
+        public BinanceClient Client { get; private set; }
 
         /// <summary>
         /// Gets the instance of the binance user socket
         /// </summary>
-        public BinanceSocketClient Socket { get; }
+        public BinanceSocketClient Socket { get; private set; }
 
         /// <inheritdoc />
         public void Dispose()
@@ -68,6 +60,21 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 Client?.Dispose();
                 Socket?.Dispose();
             }
+        }
+
+        /// <inheritdoc />
+        protected override void Startup()
+        {
+            Client = new BinanceClient();
+            Client.SetApiCredentials(_authy.Key, _authy.Secret);
+
+            var options = new BinanceSocketClientOptions { LogVerbosity = LogVerbosity.Debug };
+            Socket = new BinanceSocketClient(options);
+
+            // Setup ListenKeyManager
+            _listenKeyManager = new ListenKeyManager(_loggerFactory, Client);
+
+            EnableStreams();
         }
 
         /// <summary>

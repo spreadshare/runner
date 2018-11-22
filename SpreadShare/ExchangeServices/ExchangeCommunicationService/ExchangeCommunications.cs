@@ -8,5 +8,23 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService
     /// </summary>
     internal abstract class ExchangeCommunications : Observable<OrderUpdate>
     {
+        private bool _connected;
+
+        /// <summary>
+        /// Startup the service (if not already started)
+        /// </summary>
+        public void Connect()
+        {
+            if (!_connected)
+            {
+                Startup();
+                _connected = true;
+            }
+        }
+
+        /// <summary>
+        /// Routine for starting up the connection
+        /// </summary>
+        protected abstract void Startup();
     }
 }
