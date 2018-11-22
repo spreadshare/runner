@@ -16,13 +16,14 @@ namespace SpreadShare
     /// </summary>
     internal static class Program
     {
+        private static CommandLineArgs _commandLineArgs = new CommandLineArgs();
         private static int _exitCode;
         private static bool _shouldExit;
 
         /// <summary>
         /// Gets the instance of the CommandLineArgs
         /// </summary>
-        public static CommandLineArgs CommandLineArgs = new CommandLineArgs();
+        public static CommandLineArgs CommandLineArgs => _commandLineArgs;
 
         /// <summary>
         /// Entrypoint of the application
@@ -33,7 +34,7 @@ namespace SpreadShare
         {
             // Bind command line args to local variable.
             Parser.Default.ParseArguments<CommandLineArgs>(args)
-                .WithParsed(o => CommandLineArgs = o);
+                .WithParsed(o => _commandLineArgs = o);
 
             // Create service collection
             IServiceCollection services = new ServiceCollection();
