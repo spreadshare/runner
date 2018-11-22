@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SpreadShare.Models.Database;
 using SpreadShare.SupportServices;
 using static System.IO.File;
@@ -71,12 +73,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="filepath">Filepath to store configuration at</param>
         private static void OutputConfiguration(string filepath)
         {
-            string configuration = ReadAllText(Program.CommandLineArgs.ConfigurationPath);
+            string rawjson = ReadAllText(Program.CommandLineArgs.ConfigurationPath);
+            JObject configuration = JObject.Parse(rawjson);
 
-            // TODO: Corrupts the file
-            configuration = Regex.Replace(configuration, ".*\"Key\":.*,", "            \"Key\": \"api_key\",");
-            configuration = Regex.Replace(configuration, ".*\"Secret\":.*,", "            \"Secret\": \"api_secret\",");
-            WriteAllText(filepath, configuration);
+            configuration["BinanceClientSettings"]["Credentials"]["Key"] = "api-key";
+            configuration["BinanceClientSettings"]["Credentials"]["Secret"] = "api-secret";
+
+            WriteAllText(filepath, configuration.ToString(Formatting.Indented));
         }
 
         /// <summary>
