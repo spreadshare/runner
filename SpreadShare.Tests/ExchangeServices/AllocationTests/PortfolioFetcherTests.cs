@@ -1,7 +1,10 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -13,6 +16,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
     public class PortfolioFetcherTests : BaseTest
     {
         private readonly IPortfolioFetcherService _fetcher;
+        private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PortfolioFetcherTests"/> class.
@@ -21,8 +25,8 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         public PortfolioFetcherTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
-            _fetcher = serviceProvider.GetService<IPortfolioFetcherService>();
+            _serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
+            _fetcher = _serviceProvider.GetService<IPortfolioFetcherService>();
         }
 
         /// <summary>
@@ -31,6 +35,8 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void BinancePortfolioIsFetched()
         {
+            // Connect the communications
+            _serviceProvider.GetService<BinanceCommunicationsService>().Connect();
             var query = _fetcher.GetPortfolio(Exchange.Binance);
             Assert.True(query.Success);
             if (query.Success)
@@ -45,6 +51,8 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void BacktestPortfolioIsFetched()
         {
+            // Connection the communications
+            _serviceProvider.GetService<BacktestCommunicationService>().Connect();
             var query = _fetcher.GetPortfolio(Exchange.Backtesting);
             Assert.True(query.Success);
             if (query.Success)

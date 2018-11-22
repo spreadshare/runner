@@ -22,7 +22,7 @@ namespace SpreadShare
         /// <summary>
         /// Gets the instance of the CommandLineArgs
         /// </summary>
-        public static CommandLineArgs CommandLineArgs { get; private set; }
+        public static CommandLineArgs CommandLineArgs = new CommandLineArgs();
 
         /// <summary>
         /// Entrypoint of the application
