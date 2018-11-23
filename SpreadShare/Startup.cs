@@ -94,11 +94,11 @@ namespace SpreadShare
                 => opt.UseNpgsql(Configuration.GetConnectionString("LocalConnection")));
 
             // TODO: Add layered timeout for unsuccesfully connecting to DB
-
             // Add Logging dependency
             services.AddLogging(loggingBuilder => loggingBuilder
                 .AddConsole(opt => opt.DisableColors = false)
                 .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
+                .AddFilter("SpreadShare", Program.CommandLineArgs.VerboseLogging ? LogLevel.Information : LogLevel.Warning)
                 .SetMinimumLevel(LogLevel.Information));
 
             // Add Configuration dependency (provides access to appsettings.json)

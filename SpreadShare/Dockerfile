@@ -16,3 +16,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "SpreadShare.dll"]
+# Run the container like a deamon
+# ENTRYPOINT ["tail", "-f", "/dev/null"]

@@ -42,7 +42,7 @@ namespace SpreadShare.Algorithms.Implementations
             public override State<SimpleBandWagonAlgorithmSettings> OnMarketCondition(DataProvider data)
             {
                 decimal performance =
-                    data.GetPerformancePastHours(AlgorithmSettings.ActiveTradingPairs.First(), AlgorithmSettings.HoldTime).Data;
+                    data.GetPerformancePastHours(AlgorithmSettings.ActiveTradingPairs.First(), AlgorithmSettings.CheckTime).Data;
                 if (performance < 0.99M)
                 {
                     Logger.LogInformation($"Panic detected buying");

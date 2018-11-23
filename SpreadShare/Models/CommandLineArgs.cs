@@ -18,5 +18,17 @@ namespace SpreadShare.Models
         /// </summary>
         [Option("configpath", Default = "appsettings.json", HelpText = "The path to the configuration.json file")]
         public string ConfigurationPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the application should have high verbosity
+        /// </summary>
+        [Option('v', "verbose", Default = false, HelpText = "The verbosity of the logger")]
+        public bool VerboseLogging { get; set; }
+
+        /// <summary>
+        /// Gets or sets the output path for the backtesting result
+        /// </summary>
+        [Option("backtestpath", Default = "", HelpText = "The output of the backtest run")]
+        public string BacktestOutputPath { get; set; }
     }
 }

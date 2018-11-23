@@ -65,6 +65,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Output to database
             var outputLogger = new BacktestOutputLogger(_database, _outputFolder);
             outputLogger.Output();
+
+            // Exit the application
+            Program.ExitProgramWithCode(0);
         }
     }
 }

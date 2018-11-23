@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
@@ -26,5 +27,8 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting
         /// Gets the remote portfolio of the backtest exchange.
         /// </summary>
         public Portfolio RemotePortfolio { get; }
+
+        /// <inheritdoc />
+        protected override void Startup() => Expression.Empty();
     }
 }

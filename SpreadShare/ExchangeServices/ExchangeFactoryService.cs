@@ -72,11 +72,14 @@ namespace SpreadShare.ExchangeServices
             switch (exchange)
             {
                 case Exchange.Binance:
+                    _binanceCommunications.Connect();
                     dataProviderImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
                     tradingProviderImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications);
                     break;
 
                 case Exchange.Backtesting:
+                    _backtestCommunicationService.Connect();
+
                     // Override timer provider to backtest variant
                     timerProvider = new BacktestTimerProvider(
                         _loggerFactory,

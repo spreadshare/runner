@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SpreadShare.Models.Database;
 using SpreadShare.SupportServices;
 using static System.IO.File;
@@ -43,13 +45,20 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public void Output()
         {
             // Set name of folder
-            OutputFolder = Path.Combine(OutputFolder, $"Backtest_{DateTimeOffset.Now:yyyy-MM-dd_HH-mm-ss}");
+            if (string.IsNullOrEmpty(Program.CommandLineArgs.BacktestOutputPath))
+            {
+                OutputFolder = Path.Combine(OutputFolder, $"Backtest_{DateTimeOffset.Now:yyyy-MM-dd_HH-mm-ss}");
+            }
+            else
+            {
+                OutputFolder = Path.Combine(OutputFolder, Program.CommandLineArgs.BacktestOutputPath);
+            }
 
             // Create directory
             Directory.CreateDirectory(OutputFolder);
 
             // Copy configuration
-            OutputConfiguration(Path.Combine(OutputFolder, "configuration.json"));
+            OutputConfiguration(Path.Combine(OutputFolder, "appsettings.json"));
 
             // Output trades
             OutputTrades(Path.Combine(OutputFolder, "trades.csv"));
@@ -64,10 +73,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="filepath">Filepath to store configuration at</param>
         private static void OutputConfiguration(string filepath)
         {
-            string configuration = ReadAllText("appsettings.json");
-            configuration = Regex.Replace(configuration, ".*\"Key\":.*", "            \"Key\": \"api_key\",");
-            configuration = Regex.Replace(configuration, ".*\"Secret\":.*", "            \"Secret\": \"api_secret\",");
-            WriteAllText(filepath, configuration);
+            string rawjson = ReadAllText(Program.CommandLineArgs.ConfigurationPath);
+            rawjson = Regex.Replace(rawjson, "Password=.+?\\;", "Password=[...];");
+
+            JObject configuration = JObject.Parse(rawjson);
+
+            configuration["BinanceClientSettings"]["Credentials"]["Key"] = "api-key";
+            configuration["BinanceClientSettings"]["Credentials"]["Secret"] = "api-secret";
+
+            WriteAllText(filepath, configuration.ToString(Formatting.Indented));
         }
 
         /// <summary>

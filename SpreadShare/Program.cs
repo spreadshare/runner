@@ -14,9 +14,16 @@ namespace SpreadShare
     /// <summary>
     /// Entrypoint of the application
     /// </summary>
-    public static class Program
+    internal static class Program
     {
-        private static CommandLineArgs _commandLineArgs;
+        private static CommandLineArgs _commandLineArgs = new CommandLineArgs();
+        private static int _exitCode;
+        private static bool _shouldExit;
+
+        /// <summary>
+        /// Gets the instance of the CommandLineArgs
+        /// </summary>
+        public static CommandLineArgs CommandLineArgs => _commandLineArgs;
 
         /// <summary>
         /// Entrypoint of the application
@@ -33,7 +40,7 @@ namespace SpreadShare
             IServiceCollection services = new ServiceCollection();
 
             // Configure services - Provide depencies for services
-            Startup startup = new Startup(_commandLineArgs.ConfigurationPath);
+            Startup startup = new Startup(CommandLineArgs.ConfigurationPath);
             startup.ConfigureServices(services);
             Startup.ConfigureBusinessServices(services);
 
@@ -52,8 +59,17 @@ namespace SpreadShare
                 return 1;
             }
 
-            KeepRunningForever();
-            return 0;
+            return KeepRunningForever();
+        }
+
+        /// <summary>
+        /// Cause the Main() to return with a given status code
+        /// </summary>
+        /// <param name="statusCode">status code</param>
+        public static void ExitProgramWithCode(int statusCode)
+        {
+            _exitCode = statusCode;
+            _shouldExit = true;
         }
 
         /// <summary>
@@ -69,7 +85,7 @@ namespace SpreadShare
             SettingsService settings = serviceProvider.GetService<SettingsService>();
 
             // Check if allocation either completely set as backtesting, or the --trading flag was used
-            if (!_commandLineArgs.Trading)
+            if (!CommandLineArgs.Trading)
             {
                 decimal sum = 0.0M;
 
@@ -115,17 +131,19 @@ namespace SpreadShare
         /// <summary>
         /// Keep the application running
         /// </summary>
-        private static void KeepRunningForever()
+        /// <returns>exit code</returns>
+        private static int KeepRunningForever()
         {
             Thread t = new Thread(() =>
             {
-                while (true)
+                while (!_shouldExit)
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(10);
                 }
             });
             t.Start();
             t.Join();
+            return _exitCode;
         }
     }
 }
