@@ -116,6 +116,14 @@ namespace SpreadShare.Models.Trading
             return Math.Floor(quantity * lotSize) / lotSize;
         }
 
+        public Balance RoundToTradable(Balance balance)
+        {
+            return new Balance(
+                balance.Symbol,
+                RoundToTradable(balance.Free),
+                RoundToTradable(balance.Locked));
+        }
+
         /// <summary>
         /// Returns a string representation of the trading pair
         /// </summary>

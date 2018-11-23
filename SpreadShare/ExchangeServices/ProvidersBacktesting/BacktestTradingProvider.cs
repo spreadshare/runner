@@ -51,10 +51,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side, decimal quantity)
+        public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, OrderSide side, decimal quantity)
         {
             Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            var proposal = new TradeProposal(new Balance(currency, quantity, 0.0M));
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0.0M));
 
             // Keep the remote updated by mocking a trade execution and letting the communications know.
             TradeExecution exec = null;

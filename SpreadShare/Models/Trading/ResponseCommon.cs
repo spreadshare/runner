@@ -1,8 +1,14 @@
 namespace SpreadShare.Models.Trading
 {
-    internal static class ResponseObjectCommon
+    /// <summary>
+    /// Common response objects
+    /// </summary>
+    internal static class ResponseCommon
     {
-        public static ResponseObject<OrderUpdate> ORDER_REFUSED =>
-            new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order ");
+        /// <summary>
+        /// Gets a response object indicating a refused order
+        /// </summary>
+        public static ResponseObject<OrderUpdate> OrderRefused =>
+            new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused");
     }
 }

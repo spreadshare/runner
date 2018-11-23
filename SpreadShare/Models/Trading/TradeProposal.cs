@@ -8,10 +8,11 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Initializes a new instance of the <see cref="TradeProposal"/> class.
         /// </summary>
+        /// <param name="pair">Used to round the balance</param>
         /// <param name="from">The asset value on the left side of the trade</param>
-        public TradeProposal(Balance from)
+        public TradeProposal(TradingPair pair, Balance from)
         {
-            From = from;
+            From = pair.RoundToTradable(from);
         }
 
         /// <summary>
