@@ -105,43 +105,47 @@ namespace SpreadShare.ExchangeServices.Providers
             return new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused by AllocationManager");
         }
 
+        /// <summary>
+        /// Execute a market order with a custom amount
+        /// </summary>
+        /// <param name="pair">TradingPair</param>
+        /// <param name="side">Buy or Sell</param>
+        /// <param name="quantity">Quantity of non base currency</param>
+        /// <returns>Response object containing an order update</returns>
         public ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, OrderSide side, decimal quantity)
         {
             var currency = side == OrderSide.Buy ? pair.Right : pair.Left;
             decimal correctedAmount = side == OrderSide.Buy
-                ? quantity *
-                  _dataProvider.GetCurrentPriceLastTrade(pair).Data
+                ? quantity * _dataProvider.GetCurrentPriceLastTrade(pair).Data
                 : quantity;
             var proposal = new TradeProposal(new Balance(currency, correctedAmount, 0));
             ResponseObject<OrderUpdate> query = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            var tradeSuccess = _allocationManager.QueueTrade(proposal,
-                () =>
+            var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
+            {
+                query = RetryMethod(() => _implementation.PlaceFullMarketOrder(pair, side, quantity));
+                if (!query.Success)
                 {
-          
-                    query = RetryMethod(() => _implementation.PlaceFullMarketOrder(pair, side, quantity));
-                    if (!query.Success)
-                    {
-                        return null;
-                    }
+                    return null;
+                }
 
-                    // Report the trade with the actual quantity as communicated by the exchange.
-                    TradeExecution exec;
-                    if (side == OrderSide.Buy)
-                    {
-                        exec = new TradeExecution(
-                            new Balance(pair.Right, proposal.From.Free, 0.0M),
-                            new Balance(pair.Left, query.Data.SetQuantity, 0.0M));
-                    }
-                    else
-                    {
-                        decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
-                        exec = new TradeExecution(
-                            new Balance(pair.Left, proposal.From.Free, 0.0M),
-                            new Balance(pair.Right, query.Data.SetQuantity * priceEstimate, 0.0M));
-                    }
+                // Report the trade with the actual quantity as communicated by the exchange.
+                TradeExecution exec;
+                if (side == OrderSide.Buy)
+                {
+                    exec = new TradeExecution(
+                        new Balance(pair.Right, proposal.From.Free, 0.0M),
+                        new Balance(pair.Left, query.Data.SetQuantity, 0.0M));
+                }
+                else
+                {
+                    decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
+                    exec = new TradeExecution(
+                        new Balance(pair.Left, proposal.From.Free, 0.0M),
+                        new Balance(pair.Right, query.Data.SetQuantity * priceEstimate, 0.0M));
+                }
 
-                    return exec;
-                });
+                return exec;
+            });
             if (tradeSuccess)
             {
                 return query;
