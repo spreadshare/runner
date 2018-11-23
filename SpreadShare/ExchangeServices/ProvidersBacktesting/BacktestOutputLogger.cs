@@ -74,6 +74,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private static void OutputConfiguration(string filepath)
         {
             string rawjson = ReadAllText(Program.CommandLineArgs.ConfigurationPath);
+            rawjson = Regex.Replace(rawjson, "Password=.+?\\;", "Password=[...];");
+
             JObject configuration = JObject.Parse(rawjson);
 
             configuration["BinanceClientSettings"]["Credentials"]["Key"] = "api-key";
