@@ -112,8 +112,7 @@ namespace SpreadShare.Models.Trading
         /// <returns>Rounded quantity</returns>
         public decimal RoundToTradable(decimal quantity)
         {
-            long lotSize = IntPow(10, (uint)Decimals);
-            return Math.Floor(quantity * lotSize) / lotSize;
+            return Math.Round(quantity, Decimals);
         }
 
         /// <summary>
