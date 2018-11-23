@@ -81,17 +81,17 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency</param>
-        /// <returns></returns>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceMarketOrderBuy(TradingPair pair, decimal quantity)
         {
             var currency = pair.Right;
             var priceEstimate = _dataProvider.GetCurrentPriceTopAsk(pair).Data;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * priceEstimate, 0));
-            
+
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = RetryMethod(() => 
+                result = RetryMethod(() =>
                     _implementation.PlaceMarketOrder(pair, OrderSide.Buy, quantity));
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(pair.Left, result.Data.SetQuantity, 0.0M))
@@ -107,7 +107,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency</param>
-        /// <returns></returns>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceMarketOrderSell(TradingPair pair, decimal quantity)
         {
             var currency = pair.Left;
@@ -140,7 +140,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency to trade with</param>
         /// <param name="price">Price to set order at</param>
-        /// <returns></returns>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
             var currency = pair.Right;
@@ -163,12 +163,12 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency to trade with</param>
         /// <param name="price">Price to set order at</param>
-        /// <returns></returns>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
         {
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
-            
+
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
             {

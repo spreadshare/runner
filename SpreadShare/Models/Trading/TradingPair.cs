@@ -106,7 +106,7 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Round unrounded quantity to the tradable quantity conform to TradingPair's decimals
+        /// Round unrounded quantity to the tradable quantity conform to the TradingPair's specification
         /// </summary>
         /// <param name="quantity">Unrounded quantity</param>
         /// <returns>Rounded quantity</returns>
@@ -116,6 +116,11 @@ namespace SpreadShare.Models.Trading
             return Math.Floor(quantity * lotSize) / lotSize;
         }
 
+        /// <summary>
+        /// Round unrounded balance to tradable quantity conform to the TradingPair's specification
+        /// </summary>
+        /// <param name="balance">Balance to round</param>
+        /// <returns>Rounded Balance</returns>
         public Balance RoundToTradable(Balance balance)
         {
             return new Balance(
