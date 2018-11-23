@@ -66,7 +66,9 @@ namespace SpreadShare.Algorithms.Implementations
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                trading.PlaceFullMarketOrder(AlgorithmSettings.ActiveTradingPairs.First(), OrderSide.Buy);
+                decimal price = data.GetCurrentPriceLastTrade(AlgorithmSettings.ActiveTradingPairs.First()).Data;
+                decimal quantity = 1M / price;
+                trading.PlaceMarketOrder(AlgorithmSettings.ActiveTradingPairs.First(), OrderSide.Buy, quantity);
                 SetTimer(TimeSpan.FromHours(AlgorithmSettings.HoldTime));
             }
         }

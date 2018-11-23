@@ -105,6 +105,51 @@ namespace SpreadShare.ExchangeServices.Providers
             return new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused by AllocationManager");
         }
 
+        public ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, OrderSide side, decimal quantity)
+        {
+            var currency = side == OrderSide.Buy ? pair.Right : pair.Left;
+            decimal correctedAmount = side == OrderSide.Buy
+                ? quantity *
+                  _dataProvider.GetCurrentPriceLastTrade(pair).Data
+                : quantity;
+            var proposal = new TradeProposal(new Balance(currency, correctedAmount, 0));
+            ResponseObject<OrderUpdate> query = new ResponseObject<OrderUpdate>(ResponseCode.Error);
+            var tradeSuccess = _allocationManager.QueueTrade(proposal,
+                () =>
+                {
+          
+                    query = RetryMethod(() => _implementation.PlaceFullMarketOrder(pair, side, quantity));
+                    if (!query.Success)
+                    {
+                        return null;
+                    }
+
+                    // Report the trade with the actual quantity as communicated by the exchange.
+                    TradeExecution exec;
+                    if (side == OrderSide.Buy)
+                    {
+                        exec = new TradeExecution(
+                            new Balance(pair.Right, proposal.From.Free, 0.0M),
+                            new Balance(pair.Left, query.Data.SetQuantity, 0.0M));
+                    }
+                    else
+                    {
+                        decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
+                        exec = new TradeExecution(
+                            new Balance(pair.Left, proposal.From.Free, 0.0M),
+                            new Balance(pair.Right, query.Data.SetQuantity * priceEstimate, 0.0M));
+                    }
+
+                    return exec;
+                });
+            if (tradeSuccess)
+            {
+                return query;
+            }
+
+            return new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused by AllocationManager");
+        }
+
         /// <summary>
         /// Place a limit order at a certain price
         /// </summary>
@@ -116,7 +161,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price)
         {
             var currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            decimal proposedQuantity = side == OrderSide.Buy ? quantity * price : quantity;
+            decimal proposedQuantity = side == OrderSide.Sell ? quantity * price : quantity;
             var proposal = new TradeProposal(new Balance(currency, proposedQuantity, 0));
             ResponseObject<OrderUpdate> query = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
