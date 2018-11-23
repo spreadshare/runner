@@ -85,6 +85,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             {
                 Status = OrderUpdate.OrderStatus.Filled,
                 AveragePrice = priceEstimate,
+                FilledQuantity = quantity,
                 FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds()
             };
 
