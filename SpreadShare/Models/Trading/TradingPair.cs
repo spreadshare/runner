@@ -113,7 +113,7 @@ namespace SpreadShare.Models.Trading
         public decimal RoundToTradable(decimal quantity)
         {
             decimal value = Math.Round(quantity, Decimals);
-            return value <= quantity ? value : value - 1.0M / (decimal)Math.Pow(10, Decimals);
+            return value <= quantity ? value : value - (decimal)Math.Pow(10, -Decimals);
         }
 
         /// <summary>
