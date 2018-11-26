@@ -142,6 +142,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             var order = GetOrderInfo(pair, orderId).Data;
             order.Status = OrderUpdate.OrderStatus.Cancelled;
+            order.FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
 
             if (WatchList.ContainsKey(orderId))
             {
