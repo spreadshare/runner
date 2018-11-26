@@ -27,7 +27,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, Models.OrderSide side, decimal quantity)
+        public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, Models.OrderSide side, decimal quantity)
         {
             throw new NotImplementedException();
             /*

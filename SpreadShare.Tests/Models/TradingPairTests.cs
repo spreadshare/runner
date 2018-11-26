@@ -145,7 +145,7 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
-        public void RoundingHappyFlow()
+        public void RoundToTradableDecimalHappyFlow()
         {
             var pair = GetTradingPair("BNB", "ETH", 3);
             decimal amount = 420.691634M;
@@ -154,7 +154,18 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(corrected, calc);
         }
 
-        private static TradingPair GetTradingPair(string strLeft, string strRight, int decimals = 0)
+        [Fact]
+        public void RoundToTradableBalanceHappyFlow()
+        {
+            var pair = GetTradingPair("BNB", "ETH", 3);
+            Balance balance = new Balance(new Currency("BNB"), 254.1234M, 0.0000000000000001M);
+            Balance corrected = new Balance(new Currency("BNB"), 254.123M, 0);
+            Balance calc = pair.RoundToTradable(balance);
+            Assert.Equal(corrected.Free, calc.Free);
+            Assert.Equal(corrected.Locked, calc.Locked);
+        }
+
+        internal static TradingPair GetTradingPair(string strLeft, string strRight, int decimals = 0)
         {
             Currency left = new Currency(strLeft);
             Currency right = new Currency(strRight);

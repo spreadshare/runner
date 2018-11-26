@@ -52,7 +52,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                 typeof(SimpleBandWagonAlgorithm)));
 
             Assert.Throws<ArgumentNullException>(() => allocationManager.QueueTrade(
-                new TradeProposal(new Balance(c, 10, 10)),
+                new TradeProposal(TradingPair.Parse("EOSETH"), new Balance(c, 10, 10)),
                 typeof(SimpleBandWagonAlgorithm),
                 Exchange.Backtesting,
                 () => new TradeExecution(Balance.Empty(c), Balance.Empty(c))));
@@ -111,7 +111,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             // Get most valuable asset from backtesting settings.
             Balance balance = SortedSettingsBalances.First();
 
-            var proposal = new TradeProposal(balance);
+            var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), balance);
             bool result = weak.QueueTrade(proposal, () =>
             {
                 Logger.LogInformation($"Trading all of the {proposal.From.Free}{proposal.From.Symbol}");
@@ -135,7 +135,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             Type algo = typeof(SimpleBandWagonAlgorithm);
             Balance balance = SortedSettingsBalances.First();
             var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
-            var proposal = new TradeProposal(new Balance(
+            var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), new Balance(
                 balance.Symbol,
                 balance.Free + 1,
                 balance.Locked));
@@ -164,7 +164,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             Type algo = typeof(SimpleBandWagonAlgorithm);
             Balance balance = SortedSettingsBalances.First();
             var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
-            var proposal = new TradeProposal(balance);
+            var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), balance);
 
             bool result = alloc.QueueTrade(proposal, () => null);
             Assert.True(result, "Valid proposal was not executed");

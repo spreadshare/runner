@@ -1,3 +1,5 @@
+using Dawn;
+
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
@@ -8,10 +10,14 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Initializes a new instance of the <see cref="TradeProposal"/> class.
         /// </summary>
+        /// <param name="pair">Used to round the balance</param>
         /// <param name="from">The asset value on the left side of the trade</param>
-        public TradeProposal(Balance from)
+        public TradeProposal(TradingPair pair, Balance from)
         {
-            From = from;
+            Guard.Argument(pair).NotNull().Require(
+                x => x.Left == from.Symbol || x.Right == from.Symbol,
+                x => $"{from.Symbol} was not contained in {pair}, invalid proposal");
+            From = pair.RoundToTradable(from);
         }
 
         /// <summary>

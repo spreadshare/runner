@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
@@ -44,107 +46,138 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Gets the portfolio associated with an algorithm
         /// </summary>
         /// <returns>Response object indicating success or not</returns>
-        /// TODO: Make method algorithm specific
         public Portfolio GetPortfolio()
         {
             return _allocationManager.GetAllFunds();
         }
 
         /// <summary>
-        /// Places market order with the full quantity of given pair
+        /// Place a buy market order using the full allocation
         /// </summary>
-        /// <param name="pair">trading pair to trade with</param>
-        /// <param name="side">Whether to buy or sell</param>
-        /// <returns>A response object indicating the status of the market order</returns>
-        public ResponseObject<OrderUpdate> PlaceFullMarketOrder(TradingPair pair, OrderSide side)
+        /// <param name="pair">TradingPair to consider</param>
+        /// <returns>ResponseObject with an OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceFullMarketOrderBuy(TradingPair pair)
         {
-            Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            Balance balance = _allocationManager.GetAvailableFunds(currency);
-            var proposal = new TradeProposal(new Balance(currency, balance.Free, 0.0M));
-
-            ResponseObject<OrderUpdate> query = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
-            {
-                query = RetryMethod(() =>
-                {
-                    decimal tradeQuantity = side == OrderSide.Buy
-                        ? GetBuyQuantityEstimate(pair, proposal.From.Free)
-                        : proposal.From.Free;
-                    return _implementation.PlaceFullMarketOrder(pair, side, tradeQuantity);
-                });
-
-                if (!query.Success)
-                {
-                    return null;
-                }
-
-                // Report the trade with the actual quantity as communicated by the exchange.
-                TradeExecution exec;
-                if (side == OrderSide.Buy)
-                {
-                    exec = new TradeExecution(
-                        new Balance(pair.Right, proposal.From.Free, 0.0M),
-                        new Balance(pair.Left, query.Data.SetQuantity, 0.0M));
-                }
-                else
-                {
-                    decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
-                    exec = new TradeExecution(
-                        new Balance(pair.Left, proposal.From.Free, 0.0M),
-                        new Balance(pair.Right, query.Data.SetQuantity * priceEstimate, 0.0M));
-                }
-
-                return exec;
-            });
-
-            if (tradeSuccess)
-            {
-                return query;
-            }
-
-            return new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused by AllocationManager");
+            var currency = pair.Right;
+            var balance = _allocationManager.GetAvailableFunds(currency);
+            var quantity = GetBuyQuantityEstimate(pair, balance.Free);
+            return PlaceMarketOrderBuy(pair, quantity);
         }
 
         /// <summary>
-        /// Place a limit order at a certain price
+        /// Place a sell market order using the full allocation
         /// </summary>
-        /// <param name="pair">Trading Pair</param>
-        /// <param name="side">Buy or sell</param>
-        /// <param name="quantity">The quantity of non base currency</param>
-        /// <param name="price">The price to place the order at</param>
-        /// <returns>A Response object indicating the status of the order</returns>
-        public ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price)
+        /// <param name="pair">TradingPair to consider</param>
+        /// <returns>ResponseObject with an OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceFullMarketOrderSell(TradingPair pair)
         {
-            var currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            decimal proposedQuantity = side == OrderSide.Buy ? quantity * price : quantity;
-            var proposal = new TradeProposal(new Balance(currency, proposedQuantity, 0));
-            ResponseObject<OrderUpdate> query = new ResponseObject<OrderUpdate>(ResponseCode.Error);
+            var currency = pair.Left;
+            var balance = _allocationManager.GetAvailableFunds(currency);
+            return PlaceMarketOrderSell(pair, balance.Free);
+        }
+
+        /// <summary>
+        /// Place a buy market order given a non base quantity.
+        /// </summary>
+        /// <param name="pair">TradingPair to consider</param>
+        /// <param name="quantity">Quantity of non base currency</param>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceMarketOrderBuy(TradingPair pair, decimal quantity)
+        {
+            var currency = pair.Right;
+            var priceEstimate = _dataProvider.GetCurrentPriceTopAsk(pair).Data;
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity * priceEstimate, 0));
+
+            ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
+            var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
+            {
+                result = RetryMethod(() =>
+                    _implementation.PlaceMarketOrder(pair, OrderSide.Buy, quantity));
+                return result.Success
+                    ? new TradeExecution(proposal.From, new Balance(pair.Left, result.Data.SetQuantity, 0.0M))
+                    : null;
+            });
+            return tradeSuccess
+                ? result
+                : ResponseCommon.OrderRefused;
+        }
+
+        /// <summary>
+        /// Place a sell market order given a non base quantity
+        /// </summary>
+        /// <param name="pair">TradingPair to consider</param>
+        /// <param name="quantity">Quantity of non base currency</param>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceMarketOrderSell(TradingPair pair, decimal quantity)
+        {
+            var currency = pair.Left;
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
+
+            ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
+            var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
+            {
+                result = RetryMethod(() =>
+                    _implementation.PlaceMarketOrder(pair, OrderSide.Sell, proposal.From.Free));
+                if (result.Success)
+                {
+                    // Correct gained quantity using a price estimate
+                    decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
+                    return new TradeExecution(
+                        proposal.From,
+                        new Balance(pair.Right, result.Data.SetQuantity * priceEstimate, 0));
+                }
+
+                return null;
+            });
+            return tradeSuccess
+                ? result
+                : ResponseCommon.OrderRefused;
+        }
+
+        /// <summary>
+        /// Place a selll limit order given a non base quantity and target price
+        /// </summary>
+        /// <param name="pair">TradingPair to consider</param>
+        /// <param name="quantity">Quantity of non base currency to trade with</param>
+        /// <param name="price">Price to set order at</param>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
+        {
+            var currency = pair.Right;
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
+
+            ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
             {
-                query = RetryMethod(() => _implementation.PlaceLimitOrder(pair, side, quantity, price));
-
-                if (!query.Success)
-                {
-                    return null;
-                }
-
-                TradeExecution exec;
-                if (side == OrderSide.Buy)
-                {
-                    exec = new TradeExecution(
-                        new Balance(currency, quantity * price, 0),
-                        new Balance(currency, 0, quantity * price));
-                }
-                else
-                {
-                    exec = new TradeExecution(
-                        new Balance(currency, quantity, 0),
-                        new Balance(currency, 0, quantity));
-                }
-
-                return exec;
+                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, quantity, price));
+                return result.Success
+                    ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity * price))
+                    : null;
             });
-            return tradeSucces ? query : new ResponseObject<OrderUpdate>(ResponseCode.Error);
+            return tradeSucces ? result : ResponseCommon.OrderRefused;
+        }
+
+        /// <summary>
+        /// Place a buy limit order given a non base quantity and a target price
+        /// </summary>
+        /// <param name="pair">TradingPair to consider</param>
+        /// <param name="quantity">Quantity of non base currency to trade with</param>
+        /// <param name="price">Price to set order at</param>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
+        {
+            var currency = pair.Left;
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
+
+            ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
+            bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
+            {
+                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, quantity, price));
+                return result.Success
+                    ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity))
+                    : null;
+            });
+            return tradeSucces ? result : ResponseCommon.OrderRefused;
         }
 
         /// <summary>
