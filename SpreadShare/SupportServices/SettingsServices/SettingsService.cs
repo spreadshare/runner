@@ -350,7 +350,7 @@ namespace SpreadShare.SupportServices.SettingsServices
                 {
                     throw new Exception($"Database does not contain candles for {pair}");
                 }
-                
+
                 try
                 {
                     long first = _databaseContext.Candles.OrderBy(x => x.Timestamp)

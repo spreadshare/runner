@@ -19,7 +19,8 @@ namespace SpreadShare.Models.Database
         /// <param name="pair">The trading pair</param>
         /// <param name="setQuantity">The quantity of non base currency for which the order was set</param>
         /// <param name="filledQuantity">The quantity of non base currency that was filled</param>
-        /// <param name="price">The price of the trade</param>
+        /// <param name="setPrice">The setPrice of the trade</param>
+        /// <param name="filledPrice">the filledPrice of the trade</param>
         /// <param name="side">Buy or sell order</param>
         /// <param name="assets">The portfolio after the trade</param>
         /// <param name="value">The value of the portfolio before the trade</param>
@@ -32,7 +33,8 @@ namespace SpreadShare.Models.Database
             string pair,
             decimal setQuantity,
             decimal filledQuantity,
-            decimal price,
+            decimal setPrice,
+            decimal filledPrice,
             string side,
             string assets,
             decimal value)
@@ -43,7 +45,8 @@ namespace SpreadShare.Models.Database
             CreatedTimestamp = createdTimestamp;
             FilledTimeStamp = filledTimeStamp;
             Pair = pair;
-            Price = price;
+            SetPrice = setPrice;
+            FilledPrice = filledPrice;
             SetQuantity = setQuantity;
             FilledQuantity = filledQuantity;
             Side = side;
@@ -67,7 +70,8 @@ namespace SpreadShare.Models.Database
             CreatedTimestamp = order.CreatedTimeStamp;
             FilledTimeStamp = order.FilledTimeStamp;
             Pair = order.Pair.ToString();
-            Price = order.AveragePrice;
+            SetPrice = order.SetPrice;
+            FilledPrice = order.AverageFilledPrice;
 
             SetQuantity = order.SetQuantity;
             FilledQuantity = order.FilledQuantity;
@@ -118,9 +122,14 @@ namespace SpreadShare.Models.Database
         public decimal FilledQuantity { get; set; }
 
         /// <summary>
-        /// Gets or sets the price of the trade
+        /// Gets or sets the setPrice of the trade
         /// </summary>
-        public decimal Price { get; set; }
+        public decimal SetPrice { get; set; }
+
+        /// <summary>
+        /// Gets or sets the filledPrice of the trade.
+        /// </summary>
+        public decimal FilledPrice { get; set; }
 
         /// <summary>
         /// Gets or sets whether the order was a buy or sell order
@@ -153,7 +162,8 @@ namespace SpreadShare.Models.Database
                    $"{nameof(Pair)}{delimiter}" +
                    $"{nameof(SetQuantity)}{delimiter}" +
                    $"{nameof(FilledQuantity)}{delimiter}" +
-                   $"{nameof(Price)}{delimiter}" +
+                   $"{nameof(SetPrice)}{delimiter}" +
+                   $"{nameof(FilledPrice)}{delimiter}" +
                    $"{nameof(Value)}{delimiter}" +
                    $"{nameof(Assets)}";
         }
@@ -170,7 +180,8 @@ namespace SpreadShare.Models.Database
                    $"{Pair}{delimiter}" +
                    $"{SetQuantity}{delimiter}" +
                    $"{FilledQuantity}{delimiter}" +
-                   $"{Price}{delimiter}" +
+                   $"{SetPrice}{delimiter}" +
+                   $"{FilledPrice}{delimiter}" +
                    $"{Value}{delimiter}" +
                    $"{Assets}";
         }

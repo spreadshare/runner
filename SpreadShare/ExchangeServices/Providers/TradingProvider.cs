@@ -139,7 +139,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency to trade with</param>
-        /// <param name="price">Price to set order at</param>
+        /// <param name="price">SetPrice to set order at</param>
         /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
@@ -162,7 +162,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency to trade with</param>
-        /// <param name="price">Price to set order at</param>
+        /// <param name="price">SetPrice to set order at</param>
         /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
         {
@@ -265,7 +265,7 @@ namespace SpreadShare.ExchangeServices.Providers
             {
                 exec = new TradeExecution(
                     new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                    new Balance(order.Pair.Right, order.SetQuantity * order.AveragePrice, 0));
+                    new Balance(order.Pair.Right, order.SetQuantity * order.AverageFilledPrice, 0));
             }
 
             _allocationManager.UpdateAllocation(exec);

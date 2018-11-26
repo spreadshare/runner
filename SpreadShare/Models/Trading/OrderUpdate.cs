@@ -10,7 +10,7 @@
         /// </summary>
         /// <param name="orderType">The type of the order</param>
         /// <param name="createdTimeStamp">The timestamp at which the order is created</param>
-        /// <param name="setPrice">Price at which the order was set</param>
+        /// <param name="setPrice">SetPrice at which the order was set</param>
         /// <param name="side">Side of the order</param>
         /// <param name="pair">The pair of order</param>
         /// <param name="setQuantity">The quantity of the order</param>
@@ -148,7 +148,7 @@
         /// <summary>
         /// Gets or sets the average price of the order.
         /// </summary>
-        public decimal AveragePrice { get; set; }
+        public decimal AverageFilledPrice { get; set; }
 
         /// <summary>
         /// Gets or sets the last fill price of the order.
