@@ -165,6 +165,14 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(corrected.Locked, calc.Locked);
         }
 
+        [Fact]
+        public void RoundToTradableNegativeNumbers()
+        {
+            var pair = GetTradingPair("BNB", "ETH", 3);
+            Balance balance = new Balance(new Currency("BNB"), -1, 0);
+            Assert.Throws<ArgumentOutOfRangeException>(() => pair.RoundToTradable(balance));
+        }
+
         internal static TradingPair GetTradingPair(string strLeft, string strRight, int decimals = 0)
         {
             Currency left = new Currency(strLeft);
