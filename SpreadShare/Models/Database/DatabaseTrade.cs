@@ -68,6 +68,7 @@ namespace SpreadShare.Models.Database
             FilledTimeStamp = order.FilledTimeStamp;
             Pair = order.Pair.ToString();
             Price = order.AveragePrice;
+
             SetQuantity = order.SetQuantity;
             FilledQuantity = order.FilledQuantity;
             Side = order.Side.ToString();
@@ -145,6 +146,7 @@ namespace SpreadShare.Models.Database
         {
             return $"{nameof(OrderId)}{delimiter}" +
                    $"{nameof(OrderType)}{delimiter}" +
+                   $"{nameof(OrderStatus)}{delimiter}" +
                    $"{nameof(Side)}{delimiter}" +
                    $"{nameof(CreatedTimestamp)}{delimiter}" +
                    $"{nameof(FilledTimeStamp)}{delimiter}" +
@@ -161,6 +163,7 @@ namespace SpreadShare.Models.Database
         {
             return $"{OrderId}{delimiter}" +
                    $"{OrderType}{delimiter}" +
+                   $"{OrderStatus}{delimiter}" +
                    $"{Side}{delimiter}" +
                    $"{CreatedTimestamp}{delimiter}" +
                    $"{FilledTimeStamp}{delimiter}" +
