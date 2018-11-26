@@ -144,7 +144,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject<OrderUpdate> PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
             var currency = pair.Right;
-            var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
@@ -167,12 +167,12 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject<OrderUpdate> PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
         {
             var currency = pair.Left;
-            var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, quantity, price));
+                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Sell, quantity, price));
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity))
                     : null;
