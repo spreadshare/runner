@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Binance.Net;
 using Binance.Net.Objects;
+using Dawn;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
@@ -303,6 +304,13 @@ namespace SpreadShare.SupportServices.SettingsServices
             result.BeginTimeStamp = beginValStr == "auto" ? edges.Item1 : long.Parse(beginValStr, NumberFormatInfo.InvariantInfo);
             result.EndTimeStamp = endValStr == "auto" ? edges.Item2 : long.Parse(endValStr, NumberFormatInfo.InvariantInfo);
 
+            Guard.Argument(result.BeginTimeStamp).Require(
+                x => x % 60000 == 0,
+                x => $"BeginTimeStamp must be a multiple of 60000 but is {x}");
+            Guard.Argument(result.EndTimeStamp).Require(
+                x => x % 60000 == 0,
+                x => $"EndTimeStamp must be a multiple of 60000 but is {x}");
+
             if (result.BeginTimeStamp % 60000 != 0 || result.EndTimeStamp % 60000 != 0)
             {
                 _logger.LogError("Timestamps must be a multiple of 60000ms (1 minute)");
@@ -328,11 +336,21 @@ namespace SpreadShare.SupportServices.SettingsServices
 
         private Tuple<long, long> GetTimeStampEdges()
         {
+            if (!_databaseContext.Candles.Any())
+            {
+                throw new Exception("Database contains no candles!");
+            }
+
             var pairs = _backtestedAlgorithm.ActiveTradingPairs;
             long minBeginVal = 0;
             long minEndVal = long.MaxValue;
             foreach (var pair in pairs)
             {
+                if (!_databaseContext.Candles.Where(x => x.TradingPair == pair.ToString()).Any())
+                {
+                    throw new Exception($"Database does not contain candles for {pair}");
+                }
+                
                 try
                 {
                     long first = _databaseContext.Candles.OrderBy(x => x.Timestamp)
