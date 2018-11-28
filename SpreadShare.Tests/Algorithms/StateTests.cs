@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
+using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
@@ -19,7 +20,7 @@ namespace SpreadShare.Tests.Algorithms
             : base(outputHelper)
         {
             _container = ExchangeFactoryService
-                .BuildContainer(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithmSettings));
+                .BuildContainer(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithm));
         }
 
         [Fact]
