@@ -1,4 +1,4 @@
-﻿namespace SpreadShare.Utilities
+﻿namespace SpreadShare.Models
 {
     /// <summary>
     /// Object representation of the code of the response to an action
