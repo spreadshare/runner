@@ -17,8 +17,6 @@ namespace SpreadShare
     internal static class Program
     {
         private static CommandLineArgs _commandLineArgs = new CommandLineArgs();
-        private static int _exitCode;
-        private static bool _shouldExit;
 
         /// <summary>
         /// Gets the instance of the CommandLineArgs
@@ -68,8 +66,9 @@ namespace SpreadShare
         /// <param name="statusCode">status code</param>
         public static void ExitProgramWithCode(int statusCode)
         {
-            _exitCode = statusCode;
-            _shouldExit = true;
+            // Allow some time for the logs to flush
+            Thread.Sleep(500);
+            Environment.Exit(statusCode);
         }
 
         /// <summary>
@@ -136,14 +135,14 @@ namespace SpreadShare
         {
             Thread t = new Thread(() =>
             {
-                while (!_shouldExit)
+                while (true)
                 {
                     Thread.Sleep(10);
                 }
             });
             t.Start();
             t.Join();
-            return _exitCode;
+            return 0;
         }
     }
 }

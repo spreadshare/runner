@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
