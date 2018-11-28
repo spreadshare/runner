@@ -8,6 +8,7 @@ using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.Algorithms
 {
@@ -66,19 +67,11 @@ namespace SpreadShare.Algorithms
             // Figure out which container to get
             BaseAlgorithm algorithm = (BaseAlgorithm)Activator.CreateInstance(algorithmType);
 
-            // Get settings
-            var settingsResponse = GetSettings(algorithm.GetSettingsType);
-            if (!settingsResponse.Success)
-            {
-                return new ResponseObject(ResponseCode.Error, settingsResponse.Message);
-            }
-
-            AlgorithmSettings settings = settingsResponse.Data;
-            Exchange exchangeEnum = settings.Exchange;
+            AlgorithmSettings settings = _settingsService.GetAlgorithSettings(algorithmType);
 
             // Build container
             var container = _exchangeFactoryService.BuildContainer(
-                exchangeEnum,
+                settings.Exchange,
                 algorithmType);
 
             // Start the timer provider

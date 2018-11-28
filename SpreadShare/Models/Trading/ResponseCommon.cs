@@ -1,3 +1,5 @@
+using SpreadShare.Utilities;
+
 namespace SpreadShare.Models.Trading
 {
     /// <summary>

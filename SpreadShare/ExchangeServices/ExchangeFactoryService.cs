@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
@@ -99,11 +98,7 @@ namespace SpreadShare.ExchangeServices
                     throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);
             }
 
-            AlgorithmSettings algorithmSettings = null;
-            if (algorithm == typeof(SimpleBandWagonAlgorithm))
-            {
-                algorithmSettings = _settingsService.SimpleBandWagonAlgorithmSettings;
-            }
+            AlgorithmSettings algorithmSettings = _settingsService.GetAlgorithSettings(algorithm);
 
             var allocationManager = _allocationManager.GetWeakAllocationManager(algorithm, exchange);
 
