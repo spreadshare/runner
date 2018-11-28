@@ -22,7 +22,8 @@ namespace SpreadShare.Migrations
                     Pair = table.Column<string>(nullable: true),
                     SetQuantity = table.Column<decimal>(nullable: false),
                     FilledQuantity = table.Column<decimal>(nullable: false),
-                    Price = table.Column<decimal>(nullable: false),
+                    SetPrice = table.Column<decimal>(nullable: false),
+                    FilledPrice = table.Column<decimal>(nullable: false),
                     Side = table.Column<string>(nullable: true),
                     Assets = table.Column<string>(nullable: true),
                     Value = table.Column<decimal>(nullable: false)

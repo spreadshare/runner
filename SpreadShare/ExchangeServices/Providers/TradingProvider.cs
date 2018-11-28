@@ -139,12 +139,12 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency to trade with</param>
-        /// <param name="price">Price to set order at</param>
+        /// <param name="price">SetPrice to set order at</param>
         /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
             var currency = pair.Right;
-            var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
@@ -162,17 +162,17 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency to trade with</param>
-        /// <param name="price">Price to set order at</param>
+        /// <param name="price">SetPrice to set order at</param>
         /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
         {
             var currency = pair.Left;
-            var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, quantity, price));
+                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Sell, quantity, price));
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity))
                     : null;
@@ -265,7 +265,7 @@ namespace SpreadShare.ExchangeServices.Providers
             {
                 exec = new TradeExecution(
                     new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                    new Balance(order.Pair.Right, order.SetQuantity * order.AveragePrice, 0));
+                    new Balance(order.Pair.Right, order.SetQuantity * order.AverageFilledPrice, 0));
             }
 
             _allocationManager.UpdateAllocation(exec);

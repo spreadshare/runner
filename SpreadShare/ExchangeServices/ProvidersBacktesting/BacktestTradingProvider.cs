@@ -84,7 +84,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 quantity)
             {
                 Status = OrderUpdate.OrderStatus.Filled,
-                AveragePrice = priceEstimate,
+                AverageFilledPrice = priceEstimate,
                 FilledQuantity = quantity,
                 FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds()
             };
@@ -142,6 +142,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             var order = GetOrderInfo(pair, orderId).Data;
             order.Status = OrderUpdate.OrderStatus.Cancelled;
+            order.FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
 
             if (WatchList.ContainsKey(orderId))
             {
@@ -207,7 +208,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 order.Status = OrderUpdate.OrderStatus.Filled;
 
                 // Set the actual price for the order
-                order.AveragePrice = price;
+                order.AverageFilledPrice = price;
                 order.FilledQuantity = order.SetQuantity;
                 order.LastFillIncrement = order.SetQuantity;
                 order.LastFillPrice = price;
@@ -225,7 +226,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 {
                     exec = new TradeExecution(
                         new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                        new Balance(order.Pair.Right, order.SetQuantity * order.AveragePrice, 0));
+                        new Balance(order.Pair.Right, order.SetQuantity * order.AverageFilledPrice, 0));
                 }
 
                 _comm.RemotePortfolio.UpdateAllocation(exec);

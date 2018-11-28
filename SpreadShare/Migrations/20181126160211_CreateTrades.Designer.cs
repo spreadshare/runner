@@ -11,7 +11,7 @@ using SpreadShare.SupportServices;
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20181119184058_CreateTrades")]
+    [Migration("20181126160211_CreateTrades")]
     partial class CreateTrades
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,6 +53,8 @@ namespace SpreadShare.Migrations
 
                     b.Property<long>("CreatedTimestamp");
 
+                    b.Property<decimal>("FilledPrice");
+
                     b.Property<decimal>("FilledQuantity");
 
                     b.Property<long>("FilledTimeStamp");
@@ -63,7 +65,7 @@ namespace SpreadShare.Migrations
 
                     b.Property<string>("Pair");
 
-                    b.Property<decimal>("Price");
+                    b.Property<decimal>("SetPrice");
 
                     b.Property<decimal>("SetQuantity");
 
@@ -95,5 +97,6 @@ namespace SpreadShare.Migrations
         }
     }
 }
+
 
 #pragma warning restore

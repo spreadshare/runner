@@ -16,19 +16,7 @@
         "MinimalGrowthPercentage" : 7,
         "CheckTime": 18,
         "HoldTime": 1,
-        "activeTradingPairs": [
-            "MTHETH",
-            "ADAETH",
-            "VETETH",
-            "QTUMETH",
-            "PIVXETH",
-            "XRPETH",
-            "IOTAETH",
-            "ONTETH",
-            "XMRETH",
-            "ZECETH",
-            "XLMETH",
-            "XVGETH",
+        "ActiveTradingPairs": [
             "EOSETH"
         ]
     },

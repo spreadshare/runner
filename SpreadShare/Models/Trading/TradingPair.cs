@@ -112,6 +112,7 @@ namespace SpreadShare.Models.Trading
         /// <returns>Rounded quantity</returns>
         public decimal RoundToTradable(decimal quantity)
         {
+            Guard.Argument(quantity).NotNegative(x => $"Quantity is negative namely: {x}");
             decimal value = Math.Round(quantity, Decimals);
             return value <= quantity ? value : value - (decimal)Math.Pow(10, -Decimals);
         }

@@ -21,6 +21,17 @@ namespace SpreadShare
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// Empty constructor, visited by EF core cli tools
+        /// </summary>
+        public Startup()
+        {
+            Configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
         /// Sets configuration
         /// </summary>
         /// <param name="filepath">location of the configuration file</param>
