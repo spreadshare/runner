@@ -6,7 +6,6 @@ using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
-using SpreadShare.Utilities;
 
 namespace SpreadShare.Algorithms.Implementations
 {
@@ -20,9 +19,6 @@ namespace SpreadShare.Algorithms.Implementations
     /// </summary>
     internal class SimpleBandWagonAlgorithm : BaseAlgorithm
     {
-        /// <inheritdoc />
-        public override Type GetSettingsType => typeof(SimpleBandWagonAlgorithmSettings);
-
         /// <inheritdoc />
         public override ResponseObject Start(
             AlgorithmSettings settings,

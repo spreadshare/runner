@@ -3,7 +3,6 @@ using System.Threading;
 using Binance.Net;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
-using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 {

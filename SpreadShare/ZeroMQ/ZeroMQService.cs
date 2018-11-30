@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using NetMQ;
 using NetMQ.Sockets;
 using SpreadShare.Models;
-using SpreadShare.Utilities;
 
 namespace SpreadShare.ZeroMQ
 {

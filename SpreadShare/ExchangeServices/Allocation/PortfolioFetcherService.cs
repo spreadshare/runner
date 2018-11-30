@@ -5,7 +5,6 @@ using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
-using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.Allocation
 {
