@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 
 namespace SpreadShare.Utilities
 {
@@ -18,17 +19,7 @@ namespace SpreadShare.Utilities
         /// <returns>All implementations of given base type</returns>
         public static IEnumerable<Type> GetAllSubtypes(Type abstraction)
         {
-            // Get current assembly
-            Assembly thisAssembly = Array.Find(AppDomain.CurrentDomain.GetAssemblies(), assembly
-                => assembly.ManifestModule.Name.Contains("SpreadShare.dll", StringComparison.InvariantCulture));
-
-            // Check if the assembly was found
-            if (thisAssembly == null)
-            {
-                throw new InvalidProgramException("Could not find SpreadShare.dll");
-            }
-
-            return from type in thisAssembly.GetTypes()
+            return from type in ThisAssembly.GetTypes()
                    where type.IsSubclassOf(abstraction)
                    select type;
         }
@@ -39,18 +30,8 @@ namespace SpreadShare.Utilities
         /// <returns>Dictionary of classes with class name</returns>
         public static Dictionary<string, TypeInfo> GetClasses()
         {
-            // Get current assembly
-            Assembly thisAssembly = Array.Find(AppDomain.CurrentDomain.GetAssemblies(), assembly
-                => assembly.ManifestModule.Name.Contains("SpreadShare.dll", StringComparison.InvariantCulture));
-
-            // Check if the assembly was found
-            if (thisAssembly == null)
-            {
-                throw new InvalidProgramException("Could not find SpreadShare.dll");
-            }
-
             // Get all defined classes
-            var typeInfos = thisAssembly.DefinedTypes;
+            var typeInfos = ThisAssembly.DefinedTypes;
             Dictionary<string, TypeInfo> classes = new Dictionary<string, TypeInfo>();
             foreach (var typeInfo in typeInfos)
             {
@@ -89,5 +70,11 @@ namespace SpreadShare.Utilities
         {
             return t.ToString().Split('.').Last();
         }
+
+        /// <summary>
+        /// One time initialized property for the assembly
+        /// </summary>
+        private static Assembly ThisAssembly { get; } = Array.Find(AppDomain.CurrentDomain.GetAssemblies(), assembly
+            => assembly.ManifestModule.Name.Contains("SpreadShare.dll", StringComparison.InvariantCulture));
     }
 }

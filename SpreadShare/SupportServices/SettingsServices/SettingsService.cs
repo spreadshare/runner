@@ -4,6 +4,7 @@ using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using Binance.Net;
 using Binance.Net.Objects;
@@ -93,11 +94,17 @@ namespace SpreadShare.SupportServices.SettingsServices
                 BinanceSettings = _configuration.GetSection("BinanceClientSettings").Get<BinanceSettings>();
                 BackTestSettings = ParseBacktestSettings();
             }
-            catch (Exception e)
+            catch (SocketException e)
             {
                 _logger.LogError(e.Message);
+                _logger.LogError("Database not available, are you running inside the docker container?");
+                Program.ExitProgramWithCode(1);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
                 _logger.LogError($"SettingsService failed to start, aborting other services\n" +
-                                 $"Validate that SpreadShare/appsettings.json is in the correct format.");
+                                 $"Validate that SpreadShare/{Program.CommandLineArgs.ConfigurationPath} is in the correct format.");
                 Program.ExitProgramWithCode(1);
             }
         }
@@ -111,14 +118,13 @@ namespace SpreadShare.SupportServices.SettingsServices
             {
                 // Disect by extracting the known base pairs.
                 Regex rx = new Regex(
-                    "(.*)(BTC|ETH|USDT|BNB)",
+                    "(.*)(BTC|ETH|USDT|BNB|PAX)",
                      RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
                 var listQuery = client.GetExchangeInfo();
                 if (!listQuery.Success)
                 {
-                    _logger.LogInformation("Could not get exchange info");
-                    throw new Exception("No connection to Binance!");
+                    throw new Exception("Could not fetch TradingPair info, no connection to Binance!");
                 }
 
                 foreach (var item in listQuery.Data.Symbols)
@@ -129,12 +135,17 @@ namespace SpreadShare.SupportServices.SettingsServices
                     var pair = rx.Match(item.Name);
                     if (!pair.Success)
                     {
-                            _logger.LogWarning($"Could not extract pairs from {item.Name}, skipping");
-                            continue;
+                        _logger.LogWarning($"Could not extract pairs from {item.Name}, skipping");
+                        continue;
                     }
 
                     string left = pair.Groups[1].Value;
                     string right = pair.Groups[2].Value;
+                    if (string.IsNullOrEmpty(left) || string.IsNullOrEmpty(right))
+                    {
+                        _logger.LogWarning($"Either left: |{left}| or right: |{right}|  --> was a null or empty string (from {item.Name})");  
+                        continue;
+                    }
 
                     // Extract the stepSize from the filter
                     foreach (var filter in item.Filters)
@@ -177,7 +188,7 @@ namespace SpreadShare.SupportServices.SettingsServices
             foreach (var type in algoTypes)
             {
                 string algoName = Reflections.GetTypeName(type);
-                _logger.LogInformation($"Machting {algoName} to an {algoName}Settings instance");
+                _logger.LogInformation($"Matching {algoName} to a {algoName}Settings instance");
 
                 // Filter settings types for current algorithm
                 var settingsTypesFiltered = settingsTypes
@@ -226,7 +237,7 @@ namespace SpreadShare.SupportServices.SettingsServices
             AllocationSettings = new Dictionary<Exchange, Dictionary<Type, decimal>>();
 
             // Get configuration section
-            var allocations = _configuration.GetSection("AllocationSettings").GetChildren();
+            var allocations = _configuration.GetSection("AllocationSettings").GetChildren().ToList();
             if (!allocations.Any())
             {
                 throw new Exception("Could not find segment AllocationSettings");
@@ -295,12 +306,6 @@ namespace SpreadShare.SupportServices.SettingsServices
                 x => x % 60000 == 0,
                 x => $"EndTimeStamp must be a multiple of 60000 but is {x}");
 
-            if (result.BeginTimeStamp % 60000 != 0 || result.EndTimeStamp % 60000 != 0)
-            {
-                _logger.LogError("Timestamps must be a multiple of 60000ms (1 minute)");
-                throw new ArgumentException("BeginTimeStamp or EndTimeStamp");
-            }
-
             if (result.BeginTimeStamp < edges.Item1)
             {
                 _logger.LogError("BeginTimestamp was smaller than one or more of the trading pairs available data");
@@ -320,10 +325,7 @@ namespace SpreadShare.SupportServices.SettingsServices
 
         private Tuple<long, long> GetTimeStampEdges()
         {
-            if (!_databaseContext.Candles.Any())
-            {
-                throw new Exception("Database contains no candles!");
-            }
+            Guard.Argument(_databaseContext.Candles).NotEmpty(x => $"Database contains no candles!");
 
             var pairs = BacktestedAlgorithm.ActiveTradingPairs;
             long minBeginVal = 0;

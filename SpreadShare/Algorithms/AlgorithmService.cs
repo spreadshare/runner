@@ -8,7 +8,6 @@ using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
-using SpreadShare.Utilities;
 
 namespace SpreadShare.Algorithms
 {

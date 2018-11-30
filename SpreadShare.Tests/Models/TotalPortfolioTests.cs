@@ -250,16 +250,12 @@ namespace SpreadShare.Tests.Models
             return total;
         }
 
-        #pragma warning disable CA1812
         private abstract class TestAlgorithm : BaseAlgorithm
         {
-            public override Type GetSettingsType { get; }
-
             public override ResponseObject Start(AlgorithmSettings settings, ExchangeProvidersContainer container, DatabaseContext database)
             {
                 throw new NotImplementedException();
             }
         }
-        #pragma warning restore CA1812
     }
 }

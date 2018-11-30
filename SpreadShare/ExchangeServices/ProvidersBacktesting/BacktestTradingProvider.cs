@@ -9,7 +9,6 @@ using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
-using SpreadShare.Utilities;
 using OrderSide = SpreadShare.Models.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting

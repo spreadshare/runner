@@ -1,6 +1,4 @@
-﻿using SpreadShare.Utilities;
-
-namespace SpreadShare.Models
+﻿namespace SpreadShare.Models
 {
     /// <summary>
     /// ResponseObject with string data
