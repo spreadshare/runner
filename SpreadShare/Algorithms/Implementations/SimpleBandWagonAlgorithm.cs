@@ -48,7 +48,6 @@ namespace SpreadShare.Algorithms.Implementations
 
                 return new NothingState<SimpleBandWagonAlgorithmSettings>();
             }
-
             protected override void Run(TradingProvider trading, DataProvider data)
             {
             }
