@@ -208,7 +208,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 order.Status = OrderUpdate.OrderStatus.Filled;
 
                 // Set the actual price for the order
-                order.AverageFilledPrice = price;
+                order.AverageFilledPrice = order.SetPrice;
                 order.FilledQuantity = order.SetQuantity;
                 order.LastFillIncrement = order.SetQuantity;
                 order.LastFillPrice = price;
