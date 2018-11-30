@@ -222,6 +222,13 @@ namespace SpreadShare.SupportServices.SettingsServices
                     ?? throw new InvalidDataException($"{algoName}:Exchange could not be parsed from json");
                 settings.Exchange = Enum.Parse<Exchange>(exchangeStr);
 
+                // Validate that the trading pairs are all match with the base currency
+                if (settings.ActiveTradingPairs.Any(x => x.Right != settings.BaseCurrency))
+                {
+                    throw new InvalidDataException($"One or more {algoName}:ActiveTradingPairs was not " +
+                                                   $"compatible with the {algoName}:BaseCurrency");
+                }
+
                 // Add settings object to the lookup table
                 _algorithmSettingsLookup.Add(type, settings);
             }

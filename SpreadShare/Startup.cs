@@ -83,11 +83,10 @@ namespace SpreadShare
             {
                 logger.LogError("Could not migrate database");
             }
- 
+
             // Setup Settings service
             var settings = serviceProvider.GetService<SettingsService>();
             settings.Start();
-
         }
 
         /// <summary>
