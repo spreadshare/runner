@@ -45,9 +45,10 @@ namespace SpreadShare.Algorithms.Implementations
                     Logger.LogInformation($"Panic detected buying");
                     return new BuyState();
                 }
-
+ 
                 return new NothingState<SimpleBandWagonAlgorithmSettings>();
             }
+ 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
             }
