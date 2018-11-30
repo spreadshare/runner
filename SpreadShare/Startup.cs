@@ -77,16 +77,17 @@ namespace SpreadShare
         {
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
 
-            // Setup Settings service
-            var settings = serviceProvider.GetService<SettingsService>();
-            settings.Start();
-
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
             if (!service.Migrate().Success)
             {
                 logger.LogError("Could not migrate database");
             }
+ 
+            // Setup Settings service
+            var settings = serviceProvider.GetService<SettingsService>();
+            settings.Start();
+
         }
 
         /// <summary>
