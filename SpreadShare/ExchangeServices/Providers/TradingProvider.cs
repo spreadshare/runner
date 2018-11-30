@@ -161,7 +161,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency to trade with</param>
-        /// <param name="price">SetPrice to set order at</param>
+        /// <param name="price">Price to set order at</param>
         /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
         {
@@ -169,14 +169,40 @@ namespace SpreadShare.ExchangeServices.Providers
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
+            bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
                 result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Sell, quantity, price));
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity))
                     : null;
             });
-            return tradeSucces ? result : ResponseCommon.OrderRefused;
+            return tradeSuccess ? result : ResponseCommon.OrderRefused;
+        }
+
+        /// <summary>
+        /// Place a sell limit order with the full allocation
+        /// </summary>
+        /// <param name="pair">TradingPair to consider</param>
+        /// <param name="price">Price to set order at</param>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceFullLimitOrderSell(TradingPair pair, decimal price)
+        {
+            var currency = pair.Left;
+            var quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            return PlaceLimitOrderSell(pair, quantity, price);
+        }
+
+        /// <summary>
+        /// Place a buy limit order with the full allocation
+        /// </summary>
+        /// <param name="pair">TradingPair to consider</param>
+        /// <param name="price">Price to set the order at</param>
+        /// <returns>ResponseObject containing and OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceFullLimitOrderBuy(TradingPair pair, decimal price)
+        {
+            var currency = pair.Right;
+            var quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            return PlaceLimitOrderBuy(pair, quantity, price);
         }
 
         /// <summary>
