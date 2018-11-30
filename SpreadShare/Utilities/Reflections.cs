@@ -13,6 +13,12 @@ namespace SpreadShare.Utilities
     internal static class Reflections
     {
         /// <summary>
+        /// Gets a one time initialized property for the assembly
+        /// </summary>
+        private static Assembly ThisAssembly { get; } = Array.Find(AppDomain.CurrentDomain.GetAssemblies(), assembly
+            => assembly.ManifestModule.Name.Contains("SpreadShare.dll", StringComparison.InvariantCulture));
+
+        /// <summary>
         /// Fetches a collection of types which are explicit subtypes of the given abstract type
         /// </summary>
         /// <param name="abstraction">Base type</param>
@@ -70,11 +76,5 @@ namespace SpreadShare.Utilities
         {
             return t.ToString().Split('.').Last();
         }
-
-        /// <summary>
-        /// One time initialized property for the assembly
-        /// </summary>
-        private static Assembly ThisAssembly { get; } = Array.Find(AppDomain.CurrentDomain.GetAssemblies(), assembly
-            => assembly.ManifestModule.Name.Contains("SpreadShare.dll", StringComparison.InvariantCulture));
     }
 }

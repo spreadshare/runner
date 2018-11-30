@@ -143,7 +143,7 @@ namespace SpreadShare.SupportServices.SettingsServices
                     string right = pair.Groups[2].Value;
                     if (string.IsNullOrEmpty(left) || string.IsNullOrEmpty(right))
                     {
-                        _logger.LogWarning($"Either left: |{left}| or right: |{right}|  --> was a null or empty string (from {item.Name})");  
+                        _logger.LogWarning($"Either left: |{left}| or right: |{right}|  --> was a null or empty string (from {item.Name})");
                         continue;
                     }
 
