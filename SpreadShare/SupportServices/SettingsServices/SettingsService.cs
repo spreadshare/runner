@@ -206,6 +206,11 @@ namespace SpreadShare.SupportServices.SettingsServices
 
                 var settingsType = settingsTypesFiltered.First();
                 var settings = _configuration.GetSection(algoName).Get(settingsType) as AlgorithmSettings;
+                if (settings == null)
+                {
+                    _logger.LogWarning($"{algoName} was not configured in the appsettings.json and will be disabled.");
+                    continue;
+                }
 
                 // Edge case for parsing [string] -> [TradingPair]
                 var currencies = _configuration.GetSection($"{algoName}:ActiveTradingPairs").Get<List<string>>()
