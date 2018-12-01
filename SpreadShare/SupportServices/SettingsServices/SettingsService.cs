@@ -102,7 +102,7 @@ namespace SpreadShare.SupportServices.SettingsServices
             }
             catch (Exception e)
             {
-                _logger.LogError(e.ToString());
+                _logger.LogError(e.Message);
                 _logger.LogError($"SettingsService failed to start, aborting other services\n" +
                                  $"Validate that SpreadShare/{Program.CommandLineArgs.ConfigurationPath} is in the correct format.");
                 Program.ExitProgramWithCode(1);
@@ -236,6 +236,11 @@ namespace SpreadShare.SupportServices.SettingsServices
 
                 // Add settings object to the lookup table
                 _algorithmSettingsLookup.Add(type, settings);
+            }
+
+            if (_algorithmSettingsLookup.Values.Where(x => x.Exchange == Exchange.Backtesting).Count() > 1)
+            {
+                throw new InvalidDataException("More than one algorithm was configured for backtesting");
             }
         }
 
