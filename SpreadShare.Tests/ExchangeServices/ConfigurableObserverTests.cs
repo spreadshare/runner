@@ -16,7 +16,7 @@ namespace SpreadShare.Tests.ExchangeServices
             : base(outputHelper)
         {
             var container =
-                ExchangeFactoryService.BuildContainer(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithm));
+                ExchangeFactoryService.BuildContainer(typeof(SimpleBandWagonAlgorithm));
             _data = container.DataProvider;
         }
 

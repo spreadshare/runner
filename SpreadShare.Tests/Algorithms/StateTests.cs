@@ -20,7 +20,7 @@ namespace SpreadShare.Tests.Algorithms
             : base(outputHelper)
         {
             _container = ExchangeFactoryService
-                .BuildContainer(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithm));
+                .BuildContainer(typeof(SimpleBandWagonAlgorithm));
         }
 
         [Fact]

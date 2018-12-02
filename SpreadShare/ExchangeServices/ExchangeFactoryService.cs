@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
@@ -57,18 +58,17 @@ namespace SpreadShare.ExchangeServices
         /// <summary>
         /// Builds container for Binance
         /// </summary>
-        /// <param name="exchange">Specifies which container to create</param>
         /// <param name="algorithm">The type of the algorithm</param>
         /// <returns>Binance container with providers</returns>
         public ExchangeProvidersContainer BuildContainer(
-            Exchange exchange,
             Type algorithm)
         {
             AbstractDataProvider dataProviderImplementation;
             AbstractTradingProvider tradingProviderImplementation;
             TimerProvider timerProvider = new ExchangeTimerProvider();
+            AlgorithmSettings algorithmSettings = _settingsService.GetAlgorithSettings(algorithm);
 
-            switch (exchange)
+            switch (algorithmSettings.Exchange)
             {
                 case Exchange.Binance:
                     _binanceCommunications.Connect();
@@ -95,12 +95,10 @@ namespace SpreadShare.ExchangeServices
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);
+                    throw new ArgumentOutOfRangeException(nameof(algorithm));
             }
 
-            AlgorithmSettings algorithmSettings = _settingsService.GetAlgorithSettings(algorithm);
-
-            var allocationManager = _allocationManager.GetWeakAllocationManager(algorithm, exchange);
+            var allocationManager = _allocationManager.GetWeakAllocationManager(algorithm, algorithmSettings.Exchange);
 
             var dataProvider = new DataProvider(dataProviderImplementation, algorithmSettings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingProviderImplementation, dataProvider, allocationManager);

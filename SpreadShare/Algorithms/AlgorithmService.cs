@@ -69,9 +69,7 @@ namespace SpreadShare.Algorithms
             AlgorithmSettings settings = _settingsService.GetAlgorithSettings(algorithmType);
 
             // Build container
-            var container = _exchangeFactoryService.BuildContainer(
-                settings.Exchange,
-                algorithmType);
+            var container = _exchangeFactoryService.BuildContainer(algorithmType);
 
             // Start the timer provider
             container.TimerProvider.RunPeriodicTimer();
