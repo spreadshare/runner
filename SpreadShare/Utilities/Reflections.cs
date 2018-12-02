@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Resources;
 
 namespace SpreadShare.Utilities
@@ -65,16 +66,6 @@ namespace SpreadShare.Utilities
             }
 
             return classes;
-        }
-
-        /// <summary>
-        /// Extracts the name of a an object from its type
-        /// </summary>
-        /// <param name="t">Type instance</param>
-        /// <returns>Cleaned name string</returns>
-        public static string GetTypeName(Type t)
-        {
-            return t.ToString().Split('.').Last();
         }
     }
 }

@@ -187,12 +187,12 @@ namespace SpreadShare.SupportServices.SettingsServices
             var settingsTypes = Reflections.GetAllSubtypes(typeof(AlgorithmSettings)).ToList();
             foreach (var type in algoTypes)
             {
-                string algoName = Reflections.GetTypeName(type);
+                string algoName = type.Name;
                 _logger.LogInformation($"Matching {algoName} to a {algoName}Settings instance");
 
                 // Filter settings types for current algorithm
                 var settingsTypesFiltered = settingsTypes
-                    .Where(x => Reflections.GetTypeName(x) == $"{algoName}Settings").ToList();
+                    .Where(x => x.Name == $"{algoName}Settings").ToList();
 
                 if (settingsTypesFiltered.Count < 1)
                 {
