@@ -108,9 +108,6 @@ namespace SpreadShare.Algorithms.Implementations
 
     internal class SimpleScalpSettings : AlgorithmSettings
     {
-        public override Exchange Exchange { get; set; }
-        public override Currency BaseCurrency { get; set; }
-        public override List<TradingPair> ActiveTradingPairs { get; set; }
         public decimal TakeProfit { get; set; }
         public int WaitTime { get; set; }
         public int StopTime { get; set; }

@@ -62,12 +62,6 @@ namespace SpreadShare.Tests.Algorithms
 
         private class TestSettings : AlgorithmSettings
         {
-            public override Exchange Exchange { get; set; }
-
-            public override Currency BaseCurrency { get; set; }
-
-            public override List<TradingPair> ActiveTradingPairs { get; set; }
-
             public decimal Value { get; set; }
         }
     }

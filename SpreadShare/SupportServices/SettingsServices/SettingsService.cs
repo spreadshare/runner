@@ -212,6 +212,9 @@ namespace SpreadShare.SupportServices.SettingsServices
                     continue;
                 }
 
+                // Validate that all extra properties are found in the configuration
+                settings.ValidateAllSet(algoName, _configuration);
+
                 // Edge case for parsing [string] -> [TradingPair]
                 var currencies = _configuration.GetSection($"{algoName}:ActiveTradingPairs").Get<List<string>>()
                     ?? throw new InvalidDataException($"{algoName}:ActiveTradingPairs could not parsed from json");
