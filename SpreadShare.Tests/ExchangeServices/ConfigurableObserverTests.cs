@@ -1,6 +1,5 @@
 using System;
 using SpreadShare.Algorithms.Implementations;
-using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using Xunit;
