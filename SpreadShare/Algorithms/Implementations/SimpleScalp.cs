@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
@@ -62,6 +61,8 @@ namespace SpreadShare.Algorithms.Implementations
                  {
                      return new WaitState();
                  }
+
+                 return new NothingState<SimpleScalpSettings>();
              }
 
              protected override void Run(TradingProvider trading, DataProvider data)
