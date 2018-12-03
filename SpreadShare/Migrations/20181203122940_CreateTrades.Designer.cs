@@ -11,7 +11,7 @@ using SpreadShare.SupportServices;
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20181126160211_CreateTrades")]
+    [Migration("20181203122940_CreateTrades")]
     partial class CreateTrades
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,6 +71,8 @@ namespace SpreadShare.Migrations
 
                     b.Property<string>("Side");
 
+                    b.Property<long>("TradeId");
+
                     b.Property<decimal>("Value");
 
                     b.HasKey("OrderId");
@@ -97,6 +99,5 @@ namespace SpreadShare.Migrations
         }
     }
 }
-
 
 #pragma warning restore
