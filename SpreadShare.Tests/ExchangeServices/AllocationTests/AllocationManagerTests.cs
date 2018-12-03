@@ -44,16 +44,16 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
 
             Assert.Throws<ArgumentNullException>(() => allocationManager.GetAvailableFunds(
                 Exchange.Backtesting,
-                typeof(SimpleBandWagonAlgorithm),
+                typeof(TemplateAlgorithm),
                 c));
 
             Assert.Throws<ArgumentNullException>(() => allocationManager.GetAllFunds(
                 Exchange.Backtesting,
-                typeof(SimpleBandWagonAlgorithm)));
+                typeof(TemplateAlgorithm)));
 
             Assert.Throws<ArgumentNullException>(() => allocationManager.QueueTrade(
                 new TradeProposal(TradingPair.Parse("EOSETH"), new Balance(c, 10, 10)),
-                typeof(SimpleBandWagonAlgorithm),
+                typeof(TemplateAlgorithm),
                 Exchange.Backtesting,
                 () => new TradeExecution(Balance.Empty(c), Balance.Empty(c))));
         }
@@ -70,14 +70,14 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                   Exchange.Backtesting,
                   new Dictionary<Type, decimal>
                   {
-                     { typeof(SimpleBandWagonAlgorithm), factor }
+                     { typeof(TemplateAlgorithm), factor }
                   }
                 }
             });
 
             Currency c = new Currency("ETH");
             var local = SettingsService.BackTestSettings.InitialPortfolio.GetAllocation(c);
-            var amount = alloc.GetAvailableFunds(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithm), c);
+            var amount = alloc.GetAvailableFunds(Exchange.Backtesting, typeof(TemplateAlgorithm), c);
             Assert.Equal(local.Free * factor, amount.Free);
         }
 
@@ -94,7 +94,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                     Exchange.Backtesting,
                     new Dictionary<Type, decimal>
                     {
-                        { typeof(SimpleBandWagonAlgorithm), factor }
+                        { typeof(TemplateAlgorithm), factor }
                     }
                 }
             }));
@@ -103,7 +103,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void QueueTradeHappyFlow()
         {
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
             var alloc = MakeDefaultAllocation();
 
             var weak = alloc.GetWeakAllocationManager(algo, Exchange.Backtesting);
@@ -132,7 +132,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void QueueTradeInvalid()
         {
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
             Balance balance = SortedSettingsBalances.First();
             var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
             var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), new Balance(
@@ -153,7 +153,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void QueueTradeNull()
         {
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
             var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
             Assert.Throws<ArgumentNullException>(() => alloc.QueueTrade(null, () => null));
         }
@@ -161,7 +161,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void QueueTradeReportNull()
         {
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
             Balance balance = SortedSettingsBalances.First();
             var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
             var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), balance);
@@ -177,7 +177,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void GetAllFundsHappyFlow()
         {
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
             var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
             var funds = alloc.GetAllFunds();
             Assert.NotNull(funds);
@@ -187,7 +187,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void GetAllFundEmpty()
         {
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
             var totalalloc = new AllocationManager(LoggerFactory, _fetcher);
             totalalloc.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>
             {
@@ -208,7 +208,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                     Exchange.Backtesting,
                     new Dictionary<Type, decimal>
                     {
-                        { typeof(SimpleBandWagonAlgorithm), scale }
+                        { typeof(TemplateAlgorithm), scale }
                     }
                 }
             });

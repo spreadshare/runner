@@ -1,10 +1,8 @@
-using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
-using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.SupportServices.SettingsServices;
 using SpreadShare.Tests.ExchangeServices;
+using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -18,7 +16,7 @@ namespace SpreadShare.Tests.Algorithms
             : base(outputHelper)
         {
             _container = ExchangeFactoryService
-                .BuildContainer(typeof(SimpleBandWagonAlgorithm));
+                .BuildContainer(typeof(TemplateAlgorithm));
         }
 
         [Fact]
@@ -31,7 +29,7 @@ namespace SpreadShare.Tests.Algorithms
         public void RunHappyFlow()
         {
             var state = new TestState();
-            state.Activate(new TestSettings() { Value = 1 }, _container, LoggerFactory);
+            state.Activate(new TemplateAlgorithmSettings(), _container, LoggerFactory);
         }
 
         [Fact]
@@ -39,7 +37,7 @@ namespace SpreadShare.Tests.Algorithms
         {
             var state = new TestState();
             var next = state.OnMarketCondition(_container.DataProvider);
-            Assert.IsType<NothingState<TestSettings>>(next);
+            Assert.IsType<NothingState<TemplateAlgorithmSettings>>(next);
         }
 
         [Fact]
@@ -47,20 +45,7 @@ namespace SpreadShare.Tests.Algorithms
         {
             var state = new TestState();
             var next = state.OnOrderUpdate(null);
-            Assert.IsType<NothingState<TestSettings>>(next);
-        }
-
-        private class TestState : State<TestSettings>
-        {
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-                Logger.LogInformation($"Running, value is {AlgorithmSettings.Value}");
-            }
-        }
-
-        private class TestSettings : AlgorithmSettings
-        {
-            public decimal Value { get; set; }
+            Assert.IsType<NothingState<TemplateAlgorithmSettings>>(next);
         }
     }
 }

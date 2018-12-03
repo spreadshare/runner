@@ -18,7 +18,7 @@ namespace SpreadShare.Tests.ExchangeServices
             : base(outputHelper)
         {
             var container =
-                ExchangeFactoryService.BuildContainer(typeof(SimpleBandWagonAlgorithm));
+                ExchangeFactoryService.BuildContainer(typeof(TemplateAlgorithm));
             _time = container.TimerProvider;
         }
 
