@@ -1,10 +1,8 @@
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
 using SpreadShare.Tests.ExchangeServices;
 using Xunit;
