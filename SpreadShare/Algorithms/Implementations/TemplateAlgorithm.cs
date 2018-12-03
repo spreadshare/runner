@@ -1,4 +1,6 @@
+using System.Data.Common;
 using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
@@ -15,7 +17,21 @@ namespace SpreadShare.Algorithms.Implementations
         /// <inheritdoc />
         public override ResponseObject Start(AlgorithmSettings settings, ExchangeProvidersContainer container, DatabaseContext database)
         {
+            var stateManager = new StateManager<TemplateAlgorithmSettings>(
+                settings as TemplateAlgorithmSettings,
+                new TemplateState(),
+                container,
+                database);
             return new ResponseObject(ResponseCode.Success);
+        }
+
+        private class TemplateState : State<TemplateAlgorithmSettings>
+        {
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
+                // Increase the trade id every time the entry state is called.
+                trading.TradeId += 1;
+            }
         }
     }
 
