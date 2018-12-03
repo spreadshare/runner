@@ -1,4 +1,3 @@
-using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms
