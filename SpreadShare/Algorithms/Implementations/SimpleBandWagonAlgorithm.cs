@@ -20,9 +20,6 @@ namespace SpreadShare.Algorithms.Implementations
     internal class SimpleBandWagonAlgorithm : BaseAlgorithm
     {
         /// <inheritdoc />
-        public override Type GetSettingsType => typeof(SimpleBandWagonAlgorithmSettings);
-
-        /// <inheritdoc />
         public override ResponseObject Start(
             AlgorithmSettings settings,
             ExchangeProvidersContainer container,

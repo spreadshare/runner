@@ -2,18 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Reflection;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using Binance.Net;
 using Binance.Net.Objects;
 using Dawn;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
-using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.SupportServices.SettingsServices
 {
@@ -25,7 +27,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
         private readonly DatabaseContext _databaseContext;
-        private AlgorithmSettings _backtestedAlgorithm;
+        private readonly Dictionary<Type, AlgorithmSettings> _algorithmSettingsLookup;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsService"/> class.
@@ -38,6 +40,7 @@ namespace SpreadShare.SupportServices.SettingsServices
             _configuration = configuration;
             _logger = loggerFactory.CreateLogger<SettingsService>();
             _databaseContext = databaseContext;
+            _algorithmSettingsLookup = new Dictionary<Type, AlgorithmSettings>();
         }
 
         /// <summary>
@@ -59,89 +62,51 @@ namespace SpreadShare.SupportServices.SettingsServices
         public BinanceSettings BinanceSettings { get; private set; }
 
         /// <summary>
-        /// Gets the settings for the simple bandwagon algorithm
-        /// </summary>
-        public SimpleBandWagonAlgorithmSettings SimpleBandWagonAlgorithmSettings { get; private set; }
-
-        /// <summary>
         /// Gets the settings for the backtests
         /// </summary>
         public BacktestSettings BackTestSettings { get; private set; }
 
+        private AlgorithmSettings BacktestedAlgorithm =>
+            _algorithmSettingsLookup.Values.First(x => x.Exchange == Exchange.Backtesting);
+
+        /// <summary>
+        /// Returns the settings instance given a particular Algorithm type
+        /// </summary>
+        /// <param name="algo">Type of the algorithm</param>
+        /// <returns>AlgorithmSettings of algo</returns>
+        public AlgorithmSettings GetAlgorithSettings(Type algo)
+        {
+            Guard.Argument(algo).Require(x => x.IsSubclassOf(typeof(BaseAlgorithm)));
+            return _algorithmSettingsLookup[algo];
+        }
+
         /// <summary>
         /// Starts the settings service
         /// </summary>
-        /// <returns>Response object indicating success</returns>
-        public ResponseObject Start()
+        public void Start()
         {
             try
             {
                 // Enables parsing functionality for currencies and should be called first.
                 ParseAllocationSettings();
                 DownloadCurrencies();
-                ParseSimpleBandwagonSettings();
-                if (SimpleBandWagonAlgorithmSettings.Exchange == Exchange.Backtesting)
-                {
-                    _backtestedAlgorithm = SimpleBandWagonAlgorithmSettings;
-                }
-
+                ParseAlgorithmSettings();
                 BinanceSettings = _configuration.GetSection("BinanceClientSettings").Get<BinanceSettings>();
                 BackTestSettings = ParseBacktestSettings();
             }
+            catch (SocketException e)
+            {
+                _logger.LogError(e.Message);
+                _logger.LogError("Database not available, are you running inside the docker container?");
+                Program.ExitProgramWithCode(1);
+            }
             catch (Exception e)
             {
-                _logger.LogError(e.ToString());
-                return new ResponseObject(ResponseCode.Error, e.Message);
+                _logger.LogError(e.Message);
+                _logger.LogError($"SettingsService failed to start, aborting other services\n" +
+                                 $"Validate that SpreadShare/{Program.CommandLineArgs.ConfigurationPath} is in the correct format.");
+                Program.ExitProgramWithCode(1);
             }
-
-            return new ResponseObject(ResponseCode.Success);
-        }
-
-        /// <summary>
-        /// Get a dictionary of classes with class name
-        /// </summary>
-        /// <returns>Dictionary of classes with class name</returns>
-        private static Dictionary<string, TypeInfo> GetClasses()
-        {
-            // Get current assembly
-            Assembly thisAssembly = Array.Find(AppDomain.CurrentDomain.GetAssemblies(), assembly
-                => assembly.ManifestModule.Name.Contains("SpreadShare.dll", StringComparison.InvariantCulture));
-
-            // Check if the assembly was found
-            if (thisAssembly == null)
-            {
-                throw new InvalidProgramException("Could not find SpreadShare.dll");
-            }
-
-            // Get all defined classes
-            var typeInfos = thisAssembly.DefinedTypes;
-            Dictionary<string, TypeInfo> classes = new Dictionary<string, TypeInfo>();
-            foreach (var typeInfo in typeInfos)
-            {
-                var typeInfoName = typeInfo.Name;
-
-                // Remove noise
-                string[] patterns = { "`1", "+<>c" };
-                foreach (string pattern in patterns)
-                {
-                    if (typeInfoName.EndsWith(pattern, true, CultureInfo.InvariantCulture))
-                    {
-                        typeInfoName = typeInfoName.Substring(0, typeInfoName.Length - pattern.Length);
-                    }
-                }
-
-                if (!classes.ContainsKey(typeInfoName))
-                {
-                    classes.Add(typeInfoName, typeInfo);
-                }
-                else
-                {
-                    // Make sure the algorithm class does not have different parameterized types
-                    classes[typeInfoName] = null;
-                }
-            }
-
-            return classes;
         }
 
         /// <summary>
@@ -153,14 +118,13 @@ namespace SpreadShare.SupportServices.SettingsServices
             {
                 // Disect by extracting the known base pairs.
                 Regex rx = new Regex(
-                    "(.*)(BTC|ETH|USDT|BNB)",
+                    "(.*)(BTC|ETH|USDT|BNB|PAX)",
                      RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
                 var listQuery = client.GetExchangeInfo();
                 if (!listQuery.Success)
                 {
-                    _logger.LogInformation("Could not get exchange info");
-                    throw new Exception("No connection to Binance!");
+                    throw new Exception("Could not fetch TradingPair info, no connection to Binance!");
                 }
 
                 foreach (var item in listQuery.Data.Symbols)
@@ -171,12 +135,17 @@ namespace SpreadShare.SupportServices.SettingsServices
                     var pair = rx.Match(item.Name);
                     if (!pair.Success)
                     {
-                            _logger.LogWarning($"Could not extract pairs from {item.Name}, skipping");
-                            continue;
+                        _logger.LogWarning($"Could not extract pairs from {item.Name}, skipping");
+                        continue;
                     }
 
                     string left = pair.Groups[1].Value;
                     string right = pair.Groups[2].Value;
+                    if (string.IsNullOrEmpty(left) || string.IsNullOrEmpty(right))
+                    {
+                        _logger.LogWarning($"Either left: |{left}| or right: |{right}|  --> was a null or empty string (from {item.Name})");
+                        continue;
+                    }
 
                     // Extract the stepSize from the filter
                     foreach (var filter in item.Filters)
@@ -210,28 +179,72 @@ namespace SpreadShare.SupportServices.SettingsServices
         }
 
         /// <summary>
-        /// Parse settings for the simple bandwagon algorithm.
+        /// Uses reflections to match any class implement BaseStrategy with its AlgorithmSettings
         /// </summary>
-        private void ParseSimpleBandwagonSettings()
+        private void ParseAlgorithmSettings()
         {
-            SimpleBandWagonAlgorithmSettings = _configuration.GetSection("SimpleBandWagonAlgorithm").Get<SimpleBandWagonAlgorithmSettings>();
+            var algoTypes = Reflections.GetAllSubtypes(typeof(BaseAlgorithm));
+            var settingsTypes = Reflections.GetAllSubtypes(typeof(AlgorithmSettings)).ToList();
+            foreach (var type in algoTypes)
+            {
+                string algoName = type.Name;
+                _logger.LogInformation($"Matching {algoName} to a {algoName}Settings instance");
 
-            // Get the ActiveTradingPairs as a seperate string list
-            var currencies = _configuration.GetSection("SimpleBandWagonAlgorithm:ActiveTradingPairs")
-                .Get<List<string>>();
+                // Filter settings types for current algorithm
+                var settingsTypesFiltered = settingsTypes
+                    .Where(x => x.Name == $"{algoName}Settings").ToList();
 
-            // Map the trading pairs to currencies by parsing and assign to the settings.
-            SimpleBandWagonAlgorithmSettings.ActiveTradingPairs = currencies.Select(TradingPair.Parse).ToList();
+                if (settingsTypesFiltered.Count < 1)
+                {
+                    throw new InvalidProgramException($"The {algoName}Settings class was not found in the assembly but {algoName} was");
+                }
 
-            // Parse the base currency string to a Currency type
-            var baseStr = _configuration.GetSection("SimpleBandWagonAlgorithm:BaseCurrency").Get<string>();
-            SimpleBandWagonAlgorithmSettings.BaseCurrency = new Currency(baseStr);
+                if (settingsTypesFiltered.Count > 1)
+                {
+                    throw new InvalidProgramException($"Multiple classes match the filter '{algoName}Settings'\n{settingsTypesFiltered.Join(",\n\t")}");
+                }
 
-            // TODO: Parse exchange in the AlgorithmSettings class
+                var settingsType = settingsTypesFiltered.First();
+                var settings = _configuration.GetSection(algoName).Get(settingsType) as AlgorithmSettings;
+                if (settings == null)
+                {
+                    _logger.LogWarning($"{algoName} was not configured in the appsettings.json and will be disabled.");
+                    continue;
+                }
 
-            // Parse exchange to enum Exchange
-            var exchange = _configuration.GetSection("SimpleBandWagonAlgorithm:Exchange").Get<string>();
-            SimpleBandWagonAlgorithmSettings.Exchange = Enum.Parse<Exchange>(exchange);
+                // Validate that all extra properties are found in the configuration
+                settings.ValidateAllSet(algoName, _configuration);
+
+                // Edge case for parsing [string] -> [TradingPair]
+                var currencies = _configuration.GetSection($"{algoName}:ActiveTradingPairs").Get<List<string>>()
+                    ?? throw new InvalidDataException($"{algoName}:ActiveTradingPairs could not parsed from json");
+                settings.ActiveTradingPairs = currencies.Select(TradingPair.Parse).ToList();
+
+                // Edge case for parsing string -> Currency
+                var currencyStr = _configuration.GetSection($"{algoName}:BaseCurrency").Get<string>()
+                    ?? throw new InvalidDataException($"{algoName}:BaseCurrency could not be parsed from json");
+                settings.BaseCurrency = new Currency(currencyStr);
+
+                // Edge case for parsing string -> Exchange
+                var exchangeStr = _configuration.GetSection($"{algoName}:Exchange").Get<string>()
+                    ?? throw new InvalidDataException($"{algoName}:Exchange could not be parsed from json");
+                settings.Exchange = Enum.Parse<Exchange>(exchangeStr);
+
+                // Validate that the trading pairs are all match with the base currency
+                if (settings.ActiveTradingPairs.Any(x => x.Right != settings.BaseCurrency))
+                {
+                    throw new InvalidDataException($"One or more {algoName}:ActiveTradingPairs was not " +
+                                                   $"compatible with the {algoName}:BaseCurrency");
+                }
+
+                // Add settings object to the lookup table
+                _algorithmSettingsLookup.Add(type, settings);
+            }
+
+            if (_algorithmSettingsLookup.Values.Where(x => x.Exchange == Exchange.Backtesting).Count() > 1)
+            {
+                throw new InvalidDataException("More than one algorithm was configured for backtesting");
+            }
         }
 
         /// <summary>
@@ -244,14 +257,14 @@ namespace SpreadShare.SupportServices.SettingsServices
             AllocationSettings = new Dictionary<Exchange, Dictionary<Type, decimal>>();
 
             // Get configuration section
-            var allocations = _configuration.GetSection("AllocationSettings").GetChildren();
+            var allocations = _configuration.GetSection("AllocationSettings").GetChildren().ToList();
             if (!allocations.Any())
             {
                 throw new Exception("Could not find segment AllocationSettings");
             }
 
             // Iterate through assembly and classes and retrieve a dictionary with the solution's classes
-            var classes = GetClasses();
+            var classes = Reflections.GetClasses();
 
             // Iterate over exchanges
             foreach (var exchange in allocations)
@@ -295,7 +308,9 @@ namespace SpreadShare.SupportServices.SettingsServices
             string beginValStr = _configuration.GetSection("BacktestSettings:BeginTimeStamp").Get<string>();
             string endValStr = _configuration.GetSection("BacktestSettings:EndTimeStamp").Get<string>();
             result.OutputFolder = _configuration.GetSection("BacktestSettings:OutputFolder").Get<string>();
-            if (_backtestedAlgorithm == null)
+
+            // If no algorithm are configured for backtesting, stop
+            if (!_algorithmSettingsLookup.Values.Any(x => x.Exchange == Exchange.Backtesting))
             {
                 return result;
             }
@@ -310,12 +325,6 @@ namespace SpreadShare.SupportServices.SettingsServices
             Guard.Argument(result.EndTimeStamp).Require(
                 x => x % 60000 == 0,
                 x => $"EndTimeStamp must be a multiple of 60000 but is {x}");
-
-            if (result.BeginTimeStamp % 60000 != 0 || result.EndTimeStamp % 60000 != 0)
-            {
-                _logger.LogError("Timestamps must be a multiple of 60000ms (1 minute)");
-                throw new ArgumentException("BeginTimeStamp or EndTimeStamp");
-            }
 
             if (result.BeginTimeStamp < edges.Item1)
             {
@@ -336,12 +345,9 @@ namespace SpreadShare.SupportServices.SettingsServices
 
         private Tuple<long, long> GetTimeStampEdges()
         {
-            if (!_databaseContext.Candles.Any())
-            {
-                throw new Exception("Database contains no candles!");
-            }
+            Guard.Argument(_databaseContext.Candles).NotEmpty(x => $"Database contains no candles!");
 
-            var pairs = _backtestedAlgorithm.ActiveTradingPairs;
+            var pairs = BacktestedAlgorithm.ActiveTradingPairs;
             long minBeginVal = 0;
             long minEndVal = long.MaxValue;
             foreach (var pair in pairs)

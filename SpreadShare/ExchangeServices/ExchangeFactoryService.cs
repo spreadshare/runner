@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
@@ -58,18 +57,17 @@ namespace SpreadShare.ExchangeServices
         /// <summary>
         /// Builds container for Binance
         /// </summary>
-        /// <param name="exchange">Specifies which container to create</param>
         /// <param name="algorithm">The type of the algorithm</param>
         /// <returns>Binance container with providers</returns>
         public ExchangeProvidersContainer BuildContainer(
-            Exchange exchange,
             Type algorithm)
         {
             AbstractDataProvider dataProviderImplementation;
             AbstractTradingProvider tradingProviderImplementation;
             TimerProvider timerProvider = new ExchangeTimerProvider();
+            AlgorithmSettings algorithmSettings = _settingsService.GetAlgorithSettings(algorithm);
 
-            switch (exchange)
+            switch (algorithmSettings.Exchange)
             {
                 case Exchange.Binance:
                     _binanceCommunications.Connect();
@@ -96,16 +94,10 @@ namespace SpreadShare.ExchangeServices
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(exchange), exchange, null);
+                    throw new ArgumentOutOfRangeException(nameof(algorithm));
             }
 
-            AlgorithmSettings algorithmSettings = null;
-            if (algorithm == typeof(SimpleBandWagonAlgorithm))
-            {
-                algorithmSettings = _settingsService.SimpleBandWagonAlgorithmSettings;
-            }
-
-            var allocationManager = _allocationManager.GetWeakAllocationManager(algorithm, exchange);
+            var allocationManager = _allocationManager.GetWeakAllocationManager(algorithm, algorithmSettings.Exchange);
 
             var dataProvider = new DataProvider(dataProviderImplementation, algorithmSettings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingProviderImplementation, dataProvider, allocationManager);

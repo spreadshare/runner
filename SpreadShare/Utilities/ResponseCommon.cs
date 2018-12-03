@@ -1,4 +1,7 @@
-namespace SpreadShare.Models.Trading
+using SpreadShare.Models;
+using SpreadShare.Models.Trading;
+
+namespace SpreadShare.Utilities
 {
     /// <summary>
     /// Common response objects

@@ -17,8 +17,7 @@ namespace SpreadShare
     internal static class Program
     {
         private static CommandLineArgs _commandLineArgs = new CommandLineArgs();
-        private static int _exitCode;
-        private static bool _shouldExit;
+        private static ILoggerFactory _loggerFactory;
 
         /// <summary>
         /// Gets the instance of the CommandLineArgs
@@ -48,12 +47,12 @@ namespace SpreadShare
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
             // Configure application
-            ILoggerFactory loggerFactory = (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory));
-            Startup.Configure(serviceProvider, loggerFactory);
+            _loggerFactory = (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory));
+            Startup.Configure(serviceProvider, _loggerFactory);
 
             // --------------------------------------------------
             // Setup finished --> Execute business logic services
-            bool successfulStart = ExecuteBusinessLogic(serviceProvider, loggerFactory);
+            bool successfulStart = ExecuteBusinessLogic(serviceProvider, _loggerFactory);
             if (!successfulStart)
             {
                 return 1;
@@ -68,8 +67,9 @@ namespace SpreadShare
         /// <param name="statusCode">status code</param>
         public static void ExitProgramWithCode(int statusCode)
         {
-            _exitCode = statusCode;
-            _shouldExit = true;
+            // Flush the logs by disposing the factory
+            _loggerFactory.Dispose();
+            Environment.Exit(statusCode);
         }
 
         /// <summary>
@@ -81,7 +81,6 @@ namespace SpreadShare
         private static bool ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
-
             SettingsService settings = serviceProvider.GetService<SettingsService>();
 
             // Check if allocation either completely set as backtesting, or the --trading flag was used
@@ -136,14 +135,14 @@ namespace SpreadShare
         {
             Thread t = new Thread(() =>
             {
-                while (!_shouldExit)
+                while (true)
                 {
                     Thread.Sleep(10);
                 }
             });
             t.Start();
             t.Join();
-            return _exitCode;
+            return 0;
         }
     }
 }

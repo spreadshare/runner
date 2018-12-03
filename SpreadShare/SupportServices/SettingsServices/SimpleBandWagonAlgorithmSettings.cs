@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using SpreadShare.ExchangeServices;
-using SpreadShare.Models.Trading;
-
 namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
@@ -9,17 +5,6 @@ namespace SpreadShare.SupportServices.SettingsServices
     /// </summary>
     internal class SimpleBandWagonAlgorithmSettings : AlgorithmSettings
     {
-        /// <inheritdoc />
-        public override Exchange Exchange { get; set; }
-
-        /// <inheritdoc />
-        public override Currency BaseCurrency { get; set; }
-
-        /// <summary>
-        /// Gets or sets the trading pairs for this algorithm.
-        /// </summary>
-        public override List<TradingPair> ActiveTradingPairs { get; set; }
-
         /// <summary>
         /// Gets or sets the minimal value before reverting to the base currency
         /// </summary>

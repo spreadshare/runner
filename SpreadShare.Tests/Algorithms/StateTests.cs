@@ -1,9 +1,8 @@
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
+using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
 using SpreadShare.Tests.ExchangeServices;
 using Xunit;
@@ -19,7 +18,7 @@ namespace SpreadShare.Tests.Algorithms
             : base(outputHelper)
         {
             _container = ExchangeFactoryService
-                .BuildContainer(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithmSettings));
+                .BuildContainer(typeof(SimpleBandWagonAlgorithm));
         }
 
         [Fact]
@@ -61,12 +60,6 @@ namespace SpreadShare.Tests.Algorithms
 
         private class TestSettings : AlgorithmSettings
         {
-            public override Exchange Exchange { get; set; }
-
-            public override Currency BaseCurrency { get; set; }
-
-            public override List<TradingPair> ActiveTradingPairs { get; set; }
-
             public decimal Value { get; set; }
         }
     }

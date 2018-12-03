@@ -11,11 +11,6 @@ namespace SpreadShare.Algorithms
     internal abstract class BaseAlgorithm
     {
         /// <summary>
-        /// Gets type of the settings of the algorithm
-        /// </summary>
-        public abstract System.Type GetSettingsType { get; }
-
-        /// <summary>
         /// Start algorithm with the initial state using a StateManager
         /// </summary>
         /// <param name="settings">Provides access to settings of the algorithm</param>

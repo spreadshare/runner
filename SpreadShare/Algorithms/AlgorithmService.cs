@@ -66,20 +66,10 @@ namespace SpreadShare.Algorithms
             // Figure out which container to get
             BaseAlgorithm algorithm = (BaseAlgorithm)Activator.CreateInstance(algorithmType);
 
-            // Get settings
-            var settingsResponse = GetSettings(algorithm.GetSettingsType);
-            if (!settingsResponse.Success)
-            {
-                return new ResponseObject(ResponseCode.Error, settingsResponse.Message);
-            }
-
-            AlgorithmSettings settings = settingsResponse.Data;
-            Exchange exchangeEnum = settings.Exchange;
+            AlgorithmSettings settings = _settingsService.GetAlgorithSettings(algorithmType);
 
             // Build container
-            var container = _exchangeFactoryService.BuildContainer(
-                exchangeEnum,
-                algorithmType);
+            var container = _exchangeFactoryService.BuildContainer(algorithmType);
 
             // Start the timer provider
             container.TimerProvider.RunPeriodicTimer();

@@ -1,5 +1,4 @@
 using System;
-using System.Reflection.Metadata;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;

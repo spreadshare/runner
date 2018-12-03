@@ -1,5 +1,4 @@
 using SpreadShare.Algorithms.Implementations;
-using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using Xunit;
@@ -19,7 +18,7 @@ namespace SpreadShare.Tests.ExchangeServices
             : base(outputHelper)
         {
             var container =
-                ExchangeFactoryService.BuildContainer(Exchange.Backtesting, typeof(SimpleBandWagonAlgorithm));
+                ExchangeFactoryService.BuildContainer(typeof(SimpleBandWagonAlgorithm));
             _time = container.TimerProvider;
         }
 

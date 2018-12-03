@@ -77,21 +77,16 @@ namespace SpreadShare
         {
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
 
-            // Setup Settings service
-            var settings = serviceProvider.GetService<SettingsService>();
-            var settingsResult = settings.Start();
-            if (!settingsResult.Success)
-            {
-                logger.LogError($"SettingsService failed to start, aborting other services\n{settingsResult}" +
-                                $"Validate that SpreadShare/appsettings.json is in the correct format.");
-            }
-
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
             if (!service.Migrate().Success)
             {
                 logger.LogError("Could not migrate database");
             }
+
+            // Setup Settings service
+            var settings = serviceProvider.GetService<SettingsService>();
+            settings.Start();
         }
 
         /// <summary>
