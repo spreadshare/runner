@@ -50,3 +50,12 @@ Furthermore, the Visual Studio debug output window does not support special char
 ### Splitting debug logs into default output and program output
 The debug output contains default output and program output. If you would like to split this output, change the following setting in Visual Studio:
 > _Tools -> Visual Studio Options Dialog -> Debugging -> Check the "Redirect All Output Window Text to the Immediate Window"_
+
+### Removing trailing whitespace in a pre-commit hook
+Add the following script to `.git/hooks/pre-commit` (no extension)
+```bash
+find . -name '*.cs' -exec sed -i 's/\s*$//g' {} +
+```
+You have to set the script executable using `chmod +x .git/hooks/pre-commit`
+
+Each time you commit, this command will remove trailing whitespace.
