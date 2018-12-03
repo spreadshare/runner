@@ -69,7 +69,6 @@ namespace SpreadShare.Models.Database
             decimal value)
         {
             OrderType = order.OrderType.ToString();
-            OrderId = order.OrderId;
             TradeId = order.TradeId;
             OrderStatus = order.Status.ToString();
             CreatedTimestamp = order.CreatedTimeStamp;
@@ -164,6 +163,7 @@ namespace SpreadShare.Models.Database
         public static string GetStaticCsvHeader(char delimiter)
         {
             return $"{nameof(OrderId)}{delimiter}" +
+                   $"{nameof(TradeId)}{delimiter}" +
                    $"{nameof(OrderType)}{delimiter}" +
                    $"{nameof(OrderStatus)}{delimiter}" +
                    $"{nameof(Side)}{delimiter}" +
@@ -182,6 +182,7 @@ namespace SpreadShare.Models.Database
         public string GetCsvRepresentation(char delimiter)
         {
             return $"{OrderId}{delimiter}" +
+                   $"{TradeId}{delimiter}" +
                    $"{OrderType}{delimiter}" +
                    $"{OrderStatus}{delimiter}" +
                    $"{Side}{delimiter}" +
