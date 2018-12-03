@@ -163,7 +163,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     new Balance(order.Pair.Left, order.SetQuantity, 0));
             }
 
-            _logger.LogInformation($"Updating remote with exec {JsonConvert.SerializeObject(exec)}");
             _comm.RemotePortfolio.UpdateAllocation(exec);
 
             // Add cancelled order to the database
