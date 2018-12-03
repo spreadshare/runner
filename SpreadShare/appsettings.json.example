@@ -9,20 +9,16 @@
             "Secret": "api_secret"
         }
     },
-    "SimpleBandWagonAlgorithm": {
-        "Exchange" : "Binance",
-        "BaseCurrency": "ETH",
-        "MinimalRevertValue": "0.01",
-        "MinimalGrowthPercentage" : 7,
-        "CheckTime": 18,
-        "HoldTime": 1,
-        "ActiveTradingPairs": [
-            "EOSETH"
-        ]
+    "TemplateAlgorithm" : {
+      "Exchange" : "Binance",
+      "BaseCurrency": "ETH",
+      "ActiveTradingPairs": [
+        "EOSETH"
+      ]
     },
     "AllocationSettings": {
         "Backtesting": {
-            "SimpleBandWagonAlgorithm": 1.0
+            "TemplateAlgorithm": 1.0
         }
     },
     "BacktestSettings" : {

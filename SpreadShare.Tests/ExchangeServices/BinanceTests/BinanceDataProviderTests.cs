@@ -1,6 +1,7 @@
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models.Trading;
+using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,7 +21,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
         public BinanceDataProviderTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            _container = ExchangeFactoryService.BuildContainer(typeof(SimpleBandWagonAlgorithm));
+            _container = ExchangeFactoryService.BuildContainer(typeof(TemplateAlgorithm));
         }
 
         /// <summary>
