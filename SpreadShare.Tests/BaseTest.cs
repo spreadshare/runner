@@ -12,11 +12,10 @@ namespace SpreadShare.Tests
     public abstract class BaseTest
     {
         /// <summary>
-        /// One time iniatilized instance of the settings service.
+        /// One time initialized instance of the settings service.
         /// </summary>
         internal static readonly SettingsService SettingsService =
-            (SettingsService)ServiceProviderSingleton.Instance
-            .ServiceProvider.GetService<SettingsService>();
+            ServiceProviderSingleton.Instance.ServiceProvider.GetService<SettingsService>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseTest"/> class.

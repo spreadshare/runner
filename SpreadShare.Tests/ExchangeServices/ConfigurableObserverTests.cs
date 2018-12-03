@@ -2,6 +2,7 @@ using System;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.Providers.Observing;
+using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,7 +16,7 @@ namespace SpreadShare.Tests.ExchangeServices
             : base(outputHelper)
         {
             var container =
-                ExchangeFactoryService.BuildContainer(typeof(SimpleBandWagonAlgorithm));
+                ExchangeFactoryService.BuildContainer(typeof(TemplateAlgorithm));
             _data = container.DataProvider;
         }
 

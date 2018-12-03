@@ -8,6 +8,7 @@ using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,7 +32,8 @@ namespace SpreadShare.Tests.Models
         public void GetAlgorithmAllocationHappyFlow()
         {
             var total = GetDefaultPortfolio();
-            var algo = typeof(SimpleBandWagonAlgorithm);
+
+            var algo = typeof(TemplateAlgorithm);
 
             var allocation = total.GetAlgorithmAllocation(algo);
             Assert.NotNull(allocation);
@@ -56,19 +58,19 @@ namespace SpreadShare.Tests.Models
         public void GetAlgorithmAllocationNone()
         {
             var total = GetDefaultPortfolio();
-            var algo = typeof(TestAlgorithm);
+            var algo = typeof(OtherAlgorithm);
 
             var allocation = total.GetAlgorithmAllocation(algo);
             Assert.NotNull(allocation);
-            Assert.True(!allocation.AllBalances().Any(), "Algorithm 'TestAlgorithm' should not be allocated");
+            Assert.True(!allocation.AllBalances().Any(), "Algorithm 'OtherAlgorithm' should not be allocated");
         }
 
         [Fact]
         public void SetAllocationHappyFlow()
         {
             var total = new TotalPortfolio();
-            Type algo1 = typeof(SimpleBandWagonAlgorithm);
-            Type algo2 = typeof(TestAlgorithm);
+            Type algo1 = typeof(TemplateAlgorithm);
+            Type algo2 = typeof(OtherAlgorithm);
             total.SetAlgorithmAllocation(algo1, new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 2.001M, 4) },
@@ -96,7 +98,7 @@ namespace SpreadShare.Tests.Models
         public void SetAllocationNull()
         {
             var total = new TotalPortfolio();
-            Type algo = typeof(TestAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
 
             Assert.Throws<ArgumentNullException>(() => total.SetAlgorithmAllocation(
                 null,
@@ -119,7 +121,7 @@ namespace SpreadShare.Tests.Models
         public void SetAllocationOverwrites()
         {
             var total = new TotalPortfolio();
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
 
             total.SetAlgorithmAllocation(algo, new Portfolio(new Dictionary<Currency, Balance>
             {
@@ -143,7 +145,7 @@ namespace SpreadShare.Tests.Models
         public void IsAllocatedHappyFlow()
         {
             var total = new TotalPortfolio();
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
 
             Assert.False(total.IsAllocated(algo));
 
@@ -160,11 +162,11 @@ namespace SpreadShare.Tests.Models
         public void IsAllocatedNonExistent()
         {
             var total = new TotalPortfolio();
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(OtherAlgorithm);
 
             Assert.False(total.IsAllocated(algo));
 
-            total.SetAlgorithmAllocation(typeof(TestAlgorithm), new Portfolio(new Dictionary<Currency, Balance>
+            total.SetAlgorithmAllocation(typeof(TemplateAlgorithm), new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 2.001M, 4) },
                 { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) }
@@ -177,7 +179,7 @@ namespace SpreadShare.Tests.Models
         public void TradeIsProcessedHappyFlow()
         {
             var total = GetDefaultPortfolio();
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
             var trade = new TradeExecution(
                 new Balance(new Currency("ETH"), 2, 0),
                 new Balance(new Currency("VET"), 100, 0));
@@ -192,7 +194,7 @@ namespace SpreadShare.Tests.Models
         public void TradeIsProcessedNull()
         {
             var total = GetDefaultPortfolio();
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
             var trade = new TradeExecution(
                 new Balance(new Currency("ETH"), 2, 0),
                 new Balance(new Currency("VET"), 100, 0));
@@ -217,7 +219,7 @@ namespace SpreadShare.Tests.Models
         public void ChildrenAreSummed()
         {
             var total = GetDefaultPortfolio();
-            Type algo = typeof(TestAlgorithm);
+            Type algo = typeof(OtherAlgorithm);
 
             total.SetAlgorithmAllocation(algo, new Portfolio(new Dictionary<Currency, Balance>
             {
@@ -239,7 +241,7 @@ namespace SpreadShare.Tests.Models
         private static TotalPortfolio GetDefaultPortfolio()
         {
             var total = new TotalPortfolio();
-            Type algo = typeof(SimpleBandWagonAlgorithm);
+            Type algo = typeof(TemplateAlgorithm);
 
             total.SetAlgorithmAllocation(algo, new Portfolio(new Dictionary<Currency, Balance>
             {
@@ -250,12 +252,15 @@ namespace SpreadShare.Tests.Models
             return total;
         }
 
-        private abstract class TestAlgorithm : BaseAlgorithm
+        // Disable warning about classes that are not instantiated
+        #pragma warning disable CA1812
+        private class OtherAlgorithm : BaseAlgorithm
         {
             public override ResponseObject Start(AlgorithmSettings settings, ExchangeProvidersContainer container, DatabaseContext database)
             {
                 throw new NotImplementedException();
             }
         }
+        #pragma warning restore CA1812
     }
 }
