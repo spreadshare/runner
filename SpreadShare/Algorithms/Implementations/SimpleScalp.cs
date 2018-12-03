@@ -58,7 +58,10 @@ namespace SpreadShare.Algorithms.Implementations
 
              public override State<SimpleScalpSettings> OnOrderUpdate(OrderUpdate order)
              {
-                 return new WaitState();
+                 if (order.Status == OrderUpdate.OrderStatus.Filled && order.OrderId == limitsell.OrderId)
+                 {
+                     return new WaitState();
+                 }
              }
 
              protected override void Run(TradingProvider trading, DataProvider data)
