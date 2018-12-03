@@ -33,7 +33,7 @@ namespace SpreadShare.Algorithms.Implementations
          }
 
          // Buy at market, set a limit sell immediately, and a 2 hour stop. if the stop is hit, sell at market, and wait
-         private class WelcomeState : State<SimpleScalpSettings>
+         private class WelcomeState : EntryState<SimpleScalpSettings>
          {
              public override State<SimpleScalpSettings> OnTimerElapsed()
              {
@@ -46,7 +46,7 @@ namespace SpreadShare.Algorithms.Implementations
              }
          }
 
-         private class EntryState : State<SimpleScalpSettings>
+         private class EntryState : EntryState<SimpleScalpSettings>
          {
              private OrderUpdate limitsell;
 
