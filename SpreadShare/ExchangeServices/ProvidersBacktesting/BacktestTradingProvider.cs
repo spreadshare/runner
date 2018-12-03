@@ -53,23 +53,20 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
         {
-            Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0.0M));
-
             // Keep the remote updated by mocking a trade execution and letting the communications know.
-            TradeExecution exec = null;
+            TradeExecution exec;
             decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
             if (side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M),
+                    new Balance(pair.Right, quantity * priceEstimate, 0.0M),
                     new Balance(pair.Left, quantity, 0.0M));
             }
             else
             {
                 exec = new TradeExecution(
                     new Balance(pair.Left, quantity, 0.0M),
-                    new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M));
+                    new Balance(pair.Right, quantity * priceEstimate, 0.0M));
             }
 
             _comm.RemotePortfolio.UpdateAllocation(exec);
