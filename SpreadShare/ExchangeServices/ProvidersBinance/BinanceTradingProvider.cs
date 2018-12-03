@@ -27,7 +27,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, Models.OrderSide side, decimal quantity)
+        public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, Models.OrderSide side, decimal quantity, long tradeId)
         {
             throw new NotImplementedException();
             /*
@@ -47,7 +47,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price)
+        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
         {
             throw new System.NotImplementedException();
         }
