@@ -1,4 +1,3 @@
-using System.Data.Common;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
@@ -25,12 +24,10 @@ namespace SpreadShare.Algorithms.Implementations
             return new ResponseObject(ResponseCode.Success);
         }
 
-        private class TemplateState : State<TemplateAlgorithmSettings>
+        private class TemplateState : EntryState<TemplateAlgorithmSettings>
         {
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                // Increase the trade id every time the entry state is called.
-                trading.TradeId += 1;
             }
         }
     }

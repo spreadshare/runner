@@ -2,6 +2,7 @@
 using System.Linq;
 using Dawn;
 using Microsoft.Extensions.Logging;
+using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models.Database;
@@ -35,7 +36,7 @@ namespace SpreadShare.Algorithms
         /// <param name="database">The database context for logging state switches</param>
         public StateManager(
             T algorithmSettings,
-            State<T> initial,
+            EntryState<T> initial,
             ExchangeProvidersContainer container,
             DatabaseContext database)
         {
@@ -144,6 +145,12 @@ namespace SpreadShare.Algorithms
             {
                 _logger.LogInformation(
                     $"STATE SWITCH: {CurrentState} ---> {child.GetType().ToString().Split('+').Last()} at {Container.TimerProvider.CurrentTime}");
+
+                // Full cycle -> increase TradeID
+                if (child is EntryState<T>)
+                {
+                    Container.TradingProvider.IncrementTradeId();
+                }
 
                 // Add state switch event to the database
                 _database.StateSwitchEvents.Add(new StateSwitchEvent(
