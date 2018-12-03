@@ -2,7 +2,6 @@
 using System.Linq;
 using Dawn;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models.Database;
