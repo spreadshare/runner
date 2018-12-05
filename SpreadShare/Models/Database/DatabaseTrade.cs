@@ -12,6 +12,7 @@ namespace SpreadShare.Models.Database
         /// Initializes a new instance of the <see cref="DatabaseTrade"/> class.
         /// </summary>
         /// <param name="orderId">The orderId of the trade, must be unique</param>
+        /// <param name="tradeId">The tradeId of the trade</param>
         /// <param name="orderType">Kind of order</param>
         /// <param name="orderStatus">The status of the order</param>
         /// <param name="createdTimestamp">The unix createdTimestamp in milliseconds</param>
@@ -26,6 +27,7 @@ namespace SpreadShare.Models.Database
         /// <param name="value">The value of the portfolio before the trade</param>
         public DatabaseTrade(
             long orderId,
+            long tradeId,
             string orderType,
             string orderStatus,
             long createdTimestamp,
@@ -40,6 +42,7 @@ namespace SpreadShare.Models.Database
             decimal value)
         {
             OrderId = orderId;
+            TradeId = tradeId;
             OrderType = orderType;
             OrderStatus = orderStatus;
             CreatedTimestamp = createdTimestamp;
@@ -66,6 +69,7 @@ namespace SpreadShare.Models.Database
             decimal value)
         {
             OrderType = order.OrderType.ToString();
+            TradeId = order.TradeId;
             OrderStatus = order.Status.ToString();
             CreatedTimestamp = order.CreatedTimeStamp;
             FilledTimeStamp = order.FilledTimeStamp;
@@ -85,6 +89,11 @@ namespace SpreadShare.Models.Database
         /// </summary>
         [Key]
         public long OrderId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID in specific for a certain trade
+        /// </summary>
+        public long TradeId { get; set; }
 
         /// <summary>
         /// Gets or sets the Type of order.
@@ -154,6 +163,7 @@ namespace SpreadShare.Models.Database
         public static string GetStaticCsvHeader(char delimiter)
         {
             return $"{nameof(OrderId)}{delimiter}" +
+                   $"{nameof(TradeId)}{delimiter}" +
                    $"{nameof(OrderType)}{delimiter}" +
                    $"{nameof(OrderStatus)}{delimiter}" +
                    $"{nameof(Side)}{delimiter}" +
@@ -172,6 +182,7 @@ namespace SpreadShare.Models.Database
         public string GetCsvRepresentation(char delimiter)
         {
             return $"{OrderId}{delimiter}" +
+                   $"{TradeId}{delimiter}" +
                    $"{OrderType}{delimiter}" +
                    $"{OrderStatus}{delimiter}" +
                    $"{Side}{delimiter}" +

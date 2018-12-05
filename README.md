@@ -29,6 +29,24 @@ Each time the database schema changes, the following command needs to be ran.
 dotnet ef migrations add [MigrationTitle]
 ```
 
+### Database restore
+In development, database migrations are replaced not stacked to keep a simple history. This does require a rebuild of the database however. This can be done as follows:
+```
+cd SpreadShare2/
+docker container prune
+# EOSETH is an example
+sudo cp DataPump/EOSETH.cv DataPump/input-data/
+```
+Make sure the entry point in SpreadShare/Dockerfile looks like this:
+```
+ENTRYPOINT ["dotnet", "SpreadShare.dll", "--verbose"]
+```
+Then run the container, resulting in a fresh migration
+```
+docker-compose up --build
+# Wait for the Datapump to complete
+```
+
 ### Dawn's Guard plugin
 For argument checking, the project consistenly uses the Guard plugin from Dawn. This plugin requires at least C#7.2. You can review the documentation here https://github.com/safakgur/guard
 

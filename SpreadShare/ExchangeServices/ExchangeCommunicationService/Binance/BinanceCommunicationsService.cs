@@ -96,6 +96,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 
             // Start socket connection
             // TODO: Is this correct?
+            // TODO: TradeId is not correct.
             var succesOrderBook = Socket.SubscribeToUserStream(
                 listenKey,
                 accountInfoUpdate =>
@@ -104,6 +105,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 },
                 orderInfoUpdate => UpdateObservers(new OrderUpdate(
                     orderInfoUpdate.OrderId,
+                    0,
                     BinanceUtilities.ToInternal(orderInfoUpdate.Type),
                     DateTimeOffset.FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime()).ToUnixTimeMilliseconds(),
                     orderInfoUpdate.Price,

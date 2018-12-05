@@ -15,6 +15,7 @@ namespace SpreadShare.Migrations
                 {
                     OrderId = table.Column<long>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    TradeId = table.Column<long>(nullable: false),
                     OrderType = table.Column<string>(nullable: true),
                     OrderStatus = table.Column<string>(nullable: true),
                     CreatedTimestamp = table.Column<long>(nullable: false),

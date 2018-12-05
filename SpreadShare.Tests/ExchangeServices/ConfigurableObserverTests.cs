@@ -2,7 +2,6 @@ using System;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.Providers.Observing;
-using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
 

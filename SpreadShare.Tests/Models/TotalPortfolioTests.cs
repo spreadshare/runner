@@ -8,7 +8,6 @@ using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
-using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
 

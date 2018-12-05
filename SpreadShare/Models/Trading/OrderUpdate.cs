@@ -8,6 +8,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="OrderUpdate"/> class.
         /// </summary>
+        /// <param name="tradeId">The id of the trade</param>
         /// <param name="orderType">The type of the order</param>
         /// <param name="createdTimeStamp">The timestamp at which the order is created</param>
         /// <param name="setPrice">SetPrice at which the order was set</param>
@@ -17,6 +18,7 @@
         /// <param name="orderId">The unique id of the order</param>
         public OrderUpdate(
             long orderId,
+            long tradeId,
             OrderTypes orderType,
             long createdTimeStamp,
             decimal setPrice,
@@ -25,6 +27,7 @@
             decimal setQuantity)
         {
             OrderId = orderId;
+            TradeId = tradeId;
             OrderType = orderType;
             CreatedTimeStamp = createdTimeStamp;
             SetPrice = setPrice;
@@ -124,6 +127,11 @@
         /// Gets the unique id of the order
         /// </summary>
         public long OrderId { get; }
+
+        /// <summary>
+        /// Gets the id of the accompanying trade
+        /// </summary>
+        public long TradeId { get; }
 
         /// <summary>
         /// Gets the type fo the order

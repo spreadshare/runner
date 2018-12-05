@@ -51,31 +51,29 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, OrderSide side, decimal quantity)
+        public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
         {
-            Currency currency = side == OrderSide.Buy ? pair.Right : pair.Left;
-            var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0.0M));
-
             // Keep the remote updated by mocking a trade execution and letting the communications know.
-            TradeExecution exec = null;
+            TradeExecution exec;
             decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
             if (side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M),
+                    new Balance(pair.Right, quantity * priceEstimate, 0.0M),
                     new Balance(pair.Left, quantity, 0.0M));
             }
             else
             {
                 exec = new TradeExecution(
                     new Balance(pair.Left, quantity, 0.0M),
-                    new Balance(pair.Right, proposal.From.Free * priceEstimate, 0.0M));
+                    new Balance(pair.Right, quantity * priceEstimate, 0.0M));
             }
 
             _comm.RemotePortfolio.UpdateAllocation(exec);
 
             var orderUpdate = new OrderUpdate(
                 _mockOrderCounter++,
+                tradeId,
                 OrderUpdate.OrderTypes.Market,
                 _timer.CurrentTime.ToUnixTimeMilliseconds(),
                 priceEstimate,
@@ -101,7 +99,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price)
+        public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
         {
             // Keep the remote updated by mocking a trade execution
             TradeExecution exec;
@@ -125,6 +123,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Add the order to the watchlist
             OrderUpdate order = new OrderUpdate(
                 _mockOrderCounter,
+                tradeId,
                 OrderUpdate.OrderTypes.Limit,
                 _timer.CurrentTime.ToUnixTimeMilliseconds(),
                 price,
@@ -164,7 +163,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     new Balance(order.Pair.Left, order.SetQuantity, 0));
             }
 
-            _logger.LogInformation($"Updating remote with exec {JsonConvert.SerializeObject(exec)}");
             _comm.RemotePortfolio.UpdateAllocation(exec);
 
             // Add cancelled order to the database

@@ -42,6 +42,19 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
+        /// Gets or sets the current ID of the trade under which order will be placed.
+        /// </summary>
+        private long TradeId { get; set; }
+
+        /// <summary>
+        /// Increment the trade ID, handled by the StateManager
+        /// </summary>
+        public void IncrementTradeId()
+        {
+            TradeId++;
+        }
+
+        /// <summary>
         /// Gets the portfolio associated with an algorithm
         /// </summary>
         /// <returns>Response object indicating success or not</returns>
@@ -91,7 +104,7 @@ namespace SpreadShare.ExchangeServices.Providers
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
                 result = RetryMethod(() =>
-                    _implementation.PlaceMarketOrder(pair, OrderSide.Buy, quantity));
+                    _implementation.PlaceMarketOrder(pair, OrderSide.Buy, quantity, TradeId));
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(pair.Left, result.Data.SetQuantity, 0.0M))
                     : null;
@@ -116,7 +129,7 @@ namespace SpreadShare.ExchangeServices.Providers
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
                 result = RetryMethod(() =>
-                    _implementation.PlaceMarketOrder(pair, OrderSide.Sell, proposal.From.Free));
+                    _implementation.PlaceMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId));
                 if (result.Success)
                 {
                     // Correct gained quantity using a price estimate
@@ -148,7 +161,7 @@ namespace SpreadShare.ExchangeServices.Providers
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, quantity, price));
+                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, quantity, price, TradeId));
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity * price))
                     : null;
@@ -171,7 +184,7 @@ namespace SpreadShare.ExchangeServices.Providers
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Sell, quantity, price));
+                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Sell, quantity, price, TradeId));
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity))
                     : null;
