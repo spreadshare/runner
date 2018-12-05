@@ -35,7 +35,7 @@ In development, database migrations are replaced not stacked to keep a simple hi
 cd SpreadShare2/
 docker container prune
 # EOSETH is an example
-sudo cp DataPump/EOSETH.cv DataPump/input-data/
+sudo cp DataPump/EOSETH.csv DataPump/input-data/
 ```
 Make sure the entry point in SpreadShare/Dockerfile looks like this:
 ```
