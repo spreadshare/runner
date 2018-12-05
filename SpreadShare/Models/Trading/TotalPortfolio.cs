@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dawn;
-using SpreadShare.Algorithms;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.Models.Trading
 {
@@ -29,7 +29,7 @@ namespace SpreadShare.Models.Trading
         public void ApplyTradeExecution(Type algo, TradeExecution trade)
         {
             Guard.Argument(algo).NotNull().Require(
-                a => a.IsSubclassOf(typeof(BaseAlgorithm)),
+                a => Reflections.IsAlgorithm(algo),
                 a => $"{a} is not a subclass of BaseAlgorithm");
             Guard.Argument(trade).NotNull();
 
@@ -59,7 +59,7 @@ namespace SpreadShare.Models.Trading
         public Portfolio GetAlgorithmAllocation(Type algo)
         {
             Guard.Argument(algo).NotNull().Require(
-                a => a.IsSubclassOf(typeof(BaseAlgorithm)),
+                Reflections.IsAlgorithm,
                 a => $"{a} is not a subclass of BaseAlgorithm");
 
             if (!IsAllocated(algo))
@@ -78,7 +78,7 @@ namespace SpreadShare.Models.Trading
         public void SetAlgorithmAllocation(Type algo, Portfolio alloc)
         {
             Guard.Argument(algo).NotNull().Require(
-                a => a.IsSubclassOf(typeof(BaseAlgorithm)),
+                Reflections.IsAlgorithm,
                 a => $"{a} is not a subclass of BaseAlgorithm");
             Guard.Argument(alloc).NotNull();
 

@@ -1,4 +1,5 @@
-﻿using SpreadShare.ExchangeServices;
+﻿using Dawn;
+using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
@@ -8,18 +9,28 @@ namespace SpreadShare.Algorithms
     /// <summary>
     /// Base class for all algorithms
     /// </summary>
-    internal abstract class BaseAlgorithm
+    /// <typeparam name="T">The derived AlgorithmSettings</typeparam>
+    internal abstract class BaseAlgorithm<T> : IBaseAlgorithm
+        where T : AlgorithmSettings
     {
         /// <summary>
-        /// Start algorithm with the initial state using a StateManager
+        /// Gets the the EntryState of the algorithm
         /// </summary>
-        /// <param name="settings">Provides access to settings of the algorithm</param>
-        /// <param name="container">Provides trading and data gathering capabilities</param>
-        /// <param name="database">The database context</param>
-        /// <returns>Whether the algorithm started succesfully</returns>
-        public abstract ResponseObject Start(
-            AlgorithmSettings settings,
-            ExchangeProvidersContainer container,
-            DatabaseContext database);
+        protected abstract EntryState<T> Initial { get; }
+
+        private StateManager<T> StateManager { get; set; }
+
+        /// <inheritdoc />
+        public ResponseObject Start(AlgorithmSettings settings, ExchangeProvidersContainer container, DatabaseContext database)
+        {
+            Guard.Argument(settings).Require(
+                x => x is T,
+                x => $"{x} cannot not be converted to {typeof(T)}, please make sure to use the correct AlgorithmSettings");
+            Start(settings as T, container, database);
+            return new ResponseObject(ResponseCode.Success);
+        }
+
+        private void Start(T settings, ExchangeProvidersContainer container, DatabaseContext database)
+            => StateManager = new StateManager<T>(settings, Initial, container, database);
     }
 }

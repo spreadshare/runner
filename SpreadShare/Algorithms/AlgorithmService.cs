@@ -8,6 +8,7 @@ using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.Algorithms
 {
@@ -52,7 +53,7 @@ namespace SpreadShare.Algorithms
         public ResponseObject StartAlgorithm(Type algorithmType)
         {
             // Check if type is an algorithm
-            if (!algorithmType.IsSubclassOf(typeof(BaseAlgorithm)))
+            if (Reflections.IsAlgorithm(algorithmType))
             {
                 return new ResponseObject(ResponseCode.Error, $"Provided type {algorithmType} is not an algorithm.");
             }
@@ -64,7 +65,7 @@ namespace SpreadShare.Algorithms
             }
 
             // Figure out which container to get
-            BaseAlgorithm algorithm = (BaseAlgorithm)Activator.CreateInstance(algorithmType);
+            IBaseAlgorithm algorithm = (IBaseAlgorithm)Activator.CreateInstance(algorithmType);
 
             AlgorithmSettings settings = _settingsService.GetAlgorithSettings(algorithmType);
 
@@ -93,7 +94,7 @@ namespace SpreadShare.Algorithms
         public ResponseObject StopAlgorithm(Type algorithmType)
         {
             // Check if type is an algorithm
-            if (!algorithmType.IsSubclassOf(typeof(BaseAlgorithm)))
+            if (!Reflections.IsAlgorithm(algorithmType))
             {
                 return new ResponseObject(ResponseCode.Error, $"Provided type {algorithmType} is not an algorithm.");
             }

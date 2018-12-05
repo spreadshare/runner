@@ -1,7 +1,4 @@
-using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.Models;
-using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
 
 #pragma warning disable SA1402
@@ -11,18 +8,10 @@ namespace SpreadShare.Algorithms.Implementations
     /// <summary>
     /// Stud algorithm, used for testing
     /// </summary>
-    internal class TemplateAlgorithm : BaseAlgorithm
+    internal class TemplateAlgorithm : BaseAlgorithm<TemplateAlgorithmSettings>
     {
         /// <inheritdoc />
-        public override ResponseObject Start(AlgorithmSettings settings, ExchangeProvidersContainer container, DatabaseContext database)
-        {
-            var stateManager = new StateManager<TemplateAlgorithmSettings>(
-                settings as TemplateAlgorithmSettings,
-                new TemplateState(),
-                container,
-                database);
-            return new ResponseObject(ResponseCode.Success);
-        }
+        protected override EntryState<TemplateAlgorithmSettings> Initial => new TemplateState();
 
         private class TemplateState : EntryState<TemplateAlgorithmSettings>
         {

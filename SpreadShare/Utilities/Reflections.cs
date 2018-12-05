@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using Dawn;
+using SpreadShare.Algorithms;
 
 namespace SpreadShare.Utilities
 {
@@ -24,9 +26,37 @@ namespace SpreadShare.Utilities
         /// <returns>All implementations of given base type</returns>
         public static IEnumerable<Type> GetAllSubtypes(Type abstraction)
         {
+            Guard.Argument(abstraction).Require(
+                x => !x.IsInterface,
+                x => $"{x} is an interface, please use the GetAllImplementations() method instead");
             return from type in ThisAssembly.GetTypes()
                    where type.IsSubclassOf(abstraction)
                    select type;
+        }
+
+        /// <summary>
+        /// Fetches a collection of types which are explicit implementations of the given interface
+        /// </summary>
+        /// <param name="abstraction">Type of the interface</param>
+        /// <returns>All implementations of a given interface</returns>
+        public static IEnumerable<Type> GetAllImplementations(Type abstraction)
+        {
+            Guard.Argument(abstraction).Require(
+                x => x.IsInterface,
+                x => $"{x} is not an interface, did you mean to call GetAllSubtypes()?");
+            return from type in ThisAssembly.GetTypes()
+                where type.GetInterfaces().Contains(abstraction)
+                select type;
+        }
+
+        /// <summary>
+        /// Check whether a type implements IBaseAlgorithm
+        /// </summary>
+        /// <param name="t">Type to check</param>
+        /// <returns>Whether the provided type is an algorithm</returns>
+        public static bool IsAlgorithm(Type t)
+        {
+            return t.GetInterfaces().Contains(typeof(IBaseAlgorithm));
         }
 
         /// <summary>

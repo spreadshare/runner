@@ -3,11 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SpreadShare.Algorithms;
 using SpreadShare.Algorithms.Implementations;
-using SpreadShare.ExchangeServices;
-using SpreadShare.Models;
 using SpreadShare.Models.Trading;
-using SpreadShare.SupportServices;
-using SpreadShare.SupportServices.SettingsServices;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -253,12 +249,9 @@ namespace SpreadShare.Tests.Models
 
         // Disable warning about classes that are not instantiated
         #pragma warning disable CA1812
-        private class OtherAlgorithm : BaseAlgorithm
+        private class OtherAlgorithm : BaseAlgorithm<TemplateAlgorithmSettings>
         {
-            public override ResponseObject Start(AlgorithmSettings settings, ExchangeProvidersContainer container, DatabaseContext database)
-            {
-                throw new NotImplementedException();
-            }
+            protected override EntryState<TemplateAlgorithmSettings> Initial { get; }
         }
         #pragma warning restore CA1812
     }

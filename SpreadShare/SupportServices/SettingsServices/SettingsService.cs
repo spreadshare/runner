@@ -76,7 +76,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// <returns>AlgorithmSettings of algo</returns>
         public AlgorithmSettings GetAlgorithSettings(Type algo)
         {
-            Guard.Argument(algo).Require(x => x.IsSubclassOf(typeof(BaseAlgorithm)));
+            Guard.Argument(algo).Require(Reflections.IsAlgorithm);
             return _algorithmSettingsLookup[algo];
         }
 
@@ -183,7 +183,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// </summary>
         private void ParseAlgorithmSettings()
         {
-            var algoTypes = Reflections.GetAllSubtypes(typeof(BaseAlgorithm));
+            var algoTypes = Reflections.GetAllImplementations(typeof(IBaseAlgorithm)).Where(x => !x.IsAbstract);
             var settingsTypes = Reflections.GetAllSubtypes(typeof(AlgorithmSettings)).ToList();
             foreach (var type in algoTypes)
             {
@@ -283,7 +283,7 @@ namespace SpreadShare.SupportServices.SettingsServices
                         throw new InvalidConstraintException($"Could not parse algorithm {algorithm.Key}");
                     }
 
-                    if (algorithmType.BaseType != typeof(BaseAlgorithm))
+                    if (!Reflections.IsAlgorithm(algorithmType))
                     {
                         throw new InvalidConstraintException($"The type {algorithm} does not implement BaseAlgorithm");
                     }
