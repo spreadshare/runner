@@ -47,6 +47,14 @@ docker-compose up --build
 # Wait for the Datapump to complete
 ```
 
+Then make sure the entry point in SpreadShare/Dockerfile is set back to normal and run the container again
+```
+docker-compose up --build
+# Wait untill its done loading
+```
+
+You´re done and can now run your python scripts!
+
 ### Dawn's Guard plugin
 For argument checking, the project consistenly uses the Guard plugin from Dawn. This plugin requires at least C#7.2. You can review the documentation here https://github.com/safakgur/guard
 
