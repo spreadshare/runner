@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
@@ -11,12 +12,13 @@ namespace SpreadShare.ExchangeServices.Providers
     /// <summary>
     /// Provides trading capabilities.
     /// </summary>
-    internal class TradingProvider : Observable<OrderUpdate>
+    internal class TradingProvider : Observable<OrderUpdate>, IDisposable
     {
         private readonly ILogger _logger;
         private readonly AbstractTradingProvider _implementation;
         private readonly WeakAllocationManager _allocationManager;
         private readonly DataProvider _dataProvider;
+        private readonly List<OrderUpdate> _openOrders;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TradingProvider"/> class.
@@ -35,6 +37,7 @@ namespace SpreadShare.ExchangeServices.Providers
             _implementation = implementation;
             _allocationManager = allocationManager;
             _dataProvider = dataProvider;
+            _openOrders = new List<OrderUpdate>();
             _implementation.Subscribe(new ConfigurableObserver<OrderUpdate>(
                 UpdateAllocation,
                 () => { },
@@ -166,7 +169,13 @@ namespace SpreadShare.ExchangeServices.Providers
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity * price))
                     : null;
             });
-            return tradeSucces ? result : ResponseCommon.OrderRefused;
+            if (tradeSucces)
+            {
+                _openOrders.Add(result.Data);
+                return result;
+            }
+
+            return ResponseCommon.OrderRefused;
         }
 
         /// <summary>
@@ -189,7 +198,14 @@ namespace SpreadShare.ExchangeServices.Providers
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity))
                     : null;
             });
-            return tradeSuccess ? result : ResponseCommon.OrderRefused;
+
+            if (tradeSuccess)
+            {
+                _openOrders.Add(result.Data);
+                return result;
+            }
+
+            return ResponseCommon.OrderRefused;
         }
 
         /// <summary>
@@ -259,6 +275,29 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
         {
             return _implementation.GetOrderInfo(pair, orderId);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose the TradingProvider
+        /// </summary>
+        /// <param name="disposing">actually dispose it</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                foreach (var order in _openOrders)
+                {
+                    _logger.LogWarning($"Cancelling order {order.Pair}");
+                    CancelOrder(order.Pair, order.OrderId);
+                }
+            }
         }
 
         private decimal GetBuyQuantityEstimate(TradingPair pair, decimal baseQuantity)

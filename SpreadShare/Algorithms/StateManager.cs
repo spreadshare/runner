@@ -148,6 +148,7 @@ namespace SpreadShare.Algorithms
                     _loggerFactory.Dispose();
                     _timerObserver.Dispose();
                     _tradingObserver.Dispose();
+                    Container.TradingProvider.Dispose();
                 }
             }
         }
