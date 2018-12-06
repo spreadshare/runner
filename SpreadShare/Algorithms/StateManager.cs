@@ -15,13 +15,15 @@ namespace SpreadShare.Algorithms
     /// Object managing the active state and related resources
     /// </summary>
     /// <typeparam name="T">The type of the parent algorithm settings</typeparam>
-    internal class StateManager<T>
+    internal class StateManager<T> : IDisposable
         where T : AlgorithmSettings
     {
         private readonly object _lock = new object();
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly DatabaseContext _database;
+        private readonly IDisposable _timerObserver;
+        private readonly IDisposable _tradingObserver;
 
         private State<T> _activeState;
 
@@ -60,13 +62,13 @@ namespace SpreadShare.Algorithms
                     },
                     () => { },
                     e => { });
-                container.TimerProvider.Subscribe(periodicObserver);
+                _timerObserver = container.TimerProvider.Subscribe(periodicObserver);
 
                 var orderObserver = new ConfigurableObserver<OrderUpdate>(
                     OnOrderUpdateEval,
                     () => { },
                     e => { });
-                container.TradingProvider.Subscribe(orderObserver);
+                _tradingObserver = container.TradingProvider.Subscribe(orderObserver);
 
                 // Bind the database
                 _database = database;
@@ -126,6 +128,30 @@ namespace SpreadShare.Algorithms
             }
         }
 
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose the StateManager
+        /// </summary>
+        /// <param name="disposing">actually do it</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                lock (_lock)
+                {
+                    _loggerFactory.Dispose();
+                    _timerObserver.Dispose();
+                    _tradingObserver.Dispose();
+                }
+            }
+        }
+
         /// <summary>
         /// Switches the active state to the given state, only to be used by states
         /// </summary>
@@ -155,7 +181,7 @@ namespace SpreadShare.Algorithms
                 _database.StateSwitchEvents.Add(new StateSwitchEvent(
                     Container.TimerProvider.CurrentTime.ToUnixTimeMilliseconds(),
                     CurrentState,
-                    child.GetType().ToString().Split('+').Last()));
+                    child.GetType().Name));
 
                 _activeState = child;
 

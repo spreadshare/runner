@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
@@ -21,7 +22,7 @@ namespace SpreadShare.Algorithms
         private readonly SettingsService _settingsService;
         private readonly AllocationManager _allocationManager;
         private readonly ExchangeFactoryService _exchangeFactoryService;
-        private readonly Dictionary<Type, bool> _algorithms;
+        private readonly Dictionary<Type, IBaseAlgorithm> _algorithms;
         private readonly DatabaseContext _database;
 
         /// <summary>
@@ -44,7 +45,7 @@ namespace SpreadShare.Algorithms
             _allocationManager = allocationManager;
             _exchangeFactoryService = exchangeFactoryService;
             _settingsService = settingsService;
-            _algorithms = new Dictionary<Type, bool>();
+            _algorithms = new Dictionary<Type, IBaseAlgorithm>();
 
             SetInitialAllocation();
         }
@@ -59,7 +60,7 @@ namespace SpreadShare.Algorithms
             }
 
             // Check if algorithm is in a stopped state
-            if (_algorithms.ContainsKey(algorithmType) && _algorithms[algorithmType])
+            if (_algorithms.ContainsKey(algorithmType))
             {
                 return new ResponseObject(ResponseCode.Error, "Algorithm was already started.");
             }
@@ -84,7 +85,7 @@ namespace SpreadShare.Algorithms
             }
 
             // Set status Running to True
-            _algorithms[algorithmType] = true;
+            _algorithms[algorithmType] = algorithm;
 
             // Return a success
             return new ResponseObject(ResponseCode.Success);
@@ -93,13 +94,19 @@ namespace SpreadShare.Algorithms
         /// <inheritdoc />
         public ResponseObject StopAlgorithm(Type algorithmType)
         {
-            // Check if type is an algorithm
-            if (!Reflections.IsAlgorithm(algorithmType))
+            Guard.Argument(algorithmType).Require(
+                Reflections.IsAlgorithm,
+                x => $"Cannot stop {x} for it is not an algorithm");
+
+            if (!_algorithms.ContainsKey(algorithmType))
             {
-                return new ResponseObject(ResponseCode.Error, $"Provided type {algorithmType} is not an algorithm.");
+                return new ResponseObject(ResponseCode.Success, $"{algorithmType} was already stopped");
             }
 
-            throw new NotImplementedException();
+            _algorithms[algorithmType].Stop();
+            _algorithms.Remove(algorithmType);
+
+            return new ResponseObject(ResponseCode.Success);
         }
 
         /// <summary>

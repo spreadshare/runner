@@ -30,6 +30,13 @@ namespace SpreadShare.Algorithms
             return new ResponseObject(ResponseCode.Success);
         }
 
+        /// <inheritdoc />
+        public ResponseObject Stop()
+        {
+            StateManager.Dispose();
+            return new ResponseObject(ResponseCode.Success);
+        }
+
         private void Start(T settings, ExchangeProvidersContainer container, DatabaseContext database)
             => StateManager = new StateManager<T>(settings, Initial, container, database);
     }
