@@ -53,7 +53,7 @@ namespace SpreadShare.Algorithms
         public ResponseObject StartAlgorithm(Type algorithmType)
         {
             // Check if type is an algorithm
-            if (Reflections.IsAlgorithm(algorithmType))
+            if (!Reflections.IsAlgorithm(algorithmType))
             {
                 return new ResponseObject(ResponseCode.Error, $"Provided type {algorithmType} is not an algorithm.");
             }
