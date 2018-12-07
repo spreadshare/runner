@@ -53,6 +53,17 @@ namespace SpreadShare.ExchangeServices.Providers
         public abstract ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId);
 
         /// <summary>
+        /// Place a stoploss order at the given price
+        /// </summary>
+        /// <param name="pair">trading pair</param>
+        /// <param name="side">buy or sell order</param>
+        /// <param name="quantity">quantity of non base currency</param>
+        /// <param name="price">price to set the order at</param>
+        /// <param name="tradeId">The id of the trade</param>
+        /// <returns>A response object indicating the status of the stoplos order</returns>
+        public abstract ResponseObject<OrderUpdate> PlaceStoplossOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId);
+
+        /// <summary>
         /// Cancels order
         /// </summary>
         /// <param name="pair">The trading pair for which the order is set</param>

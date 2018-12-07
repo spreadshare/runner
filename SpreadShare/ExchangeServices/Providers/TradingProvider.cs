@@ -236,6 +236,84 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
+        /// Place a sell stoploss order
+        /// </summary>
+        /// <param name="pair">TradingPair to consider</param>
+        /// <param name="price">Price to set the order at</param>
+        /// <param name="quantity">Quantity of non base currency</param>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceStoplossSell(TradingPair pair, decimal price, decimal quantity)
+        {
+            var currency = pair.Left;
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
+
+            ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
+            bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
+            {
+                result = RetryMethod(
+                    () => _implementation.PlaceStoplossOrder(pair, OrderSide.Sell, quantity, price, TradeId));
+                return result.Success
+                    ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity))
+                    : null;
+            });
+
+            // TODO: Cancel stoploss orders on dispose
+            return tradeSucces ? result : ResponseCommon.OrderRefused;
+        }
+
+        /// <summary>
+        /// Place a buy stoploss order
+        /// </summary>
+        /// <param name="pair">trading pair</param>
+        /// <param name="price">price to set the order at</param>
+        /// <param name="quantity">Quantity of none base currency to trade with</param>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceStoplossBuy(TradingPair pair, decimal price, decimal quantity)
+        {
+            var currency = pair.Right;
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
+
+            ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
+            bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
+            {
+                result = RetryMethod(
+                    () => _implementation.PlaceStoplossOrder(pair, OrderSide.Buy, quantity, price, TradeId));
+                return result.Success
+                    ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity * price))
+                    : null;
+            });
+
+            // TODO: Cancel stoploss orders on dispose
+            return tradeSucces ? result : ResponseCommon.OrderRefused;
+        }
+
+        /// <summary>
+        /// Place a sell stoploss order with the full allocation
+        /// </summary>
+        /// <param name="pair">trading pair</param>
+        /// <param name="price">price to set the order at</param>
+        /// <returns>ResonseObject containing an OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceFullStoplossSell(TradingPair pair, decimal price)
+        {
+            var currency = pair.Left;
+            decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            return PlaceStoplossSell(pair, price, quantity);
+        }
+
+        /// <summary>
+        /// Place a buy stoploss order with the full allocation
+        /// </summary>
+        /// <param name="pair">trading pair</param>
+        /// <param name="price">price to set the order at</param>
+        /// <returns>ReponseObject containing an OrderUpdate</returns>
+        public ResponseObject<OrderUpdate> PlaceFullStoplossBuy(TradingPair pair, decimal price)
+        {
+            var currency = pair.Right;
+            decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            return PlaceStoplossBuy(pair, price, quantity);
+        }
+
+        /// <summary>
         /// Cancels order
         /// </summary>
         /// <param name="pair">trading pair in which the order is found</param>

@@ -136,6 +136,43 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
+        public override ResponseObject<OrderUpdate> PlaceStoplossOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
+        {
+            // Keep the remote updated by mocking a TradeExecution
+            TradeExecution exec;
+
+            if (side == OrderSide.Buy)
+            {
+                exec = new TradeExecution(
+                    new Balance(pair.Right, quantity * price, 0),
+                    new Balance(pair.Right, 0, quantity * price));
+            }
+            else
+            {
+                exec = new TradeExecution(
+                    new Balance(pair.Left, quantity, 0),
+                    new Balance(pair.Left, 0, quantity));
+            }
+
+            _comm.RemotePortfolio.UpdateAllocation(exec);
+
+            // Add the order to the watchlist
+            OrderUpdate order = new OrderUpdate(
+                _mockOrderCounter,
+                tradeId,
+                OrderUpdate.OrderTypes.StopLoss,
+                _timer.CurrentTime.ToUnixTimeMilliseconds(),
+                price,
+                side,
+                pair,
+                quantity);
+            WatchList.Add(_mockOrderCounter, order);
+            _mockOrderCounter++;
+
+            return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
+        }
+
+        /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
             var order = GetOrderInfo(pair, orderId).Data;
@@ -196,7 +233,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             foreach (var order in WatchList.Values.ToList())
             {
                 decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
-                if (!FilledLimitOrder(order))
+                if (!FilledLimitOrder(order) || !FilledStoplossOrder(order))
                 {
                     continue;
                 }
@@ -248,6 +285,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             return order.Side == OrderSide.Buy
                 ? price <= order.SetPrice
                 : price >= order.SetPrice;
+        }
+
+        private bool FilledStoplossOrder(OrderUpdate order)
+        {
+            decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
+            return order.Side == OrderSide.Buy
+                ? price >= order.SetPrice
+                : price <= order.SetPrice;
         }
     }
 }

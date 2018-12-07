@@ -53,6 +53,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
+        public override ResponseObject<OrderUpdate> PlaceStoplossOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
             // set alias for more readable code
