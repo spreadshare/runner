@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
@@ -39,7 +40,7 @@ namespace SpreadShare.ExchangeServices.Providers
             _dataProvider = dataProvider;
             _openOrders = new List<OrderUpdate>();
             _implementation.Subscribe(new ConfigurableObserver<OrderUpdate>(
-                UpdateAllocation,
+                HandleOrderUpdate,
                 () => { },
                 e => { }));
         }
@@ -329,6 +330,15 @@ namespace SpreadShare.ExchangeServices.Providers
             return new ResponseObject<T>(ResponseCode.Error);
         }
 
+        private void HandleOrderUpdate(OrderUpdate order)
+        {
+            UpdateAllocation(order);
+            UpdateOpenOrders(order);
+
+            // pass the order on to the subscribers
+            UpdateObservers(order);
+        }
+
         private void UpdateAllocation(OrderUpdate order)
         {
             TradeExecution exec;
@@ -346,7 +356,19 @@ namespace SpreadShare.ExchangeServices.Providers
             }
 
             _allocationManager.UpdateAllocation(exec);
-            UpdateObservers(order);
+        }
+
+        private void UpdateOpenOrders(OrderUpdate order)
+        {
+            if (order.Status == OrderUpdate.OrderStatus.Filled)
+            {
+                if (_openOrders.All(o => o.OrderId != order.OrderId))
+                {
+                    _logger.LogWarning($"Observerd order {order.OrderId} as Filled but the order was not tracked");
+                }
+
+                _openOrders.RemoveAll(o => o.OrderId == order.OrderId);
+            }
         }
     }
 }
