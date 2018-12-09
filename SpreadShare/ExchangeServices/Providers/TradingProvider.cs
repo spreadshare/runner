@@ -46,17 +46,14 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Gets or sets the current ID of the trade under which order will be placed.
+        /// Gets or sets the current ID of the trade under which an order will be placed.
         /// </summary>
         private long TradeId { get; set; }
 
         /// <summary>
         /// Increment the trade ID, handled by the StateManager
         /// </summary>
-        public void IncrementTradeId()
-        {
-            TradeId++;
-        }
+        public void IncrementTradeId() => TradeId++;
 
         /// <summary>
         /// Gets the portfolio associated with an algorithm

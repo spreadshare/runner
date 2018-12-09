@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
@@ -138,6 +139,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> PlaceStoplossOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
         {
+            _logger.LogInformation("Placing a stoploss order");
             // Keep the remote updated by mocking a TradeExecution
             TradeExecution exec;
 
@@ -168,6 +170,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 quantity);
             WatchList.Add(_mockOrderCounter, order);
             _mockOrderCounter++;
+            
+            _logger.LogInformation(JsonConvert.SerializeObject(order));
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
         }
@@ -233,7 +237,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             foreach (var order in WatchList.Values.ToList())
             {
                 decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
-                if (!FilledLimitOrder(order) || !FilledStoplossOrder(order))
+                if (order.OrderType == OrderUpdate.OrderTypes.Limit && !FilledLimitOrder(order))
+                {
+                    continue;
+                }
+
+                if (order.OrderType == OrderUpdate.OrderTypes.StopLoss && !FilledStoplossOrder(order))
                 {
                     continue;
                 }
