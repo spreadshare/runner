@@ -238,12 +238,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             foreach (var order in WatchList.Values.ToList())
             {
                 decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
-                if (order.OrderType == OrderUpdate.OrderTypes.Limit && !FilledLimitOrder(order))
+                if (order.OrderType == OrderUpdate.OrderTypes.Limit && !FilledLimitOrder(order, price))
                 {
                     continue;
                 }
 
-                if (order.OrderType == OrderUpdate.OrderTypes.StopLoss && !FilledStoplossOrder(order))
+                if (order.OrderType == OrderUpdate.OrderTypes.StopLoss && !FilledStoplossOrder(order, price))
                 {
                     continue;
                 }
@@ -289,17 +289,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 .ToDictionary(p => p.Key, p => p.Value);
         }
 
-        private bool FilledLimitOrder(OrderUpdate order)
+        private static bool FilledLimitOrder(OrderUpdate order, decimal price)
         {
-            decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
             return order.Side == OrderSide.Buy
                 ? price <= order.SetPrice
                 : price >= order.SetPrice;
         }
 
-        private bool FilledStoplossOrder(OrderUpdate order)
+        private static bool FilledStoplossOrder(OrderUpdate order, decimal price)
         {
-            decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
             return order.Side == OrderSide.Buy
                 ? price >= order.SetPrice
                 : price <= order.SetPrice;
