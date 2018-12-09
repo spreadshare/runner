@@ -140,6 +140,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public override ResponseObject<OrderUpdate> PlaceStoplossOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
         {
             _logger.LogInformation("Placing a stoploss order");
+
             // Keep the remote updated by mocking a TradeExecution
             TradeExecution exec;
 
@@ -170,7 +171,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 quantity);
             WatchList.Add(_mockOrderCounter, order);
             _mockOrderCounter++;
-            
+
             _logger.LogInformation(JsonConvert.SerializeObject(order));
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
