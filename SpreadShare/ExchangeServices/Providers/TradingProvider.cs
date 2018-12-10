@@ -25,7 +25,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Initializes a new instance of the <see cref="TradingProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output</param>
-        /// <param name="implementation">The implementationt to delegate calls to</param>
+        /// <param name="implementation">The implementation to delegate calls to</param>
         /// <param name="dataProvider">The data provider to manager certain orders with</param>
         /// <param name="allocationManager">The allocation manager to verify orders</param>
         public TradingProvider(
@@ -151,7 +151,7 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Place a selll limit order given a non base quantity and target price
+        /// Place a sell limit order given a non base quantity and target price
         /// </summary>
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency to trade with</param>
@@ -163,14 +163,14 @@ namespace SpreadShare.ExchangeServices.Providers
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
+            bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
                 result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, quantity, price, TradeId));
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity * price))
                     : null;
             });
-            if (tradeSucces)
+            if (tradeSuccess)
             {
                 _openOrders.Add(result.Data);
                 return result;
