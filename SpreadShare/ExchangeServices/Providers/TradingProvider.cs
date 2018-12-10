@@ -263,7 +263,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Place a buy stoploss order
         /// </summary>
         /// <param name="pair">TradingPair</param>
-        /// <param name="price">price to set the order at</param>
+        /// <param name="price">Price to set the order at</param>
         /// <param name="quantity">Quantity of none base currency to trade with</param>
         /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceStoplossBuy(TradingPair pair, decimal price, decimal quantity)
@@ -288,9 +288,9 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Place a sell stoploss order with the full allocation
         /// </summary>
-        /// <param name="pair">trading pair</param>
-        /// <param name="price">price to set the order at</param>
-        /// <returns>ResonseObject containing an OrderUpdate</returns>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="price">Price to set the order at</param>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceFullStoplossSell(TradingPair pair, decimal price)
         {
             var currency = pair.Left;
@@ -301,9 +301,9 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Place a buy stoploss order with the full allocation
         /// </summary>
-        /// <param name="pair">trading pair</param>
-        /// <param name="price">price to set the order at</param>
-        /// <returns>ReponseObject containing an OrderUpdate</returns>
+        /// <param name="pair">Trading pair</param>
+        /// <param name="price">Price to set the order at</param>
+        /// <returns>ResponseObject containing an OrderUpdate</returns>
         public ResponseObject<OrderUpdate> PlaceFullStoplossBuy(TradingPair pair, decimal price)
         {
             var currency = pair.Right;
@@ -314,7 +314,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Cancels order
         /// </summary>
-        /// <param name="pair">trading pair in which the order is found</param>
+        /// <param name="pair">Trading pair in which the order is found</param>
         /// <param name="orderId">Id of the order</param>
         /// <returns>A response object with the results of the action</returns>
         public ResponseObject CancelOrder(TradingPair pair, long orderId)
@@ -364,7 +364,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Dispose the TradingProvider
         /// </summary>
-        /// <param name="disposing">actually dispose it</param>
+        /// <param name="disposing">Actually dispose it</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)

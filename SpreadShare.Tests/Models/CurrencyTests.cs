@@ -344,7 +344,7 @@ namespace SpreadShare.Tests.Models
         /// <summary>
         /// Tests if the serialized version of a currency is the correct JSON string
         /// </summary>
-        /// <param name="input">input currency as string</param>
+        /// <param name="input">Input currency as string</param>
         [Theory]
         [InlineData("ETH")]
         [InlineData("eth")]
@@ -359,7 +359,7 @@ namespace SpreadShare.Tests.Models
         /// <summary>
         /// Tests if a JSON string is correctly deserialized to a Currency instance.
         /// </summary>
-        /// <param name="input">input currency as string</param>
+        /// <param name="input">Input currency as string</param>
         [Theory]
         [InlineData("ETH")]
         [InlineData("eth")]
@@ -372,7 +372,7 @@ namespace SpreadShare.Tests.Models
         /// <summary>
         /// Tests if the combined operation of serialization and deserialization results in an identity function.
         /// </summary>
-        /// <param name="input">input currency as string    </param>
+        /// <param name="input">Input currency as string    </param>
         [Theory]
         [InlineData("ETH")]
         [InlineData("eth")]

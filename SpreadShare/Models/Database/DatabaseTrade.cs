@@ -21,7 +21,7 @@ namespace SpreadShare.Models.Database
         /// <param name="setQuantity">The quantity of non base currency for which the order was set</param>
         /// <param name="filledQuantity">The quantity of non base currency that was filled</param>
         /// <param name="setPrice">The setPrice of the trade</param>
-        /// <param name="filledPrice">the filledPrice of the trade</param>
+        /// <param name="filledPrice">The filledPrice of the trade</param>
         /// <param name="side">Buy or sell order</param>
         /// <param name="assets">The portfolio after the trade</param>
         /// <param name="value">The value of the portfolio before the trade</param>
@@ -158,7 +158,7 @@ namespace SpreadShare.Models.Database
         /// <summary>
         /// Get a header matching the format of the CSV representation
         /// </summary>
-        /// <param name="delimiter">delimiter</param>
+        /// <param name="delimiter">Delimiter</param>
         /// <returns>csv header</returns>
         public static string GetStaticCsvHeader(char delimiter)
         {

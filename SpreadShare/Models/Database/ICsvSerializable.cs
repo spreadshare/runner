@@ -8,14 +8,14 @@ namespace SpreadShare.Models.Database
         /// <summary>
         /// Get the header of the CSV representation
         /// </summary>
-        /// <param name="delimiter">delimiter</param>
+        /// <param name="delimiter">Delimiter</param>
         /// <returns>CSV header string</returns>
         string GetCsvHeader(char delimiter);
 
         /// <summary>
         /// Get the current instance as CSV row
         /// </summary>
-        /// <param name="delimiter">delimiter</param>
+        /// <param name="delimiter">Delimiter</param>
         /// <returns>CSV serialized string</returns>
         string GetCsvRepresentation(char delimiter);
     }

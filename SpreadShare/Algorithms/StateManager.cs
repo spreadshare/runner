@@ -118,7 +118,7 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Evaluates the active state's order update condition.
         /// </summary>
-        /// <param name="order">update of a certain order</param>
+        /// <param name="order">Update of a certain order</param>
         public void OnOrderUpdateEval(OrderUpdate order)
         {
             lock (_lock)
@@ -138,7 +138,7 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Dispose the StateManager
         /// </summary>
-        /// <param name="disposing">actually do it</param>
+        /// <param name="disposing">Actually do it</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)

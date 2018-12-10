@@ -88,8 +88,8 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Parse given two currencies
         /// </summary>
-        /// <param name="left">left currency</param>
-        /// <param name="right">right currency</param>
+        /// <param name="left">Left currency</param>
+        /// <param name="right">Right currency</param>
         /// <returns>Parsed trading pair</returns>
         public static TradingPair Parse(Currency left, Currency right)
         {

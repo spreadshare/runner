@@ -60,7 +60,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Gets past performance in the past hours
         /// </summary>
-        /// <param name="pair">trading pair to obtain performance of</param>
+        /// <param name="pair">Trading pair to obtain performance of</param>
         /// <param name="hoursBack">Number of hours to look back</param>
         /// <returns>A response object with the performance on success</returns>
         public ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack)
@@ -82,8 +82,8 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Gets a value estimation of a portfolio
         /// </summary>
-        /// <param name="portfolio">portfolio</param>
-        /// <returns>value in base currency</returns>
+        /// <param name="portfolio">Portfolio</param>
+        /// <returns>Value in base currency</returns>
         public decimal ValuatePortfolioInBaseCurrency(Portfolio portfolio)
         {
             var balances = portfolio.AllBalances();

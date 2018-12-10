@@ -16,9 +16,9 @@ namespace SpreadShare.ExchangeServices.Providers.Observing
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurableObserver{T}"/> class.
         /// </summary>
-        /// <param name="onNext">callback for observing new data</param>
-        /// <param name="onCompleted">callback for observing end of stream</param>
-        /// <param name="onError">callback for observing errors</param>
+        /// <param name="onNext">Callback for observing new data</param>
+        /// <param name="onCompleted">Callback for observing end of stream</param>
+        /// <param name="onError">Callback for observing errors</param>
         public ConfigurableObserver(Action<T> onNext, Action onCompleted, Action<Exception> onError)
         {
             Guard.Argument(onNext).NotNull();

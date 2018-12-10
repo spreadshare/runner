@@ -64,7 +64,7 @@ namespace SpreadShare
         /// <summary>
         /// Cause the Main() to return with a given status code
         /// </summary>
-        /// <param name="statusCode">status code</param>
+        /// <param name="statusCode">Status code</param>
         public static void ExitProgramWithCode(int statusCode)
         {
             // Flush the logs by disposing the factory

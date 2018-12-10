@@ -26,7 +26,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
         /// <summary>
         /// Check if the last trade price is a non zero decimal
         /// </summary>
-        /// <param name="input">string representation of the pair</param>
+        /// <param name="input">String representation of the pair</param>
         [Theory]
         [InlineData("BNBETH")]
         [InlineData("VETETH")]
@@ -46,7 +46,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
         /// <summary>
         /// Check if the top bid is lower than lowest ask
         /// </summary>
-        /// <param name="input">string representation of the pair</param>
+        /// <param name="input">String representation of the pair</param>
         [Theory]
         [InlineData("XRPBTC")]
         [InlineData("NEOBNB")]

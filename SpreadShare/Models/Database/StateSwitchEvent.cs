@@ -10,9 +10,9 @@ namespace SpreadShare.Models.Database
         /// <summary>
         /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
         /// </summary>
-        /// <param name="timestamp">timestamp</param>
-        /// <param name="from">origin state</param>
-        /// <param name="to">goal state</param>
+        /// <param name="timestamp">Timestamp</param>
+        /// <param name="from">Origin state</param>
+        /// <param name="to">Goal state</param>
         public StateSwitchEvent(long timestamp, string from, string to)
         {
             Timestamp = timestamp;
@@ -44,7 +44,7 @@ namespace SpreadShare.Models.Database
         /// <summary>
         /// Get a header matching the format of the CSV representation
         /// </summary>
-        /// <param name="delimiter">delimiter</param>
+        /// <param name="delimiter">Delimiter</param>
         /// <returns>csv header</returns>
         public static string GetStaticCsvHeader(char delimiter)
         {
