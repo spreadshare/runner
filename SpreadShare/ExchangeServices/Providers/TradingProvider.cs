@@ -167,6 +167,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity * price))
                     : null;
             });
+  
             if (tradeSuccess)
             {
                 _openOrders.Add(result.Data);
@@ -261,7 +262,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Place a buy stoploss order
         /// </summary>
-        /// <param name="pair">trading pair</param>
+        /// <param name="pair">TradingPair</param>
         /// <param name="price">price to set the order at</param>
         /// <param name="quantity">Quantity of none base currency to trade with</param>
         /// <returns>ResponseObject containing an OrderUpdate</returns>
