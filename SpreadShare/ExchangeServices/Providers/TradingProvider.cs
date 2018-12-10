@@ -360,15 +360,17 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private void UpdateOpenOrders(OrderUpdate order)
         {
-            if (order.Status == OrderUpdate.OrderStatus.Filled)
+            if (order.Status != OrderUpdate.OrderStatus.Filled)
             {
-                if (_openOrders.All(o => o.OrderId != order.OrderId))
-                {
-                    _logger.LogWarning($"Observerd order {order.OrderId} as Filled but the order was not tracked");
-                }
-
-                _openOrders.RemoveAll(o => o.OrderId == order.OrderId);
+                return;
             }
+
+            if (_openOrders.All(o => o.OrderId != order.OrderId))
+            {
+                _logger.LogWarning($"Observed order {order.OrderId} as Filled but the order was not tracked");
+            }
+
+            _openOrders.RemoveAll(o => o.OrderId == order.OrderId);
         }
     }
 }
