@@ -34,7 +34,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Places market order with the full quantity of given pair
         /// </summary>
-        /// <param name="pair">trading pair to trade with</param>
+        /// <param name="pair">TradingPair to trade with</param>
         /// <param name="side">Whether to buy or sell</param>
         /// <param name="quantity">The quantity to buy or sell</param>
         /// <param name="tradeId">The id of the trade</param>
@@ -44,7 +44,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Place a limit order at the given price.
         /// </summary>
-        /// <param name="pair">trading pair</param>
+        /// <param name="pair">TradingPair</param>
         /// <param name="side">buy or sell order</param>
         /// <param name="quantity">quantity of non base currency</param>
         /// <param name="price">price to set the order at</param>
@@ -55,7 +55,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Place a stoploss order at the given price
         /// </summary>
-        /// <param name="pair">trading pair</param>
+        /// <param name="pair">TradingPair</param>
         /// <param name="side">buy or sell order</param>
         /// <param name="quantity">quantity of non base currency</param>
         /// <param name="price">price to set the order at</param>
@@ -66,7 +66,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Cancels order
         /// </summary>
-        /// <param name="pair">The trading pair for which the order is set</param>
+        /// <param name="pair">The TradingPair for which the order is set</param>
         /// <param name="orderId">Id of the order</param>
         /// <returns>A response object with the results of the action</returns>
         public abstract ResponseObject CancelOrder(TradingPair pair, long orderId);
@@ -74,7 +74,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Gets the info regarding an order
         /// </summary>
-        /// <param name="pair">the trading pair</param>
+        /// <param name="pair">the TradingPair</param>
         /// <param name="orderId">the id of the order</param>
         /// <returns>OrderUpdate containing the state of an order</returns>
         public abstract ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId);
