@@ -11,7 +11,7 @@ using SpreadShare.SupportServices;
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20181203122940_CreateTrades")]
+    [Migration("20181210083402_CreateTrades")]
     partial class CreateTrades
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,7 +57,7 @@ namespace SpreadShare.Migrations
 
                     b.Property<decimal>("FilledQuantity");
 
-                    b.Property<long>("FilledTimeStamp");
+                    b.Property<long>("FilledTimestamp");
 
                     b.Property<string>("OrderStatus");
 

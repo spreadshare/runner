@@ -53,7 +53,7 @@ namespace SpreadShare.Migrations
 
                     b.Property<long>("CreatedTimestamp");
 
-                    b.Property<long>("FilledTimeStamp");
+                    b.Property<long>("FilledTimestamp");
 
                     b.Property<string>("OrderType");
 

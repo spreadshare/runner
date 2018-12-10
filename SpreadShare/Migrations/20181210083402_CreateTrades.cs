@@ -19,7 +19,7 @@ namespace SpreadShare.Migrations
                     OrderType = table.Column<string>(nullable: true),
                     OrderStatus = table.Column<string>(nullable: true),
                     CreatedTimestamp = table.Column<long>(nullable: false),
-                    FilledTimeStamp = table.Column<long>(nullable: false),
+                    FilledTimestamp = table.Column<long>(nullable: false),
                     Pair = table.Column<string>(nullable: true),
                     SetQuantity = table.Column<decimal>(nullable: false),
                     FilledQuantity = table.Column<decimal>(nullable: false),

@@ -16,7 +16,7 @@ namespace SpreadShare.Models.Database
         /// <param name="orderType">Kind of order</param>
         /// <param name="orderStatus">The status of the order</param>
         /// <param name="createdTimestamp">The unix createdTimestamp in milliseconds</param>
-        /// <param name="filledTimeStamp">Time at which the order was filled</param>
+        /// <param name="filledTimestamp">Time at which the order was filled</param>
         /// <param name="pair">The trading pair</param>
         /// <param name="setQuantity">The quantity of non base currency for which the order was set</param>
         /// <param name="filledQuantity">The quantity of non base currency that was filled</param>
@@ -31,7 +31,7 @@ namespace SpreadShare.Models.Database
             string orderType,
             string orderStatus,
             long createdTimestamp,
-            long filledTimeStamp,
+            long filledTimestamp,
             string pair,
             decimal setQuantity,
             decimal filledQuantity,
@@ -46,7 +46,7 @@ namespace SpreadShare.Models.Database
             OrderType = orderType;
             OrderStatus = orderStatus;
             CreatedTimestamp = createdTimestamp;
-            FilledTimeStamp = filledTimeStamp;
+            FilledTimestamp = filledTimestamp;
             Pair = pair;
             SetPrice = setPrice;
             FilledPrice = filledPrice;
@@ -72,7 +72,7 @@ namespace SpreadShare.Models.Database
             TradeId = order.TradeId;
             OrderStatus = order.Status.ToString();
             CreatedTimestamp = order.CreatedTimeStamp;
-            FilledTimeStamp = order.FilledTimeStamp;
+            FilledTimestamp = order.FilledTimeStamp;
             Pair = order.Pair.ToString();
             SetPrice = order.SetPrice;
             FilledPrice = order.AverageFilledPrice;
@@ -113,7 +113,7 @@ namespace SpreadShare.Models.Database
         /// <summary>
         /// Gets or sets the Timestamp at the moment the trade was filled
         /// </summary>
-        public long FilledTimeStamp { get; set; }
+        public long FilledTimestamp { get; set; }
 
         /// <summary>
         /// Gets or sets the trading pair of the trade
@@ -168,7 +168,7 @@ namespace SpreadShare.Models.Database
                    $"{nameof(OrderStatus)}{delimiter}" +
                    $"{nameof(Side)}{delimiter}" +
                    $"{nameof(CreatedTimestamp)}{delimiter}" +
-                   $"{nameof(FilledTimeStamp)}{delimiter}" +
+                   $"{nameof(FilledTimestamp)}{delimiter}" +
                    $"{nameof(Pair)}{delimiter}" +
                    $"{nameof(SetQuantity)}{delimiter}" +
                    $"{nameof(FilledQuantity)}{delimiter}" +
@@ -187,7 +187,7 @@ namespace SpreadShare.Models.Database
                    $"{OrderStatus}{delimiter}" +
                    $"{Side}{delimiter}" +
                    $"{CreatedTimestamp}{delimiter}" +
-                   $"{FilledTimeStamp}{delimiter}" +
+                   $"{FilledTimestamp}{delimiter}" +
                    $"{Pair}{delimiter}" +
                    $"{SetQuantity}{delimiter}" +
                    $"{FilledQuantity}{delimiter}" +

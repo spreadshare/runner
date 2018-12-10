@@ -92,7 +92,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             var builder = new StringBuilder();
             builder.AppendLine(DatabaseTrade.GetStaticCsvHeader(Delimiter));
-            foreach (var trade in DatabaseContext.Trades.OrderBy(x => x.FilledTimeStamp))
+            foreach (var trade in DatabaseContext.Trades.OrderBy(x => x.FilledTimestamp))
             {
                 builder.AppendLine(trade.GetCsvRepresentation(Delimiter));
             }

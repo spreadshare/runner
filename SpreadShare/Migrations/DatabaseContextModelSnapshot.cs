@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SpreadShare.SupportServices;
 
+#pragma warning disable
+
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
@@ -52,7 +54,7 @@ namespace SpreadShare.Migrations
 
                     b.Property<decimal>("FilledQuantity");
 
-                    b.Property<long>("FilledTimeStamp");
+                    b.Property<long>("FilledTimestamp");
 
                     b.Property<string>("OrderStatus");
 
@@ -94,3 +96,5 @@ namespace SpreadShare.Migrations
         }
     }
 }
+
+#pragma warning restore
