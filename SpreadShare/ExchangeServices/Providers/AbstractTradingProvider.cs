@@ -45,9 +45,9 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Place a limit order at the given price.
         /// </summary>
         /// <param name="pair">TradingPair</param>
-        /// <param name="side">buy or sell order</param>
-        /// <param name="quantity">quantity of non base currency</param>
-        /// <param name="price">price to set the order at</param>
+        /// <param name="side">Buy or sell order</param>
+        /// <param name="quantity">Quantity of non base currency</param>
+        /// <param name="price">Price to set the order at</param>
         /// <param name="tradeId">The id of the trade</param>
         /// <returns>A response object indicating the status of the limit order</returns>
         public abstract ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId);
@@ -56,9 +56,9 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Place a stoploss order at the given price
         /// </summary>
         /// <param name="pair">TradingPair</param>
-        /// <param name="side">buy or sell order</param>
-        /// <param name="quantity">quantity of non base currency</param>
-        /// <param name="price">price to set the order at</param>
+        /// <param name="side">Buy or sell order</param>
+        /// <param name="quantity">Quantity of non base currency</param>
+        /// <param name="price">Price to set the order at</param>
         /// <param name="tradeId">The id of the trade</param>
         /// <returns>A response object indicating the status of the stoplos order</returns>
         public abstract ResponseObject<OrderUpdate> PlaceStoplossOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId);
@@ -74,7 +74,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Gets the info regarding an order
         /// </summary>
-        /// <param name="pair">the TradingPair</param>
+        /// <param name="pair">TradingPair</param>
         /// <param name="orderId">the id of the order</param>
         /// <returns>OrderUpdate containing the state of an order</returns>
         public abstract ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId);

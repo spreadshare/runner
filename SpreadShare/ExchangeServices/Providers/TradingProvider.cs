@@ -167,7 +167,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity * price))
                     : null;
             });
-  
+
             if (tradeSuccess)
             {
                 _openOrders.Add(result.Data);
@@ -421,8 +421,8 @@ namespace SpreadShare.ExchangeServices.Providers
             if (order.Side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(order.Pair.Right, 0, order.SetQuantity * order.SetPrice),
-                    new Balance(order.Pair.Left, order.LastFillIncrement, 0));
+                    new Balance(order.Pair.Right, 0.0M, order.SetQuantity * order.SetPrice),
+                    new Balance(order.Pair.Left, order.LastFillIncrement, 0.0M));
             }
             else
             {

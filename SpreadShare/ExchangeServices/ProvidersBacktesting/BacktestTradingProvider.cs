@@ -263,14 +263,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 if (order.Side == OrderSide.Buy)
                 {
                     exec = new TradeExecution(
-                        new Balance(order.Pair.Right, 0, order.SetQuantity * order.SetPrice),
-                        new Balance(order.Pair.Left, order.LastFillIncrement, 0));
+                        new Balance(order.Pair.Right, 0.0M, order.SetQuantity * order.SetPrice),
+                        new Balance(order.Pair.Left, order.LastFillIncrement, 0.0M));
                 }
                 else
                 {
                     exec = new TradeExecution(
-                        new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                        new Balance(order.Pair.Right, order.SetQuantity * order.AverageFilledPrice, 0));
+                        new Balance(order.Pair.Left, 0.0M, order.LastFillIncrement),
+                        new Balance(order.Pair.Right, order.SetQuantity * order.AverageFilledPrice, 0.0M));
                 }
 
                 _comm.RemotePortfolio.UpdateAllocation(exec);
