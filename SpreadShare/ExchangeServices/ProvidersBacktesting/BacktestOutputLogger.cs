@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,16 +18,19 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     internal class BacktestOutputLogger
     {
         private const char Delimiter = '|';
+        private BacktestTimerProvider _timer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestOutputLogger"/> class.
         /// </summary>
         /// <param name="databaseContext">DatabaseContext to fetch trades and switches</param>
+        /// <param name="timer">BacktestTimerProvider to get timespan information</param>
         /// <param name="outputFolder">General backtest output folder</param>
-        public BacktestOutputLogger(DatabaseContext databaseContext, string outputFolder)
+        public BacktestOutputLogger(DatabaseContext databaseContext, BacktestTimerProvider timer, string outputFolder)
         {
             DatabaseContext = databaseContext;
             OutputFolder = outputFolder;
+            _timer = timer;
         }
 
         /// <summary>
@@ -65,6 +69,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             // Output state switches
             OutputStateSwitches(Path.Combine(OutputFolder, "state_switches.csv"));
+
+            // Output timespan
+            OutputTimespan(Path.Combine(OutputFolder, "timespan.json"));
         }
 
         /// <summary>
@@ -115,6 +122,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             }
 
             WriteAllText(filepath, builder.ToString());
+        }
+
+        private void OutputTimespan(string filepath)
+        {
+            string data = JsonConvert.SerializeObject(new
+            {
+                BeginTime = _timer.BeginTime.ToUnixTimeMilliseconds(),
+                EndTime = _timer.EndTime.ToUnixTimeMilliseconds()
+            });
+
+            WriteAllText(filepath, data);
         }
     }
 }

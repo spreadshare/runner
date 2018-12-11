@@ -14,7 +14,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     internal class BacktestTimerProvider : TimerProvider
     {
         private readonly ILogger _logger;
-        private readonly DateTimeOffset _endDate;
         private readonly DatabaseContext _database;
         private readonly string _outputFolder;
         private DateTimeOffset _currentTime;
@@ -29,8 +28,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _database = database;
-            _currentTime = DateTimeOffset.FromUnixTimeMilliseconds(settings.BeginTimeStamp) + TimeSpan.FromHours(48);
-            _endDate = DateTimeOffset.FromUnixTimeMilliseconds(settings.EndTimeStamp);
+            BeginTime = DateTimeOffset.FromUnixTimeMilliseconds(settings.BeginTimeStamp) + TimeSpan.FromHours(48);
+            _currentTime = BeginTime;
+            EndTime = DateTimeOffset.FromUnixTimeMilliseconds(settings.EndTimeStamp);
             _outputFolder = settings.OutputFolder;
         }
 
@@ -38,6 +38,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// Gets the current time of the backtest universe.
         /// </summary>
         public override DateTimeOffset CurrentTime => _currentTime;
+
+        /// <summary>
+        /// Gets the date at which the backtest started
+        /// </summary>
+        public DateTimeOffset BeginTime { get; }
+
+        /// <summary>
+        /// Gets the date at which the backtest ended
+        /// </summary>
+        public DateTimeOffset EndTime { get; }
 
         /// <inheritdoc />
         public override async void RunPeriodicTimer()
@@ -51,7 +61,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _database.SaveChanges();
 
             DateTimeOffset start = DateTimeOffset.Now;
-            while (CurrentTime < _endDate)
+            while (CurrentTime < EndTime)
             {
                 _currentTime += TimeSpan.FromMinutes(1);
                 UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
@@ -63,7 +73,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _logger.LogCritical("...DONE");
 
             // Output to database
-            var outputLogger = new BacktestOutputLogger(_database, _outputFolder);
+            var outputLogger = new BacktestOutputLogger(_database, this, _outputFolder);
             outputLogger.Output();
 
             // Exit the application
