@@ -15,25 +15,13 @@ namespace SpreadShare.Algorithms.Implementations
     /// The first short dip algorithm.
     /// buys when the market has an unesecary dip, and sell after recovery
     /// </summary>
-    internal class ShortDip : BaseAlgorithm
-     {
-         /// <inheritdoc />
-         public override ResponseObject Start(
-             AlgorithmSettings settings,
-             ExchangeProvidersContainer container,
-             DatabaseContext database)
-         {
-             var stateManager = new StateManager<ShortDipSettings>(
-                 settings as ShortDipSettings,
-                 new WelcomeState(),
-                 container,
-                 database);
-
-             return new ResponseObject(ResponseCode.Success);
-         }
+    internal class ShortDip : BaseAlgorithm<ShortDipSettings>
+    {
+        /// <inheritdoc />
+        protected override EntryState<ShortDipSettings> Initial => new WelcomeState();
 
          // Buy when the price dips more than X percent in Y minutes, and sell after Z% recovery or after A hours
-         private class WelcomeState : State<ShortDipSettings>
+         private class WelcomeState : EntryState<ShortDipSettings>
          {
              public override State<ShortDipSettings> OnTimerElapsed()
              {
@@ -48,71 +36,67 @@ namespace SpreadShare.Algorithms.Implementations
 
          private class EntryState : State<ShortDipSettings>
          {
-             private OrderUpdate limitsell;
-
-             public override State<ShortDipSettings> OnTimerElapsed()
+             public override State<ShortDipSettings> OnMarketCondition(DataProvider data)
              {
-                 return new StopState(limitsell);
-             }
-
-             public override State<ShortDipSettings> OnOrderUpdate(OrderUpdate order)
-             {
-                 if (order.Status == OrderUpdate.OrderStatus.Filled && order.OrderId == limitsell.OrderId)
-                 {
-                     return new WaitState();
-                 }
-
+                 
+                 bool performance = data.GetPerformancePastHours(AlgorithmSettings.ActiveTradingPairs.First(),
+                             AlgorithmSettings.DipTime).Data < (1 - AlgorithmSettings.DipPercent);
+                 if(performance)
+                    return new BuyState();
+                 
                  return new NothingState<ShortDipSettings>();
              }
 
              protected override void Run(TradingProvider trading, DataProvider data)
              {
-
-
-                 OrderUpdate buyorder = trading.PlaceFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First()).Data;
-                 Portfolio portfolio = trading.GetPortfolio();
-                 limitsell = trading.PlaceLimitOrderSell(
-                    AlgorithmSettings.ActiveTradingPairs.First(),
-                    portfolio.GetAllocation(AlgorithmSettings.ActiveTradingPairs.First().Left).Free,
-                    buyorder.AverageFilledPrice * AlgorithmSettings.TakeProfit).Data;
-                 SetTimer(TimeSpan.FromHours(AlgorithmSettings.StopTime));
+                
              }
          }
 
-         // On a succesfull trade, wait WaitTime minutes long and then restart putting in orders
-         private class WaitState : State<ShortDipSettings>
+         private class BuyState : State<ShortDipSettings>
          {
+             private OrderUpdate limitsell;
+             
+             protected override void Run(TradingProvider trading, DataProvider data)
+             {
+                 var buyorder = trading.PlaceFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
+                 limitsell = trading.PlaceFullLimitOrderSell(AlgorithmSettings.ActiveTradingPairs.First(),
+                     (buyorder.Data.AverageFilledPrice * AlgorithmSettings.Recovery)).Data;
+                 SetTimer(TimeSpan.FromHours(AlgorithmSettings.StopTime));
+             }
+
+             public override State<ShortDipSettings> OnTimerElapsed()
+             {
+                 return new CancelState(limitsell);
+             }
+
+             public override State<ShortDipSettings> OnOrderUpdate(OrderUpdate order)
+             {
+                 if(order.OrderId == limitsell.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                    return new EntryState();
+                 return new NothingState<ShortDipSettings>();
+             }
+         }
+
+         private class CancelState : State<ShortDipSettings>
+         {
+             private OrderUpdate oldlimit;
+             
+             protected override void Run(TradingProvider trading, DataProvider data)
+             {
+                 trading.CancelOrder(oldlimit.Pair, oldlimit.OrderId);
+                 trading.PlaceFullMarketOrderSell(AlgorithmSettings.ActiveTradingPairs.First());
+                 SetTimer(TimeSpan.Zero);
+             }
+
              public override State<ShortDipSettings> OnTimerElapsed()
              {
                  return new EntryState();
              }
 
-             protected override void Run(TradingProvider trading, DataProvider data)
-             {
-                 SetTimer(TimeSpan.FromMinutes(AlgorithmSettings.WaitTime));
-             }
-         }
-
-         private class StopState : State<ShortDipSettings>
-         {
-             private OrderUpdate oldlimit;
-
-             public StopState(OrderUpdate limitsell)
+             public CancelState(OrderUpdate limitsell)
              {
                  oldlimit = limitsell;
-             }
-
-             public override State<ShortDipSettings> OnTimerElapsed()
-             {
-                 return new WaitState();
-             }
-
-             protected override void Run(TradingProvider trading, DataProvider data)
-             {
-                 trading.CancelOrder(oldlimit.Pair, oldlimit.OrderId);
-                 OrderUpdate mktsell = trading.PlaceFullMarketOrderSell(AlgorithmSettings.ActiveTradingPairs.First())
-                     .Data;
-                 SetTimer(TimeSpan.Zero);
              }
          }
      }
@@ -130,7 +114,7 @@ namespace SpreadShare.Algorithms.Implementations
         /// <summary>
         /// Gets or sets The diptime, how quickly the dip needs to happen to be considered a dip
         /// </summary>
-        public int DipTime { get; set; }
+        public double DipTime { get; set; }
 
         /// <summary>
         /// Gets or sets recovery, determines how much profit the system should try to get before selling
