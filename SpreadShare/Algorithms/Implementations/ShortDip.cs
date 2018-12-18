@@ -38,25 +38,25 @@ namespace SpreadShare.Algorithms.Implementations
          {
              public override State<ShortDipSettings> OnMarketCondition(DataProvider data)
              {
-                 
+
                  bool performance = data.GetPerformancePastHours(AlgorithmSettings.ActiveTradingPairs.First(),
                              AlgorithmSettings.DipTime).Data < (1 - AlgorithmSettings.DipPercent);
                  if(performance)
                     return new BuyState();
-                 
+
                  return new NothingState<ShortDipSettings>();
              }
 
              protected override void Run(TradingProvider trading, DataProvider data)
              {
-                
+
              }
          }
 
          private class BuyState : State<ShortDipSettings>
          {
              private OrderUpdate limitsell;
-             
+
              protected override void Run(TradingProvider trading, DataProvider data)
              {
                  var buyorder = trading.PlaceFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
@@ -81,7 +81,7 @@ namespace SpreadShare.Algorithms.Implementations
          private class CancelState : State<ShortDipSettings>
          {
              private OrderUpdate oldlimit;
-             
+
              protected override void Run(TradingProvider trading, DataProvider data)
              {
                  trading.CancelOrder(oldlimit.Pair, oldlimit.OrderId);
