@@ -39,7 +39,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="quantity">The quantity to buy or sell</param>
         /// <param name="tradeId">The id of the trade</param>
         /// <returns>A response object indicating the status of the market order</returns>
-        public abstract ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId);
+        public abstract ResponseObject<OrderUpdate> ExecuteMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId);
 
         /// <summary>
         /// Place a limit order at the given price.

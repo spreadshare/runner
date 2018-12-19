@@ -236,7 +236,7 @@ namespace SpreadShare.SupportServices.SettingsServices
                     throw new InvalidDataException($"One or more {algoName}:ActiveTradingPairs was not " +
                                                    $"compatible with the {algoName}:BaseCurrency");
                 }
-                
+
                 // Start the backtest communications service before allocation occurs
 
                 // Add settings object to the lookup table

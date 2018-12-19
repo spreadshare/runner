@@ -51,7 +51,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
+        public override ResponseObject<OrderUpdate> ExecuteMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
         {
             // Keep the remote updated by mocking a trade execution and letting the communications know.
             TradeExecution exec;

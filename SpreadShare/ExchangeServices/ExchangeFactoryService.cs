@@ -53,9 +53,10 @@ namespace SpreadShare.ExchangeServices
             _binanceCommunications = binanceComm;
             _backtestCommunicationService = backtestCom;
 
+            // TODO: Reflections magic
             foreach (var item in settingsService.AllocationSettings)
             {
-                switch(item.Key)
+                switch (item.Key)
                 {
                     case Exchange.Binance:
                         _binanceCommunications.Connect();
@@ -64,9 +65,8 @@ namespace SpreadShare.ExchangeServices
                         _backtestCommunicationService.Connect();
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        throw new MissingFieldException($"No communications instance for {item} in ExchangeFactory");
                 }
-                
             }
 
             _allocationManager = alloc;

@@ -74,7 +74,7 @@ namespace SpreadShare.ExchangeServices.Providers
             var currency = pair.Right;
             var balance = _allocationManager.GetAvailableFunds(currency);
             var quantity = GetBuyQuantityEstimate(pair, balance.Free);
-            return PlaceMarketOrderBuy(pair, quantity);
+            return ExecuteMarketOrderBuy(pair, quantity);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency</param>
         /// <returns>ResponseObject containing an OrderUpdate</returns>
-        public ResponseObject<OrderUpdate> PlaceMarketOrderBuy(TradingPair pair, decimal quantity)
+        public ResponseObject<OrderUpdate> ExecuteMarketOrderBuy(TradingPair pair, decimal quantity)
         {
             var currency = pair.Right;
             var priceEstimate = _dataProvider.GetCurrentPriceTopAsk(pair).Data;
@@ -104,8 +104,8 @@ namespace SpreadShare.ExchangeServices.Providers
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = HelperMethods.RetryMethod(() =>
-                    _implementation.PlaceMarketOrder(pair, OrderSide.Buy, quantity, TradeId), _logger);
+                result = HelperMethods.RetryMethod(
+                    () => _implementation.ExecuteMarketOrder(pair, OrderSide.Buy, quantity, TradeId), _logger);
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(pair.Left, result.Data.SetQuantity, 0.0M))
                     : null;
@@ -129,8 +129,8 @@ namespace SpreadShare.ExchangeServices.Providers
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = HelperMethods.RetryMethod(() =>
-                    _implementation.PlaceMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId), _logger);
+                result = HelperMethods.RetryMethod(
+                    () => _implementation.ExecuteMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId), _logger);
                 if (result.Success)
                 {
                     // Correct gained quantity using a price estimate
@@ -157,7 +157,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject<OrderUpdate> PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
             var currency = pair.Right;
-            var proposal = new TradeProposal(pair,new Balance(currency, quantity * price, 0));
+            var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>

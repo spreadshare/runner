@@ -10,12 +10,11 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Initializes a new instance of the <see cref="TradeExecution"/> class.
         /// </summary>
-        /// <param name="pair">Trading pair used to round the balances</param>
         /// <param name="from">The asset value on the left side of the trade</param>
         /// <param name="to">The asset value on the right side of the trade</param>
         public TradeExecution(Balance from, Balance to)
         {
-            From = from; 
+            From = from;
             To = to;
         }
 

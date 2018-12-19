@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
@@ -30,13 +32,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
+        public override ResponseObject<OrderUpdate> ExecuteMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
         {
             var client = _communications.Client;
             var rounded = pair.RoundToTradable(quantity);
- 
+
             // Attempt to place the order on Binance
-            var query =  client.PlaceOrder(pair.ToString(),
+            var query = client.PlaceOrder(
+                pair.ToString(),
                 BinanceUtilities.ToExternal(side),
                 OrderType.Market,
                 rounded,
@@ -46,15 +49,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 null,
                 null,
                 null,
-                (int) _communications.ReceiveWindow);
- 
+                (int)_communications.ReceiveWindow);
             if (!query.Success)
             {
                 Logger.LogError($"Placing market order {side} {rounded} {pair.Left} failed! --> {query.Error.Message}");
                 return new ResponseObject<OrderUpdate>(ResponseCode.Error, query.Error.Message);
             }
 
-            OrderUpdate result = new OrderUpdate(query.Data.OrderId,
+            OrderUpdate result = new OrderUpdate(
+                query.Data.OrderId,
                 tradeId,
                 OrderUpdate.OrderTypes.Market,
                 DateTimeOffset.Now.ToUnixTimeMilliseconds(),
@@ -66,7 +69,32 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 Status = OrderUpdate.OrderStatus.Filled,
                 FilledQuantity = query.Data.ExecutedQuantity
             };
- 
+
+            var orders = BinanceUtilities.RetryMethod(() => client.GetOpenOrders(result.Pair.ToString()), Logger);
+            if (!orders.Success)
+            {
+                Logger.LogWarning($"Market order with id {result.OrderId} could not be confirmed");
+            }
+            else
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    if (orders.Data.All(o => o.OrderId != result.OrderId))
+                    {
+                        Thread.Sleep(10);
+                        result.Status = OrderUpdate.OrderStatus.Filled;
+                        break;
+                    }
+
+                    Logger.LogTrace($"Order {result.OrderId} not yet confirmed, attempt {i + 1}/5");
+                }
+            }
+
+            if (result.Status != OrderUpdate.OrderStatus.Filled)
+            {
+                Logger.LogWarning($"Market order {result.OrderId} is not being reported as filled");
+            }
+
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, result);
         }
 
