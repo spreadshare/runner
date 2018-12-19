@@ -50,47 +50,45 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 null,
                 null,
                 (int)_communications.ReceiveWindow);
+
+            // Report failure of placing market order
             if (!query.Success)
             {
                 Logger.LogError($"Placing market order {side} {rounded} {pair.Left} failed! --> {query.Error.Message}");
                 return new ResponseObject<OrderUpdate>(ResponseCode.Error, query.Error.Message);
             }
 
+            // Create an order update with known information
             OrderUpdate result = new OrderUpdate(
                 query.Data.OrderId,
                 tradeId,
                 OrderUpdate.OrderTypes.Market,
                 DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                query.Data.Price,
+                0,
                 side,
                 pair,
                 quantity)
             {
                 Status = OrderUpdate.OrderStatus.Filled,
-                FilledQuantity = query.Data.ExecutedQuantity
+                FilledQuantity = query.Data.ExecutedQuantity,
+                FilledTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
             };
 
+            // Give Binance a short time to process the order
+            Thread.Sleep(10);
+
+            // Get the open orders from Binance, this should not contain the market order
             var orders = BinanceUtilities.RetryMethod(() => client.GetOpenOrders(result.Pair.ToString()), Logger);
             if (!orders.Success)
             {
                 Logger.LogWarning($"Market order with id {result.OrderId} could not be confirmed");
             }
-            else
+            else if (orders.Data.All(o => o.OrderId != result.OrderId))
             {
-                for (int i = 0; i < 5; i++)
-                {
-                    if (orders.Data.All(o => o.OrderId != result.OrderId))
-                    {
-                        Thread.Sleep(10);
-                        result.Status = OrderUpdate.OrderStatus.Filled;
-                        break;
-                    }
-
-                    Logger.LogTrace($"Order {result.OrderId} not yet confirmed, attempt {i + 1}/5");
-                }
+                // None of the open orders was the market order, it must have been filled
+                result.Status = OrderUpdate.OrderStatus.Filled;
             }
-
-            if (result.Status != OrderUpdate.OrderStatus.Filled)
+            else
             {
                 Logger.LogWarning($"Market order {result.OrderId} is not being reported as filled");
             }
