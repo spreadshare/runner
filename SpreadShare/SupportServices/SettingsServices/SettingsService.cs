@@ -236,12 +236,14 @@ namespace SpreadShare.SupportServices.SettingsServices
                     throw new InvalidDataException($"One or more {algoName}:ActiveTradingPairs was not " +
                                                    $"compatible with the {algoName}:BaseCurrency");
                 }
+                
+                // Start the backtest communications service before allocation occurs
 
                 // Add settings object to the lookup table
                 _algorithmSettingsLookup.Add(type, settings);
             }
 
-            if (_algorithmSettingsLookup.Values.Where(x => x.Exchange == Exchange.Backtesting).Count() > 1)
+            if (_algorithmSettingsLookup.Values.Count(x => x.Exchange == Exchange.Backtesting) > 1)
             {
                 throw new InvalidDataException("More than one algorithm was configured for backtesting");
             }

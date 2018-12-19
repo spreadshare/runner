@@ -1,9 +1,12 @@
 ﻿using System;
+using Binance.Net.Objects;
+using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.Utilities;
 using OrderSide = SpreadShare.Models.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance
@@ -27,23 +30,43 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, Models.OrderSide side, decimal quantity, long tradeId)
+        public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
         {
-            throw new NotImplementedException();
-            /*
             var client = _communications.Client;
-            decimal rounded = pair.RoundToTradable(quantity);
-
-            var query = client.PlaceOrder(pair.ToString(), BinanceUtilities.ToExternal(side), OrderType.Market, rounded);
-            if (query.Success)
+            var rounded = pair.RoundToTradable(quantity);
+ 
+            // Attempt to place the order on Binance
+            var query = client.PlaceOrder(pair.ToString(),
+                BinanceUtilities.ToExternal(side),
+                OrderType.Market,
+                rounded,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                (int) _communications.ReceiveWindow);
+ 
+            if (!query.Success)
             {
-                return new ResponseObject<decimal>(ResponseCode.Success, query.Data.ExecutedQuantity);
+                Logger.LogError($"Placing market order {side} {rounded}{pair} failed! --> {query.Error.Message}");
+                return new ResponseObject<OrderUpdate>(ResponseCode.Error, query.Error.Message);
             }
 
-            Logger.LogWarning(query.Error.Message);
-
-            Logger.LogWarning($"Placing market order {side} {rounded}{pair} failed");
-            return new ResponseObject<decimal>(ResponseCode.Error, 0.0M); */
+            OrderUpdate result = new OrderUpdate(query.Data.OrderId,
+                tradeId,
+                OrderUpdate.OrderTypes.Market,
+                DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                query.Data.Price,
+                side,
+                pair,
+                quantity)
+            {
+                FilledQuantity = query.Data.ExecutedQuantity
+            };
+ 
+            return new ResponseObject<OrderUpdate>(ResponseCode.Success, result);
         }
 
         /// <inheritdoc />

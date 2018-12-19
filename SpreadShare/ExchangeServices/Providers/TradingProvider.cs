@@ -104,8 +104,8 @@ namespace SpreadShare.ExchangeServices.Providers
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = RetryMethod(() =>
-                    _implementation.PlaceMarketOrder(pair, OrderSide.Buy, quantity, TradeId));
+                result = HelperMethods.RetryMethod(() =>
+                    _implementation.PlaceMarketOrder(pair, OrderSide.Buy, quantity, TradeId), _logger);
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(pair.Left, result.Data.SetQuantity, 0.0M))
                     : null;
@@ -129,8 +129,8 @@ namespace SpreadShare.ExchangeServices.Providers
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = RetryMethod(() =>
-                    _implementation.PlaceMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId));
+                result = HelperMethods.RetryMethod(() =>
+                    _implementation.PlaceMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId), _logger);
                 if (result.Success)
                 {
                     // Correct gained quantity using a price estimate
@@ -157,12 +157,12 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject<OrderUpdate> PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
             var currency = pair.Right;
-            var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
+            var proposal = new TradeProposal(pair,new Balance(currency, quantity * price, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, quantity, price, TradeId));
+                result = HelperMethods.RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, quantity, price, TradeId), _logger);
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity * price))
                     : null;
@@ -192,7 +192,7 @@ namespace SpreadShare.ExchangeServices.Providers
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Sell, quantity, price, TradeId));
+                result = HelperMethods.RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Sell, quantity, price, TradeId), _logger);
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity))
                     : null;
@@ -246,17 +246,18 @@ namespace SpreadShare.ExchangeServices.Providers
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
+            bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = RetryMethod(
-                    () => _implementation.PlaceStoplossOrder(pair, OrderSide.Sell, quantity, price, TradeId));
+                result = HelperMethods.RetryMethod(
+                    () => _implementation.PlaceStoplossOrder(pair, OrderSide.Sell, quantity, price, TradeId),
+                    _logger);
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity))
                     : null;
             });
 
             // TODO: Cancel stoploss orders on dispose
-            return tradeSucces ? result : ResponseCommon.OrderRefused;
+            return tradeSuccess ? result : ResponseCommon.OrderRefused;
         }
 
         /// <summary>
@@ -272,17 +273,18 @@ namespace SpreadShare.ExchangeServices.Providers
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            bool tradeSucces = _allocationManager.QueueTrade(proposal, () =>
+            bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = RetryMethod(
-                    () => _implementation.PlaceStoplossOrder(pair, OrderSide.Buy, quantity, price, TradeId));
+                result = HelperMethods.RetryMethod(
+                    () => _implementation.PlaceStoplossOrder(pair, OrderSide.Buy, quantity, price, TradeId),
+                    _logger);
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity * price))
                     : null;
             });
 
             // TODO: Cancel stoploss orders on dispose
-            return tradeSucces ? result : ResponseCommon.OrderRefused;
+            return tradeSuccess ? result : ResponseCommon.OrderRefused;
         }
 
         /// <summary>
@@ -387,23 +389,6 @@ namespace SpreadShare.ExchangeServices.Providers
             }
 
             return baseQuantity / query.Data;
-        }
-
-        private ResponseObject<T> RetryMethod<T>(Func<ResponseObject<T>> method)
-        {
-            int retries = 0;
-            for (int i = 0; i < 5; i++)
-            {
-                var result = method();
-                if (result.Success)
-                {
-                    return result;
-                }
-
-                _logger.LogWarning($"{result.Message} - attempt {retries}/5");
-            }
-
-            return new ResponseObject<T>(ResponseCode.Error);
         }
 
         private void HandleOrderUpdate(OrderUpdate order)

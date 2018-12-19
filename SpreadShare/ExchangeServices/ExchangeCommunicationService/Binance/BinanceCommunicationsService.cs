@@ -14,6 +14,11 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
     /// </summary>
     internal class BinanceCommunicationsService : ExchangeCommunications, IDisposable
     {
+        /// <summary>
+        /// Ticks before timeout should be declared. This value is set in the configuration
+        /// </summary>\
+        public long ReceiveWindow { get; }
+ 
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly BinanceCredentials _authy;
@@ -29,6 +34,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
             _logger = loggerFactory.CreateLogger(GetType());
             _loggerFactory = loggerFactory;
             _authy = settings.BinanceSettings.Credentials;
+            ReceiveWindow = settings.BinanceSettings.ReceiveWindow;
         }
 
         /// <summary>

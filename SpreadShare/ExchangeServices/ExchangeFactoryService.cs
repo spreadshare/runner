@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
+using SpreadShare.ExchangeServices.ExchangeCommunicationService;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
@@ -50,6 +52,22 @@ namespace SpreadShare.ExchangeServices
             // Link communication services
             _binanceCommunications = binanceComm;
             _backtestCommunicationService = backtestCom;
+
+            foreach (var item in settingsService.AllocationSettings)
+            {
+                switch(item.Key)
+                {
+                    case Exchange.Binance:
+                        _binanceCommunications.Connect();
+                        break;
+                    case Exchange.Backtesting:
+                        _backtestCommunicationService.Connect();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                
+            }
 
             _allocationManager = alloc;
         }
