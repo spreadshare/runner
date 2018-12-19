@@ -55,3 +55,6 @@ coverage.hits
 
 # Locked Excel files
 *.~lock*
+
+# Data from datagathering
+DataGathering/data/*.csv
