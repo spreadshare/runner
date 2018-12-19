@@ -156,7 +156,7 @@ namespace SpreadShare.Algorithms.Implementations
         /// <summary>
         /// Gets or sets Stoptime, determines how long to wait untill we get out and try again
         /// </summary>
-        public int StopPrice { get; set; }
+        public decimal StopPrice { get; set; }
     }
 }
 
