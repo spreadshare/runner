@@ -34,7 +34,7 @@ namespace SpreadShare.Algorithms.Implementations
              }
          }
 
-         private class EntryState : State<ShortDipSettings>
+         private class EntryState : EntryState<ShortDipSettings>
          {
              public override State<ShortDipSettings> OnMarketCondition(DataProvider data)
              {
