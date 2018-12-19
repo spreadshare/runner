@@ -57,4 +57,4 @@ coverage.hits
 *.~lock*
 
 # Data from datagathering
-DataGathering/data/*.csv
+DataGathering/**/*.csv
