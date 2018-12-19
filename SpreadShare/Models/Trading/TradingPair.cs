@@ -45,7 +45,7 @@ namespace SpreadShare.Models.Trading
         /// Gets the number of quantityDecimals
         /// </summary>
         public int QuantityDecimals { get; }
-        
+
         /// <summary>
         /// Gets the number of priceDecimals
         /// </summary>
@@ -128,13 +128,13 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Round unrounded price to a priceable amount conform the the TradingPairs' specification
         /// </summary>
-        /// <param name="price"></param>
-        /// <returns></returns>
+        /// <param name="price">Unrounded price</param>
+        /// <returns>Rounded price</returns>
         public decimal RoundToPriceable(decimal price)
         {
             Guard.Argument(price).NotNegative(x => $"Price is negative name: {x}");
             decimal value = Math.Round(price, PriceDecimals);
-            return value <= price ? value : value - (decimal) Math.Pow(10, -PriceDecimals);
+            return value <= price ? value : value - (decimal)Math.Pow(10, -PriceDecimals);
         }
 
         /// <summary>

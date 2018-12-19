@@ -167,10 +167,10 @@ namespace SpreadShare.SupportServices.SettingsServices
                         _logger.LogWarning($"Could not extract all filters from {item.Name}, skipping");
                         continue;
                     }
-                    
+
                     // Add the instance to the parseTable to make it available for parsing
                     int quantityDecimals = -(int)Math.Log10((double)stepSize);
-                    int priceDecimals = -(int) Math.Log10((double) pricePrecision);
+                    int priceDecimals = -(int)Math.Log10((double)pricePrecision);
                     var result = new TradingPair(new Currency(left), new Currency(right), quantityDecimals, priceDecimals);
                     try
                     {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.ServiceModel.Channels;
 using System.Threading;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
@@ -39,16 +38,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
 
             // Attempt to place the order on Binance
             var query = client.PlaceOrder(
-                pair.ToString(),
-                BinanceUtilities.ToExternal(side),
-                OrderType.Market,
-                rounded,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
+                symbol: pair.ToString(),
+                side: BinanceUtilities.ToExternal(side),
+                type: OrderType.Market,
+                quantity: rounded,
+                newClientOrderId: null,
+                price: null,
+                timeInForce: null,
+                stopPrice: null,
+                icebergQty: null,
+                orderResponseType: null,
                 (int)_communications.ReceiveWindow);
 
             // Report failure of placing market order
@@ -102,18 +101,19 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             var client = _communications.Client;
 
             var query = client.PlaceOrder(
-                pair.ToString(),
-                BinanceUtilities.ToExternal(side),
-                OrderType.Limit,
-                quantity,
-                null,
-                price,
-                TimeInForce.GoodTillCancel,
-                null,
-                null,
-                null,
-                (int) _communications.ReceiveWindow);
+                symbol: pair.ToString(),
+                side: BinanceUtilities.ToExternal(side),
+                type: OrderType.Limit,
+                quantity: quantity,
+                newClientOrderId: null,
+                price: price,
+                timeInForce: TimeInForce.GoodTillCancel,
+                stopPrice: null,
+                icebergQty: null,
+                orderResponseType: null,
+                receiveWindow: (int)_communications.ReceiveWindow);
 
+            #pragma warning disable SA1118
             return query.Success
                 ? new ResponseObject<OrderUpdate>(
                     ResponseCode.Success,
@@ -126,8 +126,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                         side,
                         pair,
                         quantity))
-                : ResponseCommon.OrderPlacementFailed(query.Error.Message    );
-
+                : ResponseCommon.OrderPlacementFailed(query.Error.Message);
+            #pragma warning disable SA1118
         }
 
         /// <inheritdoc />
