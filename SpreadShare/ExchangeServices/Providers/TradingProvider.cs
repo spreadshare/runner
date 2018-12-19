@@ -162,7 +162,7 @@ namespace SpreadShare.ExchangeServices.Providers
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = HelperMethods.RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, quantity, price, TradeId), _logger);
+                result = HelperMethods.RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, pair.RoundToTradable(quantity), pair.RoundToPriceable(price), TradeId), _logger);
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity * price))
                     : null;
@@ -192,7 +192,7 @@ namespace SpreadShare.ExchangeServices.Providers
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
             bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
             {
-                result = HelperMethods.RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Sell, quantity, price, TradeId), _logger);
+                result = HelperMethods.RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Sell, pair.RoundToTradable(quantity), pair.RoundToPriceable(price), TradeId), _logger);
                 return result.Success
                     ? new TradeExecution(proposal.From, new Balance(currency, 0, quantity))
                     : null;
@@ -230,7 +230,8 @@ namespace SpreadShare.ExchangeServices.Providers
         {
             var currency = pair.Right;
             var quantity = _allocationManager.GetAvailableFunds(currency).Free;
-            return PlaceLimitOrderBuy(pair, quantity, price);
+            decimal estimation = quantity / price;
+            return PlaceLimitOrderBuy(pair, estimation, price);
         }
 
         /// <summary>

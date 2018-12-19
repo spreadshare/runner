@@ -130,6 +130,7 @@ namespace SpreadShare.SupportServices.SettingsServices
                 foreach (var item in listQuery.Data.Symbols)
                 {
                     decimal stepSize = 0;
+                    decimal pricePrecision = 0;
 
                     // Extract the pair from the string
                     var pair = rx.Match(item.Name);
@@ -150,22 +151,27 @@ namespace SpreadShare.SupportServices.SettingsServices
                     // Extract the stepSize from the filter
                     foreach (var filter in item.Filters)
                     {
-                        if (filter.FilterType == SymbolFilterType.LotSize)
+                        if (filter is BinanceSymbolLotSizeFilter filter1)
                         {
-                            var nfilter = filter as BinanceSymbolLotSizeFilter;
-                            stepSize = nfilter.StepSize;
+                            stepSize = filter1.StepSize;
+                        }
+
+                        if (filter is BinanceSymbolPriceFilter filter2)
+                        {
+                            pricePrecision = filter2.TickSize;
                         }
                     }
 
-                    if (stepSize == 0)
+                    if (stepSize == 0 || pricePrecision == 0)
                     {
-                        _logger.LogWarning($"Could not extract stepSize from {item.Name}, skipping");
+                        _logger.LogWarning($"Could not extract all filters from {item.Name}, skipping");
                         continue;
                     }
-
+                    
                     // Add the instance to the parseTable to make it available for parsing
-                    int decimals = -(int)Math.Log10((double)stepSize);
-                    var result = new TradingPair(new Currency(left), new Currency(right), decimals);
+                    int quantityDecimals = -(int)Math.Log10((double)stepSize);
+                    int priceDecimals = -(int) Math.Log10((double) pricePrecision);
+                    var result = new TradingPair(new Currency(left), new Currency(right), quantityDecimals, priceDecimals);
                     try
                     {
                         TradingPair.AddParseEntry(pair.Value, result);

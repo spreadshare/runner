@@ -14,7 +14,7 @@ namespace SpreadShare.Utilities
         public static ResponseObject<OrderUpdate> OrderRefused =>
             new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused");
         
-        public static ResponseObject<OrderUpdate> OrderPlacementFailed =>
-            new ResponseObject<OrderUpdate>(ResponseCode.Error, "Error placing the order");
+        public static ResponseObject<OrderUpdate> OrderPlacementFailed(string reason) =>
+            new ResponseObject<OrderUpdate>(ResponseCode.Error, $"Error order: {reason}");
     }
 }

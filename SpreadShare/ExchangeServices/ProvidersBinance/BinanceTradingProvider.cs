@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.ServiceModel.Channels;
 using System.Threading;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
@@ -107,7 +108,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 quantity,
                 null,
                 price,
-                null,
+                TimeInForce.GoodTillCancel,
                 null,
                 null,
                 null,
@@ -125,7 +126,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                         side,
                         pair,
                         quantity))
-                : ResponseCommon.OrderPlacementFailed;
+                : ResponseCommon.OrderPlacementFailed(query.Error.Message    );
 
         }
 

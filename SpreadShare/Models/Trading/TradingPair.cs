@@ -17,15 +17,18 @@ namespace SpreadShare.Models.Trading
         /// </summary>
         /// <param name="left">Left side of the trading pair</param>
         /// <param name="right">Right side of the trading pair</param>
-        /// <param name="decimals">Number of decimals the trading pair can be expressed in</param>
-        public TradingPair(Currency left, Currency right, int decimals)
+        /// <param name="quantityDecimals">Number of decimals the TradingPairs' volume can be expressed in</param>
+        /// <param name="priceDecimals">Number of decimals the TradingPairs' price can be expressed in </param>
+        public TradingPair(Currency left, Currency right, int quantityDecimals, int priceDecimals)
         {
             Guard.Argument(left).NotNull().NotEqual(Guard.Argument(right).NotNull());
-            Guard.Argument(decimals).NotNegative();
+            Guard.Argument(quantityDecimals).NotNegative();
+            Guard.Argument(priceDecimals).NotNegative();
 
             Left = left;
             Right = right;
-            Decimals = decimals;
+            QuantityDecimals = quantityDecimals;
+            PriceDecimals = priceDecimals;
         }
 
         /// <summary>
@@ -39,9 +42,14 @@ namespace SpreadShare.Models.Trading
         public Currency Right { get; }
 
         /// <summary>
-        /// Gets the number of decimals
+        /// Gets the number of quantityDecimals
         /// </summary>
-        public int Decimals { get; }
+        public int QuantityDecimals { get; }
+        
+        /// <summary>
+        /// Gets the number of priceDecimals
+        /// </summary>
+        public int PriceDecimals { get; }
 
         /// <summary>
         /// This function adds a parse option tot the table, this should only be used to initialize the environment
@@ -106,15 +114,27 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Round unrounded quantity to the tradable quantity conform to the TradingPair's specification
+        /// Round unrounded quantity to the tradable quantity conform to the TradingPairs' specification
         /// </summary>
         /// <param name="quantity">Unrounded quantity</param>
         /// <returns>Rounded quantity</returns>
         public decimal RoundToTradable(decimal quantity)
         {
             Guard.Argument(quantity).NotNegative(x => $"Quantity is negative namely: {x}");
-            decimal value = Math.Round(quantity, Decimals);
-            return value <= quantity ? value : value - (decimal)Math.Pow(10, -Decimals);
+            decimal value = Math.Round(quantity, QuantityDecimals);
+            return value <= quantity ? value : value - (decimal)Math.Pow(10, -QuantityDecimals);
+        }
+
+        /// <summary>
+        /// Round unrounded price to a priceable amount conform the the TradingPairs' specification
+        /// </summary>
+        /// <param name="price"></param>
+        /// <returns></returns>
+        public decimal RoundToPriceable(decimal price)
+        {
+            Guard.Argument(price).NotNegative(x => $"Price is negative name: {x}");
+            decimal value = Math.Round(price, PriceDecimals);
+            return value <= price ? value : value - (decimal) Math.Pow(10, -PriceDecimals);
         }
 
         /// <summary>
