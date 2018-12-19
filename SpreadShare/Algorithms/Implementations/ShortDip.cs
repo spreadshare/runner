@@ -38,32 +38,25 @@ namespace SpreadShare.Algorithms.Implementations
          {
              public override State<ShortDipSettings> OnMarketCondition(DataProvider data)
              {
-
-                 bool performance = data.GetPerformancePastHours(AlgorithmSettings.ActiveTradingPairs.First(),
+                 bool performance = data.GetPerformancePastHours(
+                                        AlgorithmSettings.ActiveTradingPairs.First(),
                              AlgorithmSettings.DipTime).Data < (1 - AlgorithmSettings.DipPercent);
-                 if(performance)
-                    return new BuyState();
+                 if (performance)
+                 {
+                     return new BuyState();
+                 }
 
                  return new NothingState<ShortDipSettings>();
              }
 
              protected override void Run(TradingProvider trading, DataProvider data)
              {
-
              }
          }
 
          private class BuyState : State<ShortDipSettings>
          {
              private OrderUpdate limitsell;
-
-             protected override void Run(TradingProvider trading, DataProvider data)
-             {
-                 var buyorder = trading.PlaceFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
-                 limitsell = trading.PlaceFullLimitOrderSell(AlgorithmSettings.ActiveTradingPairs.First(),
-                     (buyorder.Data.AverageFilledPrice * AlgorithmSettings.Recovery)).Data;
-                 SetTimer(TimeSpan.FromHours(AlgorithmSettings.StopTime));
-             }
 
              public override State<ShortDipSettings> OnTimerElapsed()
              {
@@ -72,9 +65,21 @@ namespace SpreadShare.Algorithms.Implementations
 
              public override State<ShortDipSettings> OnOrderUpdate(OrderUpdate order)
              {
-                 if(order.OrderId == limitsell.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
-                    return new EntryState();
+                 if (order.OrderId == limitsell.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                 {
+                     return new EntryState();
+                 }
+
                  return new NothingState<ShortDipSettings>();
+             }
+
+             protected override void Run(TradingProvider trading, DataProvider data)
+             {
+                 var buyorder = trading.PlaceFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
+                 limitsell = trading.PlaceFullLimitOrderSell(
+                     AlgorithmSettings.ActiveTradingPairs.First(),
+                     buyorder.Data.AverageFilledPrice * AlgorithmSettings.Recovery).Data;
+                 SetTimer(TimeSpan.FromHours(AlgorithmSettings.StopTime));
              }
          }
 
@@ -82,11 +87,9 @@ namespace SpreadShare.Algorithms.Implementations
          {
              private OrderUpdate oldlimit;
 
-             protected override void Run(TradingProvider trading, DataProvider data)
+             public CancelState(OrderUpdate limitsell)
              {
-                 trading.CancelOrder(oldlimit.Pair, oldlimit.OrderId);
-                 trading.PlaceFullMarketOrderSell(AlgorithmSettings.ActiveTradingPairs.First());
-                 SetTimer(TimeSpan.Zero);
+                 oldlimit = limitsell;
              }
 
              public override State<ShortDipSettings> OnTimerElapsed()
@@ -94,9 +97,11 @@ namespace SpreadShare.Algorithms.Implementations
                  return new EntryState();
              }
 
-             public CancelState(OrderUpdate limitsell)
+             protected override void Run(TradingProvider trading, DataProvider data)
              {
-                 oldlimit = limitsell;
+                 trading.CancelOrder(oldlimit.Pair, oldlimit.OrderId);
+                 trading.PlaceFullMarketOrderSell(AlgorithmSettings.ActiveTradingPairs.First());
+                 SetTimer(TimeSpan.Zero);
              }
          }
      }
@@ -125,7 +130,6 @@ namespace SpreadShare.Algorithms.Implementations
         /// Gets or sets Stoptime, determines how long to wait untill we get out and try again
         /// </summary>
         public int StopTime { get; set; }
-
     }
 }
 
