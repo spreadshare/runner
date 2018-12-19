@@ -15,25 +15,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
     internal static class BinanceUtilities
     {
         /// <summary>
-        /// Retry a Binance CallResult method a number of times
-        /// </summary>
-        /// <param name="method"></param>
-        /// <param name="logger"></param>
-        /// <param name="maxRetries"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static ResponseObject<T> RetryMethod<T>(Func<CallResult<T>> method, ILogger logger, int maxRetries = 5)
-        {
-            return HelperMethods.RetryMethod(() =>
-            {
-                var result = method();
-                return result.Success
-                    ? new ResponseObject<T>(ResponseCode.Success)
-                    : new ResponseObject<T>(ResponseCode.Error, result.Error.Message);
-            }, logger, maxRetries);
-        }
-
-        /// <summary>
         /// Convert Binance.Net to SpreadShare.Models
         /// </summary>
         /// <param name="side">Binance.Net.Orderside</param>

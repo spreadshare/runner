@@ -36,7 +36,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             var rounded = pair.RoundToTradable(quantity);
  
             // Attempt to place the order on Binance
-            var query = client.PlaceOrder(pair.ToString(),
+            var query =  client.PlaceOrder(pair.ToString(),
                 BinanceUtilities.ToExternal(side),
                 OrderType.Market,
                 rounded,
@@ -50,7 +50,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
  
             if (!query.Success)
             {
-                Logger.LogError($"Placing market order {side} {rounded}{pair} failed! --> {query.Error.Message}");
+                Logger.LogError($"Placing market order {side} {rounded} {pair.Left} failed! --> {query.Error.Message}");
                 return new ResponseObject<OrderUpdate>(ResponseCode.Error, query.Error.Message);
             }
 
@@ -63,6 +63,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 pair,
                 quantity)
             {
+                Status = OrderUpdate.OrderStatus.Filled,
                 FilledQuantity = query.Data.ExecutedQuantity
             };
  
