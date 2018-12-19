@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using Binance.Net.Objects;
-using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
@@ -99,7 +98,35 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
         {
-            throw new System.NotImplementedException();
+            var client = _communications.Client;
+
+            var query = client.PlaceOrder(
+                pair.ToString(),
+                BinanceUtilities.ToExternal(side),
+                OrderType.Limit,
+                quantity,
+                null,
+                price,
+                null,
+                null,
+                null,
+                null,
+                (int) _communications.ReceiveWindow);
+
+            return query.Success
+                ? new ResponseObject<OrderUpdate>(
+                    ResponseCode.Success,
+                    new OrderUpdate(
+                        query.Data.OrderId,
+                        tradeId,
+                        OrderUpdate.OrderTypes.Limit,
+                        DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                        price,
+                        side,
+                        pair,
+                        quantity))
+                : ResponseCommon.OrderPlacementFailed;
+
         }
 
         /// <inheritdoc />

@@ -1,7 +1,4 @@
 using System;
-using System.Linq.Expressions;
-using System.Runtime.InteropServices.WindowsRuntime;
-using CryptoExchange.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 

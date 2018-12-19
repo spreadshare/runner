@@ -1,5 +1,3 @@
-using Dawn;
-
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
