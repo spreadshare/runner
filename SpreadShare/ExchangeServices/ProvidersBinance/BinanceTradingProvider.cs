@@ -133,13 +133,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         {
             var client = _communications.Client;
 
-            var query = BinanceUtilities.RetryMethod(
-                () => client.CancelOrder(pair.ToString(), orderId, null, null, _communications.ReceiveWindow),
-                Logger);
+            var query = client.CancelOrder(
+                symbol: pair.ToString(),
+                orderId: orderId,
+                origClientOrderId: null,
+                newClientOrderId: null,
+                receiveWindow: _communications.ReceiveWindow);
 
-            if (query.Success)
+            if (!query.Success)
             {
-                return new ResponseObject(ResponseCode.Error, query.Message);
+                return new ResponseObject(ResponseCode.Error, query.Error.Message);
             }
 
             return new ResponseObject(ResponseCode.Success);

@@ -335,11 +335,16 @@ namespace SpreadShare.ExchangeServices.Providers
                     new Balance(order.Pair.Left, order.SetQuantity, 0));
             }
 
-            var query = _implementation.CancelOrder(order.Pair, order.OrderId);
-            if (query.Success)
+            var query = HelperMethods.RetryMethod(
+                () => _implementation.CancelOrder(order.Pair, order.OrderId),
+                _logger);
+
+            if (!query.Success)
             {
-                _allocationManager.UpdateAllocation(exec);
+                _logger.LogError($"Could not cancel order {order.OrderId} --> {query.Message}");
             }
+
+            _allocationManager.UpdateAllocation(exec);
 
             return query;
         }
