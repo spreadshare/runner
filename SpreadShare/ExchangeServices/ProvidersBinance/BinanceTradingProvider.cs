@@ -134,10 +134,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             // set alias for more readable code
             var client = _communications.Client;
 
-            var query = client.CancelOrder(pair.ToString(), orderId);
+            var query = BinanceUtilities.RetryMethod(
+                () => client.CancelOrder(pair.ToString(), orderId, null, null, _communications.ReceiveWindow),
+                Logger);
+
             if (query.Success)
             {
-                return new ResponseObject(ResponseCode.Error, query.Error.Message);
+                return new ResponseObject(ResponseCode.Error, query.Message);
             }
 
             return new ResponseObject(ResponseCode.Success);

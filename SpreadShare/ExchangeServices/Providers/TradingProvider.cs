@@ -69,7 +69,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">TradingPair to consider</param>
         /// <returns>ResponseObject with an OrderUpdate</returns>
-        public ResponseObject<OrderUpdate> PlaceFullMarketOrderBuy(TradingPair pair)
+        public ResponseObject<OrderUpdate> ExecuteFullMarketOrderBuy(TradingPair pair)
         {
             var currency = pair.Right;
             var balance = _allocationManager.GetAvailableFunds(currency);
@@ -82,11 +82,11 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">TradingPair to consider</param>
         /// <returns>ResponseObject with an OrderUpdate</returns>
-        public ResponseObject<OrderUpdate> PlaceFullMarketOrderSell(TradingPair pair)
+        public ResponseObject<OrderUpdate> ExecuteFullMarketOrderSell(TradingPair pair)
         {
             var currency = pair.Left;
             var balance = _allocationManager.GetAvailableFunds(currency);
-            return PlaceMarketOrderSell(pair, balance.Free);
+            return ExecuteMarketOrderSell(pair, balance.Free);
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">TradingPair to consider</param>
         /// <param name="quantity">Quantity of non base currency</param>
         /// <returns>ResponseObject containing an OrderUpdate</returns>
-        public ResponseObject<OrderUpdate> PlaceMarketOrderSell(TradingPair pair, decimal quantity)
+        public ResponseObject<OrderUpdate> ExecuteMarketOrderSell(TradingPair pair, decimal quantity)
         {
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
