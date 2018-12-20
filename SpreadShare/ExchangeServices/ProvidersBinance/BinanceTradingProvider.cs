@@ -131,7 +131,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
-            // set alias for more readable code
             var client = _communications.Client;
 
             var query = BinanceUtilities.RetryMethod(

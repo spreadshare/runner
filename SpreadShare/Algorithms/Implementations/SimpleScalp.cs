@@ -93,7 +93,7 @@ namespace SpreadShare.Algorithms.Implementations
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                trading.CancelOrder(oldlimit.Pair, oldlimit.OrderId);
+                trading.CancelOrder(oldlimit);
                 OrderUpdate mktsell = trading.ExecuteFullMarketOrderSell(AlgorithmSettings.ActiveTradingPairs.First())
                     .Data;
                 SetTimer(TimeSpan.Zero);

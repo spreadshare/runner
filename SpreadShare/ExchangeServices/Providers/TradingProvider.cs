@@ -317,12 +317,10 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Cancels order
         /// </summary>
-        /// <param name="pair">Trading pair in which the order is found</param>
-        /// <param name="orderId">Id of the order</param>
+        /// <param name="order">The order to cancel</param>
         /// <returns>A response object with the results of the action</returns>
-        public ResponseObject CancelOrder(TradingPair pair, long orderId)
+        public ResponseObject CancelOrder(OrderUpdate order)
         {
-            var order = _implementation.GetOrderInfo(pair, orderId).Data;
             TradeExecution exec;
             if (order.Side == OrderSide.Buy)
             {
@@ -337,7 +335,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     new Balance(order.Pair.Left, order.SetQuantity, 0));
             }
 
-            var query = _implementation.CancelOrder(pair, orderId);
+            var query = _implementation.CancelOrder(order.Pair, order.OrderId);
             if (query.Success)
             {
                 _allocationManager.UpdateAllocation(exec);
@@ -375,7 +373,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 foreach (var order in _openOrders)
                 {
                     _logger.LogWarning($"Cancelling order {order.Pair}");
-                    CancelOrder(order.Pair, order.OrderId);
+                    CancelOrder(order);
                 }
             }
         }
