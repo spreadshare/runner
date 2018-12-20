@@ -107,7 +107,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 result = HelperMethods.RetryMethod(
                     () => _implementation.ExecuteMarketOrder(pair, OrderSide.Buy, quantity, TradeId), _logger);
                 return result.Success
-                    ? new TradeExecution(proposal.From, new Balance(pair.Left, result.Data.SetQuantity, 0.0M))
+                    ? new TradeExecution(proposal.From, new Balance(pair.Left, result.Data.FilledQuantity, 0.0M))
                     : null;
             });
             return tradeSuccess
@@ -133,11 +133,9 @@ namespace SpreadShare.ExchangeServices.Providers
                     () => _implementation.ExecuteMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId), _logger);
                 if (result.Success)
                 {
-                    // Correct gained quantity using a price estimate
-                    decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
                     return new TradeExecution(
                         proposal.From,
-                        new Balance(pair.Right, result.Data.SetQuantity * priceEstimate, 0));
+                        new Balance(pair.Right, result.Data.FilledQuantity * result.Data.AverageFilledPrice, 0));
                 }
 
                 return null;

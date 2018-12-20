@@ -40,7 +40,7 @@ namespace SpreadShare.Utilities
         /// <param name="method">The method to retry</param>
         /// <param name="logger">Logger to report to</param>
         /// <param name="maxRetries">Maximum number of retries (default 5)</param>
-        /// <returns></returns>
+        /// <returns>First (if any) success response of the <see pref="method"/></returns>
         public static ResponseObject RetryMethod(Func<ResponseObject> method, ILogger logger, int maxRetries = 5)
         {
             var query = RetryMethod<string>(method, logger, maxRetries);
