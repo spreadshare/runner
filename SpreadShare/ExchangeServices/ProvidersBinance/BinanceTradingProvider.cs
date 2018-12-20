@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Linq;
-using System.Threading;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
@@ -57,40 +56,33 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 return new ResponseObject<OrderUpdate>(ResponseCode.Error, query.Error.Message);
             }
 
+            var order = query.Data;
+
             // Create an order update with known information
             OrderUpdate result = new OrderUpdate(
-                query.Data.OrderId,
-                tradeId,
-                OrderUpdate.OrderTypes.Market,
-                DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                0,
-                side,
-                pair,
-                quantity)
+                orderId: order.OrderId,
+                tradeId: tradeId,
+                orderType: BinanceUtilities.ToInternal(order.Type),
+                createdTimeStamp: DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                setPrice: 0, // This information is unknown for market orders
+                side: side,
+                pair: pair,
+                setQuantity: quantity)
             {
                 Status = OrderUpdate.OrderStatus.Filled,
                 FilledQuantity = query.Data.ExecutedQuantity,
-                FilledTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+                FilledTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
             };
 
-            // Give Binance a short time to process the order
-            Thread.Sleep(10);
+            // Prevent division by zero
+            if (order.ExecutedQuantity == 0)
+            {
+                Logger.LogWarning($"Market order could not be priced --> {JsonConvert.SerializeObject(order)}");
+                return new ResponseObject<OrderUpdate>(ResponseCode.Success, result);
+            }
 
-            // Get the open orders from Binance, this should not contain the market order
-            var orders = BinanceUtilities.RetryMethod(() => client.GetOpenOrders(result.Pair.ToString()), Logger);
-            if (!orders.Success)
-            {
-                Logger.LogWarning($"Market order with id {result.OrderId} could not be confirmed");
-            }
-            else if (orders.Data.All(o => o.OrderId != result.OrderId))
-            {
-                // None of the open orders was the market order, it must have been filled
-                result.Status = OrderUpdate.OrderStatus.Filled;
-            }
-            else
-            {
-                Logger.LogWarning($"Market order {result.OrderId} is not being reported as filled");
-            }
+            // Calculate the price
+            result.AverageFilledPrice = order.CummulativeQuoteQuantity / query.Data.ExecutedQuantity;
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, result);
         }
