@@ -1,4 +1,4 @@
-﻿namespace SpreadShare.ZeroMQ.Commands
+namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
     /// Command to reset the remaining holding time to HoldTime.

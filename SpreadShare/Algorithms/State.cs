@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;

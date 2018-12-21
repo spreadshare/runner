@@ -1,4 +1,4 @@
-﻿using Dawn;
+using Dawn;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;

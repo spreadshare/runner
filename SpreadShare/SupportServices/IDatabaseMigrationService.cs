@@ -1,4 +1,4 @@
-﻿using SpreadShare.Models;
+using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {

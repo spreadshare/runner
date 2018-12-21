@@ -1,4 +1,4 @@
-﻿namespace SpreadShare.ExchangeServices
+namespace SpreadShare.ExchangeServices
 {
     /// <summary>
     /// Distinguishes the exchange used or backtesting used.

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SpreadShare.Models.Database;
 
 namespace SpreadShare.SupportServices

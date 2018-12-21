@@ -1,4 +1,4 @@
-﻿namespace SpreadShare.Models.Trading
+namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Return value of websockets.

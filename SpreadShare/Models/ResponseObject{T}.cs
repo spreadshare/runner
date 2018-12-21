@@ -1,4 +1,4 @@
-﻿namespace SpreadShare.Models
+namespace SpreadShare.Models
 {
     /// <summary>
     /// Object representing the response of a performed action.
