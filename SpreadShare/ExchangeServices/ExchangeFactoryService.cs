@@ -97,12 +97,12 @@ namespace SpreadShare.ExchangeServices
         {
             // Makes sure that the communication is enabled
            _binanceCommunications.Connect();
+            var timerProvider = new ExchangeTimerProvider();
             var dataImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
-            var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications);
+            var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications, timerProvider);
 
             var dataProvider = new DataProvider(dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
-            var timerProvider = new ExchangeTimerProvider();
             return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider);
         }
 

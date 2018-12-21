@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers.Observing;
@@ -9,7 +10,7 @@ namespace SpreadShare.ExchangeServices.Providers
     /// <summary>
     /// Abstract specification of a trading provider.
     /// </summary>
-    internal abstract class AbstractTradingProvider : Observable<OrderUpdate>
+    internal abstract class AbstractTradingProvider : Observable<OrderUpdate>, IObserver<long>
     {
         /// <summary>
         /// Create identifiable output.
@@ -22,13 +23,21 @@ namespace SpreadShare.ExchangeServices.Providers
         protected Dictionary<long, OrderUpdate> WatchList;
 
         /// <summary>
+        /// Timer provider, used to subscribe to periodic updates
+        /// </summary>
+        protected TimerProvider Timer;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AbstractTradingProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output stream</param>
-        protected AbstractTradingProvider(ILoggerFactory loggerFactory)
+        /// <param name="timer">Timer provider for </param>
+        protected AbstractTradingProvider(ILoggerFactory loggerFactory, TimerProvider timer)
         {
             Logger = loggerFactory.CreateLogger(GetType());
             WatchList = new Dictionary<long, OrderUpdate>();
+            Timer = timer;
+            timer.Subscribe(this);
         }
 
         /// <summary>
@@ -78,5 +87,14 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="orderId">The id of the order</param>
         /// <returns>OrderUpdate containing the state of an order</returns>
         public abstract ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId);
+
+        /// <inheritdoc />
+        public abstract void OnCompleted();
+
+        /// <inheritdoc />
+        public abstract void OnError(Exception error);
+
+        /// <inheritdoc />
+        public abstract void OnNext(long value);
     }
 }

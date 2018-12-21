@@ -408,14 +408,14 @@ namespace SpreadShare.ExchangeServices.Providers
             if (order.Side == OrderSide.Buy)
             {
                 exec = new TradeExecution(
-                    new Balance(order.Pair.Right, 0.0M, order.SetQuantity * order.SetPrice),
+                    new Balance(order.Pair.Right, 0.0M, order.LastFillIncrement * order.LastFillPrice),
                     new Balance(order.Pair.Left, order.LastFillIncrement, 0.0M));
             }
             else
             {
                 exec = new TradeExecution(
                     new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                    new Balance(order.Pair.Right, order.SetQuantity * order.AverageFilledPrice, 0));
+                    new Balance(order.Pair.Right, order.LastFillIncrement * order.LastFillPrice, 0));
             }
 
             _allocationManager.UpdateAllocation(exec);

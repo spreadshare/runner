@@ -3,9 +3,11 @@ using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 {
@@ -110,17 +112,22 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                     // TODO: Implement AccountInfoUpdate callback
                 },
                 orderInfoUpdate => UpdateObservers(new OrderUpdate(
-                    orderInfoUpdate.OrderId,
-                    0,
-                    BinanceUtilities.ToInternal(orderInfoUpdate.Type),
-                    DateTimeOffset.FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime()).ToUnixTimeMilliseconds(),
-                    orderInfoUpdate.Price,
-                    BinanceUtilities.ToInternal(orderInfoUpdate.Side),
-                    TradingPair.Parse(orderInfoUpdate.Symbol),
-                    orderInfoUpdate.Quantity)
-                {
-                    Status = BinanceUtilities.ToInternal(orderInfoUpdate.Status)
-                }));
+                        orderInfoUpdate.OrderId,
+                        0,
+                        BinanceUtilities.ToInternal(orderInfoUpdate.Type),
+                        DateTimeOffset.FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime())
+                            .ToUnixTimeMilliseconds(),
+                        orderInfoUpdate.Price,
+                        BinanceUtilities.ToInternal(orderInfoUpdate.Side),
+                        TradingPair.Parse(orderInfoUpdate.Symbol),
+                        orderInfoUpdate.Quantity)
+                    {
+                        Status = BinanceUtilities.ToInternal(orderInfoUpdate.Status),
+                        LastFillIncrement = orderInfoUpdate.QuantityOfLastFilledTrade,
+                        LastFillPrice = orderInfoUpdate.PriceLastFilledTrade,
+                        AverageFilledPrice = HelperMethods.SafeDiv(orderInfoUpdate.CummulativeQuoteQuantity, orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
+                        FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades
+                    }));
 
             // Set error handlers
             succesOrderBook.Data.Closed += () =>

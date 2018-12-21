@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
+using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 using SpreadShare.Utilities;
@@ -17,16 +20,25 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
     internal class BinanceTradingProvider : AbstractTradingProvider
     {
         private readonly BinanceCommunicationsService _communications;
+        private ConcurrentQueue<OrderUpdate> _orderQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceTradingProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output stream</param>
         /// <param name="communications">For communication with Binance</param>
-        public BinanceTradingProvider(ILoggerFactory loggerFactory, BinanceCommunicationsService communications)
-            : base(loggerFactory)
+        /// <param name="timer">Timer for subscribing to periodic updates</param>
+        public BinanceTradingProvider(ILoggerFactory loggerFactory, BinanceCommunicationsService communications, TimerProvider timer)
+            : base(loggerFactory, timer)
         {
             _communications = communications;
+            _orderQueue = new ConcurrentQueue<OrderUpdate>();
+
+            // Push order updates from the websocket in a concurrent queue
+            communications.Subscribe(new ConfigurableObserver<OrderUpdate>(
+                order => _orderQueue.Enqueue(order),
+                () => { },
+                e => { }));
         }
 
         /// <inheritdoc />
@@ -152,6 +164,22 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         public override ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
         {
             throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override void OnCompleted() => Expression.Empty();
+
+        /// <inheritdoc />
+        public override void OnError(Exception error) => Expression.Empty();
+
+        /// <inheritdoc />
+        public override void OnNext(long value)
+        {
+            // Flush the queue of pending order updates
+            while (_orderQueue.TryDequeue(out var order))
+            {
+                UpdateObservers(order);
+            }
         }
     }
 }

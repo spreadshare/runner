@@ -46,5 +46,16 @@ namespace SpreadShare.Utilities
             var query = RetryMethod<string>(method, logger, maxRetries);
             return new ResponseObject(query.Code);
         }
+
+        /// <summary>
+        /// A division that returns zero if the denominator is zero
+        /// </summary>
+        /// <param name="numerator">The numerator</param>
+        /// <param name="denominator">The denominator</param>
+        /// <returns>safe division result</returns>
+        public static decimal SafeDiv(decimal numerator, decimal denominator)
+        {
+            return denominator == 0 ? 0 : numerator / denominator;
+        }
     }
 }
