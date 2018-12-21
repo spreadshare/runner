@@ -112,20 +112,22 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                     // TODO: Implement AccountInfoUpdate callback
                 },
                 orderInfoUpdate => UpdateObservers(new OrderUpdate(
-                        orderInfoUpdate.OrderId,
-                        0,
-                        BinanceUtilities.ToInternal(orderInfoUpdate.Type),
-                        DateTimeOffset.FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime())
+                        orderId: orderInfoUpdate.OrderId,
+                        tradeId: 0,
+                        orderType: BinanceUtilities.ToInternal(orderInfoUpdate.Type),
+                        createdTimeStamp: DateTimeOffset.FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime())
                             .ToUnixTimeMilliseconds(),
-                        orderInfoUpdate.Price,
-                        BinanceUtilities.ToInternal(orderInfoUpdate.Side),
-                        TradingPair.Parse(orderInfoUpdate.Symbol),
-                        orderInfoUpdate.Quantity)
+                        setPrice: orderInfoUpdate.Price,
+                        side: BinanceUtilities.ToInternal(orderInfoUpdate.Side),
+                        pair: TradingPair.Parse(orderInfoUpdate.Symbol),
+                        setQuantity: orderInfoUpdate.Quantity)
                     {
                         Status = BinanceUtilities.ToInternal(orderInfoUpdate.Status),
                         LastFillIncrement = orderInfoUpdate.QuantityOfLastFilledTrade,
                         LastFillPrice = orderInfoUpdate.PriceLastFilledTrade,
-                        AverageFilledPrice = HelperMethods.SafeDiv(orderInfoUpdate.CummulativeQuoteQuantity, orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
+                        AverageFilledPrice = HelperMethods.SafeDiv(
+                            orderInfoUpdate.CummulativeQuoteQuantity,
+                            orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
                         FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades
                     }));
 

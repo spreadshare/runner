@@ -102,7 +102,7 @@ namespace SpreadShare.ExchangeServices.Providers
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * priceEstimate, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
+            var tradeAccepted = _allocationManager.QueueTrade(proposal, () =>
             {
                 result = HelperMethods.RetryMethod(
                     () => _implementation.ExecuteMarketOrder(pair, OrderSide.Buy, quantity, TradeId), _logger);
@@ -110,7 +110,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     ? new TradeExecution(proposal.From, new Balance(pair.Left, result.Data.FilledQuantity, 0.0M))
                     : null;
             });
-            return tradeSuccess
+            return tradeAccepted
                 ? result
                 : ResponseCommon.OrderRefused;
         }
@@ -127,7 +127,7 @@ namespace SpreadShare.ExchangeServices.Providers
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            var tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
+            var tradeAccepted = _allocationManager.QueueTrade(proposal, () =>
             {
                 result = HelperMethods.RetryMethod(
                     () => _implementation.ExecuteMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId), _logger);
@@ -140,7 +140,7 @@ namespace SpreadShare.ExchangeServices.Providers
 
                 return null;
             });
-            return tradeSuccess
+            return tradeAccepted
                 ? result
                 : ResponseCommon.OrderRefused;
         }
@@ -158,7 +158,7 @@ namespace SpreadShare.ExchangeServices.Providers
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
+            bool tradeAccepted = _allocationManager.QueueTrade(proposal, () =>
             {
                 result = HelperMethods.RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Buy, pair.RoundToTradable(quantity), pair.RoundToPriceable(price), TradeId), _logger);
                 return result.Success
@@ -166,7 +166,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     : null;
             });
 
-            if (tradeSuccess)
+            if (tradeAccepted)
             {
                 _openOrders.Add(result.Data);
                 return result;
@@ -188,7 +188,7 @@ namespace SpreadShare.ExchangeServices.Providers
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
+            bool tradeAccepted = _allocationManager.QueueTrade(proposal, () =>
             {
                 result = HelperMethods.RetryMethod(() => _implementation.PlaceLimitOrder(pair, OrderSide.Sell, pair.RoundToTradable(quantity), pair.RoundToPriceable(price), TradeId), _logger);
                 return result.Success
@@ -196,7 +196,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     : null;
             });
 
-            if (tradeSuccess)
+            if (tradeAccepted)
             {
                 _openOrders.Add(result.Data);
                 return result;
@@ -245,7 +245,7 @@ namespace SpreadShare.ExchangeServices.Providers
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
+            bool tradeAccepted = _allocationManager.QueueTrade(proposal, () =>
             {
                 result = HelperMethods.RetryMethod(
                     () => _implementation.PlaceStoplossOrder(pair, OrderSide.Sell, quantity, price, TradeId),
@@ -255,7 +255,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     : null;
             });
 
-            if (tradeSuccess)
+            if (tradeAccepted)
             {
                 _openOrders.Add(result.Data);
                 return result;
@@ -277,7 +277,7 @@ namespace SpreadShare.ExchangeServices.Providers
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
             ResponseObject<OrderUpdate> result = new ResponseObject<OrderUpdate>(ResponseCode.Error);
-            bool tradeSuccess = _allocationManager.QueueTrade(proposal, () =>
+            bool tradeAccepted = _allocationManager.QueueTrade(proposal, () =>
             {
                 result = HelperMethods.RetryMethod(
                     () => _implementation.PlaceStoplossOrder(pair, OrderSide.Buy, quantity, price, TradeId),
@@ -287,7 +287,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     : null;
             });
 
-            if (tradeSuccess)
+            if (tradeAccepted)
             {
                 _openOrders.Add(result.Data);
                 return result;

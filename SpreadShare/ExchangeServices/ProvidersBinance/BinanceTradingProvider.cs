@@ -117,6 +117,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 orderResponseType: null,
                 receiveWindow: (int)_communications.ReceiveWindow);
 
+            // Allow nested argument chopping
             #pragma warning disable SA1118
             return query.Success
                 ? new ResponseObject<OrderUpdate>(
