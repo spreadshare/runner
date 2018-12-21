@@ -321,10 +321,10 @@ namespace SpreadShare.Tests.Models
                          Assert.Equal(-9.6M, balance.Free);
                          Assert.Equal(0.0M, balance.Locked);
                          break;
-                    case "ETH":
-                        Assert.Equal(-1.05M, balance.Free);
-                        Assert.Equal(0.0M, balance.Locked);
-                        break;
+                     case "ETH":
+                         Assert.Equal(-1.05M, balance.Free);
+                         Assert.Equal(0.0M, balance.Locked);
+                         break;
                      case "VET":
                          Assert.Equal(0.66M, balance.Free);
                          Assert.Equal(1.0m, balance.Locked);

@@ -179,9 +179,9 @@ namespace SpreadShare.ExchangeServices.Allocation
             // Update the local information
             _allocations[exchange].ApplyTradeExecution(algorithm, exec);
 
-           UpdatePortfolioUsingRemote(exchange, algorithm);
+            UpdatePortfolioUsingRemote(exchange, algorithm);
 
-           return true;
+            return true;
         }
 
         private void UpdatePortfolioUsingRemote(Exchange exchange, Type algorithm)
