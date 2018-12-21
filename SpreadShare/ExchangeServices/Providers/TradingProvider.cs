@@ -414,6 +414,7 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private void UpdateAllocation(OrderUpdate order)
         {
+            // TODO: Reverse allocation for cancelled orders
             // Skip untracked orders
             if (_openOrders.All(o => o.OrderId != order.OrderId))
             {
