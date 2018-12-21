@@ -255,8 +255,13 @@ namespace SpreadShare.ExchangeServices.Providers
                     : null;
             });
 
-            // TODO: Cancel stoploss orders on dispose
-            return tradeSuccess ? result : ResponseCommon.OrderRefused;
+            if (tradeSuccess)
+            {
+                _openOrders.Add(result.Data);
+                return result;
+            }
+
+            return ResponseCommon.OrderRefused;
         }
 
         /// <summary>
@@ -282,8 +287,13 @@ namespace SpreadShare.ExchangeServices.Providers
                     : null;
             });
 
-            // TODO: Cancel stoploss orders on dispose
-            return tradeSuccess ? result : ResponseCommon.OrderRefused;
+            if (tradeSuccess)
+            {
+                _openOrders.Add(result.Data);
+                return result;
+            }
+
+            return ResponseCommon.OrderRefused;
         }
 
         /// <summary>
@@ -409,7 +419,7 @@ namespace SpreadShare.ExchangeServices.Providers
             {
                 return;
             }
- 
+
             TradeExecution exec;
             if (order.Side == OrderSide.Buy)
             {
