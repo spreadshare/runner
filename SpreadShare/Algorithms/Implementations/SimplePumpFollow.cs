@@ -44,12 +44,9 @@ namespace SpreadShare.Algorithms.Implementations
                  bool shortPerformance = data.GetPerformancePastHours(
                                              AlgorithmSettings.ActiveTradingPairs.First(),
                                         3).Data < (1 - AlgorithmSettings.SecondCheck);
-                 if (longPerformance)
+                 if (longPerformance && shortPerformance)
                  {
-                     if (shortPerformance)
-                     {
-                         return new BuyState();
-                     }
+                    return new BuyState();
                  }
 
                  return new NothingState<SimplePumpFollowSettings>();
@@ -98,10 +95,10 @@ namespace SpreadShare.Algorithms.Implementations
                      buyorder.Data.AverageFilledPrice * AlgorithmSettings.ProfitTake).Data;
                  SetTimer(TimeSpan.FromHours(AlgorithmSettings.StopTime));
 
-                 stophit = data.GetCurrentPriceLastTrade(
-                               AlgorithmSettings.ActiveTradingPairs.First()).Data
-                           <
-                           (buyorder.Data.AverageFilledPrice * AlgorithmSettings.StopPrice);
+                 var currentPrice = data.GetCurrentPriceLastTrade(AlgorithmSettings.ActiveTradingPairs.First()).Data;
+                 var sellPrice = buyorder.Data.AverageFilledPrice * AlgorithmSettings.StopPrice;
+
+                 stophit = currentPrice < sellPrice;
              }
          }
 
