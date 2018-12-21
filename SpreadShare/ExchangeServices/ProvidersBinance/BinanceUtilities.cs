@@ -6,15 +6,15 @@ using OrderSide = SpreadShare.Models.OrderSide;
 namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
     /// <summary>
-    /// Utility methods collection for Binance.Net related subjects
+    /// Utility methods collection for Binance.Net related subjects.
     /// </summary>
     internal static class BinanceUtilities
     {
         /// <summary>
-        /// Convert Binance.Net to SpreadShare.Models
+        /// Convert Binance.Net to SpreadShare.Models.
         /// </summary>
-        /// <param name="side">Binance.Net.Orderside</param>
-        /// <returns>SpreadShare.Models.OrderSide</returns>
+        /// <param name="side">Binance.Net.Orderside.</param>
+        /// <returns>SpreadShare.Models.OrderSide.</returns>
         public static OrderSide ToInternal(Binance.Net.Objects.OrderSide side)
         {
             switch (side)
@@ -29,10 +29,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <summary>
-        /// Convert SpreadShare.Models to Binance.Net
+        /// Convert SpreadShare.Models to Binance.Net.
         /// </summary>
-        /// <param name="side">SpreadShare.Models.OrderSide</param>
-        /// <returns>Binance.Net.OrderSide</returns>
+        /// <param name="side">SpreadShare.Models.OrderSide.</param>
+        /// <returns>Binance.Net.OrderSide.</returns>
         public static Binance.Net.Objects.OrderSide ToExternal(OrderSide side)
         {
             switch (side)
@@ -47,10 +47,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <summary>
-        /// Covert Binance.Net to SpreadShare.Models
+        /// Covert Binance.Net to SpreadShare.Models.
         /// </summary>
-        /// <param name="status">Binance.Net.OrderStatus</param>
-        /// <returns>SpreadShare.Models.OrderUpdate.OrderStatus</returns>
+        /// <param name="status">Binance.Net.OrderStatus.</param>
+        /// <returns>SpreadShare.Models.OrderUpdate.OrderStatus.</returns>
         public static OrderUpdate.OrderStatus ToInternal(Binance.Net.Objects.OrderStatus status)
         {
             switch (status)
@@ -75,10 +75,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <summary>
-        /// Convert Binance.Net.OrderTypes to internal enum
+        /// Convert Binance.Net.OrderTypes to internal enum.
         /// </summary>
-        /// <param name="type">Binance.Net.OrderType</param>
-        /// <returns>parsed for internal usage</returns>
+        /// <param name="type">Binance.Net.OrderType.</param>
+        /// <returns>parsed for internal usage.</returns>
         public static OrderUpdate.OrderTypes ToInternal(Binance.Net.Objects.OrderType type)
         {
             switch (type)

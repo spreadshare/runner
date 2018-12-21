@@ -28,11 +28,11 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Initializes a new instance of the <see cref="AlgorithmService"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Provides logging capabilities</param>
-        /// <param name="settingsService">Provides allocation and algorithm settings</param>
-        /// <param name="database">The database context</param>
-        /// <param name="allocationManager">Provides allocation management</param>
-        /// <param name="exchangeFactoryService">Provides containers for algorithms</param>
+        /// <param name="loggerFactory">Provides logging capabilities.</param>
+        /// <param name="settingsService">Provides allocation and algorithm settings.</param>
+        /// <param name="database">The database context.</param>
+        /// <param name="allocationManager">Provides allocation management.</param>
+        /// <param name="exchangeFactoryService">Provides containers for algorithms.</param>
         public AlgorithmService(
             ILoggerFactory loggerFactory,
             SettingsService settingsService,
@@ -110,7 +110,7 @@ namespace SpreadShare.Algorithms
         }
 
         /// <summary>
-        /// Sets the initial allocation in AllocationManager
+        /// Sets the initial allocation in AllocationManager.
         /// </summary>
         private void SetInitialAllocation()
         {
@@ -119,10 +119,10 @@ namespace SpreadShare.Algorithms
         }
 
         /// <summary>
-        /// Gets the exchange from the algorithm settings
+        /// Gets the exchange from the algorithm settings.
         /// </summary>
-        /// <param name="algorithmSettingsType">Type of the settings of the algorithm</param>
-        /// <returns>The settings of the algorithm with configured values</returns>
+        /// <param name="algorithmSettingsType">Type of the settings of the algorithm.</param>
+        /// <returns>The settings of the algorithm with configured values.</returns>
         private ResponseObject<AlgorithmSettings> GetSettings(Type algorithmSettingsType)
         {
             // Get type of SettingsService as declared in Startup.cs

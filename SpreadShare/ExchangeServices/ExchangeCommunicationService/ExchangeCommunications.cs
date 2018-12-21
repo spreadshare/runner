@@ -11,7 +11,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService
         private bool _connected;
 
         /// <summary>
-        /// Startup the service (if not already started)
+        /// Startup the service (if not already started).
         /// </summary>
         public void Connect()
         {
@@ -23,7 +23,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService
         }
 
         /// <summary>
-        /// Routine for starting up the connection
+        /// Routine for starting up the connection.
         /// </summary>
         protected abstract void Startup();
     }

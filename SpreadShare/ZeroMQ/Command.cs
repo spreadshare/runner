@@ -9,31 +9,31 @@ using Newtonsoft.Json.Linq;
 namespace SpreadShare.ZeroMQ
 {
     /// <summary>
-    /// Base class for ZeroMQ commands
+    /// Base class for ZeroMQ commands.
     /// </summary>
     internal abstract class Command
     {
         /// <summary>
-        /// Provides logging
+        /// Provides logging.
         /// </summary>
         protected ILogger Logger;
 
         /// <summary>
-        /// Gets the identifier for the command
+        /// Gets the identifier for the command.
         /// </summary>
         protected abstract string CommandString { get; }
 
         /// <summary>
-        /// Gets the dictionary of required arguments with their value for the command
+        /// Gets the dictionary of required arguments with their value for the command.
         /// </summary>
         protected virtual Dictionary<string, string> Arguments => new Dictionary<string, string>();
 
         /// <summary>
-        /// Identify the command received
+        /// Identify the command received.
         /// </summary>
-        /// <param name="json">Json containing the command (with arguments)</param>
-        /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        /// <returns>Concrete command</returns>
+        /// <param name="json">Json containing the command (with arguments).</param>
+        /// <param name="loggerFactory">LoggerFactory for creating a logger.</param>
+        /// <returns>Concrete command.</returns>
         public static Command GetCommand(string json, ILoggerFactory loggerFactory)
         {
             // ParseArguments json
@@ -84,14 +84,14 @@ namespace SpreadShare.ZeroMQ
         }
 
         /// <summary>
-        /// Requested action to be executed
+        /// Requested action to be executed.
         /// </summary>
         public abstract void Action();
 
         /// <summary>
-        /// Parse arguments required
+        /// Parse arguments required.
         /// </summary>
-        /// <param name="jsonObject">JsonObject containg the arguments</param>
+        /// <param name="jsonObject">JsonObject containg the arguments.</param>
         private void ParseArguments(JObject jsonObject)
         {
             // No arguments

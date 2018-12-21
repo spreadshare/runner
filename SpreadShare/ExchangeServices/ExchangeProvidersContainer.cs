@@ -11,10 +11,10 @@ namespace SpreadShare.ExchangeServices
         /// <summary>
         /// Initializes a new instance of the <see cref="ExchangeProvidersContainer"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Provides logging capabilities</param>
-        /// <param name="dataProvider">Provides data gathering capabilities</param>
-        /// <param name="timerProvider">Provides timer and scheduling capabilities</param>
-        /// <param name="tradingProvider">Provides trading capabilities</param>
+        /// <param name="loggerFactory">Provides logging capabilities.</param>
+        /// <param name="dataProvider">Provides data gathering capabilities.</param>
+        /// <param name="timerProvider">Provides timer and scheduling capabilities.</param>
+        /// <param name="tradingProvider">Provides trading capabilities.</param>
         public ExchangeProvidersContainer(
             ILoggerFactory loggerFactory,
             DataProvider dataProvider,

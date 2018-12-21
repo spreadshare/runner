@@ -21,9 +21,9 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <summary>
         /// Initializes a new instance of the <see cref="PortfolioFetcherService"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Provides logging</param>
-        /// <param name="binance">Provides access to <binance cref="BinanceCommunicationsService"/></param>
-        /// <param name="backtest">Provides access to the <backtest cref="BacktestCommunicationService"/></param>
+        /// <param name="loggerFactory">Provides logging.</param>
+        /// <param name="binance">Provides access to. <binance cref="BinanceCommunicationsService"/></param>
+        /// <param name="backtest">Provides access to the. <backtest cref="BacktestCommunicationService"/></param>
         public PortfolioFetcherService(
             ILoggerFactory loggerFactory,
             BinanceCommunicationsService binance,
@@ -50,9 +50,9 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <summary>
-        /// Gets the portfolio of the user
+        /// Gets the portfolio of the user.
         /// </summary>
-        /// <returns>The portfolio</returns>
+        /// <returns>The portfolio.</returns>
         private ResponseObject<Portfolio> GetBinancePortfolio()
         {
             var accountInfo = _binance.Client.GetAccountInfo();
@@ -74,9 +74,9 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <summary>
-        /// Gets the portfolio of the user
+        /// Gets the portfolio of the user.
         /// </summary>
-        /// <returns>The portfolio</returns>
+        /// <returns>The portfolio.</returns>
         private ResponseObject<Portfolio> GetBacktestingPortfolio()
         {
             return new ResponseObject<Portfolio>(ResponseCode.Success, _backtest.RemotePortfolio);

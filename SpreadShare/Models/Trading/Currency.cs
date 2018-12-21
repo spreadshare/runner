@@ -6,7 +6,7 @@ using SpreadShare.Models.Serializers;
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
-    /// Object representation of a currency
+    /// Object representation of a currency.
     /// </summary>
     [JsonConverter(typeof(CurrencySerializer))]
     internal class Currency
@@ -14,7 +14,7 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Initializes a new instance of the <see cref="Currency"/> class.
         /// </summary>
-        /// <param name="symbol">The symbol of a currency</param>
+        /// <param name="symbol">The symbol of a currency.</param>
         public Currency(string symbol)
         {
             Guard.Argument(symbol).NotNull().NotEmpty().NotWhiteSpace();
@@ -23,7 +23,7 @@ namespace SpreadShare.Models.Trading
 
         /// <summary>
         /// Gets the symbol of a currency
-        /// TODO: Should this not be named ticker?
+        /// TODO: Should this not be named ticker?.
         /// </summary>
         public string Symbol { get; }
 
@@ -58,9 +58,9 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// String representation of a currency
+        /// String representation of a currency.
         /// </summary>
-        /// <returns>Returns the string representation of a currency</returns>
+        /// <returns>Returns the string representation of a currency.</returns>
         public override string ToString() => Symbol;
 
         /// <inheritdoc />

@@ -1,7 +1,7 @@
 ﻿namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to start the algorithm execution
+    /// Command to start the algorithm execution.
     /// </summary>
     internal class CommandStartBot : Command
     {

@@ -3,7 +3,7 @@
 namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to change the CheckTime
+    /// Command to change the CheckTime.
     /// </summary>
     internal class CommandChangeChecktime : Command
     {

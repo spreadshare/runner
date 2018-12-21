@@ -5,18 +5,18 @@ using Newtonsoft.Json.Converters;
 namespace SpreadShare.ZeroMQ
 {
     /// <summary>
-    /// Response for a received ZeroMQ command
+    /// Response for a received ZeroMQ command.
     /// </summary>
     internal class Response
     {
         /// <summary>
-        /// Result of the action
+        /// Result of the action.
         /// </summary>
         [JsonProperty(PropertyName = "result")]
         public Type Result;
 
         /// <summary>
-        /// Message concerning the result
+        /// Message concerning the result.
         /// </summary>
         [JsonProperty(PropertyName = "message")]
         public string Message;
@@ -24,8 +24,8 @@ namespace SpreadShare.ZeroMQ
         /// <summary>
         /// Initializes a new instance of the <see cref="Response"/> class.
         /// </summary>
-        /// <param name="type">Result of the action</param>
-        /// <param name="message">Message concerning the result</param>
+        /// <param name="type">Result of the action.</param>
+        /// <param name="message">Message concerning the result.</param>
         public Response(Type type, string message)
         {
             Result = type;
@@ -33,7 +33,7 @@ namespace SpreadShare.ZeroMQ
         }
 
         /// <summary>
-        /// Result type
+        /// Result type.
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         internal enum Type
@@ -58,9 +58,9 @@ namespace SpreadShare.ZeroMQ
         }
 
         /// <summary>
-        /// Serializes the response to JSON
+        /// Serializes the response to JSON.
         /// </summary>
-        /// <returns>A JSON serialized response</returns>
+        /// <returns>A JSON serialized response.</returns>
         public string ToJson()
         {
             return JsonConvert.SerializeObject(this);

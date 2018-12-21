@@ -3,7 +3,7 @@
 namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to change the base currency
+    /// Command to change the base currency.
     /// </summary>
     internal class CommandChangeBasecurrency : Command
     {

@@ -12,9 +12,9 @@ using SpreadShare.SupportServices.SettingsServices;
 namespace SpreadShare.Algorithms
 {
     /// <summary>
-    /// Object managing the active state and related resources
+    /// Object managing the active state and related resources.
     /// </summary>
-    /// <typeparam name="T">The type of the parent algorithm settings</typeparam>
+    /// <typeparam name="T">The type of the parent algorithm settings.</typeparam>
     internal class StateManager<T> : IDisposable
         where T : AlgorithmSettings
     {
@@ -29,12 +29,12 @@ namespace SpreadShare.Algorithms
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateManager{T}"/> class.
-        /// Sets active state with an initial state and sets basic settings
+        /// Sets active state with an initial state and sets basic settings.
         /// </summary>
-        /// <param name="algorithmSettings">The settings of the algorithm settings</param>
-        /// <param name="initial">Initial state of the algorithm</param>
-        /// <param name="container">Exchange service container</param>
-        /// <param name="database">The database context for logging state switches</param>
+        /// <param name="algorithmSettings">The settings of the algorithm settings.</param>
+        /// <param name="initial">Initial state of the algorithm.</param>
+        /// <param name="container">Exchange service container.</param>
+        /// <param name="database">The database context for logging state switches.</param>
         public StateManager(
             T algorithmSettings,
             EntryState<T> initial,
@@ -80,7 +80,7 @@ namespace SpreadShare.Algorithms
         }
 
         /// <summary>
-        /// Gets the container with exchange service providers
+        /// Gets the container with exchange service providers.
         /// </summary>
         private ExchangeProvidersContainer Container { get; }
 
@@ -90,7 +90,7 @@ namespace SpreadShare.Algorithms
         private T AlgorithmSettings { get; }
 
         /// <summary>
-        /// Gets the current active state
+        /// Gets the current active state.
         /// </summary>
         private string CurrentState
         {
@@ -104,7 +104,7 @@ namespace SpreadShare.Algorithms
         }
 
         /// <summary>
-        /// Evaluates the active state's market condition predicate
+        /// Evaluates the active state's market condition predicate.
         /// </summary>
         public void OnMarketConditionEval()
         {
@@ -118,7 +118,7 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Evaluates the active state's order update condition.
         /// </summary>
-        /// <param name="order">Update of a certain order</param>
+        /// <param name="order">Update of a certain order.</param>
         public void OnOrderUpdateEval(OrderUpdate order)
         {
             lock (_lock)
@@ -136,9 +136,9 @@ namespace SpreadShare.Algorithms
         }
 
         /// <summary>
-        /// Dispose the StateManager
+        /// Dispose the StateManager.
         /// </summary>
-        /// <param name="disposing">Actually do it</param>
+        /// <param name="disposing">Actually do it.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -154,10 +154,10 @@ namespace SpreadShare.Algorithms
         }
 
         /// <summary>
-        /// Switches the active state to the given state, only to be used by states
+        /// Switches the active state to the given state, only to be used by states.
         /// </summary>
-        /// <param name="child">State to switch to</param>
-        /// <exception cref="Exception">Child can't be null</exception>
+        /// <param name="child">State to switch to.</param>
+        /// <exception cref="Exception">Child can't be null.</exception>
         private void SwitchState(State<T> child)
         {
             // This function is safe because it is executed in the locked context of the OnX callback functions

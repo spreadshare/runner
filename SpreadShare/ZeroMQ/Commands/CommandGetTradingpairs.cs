@@ -1,7 +1,7 @@
 ﻿namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to retrieve the active trading pairs
+    /// Command to retrieve the active trading pairs.
     /// </summary>
     internal class CommandGetTradingpairs : Command
     {

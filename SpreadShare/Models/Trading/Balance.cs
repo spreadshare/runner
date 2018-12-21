@@ -9,26 +9,26 @@ namespace SpreadShare.Models.Trading
     internal struct Balance
     {
         /// <summary>
-        /// Symbol of the asset
+        /// Symbol of the asset.
         /// </summary>
         public readonly Currency Symbol;
 
         /// <summary>
-        /// SetQuantity of balance that is free
+        /// SetQuantity of balance that is free.
         /// </summary>
         public decimal Free;
 
         /// <summary>
-        /// SetQuantity of balance that is locked
+        /// SetQuantity of balance that is locked.
         /// </summary>
         public decimal Locked;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Balance"/> struct.
         /// </summary>
-        /// <param name="symbol">Symbol of the asset</param>
-        /// <param name="free">Quantity of the balance that is free</param>
-        /// <param name="locked">Quantity of the balance that is locked</param>
+        /// <param name="symbol">Symbol of the asset.</param>
+        /// <param name="free">Quantity of the balance that is free.</param>
+        /// <param name="locked">Quantity of the balance that is locked.</param>
         public Balance(Currency symbol, decimal free, decimal locked)
         {
             Symbol = symbol ?? throw new ArgumentNullException(nameof(symbol));
@@ -57,8 +57,8 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Returns a new instance of balance with free and locked balances set to zero given a certain currency.
         /// </summary>
-        /// <param name="c">Currency to represent</param>
-        /// <returns>A zero initiated balance object</returns>
+        /// <param name="c">Currency to represent.</param>
+        /// <returns>A zero initiated balance object.</returns>
         public static Balance Empty(Currency c) => new Balance(c, 0.0M, 0.0M);
 
         /// <inheritdoc />

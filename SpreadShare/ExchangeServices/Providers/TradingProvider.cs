@@ -24,10 +24,10 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Initializes a new instance of the <see cref="TradingProvider"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Used to create output</param>
-        /// <param name="implementation">The implementation to delegate calls to</param>
-        /// <param name="dataProvider">The data provider to manager certain orders with</param>
-        /// <param name="allocationManager">The allocation manager to verify orders</param>
+        /// <param name="loggerFactory">Used to create output.</param>
+        /// <param name="implementation">The implementation to delegate calls to.</param>
+        /// <param name="dataProvider">The data provider to manager certain orders with.</param>
+        /// <param name="allocationManager">The allocation manager to verify orders.</param>
         public TradingProvider(
             ILoggerFactory loggerFactory,
             AbstractTradingProvider implementation,
@@ -51,24 +51,24 @@ namespace SpreadShare.ExchangeServices.Providers
         private long TradeId { get; set; }
 
         /// <summary>
-        /// Increment the trade ID, handled by the StateManager
+        /// Increment the trade ID, handled by the StateManager.
         /// </summary>
         public void IncrementTradeId() => TradeId++;
 
         /// <summary>
-        /// Gets the portfolio associated with an algorithm
+        /// Gets the portfolio associated with an algorithm.
         /// </summary>
-        /// <returns>Response object indicating success or not</returns>
+        /// <returns>Response object indicating success or not.</returns>
         public Portfolio GetPortfolio()
         {
             return _allocationManager.GetAllFunds();
         }
 
         /// <summary>
-        /// Place a buy market order using the full allocation
+        /// Place a buy market order using the full allocation.
         /// </summary>
-        /// <param name="pair">TradingPair to consider</param>
-        /// <returns>ResponseObject with an OrderUpdate</returns>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <returns>ResponseObject with an OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceFullMarketOrderBuy(TradingPair pair)
         {
             var currency = pair.Right;
@@ -78,10 +78,10 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Place a sell market order using the full allocation
+        /// Place a sell market order using the full allocation.
         /// </summary>
-        /// <param name="pair">TradingPair to consider</param>
-        /// <returns>ResponseObject with an OrderUpdate</returns>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <returns>ResponseObject with an OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceFullMarketOrderSell(TradingPair pair)
         {
             var currency = pair.Left;
@@ -92,9 +92,9 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Place a buy market order given a non base quantity.
         /// </summary>
-        /// <param name="pair">TradingPair to consider</param>
-        /// <param name="quantity">Quantity of non base currency</param>
-        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="quantity">Quantity of non base currency.</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceMarketOrderBuy(TradingPair pair, decimal quantity)
         {
             var currency = pair.Right;
@@ -116,11 +116,11 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Place a sell market order given a non base quantity
+        /// Place a sell market order given a non base quantity.
         /// </summary>
-        /// <param name="pair">TradingPair to consider</param>
-        /// <param name="quantity">Quantity of non base currency</param>
-        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="quantity">Quantity of non base currency.</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceMarketOrderSell(TradingPair pair, decimal quantity)
         {
             var currency = pair.Left;
@@ -148,12 +148,12 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Place a sell limit order given a non base quantity and target price
+        /// Place a sell limit order given a non base quantity and target price.
         /// </summary>
-        /// <param name="pair">TradingPair to consider</param>
-        /// <param name="quantity">Quantity of non base currency to trade with</param>
-        /// <param name="price">SetPrice to set order at</param>
-        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="quantity">Quantity of non base currency to trade with.</param>
+        /// <param name="price">SetPrice to set order at.</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
             var currency = pair.Right;
@@ -178,12 +178,12 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Place a buy limit order given a non base quantity and a target price
+        /// Place a buy limit order given a non base quantity and a target price.
         /// </summary>
-        /// <param name="pair">TradingPair to consider</param>
-        /// <param name="quantity">Quantity of non base currency to trade with</param>
-        /// <param name="price">Price to set order at</param>
-        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="quantity">Quantity of non base currency to trade with.</param>
+        /// <param name="price">Price to set order at.</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
         {
             var currency = pair.Left;
@@ -208,11 +208,11 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Place a sell limit order with the full allocation
+        /// Place a sell limit order with the full allocation.
         /// </summary>
-        /// <param name="pair">TradingPair to consider</param>
-        /// <param name="price">Price to set order at</param>
-        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="price">Price to set order at.</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceFullLimitOrderSell(TradingPair pair, decimal price)
         {
             var currency = pair.Left;
@@ -221,11 +221,11 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Place a buy limit order with the full allocation
+        /// Place a buy limit order with the full allocation.
         /// </summary>
-        /// <param name="pair">TradingPair to consider</param>
-        /// <param name="price">Price to set the order at</param>
-        /// <returns>ResponseObject containing and OrderUpdate</returns>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="price">Price to set the order at.</param>
+        /// <returns>ResponseObject containing and OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceFullLimitOrderBuy(TradingPair pair, decimal price)
         {
             var currency = pair.Right;
@@ -234,12 +234,12 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Place a sell stoploss order
+        /// Place a sell stoploss order.
         /// </summary>
-        /// <param name="pair">TradingPair to consider</param>
-        /// <param name="price">Price to set the order at</param>
-        /// <param name="quantity">Quantity of non base currency</param>
-        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="price">Price to set the order at.</param>
+        /// <param name="quantity">Quantity of non base currency.</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceStoplossSell(TradingPair pair, decimal price, decimal quantity)
         {
             var currency = pair.Left;
@@ -260,12 +260,12 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Place a buy stoploss order
+        /// Place a buy stoploss order.
         /// </summary>
-        /// <param name="pair">TradingPair</param>
-        /// <param name="price">Price to set the order at</param>
-        /// <param name="quantity">Quantity of none base currency to trade with</param>
-        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        /// <param name="pair">TradingPair.</param>
+        /// <param name="price">Price to set the order at.</param>
+        /// <param name="quantity">Quantity of none base currency to trade with.</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceStoplossBuy(TradingPair pair, decimal price, decimal quantity)
         {
             var currency = pair.Right;
@@ -286,11 +286,11 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Place a sell stoploss order with the full allocation
+        /// Place a sell stoploss order with the full allocation.
         /// </summary>
-        /// <param name="pair">Trading pair</param>
-        /// <param name="price">Price to set the order at</param>
-        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        /// <param name="pair">Trading pair.</param>
+        /// <param name="price">Price to set the order at.</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceFullStoplossSell(TradingPair pair, decimal price)
         {
             var currency = pair.Left;
@@ -299,11 +299,11 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Place a buy stoploss order with the full allocation
+        /// Place a buy stoploss order with the full allocation.
         /// </summary>
-        /// <param name="pair">Trading pair</param>
-        /// <param name="price">Price to set the order at</param>
-        /// <returns>ResponseObject containing an OrderUpdate</returns>
+        /// <param name="pair">Trading pair.</param>
+        /// <param name="price">Price to set the order at.</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public ResponseObject<OrderUpdate> PlaceFullStoplossBuy(TradingPair pair, decimal price)
         {
             var currency = pair.Right;
@@ -312,11 +312,11 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Cancels order
+        /// Cancels order.
         /// </summary>
-        /// <param name="pair">Trading pair in which the order is found</param>
-        /// <param name="orderId">Id of the order</param>
-        /// <returns>A response object with the results of the action</returns>
+        /// <param name="pair">Trading pair in which the order is found.</param>
+        /// <param name="orderId">Id of the order.</param>
+        /// <returns>A response object with the results of the action.</returns>
         public ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
             var order = _implementation.GetOrderInfo(pair, orderId).Data;
@@ -344,11 +344,11 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Get the info of an order
+        /// Get the info of an order.
         /// </summary>
-        /// <param name="pair">The TradingPair to consider</param>
-        /// <param name="orderId">The order id related</param>
-        /// <returns>OrderUpdate object containing the state of the order</returns>
+        /// <param name="pair">The TradingPair to consider.</param>
+        /// <param name="orderId">The order id related.</param>
+        /// <returns>OrderUpdate object containing the state of the order.</returns>
         public ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
         {
             return _implementation.GetOrderInfo(pair, orderId);
@@ -362,9 +362,9 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Dispose the TradingProvider
+        /// Dispose the TradingProvider.
         /// </summary>
-        /// <param name="disposing">Actually dispose it</param>
+        /// <param name="disposing">Actually dispose it.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)

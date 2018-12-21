@@ -5,15 +5,15 @@ namespace SpreadShare.SupportServices
 {
     /// <summary>
     /// Database context that is connected to PostgreSQL
-    /// This class defines the tables in the database using DBSets
+    /// This class defines the tables in the database using DBSets.
     /// </summary>
     internal class DatabaseContext : DbContext
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseContext"/> class.
-        /// This empty constructor is required for instantiation
+        /// This empty constructor is required for instantiation.
         /// </summary>
-        /// <param name="options">Configuration options</param>
+        /// <param name="options">Configuration options.</param>
         public DatabaseContext(DbContextOptions options)
             : base(options)
         {
@@ -30,7 +30,7 @@ namespace SpreadShare.SupportServices
         public DbSet<DatabaseTrade> Trades { get; set; }
 
         /// <summary>
-        /// Gets or sets the state switch events
+        /// Gets or sets the state switch events.
         /// </summary>
         public DbSet<StateSwitchEvent> StateSwitchEvents { get; set; }
     }

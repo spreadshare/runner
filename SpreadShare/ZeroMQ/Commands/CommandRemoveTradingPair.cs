@@ -3,7 +3,7 @@
 namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to remove a trading pair
+    /// Command to remove a trading pair.
     /// </summary>
     internal class CommandRemoveTradingPair : Command
     {

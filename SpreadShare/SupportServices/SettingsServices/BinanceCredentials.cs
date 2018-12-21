@@ -1,17 +1,17 @@
 namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
-    /// Object containing the credentials for an exchange
+    /// Object containing the credentials for an exchange.
     /// </summary>
     internal class BinanceCredentials
     {
         /// <summary>
-        /// Gets or sets the API key
+        /// Gets or sets the API key.
         /// </summary>
         public string Key { get; set; }
 
         /// <summary>
-        /// Gets or sets the API secret
+        /// Gets or sets the API secret.
         /// </summary>
         public string Secret { get; set; }
     }

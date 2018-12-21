@@ -8,7 +8,7 @@ using SpreadShare.Models;
 namespace SpreadShare.ZeroMQ
 {
     /// <summary>
-    /// Service for receiving and sending ZeroMQ messages
+    /// Service for receiving and sending ZeroMQ messages.
     /// </summary>
     internal class ZeroMqService : IZeroMqService
     {
@@ -17,9 +17,9 @@ namespace SpreadShare.ZeroMQ
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ZeroMqService"/> class.
-        /// Provides loggers to concrete commands
+        /// Provides loggers to concrete commands.
         /// </summary>
-        /// <param name="loggerFactory">LoggerFactory for creating loggers</param>
+        /// <param name="loggerFactory">LoggerFactory for creating loggers.</param>
         public ZeroMqService(ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
@@ -27,9 +27,9 @@ namespace SpreadShare.ZeroMQ
         }
 
         /// <summary>
-        /// Start both threads
+        /// Start both threads.
         /// </summary>
-        /// <returns>Whether the service started successfully</returns>
+        /// <returns>Whether the service started successfully.</returns>
         public ResponseObject Start()
         {
             Thread broadcastService = new Thread(StartBroadcastService);
@@ -42,7 +42,7 @@ namespace SpreadShare.ZeroMQ
         }
 
         /// <summary>
-        /// Start pub-sub publisher for broadcasting status and holdtime
+        /// Start pub-sub publisher for broadcasting status and holdtime.
         /// </summary>
         private void StartBroadcastService()
         {
@@ -61,7 +61,7 @@ namespace SpreadShare.ZeroMQ
         }
 
         /// <summary>
-        /// Start req-rep listener for commands
+        /// Start req-rep listener for commands.
         /// </summary>
         private void StartCommandReceiver()
         {

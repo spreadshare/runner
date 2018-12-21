@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to add a trading pair
+    /// Command to add a trading pair.
     /// </summary>
     internal class CommandAddTradingpair : Command
     {

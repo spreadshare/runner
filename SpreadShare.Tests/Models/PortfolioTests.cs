@@ -8,21 +8,21 @@ using Xunit.Abstractions;
 namespace SpreadShare.Tests.Models
 {
     /// <summary>
-    /// Test collection for the portfolio model
+    /// Test collection for the portfolio model.
     /// </summary>
     public class PortfolioTests : BaseTest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PortfolioTests"/> class.
         /// </summary>
-        /// <param name="outputHelper">Generates output</param>
+        /// <param name="outputHelper">Generates output.</param>
         public PortfolioTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
         }
 
         /// <summary>
-        /// Tests valid parsing of values after the constructor
+        /// Tests valid parsing of values after the constructor.
         /// </summary>
         [Fact]
         public void ConstructorHappyFlow()
@@ -63,13 +63,13 @@ namespace SpreadShare.Tests.Models
         }
 
         /// <summary>
-        /// Tests a number of cases to see of adding to portfolio adds the balances correctly
+        /// Tests a number of cases to see of adding to portfolio adds the balances correctly.
         /// </summary>
-        /// <param name="currency">Currency</param>
-        /// <param name="free1">Free balance for the first</param>
-        /// <param name="locked1">Locked balance for the first</param>
-        /// <param name="free2">Free balance for the second</param>
-        /// <param name="locked2">Locked balance for the second</param>
+        /// <param name="currency">Currency.</param>
+        /// <param name="free1">Free balance for the first.</param>
+        /// <param name="locked1">Locked balance for the first.</param>
+        /// <param name="free2">Free balance for the second.</param>
+        /// <param name="locked2">Locked balance for the second.</param>
         [Theory]
         [InlineData("ETH", 1.0, 0.0, 3.0, 5.0)]
         [InlineData("BTC", 0.000002, -4, 9943043.234, -343.232)]
@@ -287,7 +287,7 @@ namespace SpreadShare.Tests.Models
         }
 
         /// <summary>
-        /// Tests if the difference between to portfolios is correct
+        /// Tests if the difference between to portfolios is correct.
         /// </summary>
         [Fact]
         public void BalancesAreSubtractedHappyFlow()

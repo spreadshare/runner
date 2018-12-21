@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 namespace SpreadShare.Tests
 {
     /// <summary>
-    /// Base class for tests
+    /// Base class for tests.
     /// </summary>
     public abstract class BaseTest
     {
@@ -20,7 +20,7 @@ namespace SpreadShare.Tests
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseTest"/> class.
         /// </summary>
-        /// <param name="outputHelper">Output helper that writes to TestOutput</param>
+        /// <param name="outputHelper">Output helper that writes to TestOutput.</param>
         protected BaseTest(ITestOutputHelper outputHelper)
         {
             LoggerFactory = (ILoggerFactory)ServiceProviderSingleton.Instance
@@ -31,22 +31,22 @@ namespace SpreadShare.Tests
         }
 
         /// <summary>
-        /// Gets logging
+        /// Gets logging.
         /// </summary>
         protected ILogger Logger { get; }
 
         /// <summary>
-        /// Gets the logging factory
+        /// Gets the logging factory.
         /// </summary>
         protected ILoggerFactory LoggerFactory { get; }
 
         /// <summary>
-        /// Gets logging provider
+        /// Gets logging provider.
         /// </summary>
         protected TestLoggingProvider TestLoggingProvider { get; }
 
         /// <summary>
-        /// Keep the application running
+        /// Keep the application running.
         /// </summary>
         protected static void KeepRunningForever()
         {

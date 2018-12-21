@@ -22,8 +22,8 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceCommunicationsService"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Used to create a logger to create output</param>
-        /// <param name="settings">Used to extract the binance settings</param>
+        /// <param name="loggerFactory">Used to create a logger to create output.</param>
+        /// <param name="settings">Used to extract the binance settings.</param>
         public BinanceCommunicationsService(ILoggerFactory loggerFactory, SettingsService settings)
         {
             _logger = loggerFactory.CreateLogger(GetType());
@@ -32,12 +32,12 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Gets the instance of the binance client
+        /// Gets the instance of the binance client.
         /// </summary>
         public BinanceClient Client { get; private set; }
 
         /// <summary>
-        /// Gets the instance of the binance user socket
+        /// Gets the instance of the binance user socket.
         /// </summary>
         public BinanceSocketClient Socket { get; private set; }
 
@@ -49,9 +49,9 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Disposes the current object's resource
+        /// Disposes the current object's resource.
         /// </summary>
-        /// <param name="disposing">Whether to dispose the resources of the object</param>
+        /// <param name="disposing">Whether to dispose the resources of the object.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -78,7 +78,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Enable streams for 24 hours
+        /// Enable streams for 24 hours.
         /// </summary>
         private void EnableStreams()
         {

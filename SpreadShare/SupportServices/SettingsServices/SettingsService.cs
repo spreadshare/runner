@@ -20,7 +20,7 @@ using SpreadShare.Utilities;
 namespace SpreadShare.SupportServices.SettingsServices
 {
     /// <summary>
-    /// Service for managing settings
+    /// Service for managing settings.
     /// </summary>
     internal class SettingsService
     {
@@ -32,9 +32,9 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsService"/> class.
         /// </summary>
-        /// <param name="configuration">Configuration of the application</param>
-        /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        /// <param name="databaseContext">The database context</param>
+        /// <param name="configuration">Configuration of the application.</param>
+        /// <param name="loggerFactory">LoggerFactory for creating a logger.</param>
+        /// <param name="databaseContext">The database context.</param>
         public SettingsService(IConfiguration configuration, ILoggerFactory loggerFactory, DatabaseContext databaseContext)
         {
             _configuration = configuration;
@@ -44,12 +44,12 @@ namespace SpreadShare.SupportServices.SettingsServices
         }
 
         /// <summary>
-        /// Gets the binance settings
+        /// Gets the binance settings.
         /// </summary>
         public Dictionary<Exchange, Dictionary<Type, decimal>> AllocationSettings { get; private set; }
 
         /// <summary>
-        /// Gets the algorithms that are enabled by having allocation
+        /// Gets the algorithms that are enabled by having allocation.
         /// </summary>
         public List<Type> EnabledAlgorithms => (from e in AllocationSettings
                                                 from allocation in e.Value
@@ -57,12 +57,12 @@ namespace SpreadShare.SupportServices.SettingsServices
                                                 select allocation.Key).ToList();
 
         /// <summary>
-        /// Gets the binance settings
+        /// Gets the binance settings.
         /// </summary>
         public BinanceSettings BinanceSettings { get; private set; }
 
         /// <summary>
-        /// Gets the settings for the backtests
+        /// Gets the settings for the backtests.
         /// </summary>
         public BacktestSettings BackTestSettings { get; private set; }
 
@@ -70,10 +70,10 @@ namespace SpreadShare.SupportServices.SettingsServices
             _algorithmSettingsLookup.Values.First(x => x.Exchange == Exchange.Backtesting);
 
         /// <summary>
-        /// Returns the settings instance given a particular Algorithm type
+        /// Returns the settings instance given a particular Algorithm type.
         /// </summary>
-        /// <param name="algo">Type of the algorithm</param>
-        /// <returns>AlgorithmSettings of algo</returns>
+        /// <param name="algo">Type of the algorithm.</param>
+        /// <returns>AlgorithmSettings of algo.</returns>
         public AlgorithmSettings GetAlgorithSettings(Type algo)
         {
             Guard.Argument(algo).Require(Reflections.IsAlgorithm);
@@ -81,7 +81,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         }
 
         /// <summary>
-        /// Starts the settings service
+        /// Starts the settings service.
         /// </summary>
         public void Start()
         {
@@ -110,7 +110,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         }
 
         /// <summary>
-        /// Download all currencies from Binance
+        /// Download all currencies from Binance.
         /// </summary>
         private void DownloadCurrencies()
         {
@@ -179,7 +179,7 @@ namespace SpreadShare.SupportServices.SettingsServices
         }
 
         /// <summary>
-        /// Uses reflections to match any class implement BaseStrategy with its AlgorithmSettings
+        /// Uses reflections to match any class implement BaseStrategy with its AlgorithmSettings.
         /// </summary>
         private void ParseAlgorithmSettings()
         {

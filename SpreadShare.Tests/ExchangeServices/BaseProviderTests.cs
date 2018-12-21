@@ -5,19 +5,19 @@ using Xunit.Abstractions;
 namespace SpreadShare.Tests.ExchangeServices
 {
     /// <summary>
-    /// Setup and start exchange factory
+    /// Setup and start exchange factory.
     /// </summary>
     public abstract class BaseProviderTests : BaseTest
     {
         /// <summary>
-        /// Link to the exchange factory service
+        /// Link to the exchange factory service.
         /// </summary>
         internal ExchangeFactoryService ExchangeFactoryService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseProviderTests"/> class.
         /// </summary>
-        /// <param name="outputHelper">Used to create output</param>
+        /// <param name="outputHelper">Used to create output.</param>
         public BaseProviderTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {

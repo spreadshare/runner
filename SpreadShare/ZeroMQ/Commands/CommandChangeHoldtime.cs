@@ -3,7 +3,7 @@
 namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to change the HoldTime
+    /// Command to change the HoldTime.
     /// </summary>
     internal class CommandChangeHoldtime : Command
     {

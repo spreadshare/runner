@@ -1,7 +1,7 @@
 ﻿namespace SpreadShare.Models
 {
     /// <summary>
-    /// Object representation of the code of the response to an action
+    /// Object representation of the code of the response to an action.
     /// </summary>
     /// TODO: Should this not be called ResponseStatus?
     internal enum ResponseCode

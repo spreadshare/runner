@@ -9,21 +9,21 @@ using SpreadShare.Algorithms;
 namespace SpreadShare.Utilities
 {
     /// <summary>
-    /// Static utility functions regarding reflections
+    /// Static utility functions regarding reflections.
     /// </summary>
     internal static class Reflections
     {
         /// <summary>
-        /// Gets a one time initialized property for the assembly
+        /// Gets a one time initialized property for the assembly.
         /// </summary>
         private static Assembly ThisAssembly { get; } = Array.Find(AppDomain.CurrentDomain.GetAssemblies(), assembly
             => assembly.ManifestModule.Name.Contains("SpreadShare.dll", StringComparison.InvariantCulture));
 
         /// <summary>
-        /// Fetches a collection of types which are explicit subtypes of the given abstract type
+        /// Fetches a collection of types which are explicit subtypes of the given abstract type.
         /// </summary>
-        /// <param name="abstraction">Base type</param>
-        /// <returns>All implementations of given base type</returns>
+        /// <param name="abstraction">Base type.</param>
+        /// <returns>All implementations of given base type.</returns>
         public static IEnumerable<Type> GetAllSubtypes(Type abstraction)
         {
             Guard.Argument(abstraction).Require(
@@ -35,10 +35,10 @@ namespace SpreadShare.Utilities
         }
 
         /// <summary>
-        /// Fetches a collection of types which are explicit implementations of the given interface
+        /// Fetches a collection of types which are explicit implementations of the given interface.
         /// </summary>
-        /// <param name="abstraction">Type of the interface</param>
-        /// <returns>All implementations of a given interface</returns>
+        /// <param name="abstraction">Type of the interface.</param>
+        /// <returns>All implementations of a given interface.</returns>
         public static IEnumerable<Type> GetAllImplementations(Type abstraction)
         {
             Guard.Argument(abstraction).Require(
@@ -50,19 +50,19 @@ namespace SpreadShare.Utilities
         }
 
         /// <summary>
-        /// Check whether a type implements IBaseAlgorithm
+        /// Check whether a type implements IBaseAlgorithm.
         /// </summary>
-        /// <param name="t">Type to check</param>
-        /// <returns>Whether the provided type is an algorithm</returns>
+        /// <param name="t">Type to check.</param>
+        /// <returns>Whether the provided type is an algorithm.</returns>
         public static bool IsAlgorithm(Type t)
         {
             return t.GetInterfaces().Contains(typeof(IBaseAlgorithm));
         }
 
         /// <summary>
-        /// Get a dictionary of classes with class name
+        /// Get a dictionary of classes with class name.
         /// </summary>
-        /// <returns>Dictionary of classes with class name</returns>
+        /// <returns>Dictionary of classes with class name.</returns>
         public static Dictionary<string, TypeInfo> GetClasses()
         {
             // Get all defined classes

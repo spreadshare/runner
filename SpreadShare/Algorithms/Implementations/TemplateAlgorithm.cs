@@ -6,7 +6,7 @@ using SpreadShare.SupportServices.SettingsServices;
 namespace SpreadShare.Algorithms.Implementations
 {
     /// <summary>
-    /// Stud algorithm, used for testing
+    /// Stud algorithm, used for testing.
     /// </summary>
     internal class TemplateAlgorithm : BaseAlgorithm<TemplateAlgorithmSettings>
     {
@@ -22,7 +22,7 @@ namespace SpreadShare.Algorithms.Implementations
     }
 
     /// <summary>
-    /// Stud algorithm settings, used for testing
+    /// Stud algorithm settings, used for testing.
     /// </summary>
     internal class TemplateAlgorithmSettings : AlgorithmSettings
     {

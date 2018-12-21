@@ -22,8 +22,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <summary>
         /// Initializes a new instance of the <see cref="AllocationManager"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Provides logger instance</param>
-        /// <param name="portfolioFetcherService">Provides portfolio fetching capabilities</param>
+        /// <param name="loggerFactory">Provides logger instance.</param>
+        /// <param name="portfolioFetcherService">Provides portfolio fetching capabilities.</param>
         public AllocationManager(ILoggerFactory loggerFactory, IPortfolioFetcherService portfolioFetcherService)
         {
             _logger = loggerFactory.CreateLogger<AllocationManager>();
@@ -34,7 +34,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <summary>
         /// Sets initial configuration of allocations per algorithm.
         /// </summary>
-        /// <param name="initialAllocations">Initial set of allocations</param>
+        /// <param name="initialAllocations">Initial set of allocations.</param>
         public void SetInitialConfiguration(Dictionary<Exchange, Dictionary<Type, decimal>> initialAllocations)
         {
             // Make sure AllocationManager is not already configured
@@ -72,11 +72,11 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <summary>
-        /// Gives the entire portfolio of a certain algorithm on a certain exchange
+        /// Gives the entire portfolio of a certain algorithm on a certain exchange.
         /// </summary>
-        /// <param name="exchange">The exchange in question</param>
-        /// <param name="algorithm">The algorithm in question</param>
-        /// <returns>Portfolio containing all available funds</returns>
+        /// <param name="exchange">The exchange in question.</param>
+        /// <param name="algorithm">The algorithm in question.</param>
+        /// <returns>Portfolio containing all available funds.</returns>
         public Portfolio GetAllFunds(Exchange exchange, Type algorithm)
         {
             Guard.Argument(_allocations).NotNull("Initialise allocations first");
@@ -87,10 +87,10 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <summary>
         /// Get available funds for a given algorithm and currency.
         /// </summary>
-        /// <param name="exchange">Exchange to trade on</param>
-        /// <param name="algorithm">Algorithm to get funds for</param>
-        /// <param name="currency">Currency to get funds for</param>
-        /// <returns>Available funds or -1 if not available</returns>
+        /// <param name="exchange">Exchange to trade on.</param>
+        /// <param name="algorithm">Algorithm to get funds for.</param>
+        /// <param name="currency">Currency to get funds for.</param>
+        /// <returns>Available funds or -1 if not available.</returns>
         public Balance GetAvailableFunds(Exchange exchange, Type algorithm, Currency currency)
         {
             Guard.Argument(_allocations).NotNull("Initialise allocations first");
@@ -120,11 +120,11 @@ namespace SpreadShare.ExchangeServices.Allocation
         }
 
         /// <summary>
-        /// Updates the allocation of a given algorithm, on a certain exchange given a trade execution
+        /// Updates the allocation of a given algorithm, on a certain exchange given a trade execution.
         /// </summary>
-        /// <param name="exchange">The exchange to represent</param>
-        /// <param name="algo">The algorithm to represent</param>
-        /// <param name="exec">The trade execution to process</param>
+        /// <param name="exchange">The exchange to represent.</param>
+        /// <param name="algo">The algorithm to represent.</param>
+        /// <param name="exec">The trade execution to process.</param>
         public void UpdateAllocation(Exchange exchange, Type algo, TradeExecution exec)
         {
             _allocations[exchange].ApplyTradeExecution(algo, exec);
@@ -134,9 +134,9 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <summary>
         /// Gets a weakened version of allocation manager for the trading provider.
         /// </summary>
-        /// <param name="algorithm">The algorithm to represent</param>
-        /// <param name="exchange">The exchange to represent</param>
-        /// <returns>Weakened version of allocation manager</returns>
+        /// <param name="algorithm">The algorithm to represent.</param>
+        /// <param name="exchange">The exchange to represent.</param>
+        /// <returns>Weakened version of allocation manager.</returns>
         public WeakAllocationManager GetWeakAllocationManager(Type algorithm, Exchange exchange)
             => new WeakAllocationManager(this, algorithm, exchange);
 
@@ -144,11 +144,11 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// Queue a trade based on a proposal, the callback must return the trade execution
         /// which will be used to update the allocation.
         /// </summary>
-        /// <param name="p">TradeProposal to be verified</param>
-        /// <param name="algorithm">The algorithm in question</param>
-        /// <param name="exchange">The exchange in question</param>
-        /// <param name="tradeCallback">Trade callback to be executed if verification was successful</param>
-        /// <returns>Boolean indicating successful execution of the callback</returns>
+        /// <param name="p">TradeProposal to be verified.</param>
+        /// <param name="algorithm">The algorithm in question.</param>
+        /// <param name="exchange">The exchange in question.</param>
+        /// <param name="tradeCallback">Trade callback to be executed if verification was successful.</param>
+        /// <returns>Boolean indicating successful execution of the callback.</returns>
         public bool QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<TradeExecution> tradeCallback)
         {
             Guard.Argument(_allocations).NotNull("Initialise allocations first");

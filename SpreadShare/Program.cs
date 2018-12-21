@@ -12,7 +12,7 @@ using SpreadShare.SupportServices.SettingsServices;
 namespace SpreadShare
 {
     /// <summary>
-    /// Entrypoint of the application
+    /// Entrypoint of the application.
     /// </summary>
     internal static class Program
     {
@@ -20,15 +20,15 @@ namespace SpreadShare
         private static ILoggerFactory _loggerFactory;
 
         /// <summary>
-        /// Gets the instance of the CommandLineArgs
+        /// Gets the instance of the CommandLineArgs.
         /// </summary>
         public static CommandLineArgs CommandLineArgs => _commandLineArgs;
 
         /// <summary>
-        /// Entrypoint of the application
+        /// Entrypoint of the application.
         /// </summary>
-        /// <param name="args">The command line arguments</param>
-        /// <returns>Status code</returns>
+        /// <param name="args">The command line arguments.</param>
+        /// <returns>Status code.</returns>
         public static int Main(string[] args)
         {
             // Bind command line args to local variable.
@@ -62,9 +62,9 @@ namespace SpreadShare
         }
 
         /// <summary>
-        /// Cause the Main() to return with a given status code
+        /// Cause the Main() to return with a given status code.
         /// </summary>
-        /// <param name="statusCode">Status code</param>
+        /// <param name="statusCode">Status code.</param>
         public static void ExitProgramWithCode(int statusCode)
         {
             // Flush the logs by disposing the factory
@@ -73,11 +73,11 @@ namespace SpreadShare
         }
 
         /// <summary>
-        /// Start business services
+        /// Start business services.
         /// </summary>
-        /// <param name="serviceProvider">Service provider</param>
-        /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
-        /// <returns>Boolean indicating success</returns>
+        /// <param name="serviceProvider">Service provider.</param>
+        /// <param name="loggerFactory">LoggerFactory for creating a logger.</param>
+        /// <returns>Boolean indicating success.</returns>
         private static bool ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
@@ -128,9 +128,9 @@ namespace SpreadShare
         }
 
         /// <summary>
-        /// Keep the application running
+        /// Keep the application running.
         /// </summary>
-        /// <returns>exit code</returns>
+        /// <returns>exit code.</returns>
         private static int KeepRunningForever()
         {
             Thread t = new Thread(() =>

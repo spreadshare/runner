@@ -15,13 +15,13 @@ using SpreadShare.SupportServices.SettingsServices;
 namespace SpreadShare
 {
     /// <summary>
-    /// Startup object for assigning and configuring all services
+    /// Startup object for assigning and configuring all services.
     /// </summary>
     internal class Startup : IDesignTimeDbContextFactory<DatabaseContext>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Startup"/> class.
-        /// Empty constructor, visited by EF core cli tools
+        /// Empty constructor, visited by EF core cli tools.
         /// </summary>
         public Startup()
         {
@@ -32,9 +32,9 @@ namespace SpreadShare
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Startup"/> class.
-        /// Sets configuration
+        /// Sets configuration.
         /// </summary>
-        /// <param name="filepath">Location of the configuration file</param>
+        /// <param name="filepath">Location of the configuration file.</param>
         public Startup(string filepath)
         {
             Configuration = new ConfigurationBuilder()
@@ -43,14 +43,14 @@ namespace SpreadShare
         }
 
         /// <summary>
-        /// Gets the configuration of the application
+        /// Gets the configuration of the application.
         /// </summary>
         public IConfiguration Configuration { get; }
 
         /// <summary>
-        /// Configure business logic services such as fetching exchange data
+        /// Configure business logic services such as fetching exchange data.
         /// </summary>
-        /// <param name="services">Collection of services</param>
+        /// <param name="services">Collection of services.</param>
         public static void ConfigureBusinessServices(IServiceCollection services)
         {
             // Exchange Factory dependency
@@ -69,10 +69,10 @@ namespace SpreadShare
         }
 
         /// <summary>
-        /// Additional configuration after all have been configured
+        /// Additional configuration after all have been configured.
         /// </summary>
-        /// <param name="serviceProvider">Provides access to configured services</param>
-        /// <param name="loggerFactory">LoggerFactory for creating a logger</param>
+        /// <param name="serviceProvider">Provides access to configured services.</param>
+        /// <param name="loggerFactory">LoggerFactory for creating a logger.</param>
         public static void Configure(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
@@ -90,9 +90,9 @@ namespace SpreadShare
         }
 
         /// <summary>
-        /// Configure support services such as databases and logging
+        /// Configure support services such as databases and logging.
         /// </summary>
-        /// <param name="services">Collection of services</param>
+        /// <param name="services">Collection of services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
             // Add Database context dependency
@@ -121,10 +121,10 @@ namespace SpreadShare
         }
 
         /// <summary>
-        /// Creates database context
+        /// Creates database context.
         /// </summary>
-        /// <param name="args">Arguments for creating database context</param>
-        /// <returns>DatabaseContext</returns>
+        /// <param name="args">Arguments for creating database context.</param>
+        /// <returns>DatabaseContext.</returns>
         public DatabaseContext CreateDbContext(string[] args)
         {
             // Add Database context dependency

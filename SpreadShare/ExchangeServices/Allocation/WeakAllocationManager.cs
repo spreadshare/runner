@@ -15,9 +15,9 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <summary>
         /// Initializes a new instance of the <see cref="WeakAllocationManager"/> class.
         /// </summary>
-        /// <param name="allocationManager">Instance of AllocationManager</param>
-        /// <param name="algorithm">The algorithm to represent</param>
-        /// <param name="exchange">The exchange to represent</param>
+        /// <param name="allocationManager">Instance of AllocationManager.</param>
+        /// <param name="algorithm">The algorithm to represent.</param>
+        /// <param name="exchange">The exchange to represent.</param>
         public WeakAllocationManager(AllocationManager allocationManager, Type algorithm, Exchange exchange)
         {
             _allocationManager = allocationManager;
@@ -28,22 +28,22 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <summary>
         /// Get available funds for a given algorithm and currency.
         /// </summary>
-        /// <param name="currency">Currency to get funds for</param>
-        /// <returns>Available funds or -1 if not available</returns>
+        /// <param name="currency">Currency to get funds for.</param>
+        /// <returns>Available funds or -1 if not available.</returns>
         public Balance GetAvailableFunds(Currency currency)
             => _allocationManager.GetAvailableFunds(_exchange, _algorithm, currency);
 
         /// <summary>
         /// Get all available funds as portfolio.
         /// </summary>
-        /// <returns>Portfolio containing available funds</returns>
+        /// <returns>Portfolio containing available funds.</returns>
         public Portfolio GetAllFunds()
             => _allocationManager.GetAllFunds(_exchange, _algorithm);
 
         /// <summary>
-        /// Updates the allocation given an trade execution
+        /// Updates the allocation given an trade execution.
         /// </summary>
-        /// <param name="exec">Trade Execution</param>
+        /// <param name="exec">Trade Execution.</param>
         public void UpdateAllocation(TradeExecution exec)
             => _allocationManager.UpdateAllocation(_exchange, _algorithm, exec);
 
@@ -51,9 +51,9 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// Queue a trade based on a proposal, the callback must return the trade execution
         /// which will be used to update the allocation.
         /// </summary>
-        /// <param name="p">TradeProposal to be verified</param>
-        /// <param name="tradeCallback">Trade callback to be executed if verification was succesful</param>
-        /// <returns>Boolean indicating succesful execution</returns>
+        /// <param name="p">TradeProposal to be verified.</param>
+        /// <param name="tradeCallback">Trade callback to be executed if verification was succesful.</param>
+        /// <returns>Boolean indicating succesful execution.</returns>
         public bool QueueTrade(TradeProposal p, Func<TradeExecution> tradeCallback)
             => _allocationManager.QueueTrade(p, _algorithm, _exchange, tradeCallback);
     }

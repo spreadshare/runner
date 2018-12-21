@@ -1,21 +1,21 @@
 ﻿namespace SpreadShare.Models.Trading
 {
     /// <summary>
-    /// Return value of websockets
+    /// Return value of websockets.
     /// </summary>
     internal class OrderUpdate
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="OrderUpdate"/> class.
         /// </summary>
-        /// <param name="tradeId">The id of the trade</param>
-        /// <param name="orderType">The type of the order</param>
-        /// <param name="createdTimeStamp">The timestamp at which the order is created</param>
-        /// <param name="setPrice">SetPrice at which the order was set</param>
-        /// <param name="side">Side of the order</param>
-        /// <param name="pair">The pair of order</param>
-        /// <param name="setQuantity">The quantity of the order</param>
-        /// <param name="orderId">The unique id of the order</param>
+        /// <param name="tradeId">The id of the trade.</param>
+        /// <param name="orderType">The type of the order.</param>
+        /// <param name="createdTimeStamp">The timestamp at which the order is created.</param>
+        /// <param name="setPrice">SetPrice at which the order was set.</param>
+        /// <param name="side">Side of the order.</param>
+        /// <param name="pair">The pair of order.</param>
+        /// <param name="setQuantity">The quantity of the order.</param>
+        /// <param name="orderId">The unique id of the order.</param>
         public OrderUpdate(
             long orderId,
             long tradeId,
@@ -42,7 +42,7 @@
         }
 
         /// <summary>
-        /// The status of an order
+        /// The status of an order.
         /// </summary>
         public enum OrderStatus
         {
@@ -83,7 +83,7 @@
         }
 
         /// <summary>
-        /// Type of the order
+        /// Type of the order.
         /// </summary>
         public enum OrderTypes
         {
@@ -124,27 +124,27 @@
         }
 
         /// <summary>
-        /// Gets the unique id of the order
+        /// Gets the unique id of the order.
         /// </summary>
         public long OrderId { get; }
 
         /// <summary>
-        /// Gets the id of the accompanying trade
+        /// Gets the id of the accompanying trade.
         /// </summary>
         public long TradeId { get; }
 
         /// <summary>
-        /// Gets the type fo the order
+        /// Gets the type fo the order.
         /// </summary>
         public OrderTypes OrderType { get; }
 
         /// <summary>
-        /// Gets the timestamp at which the order was created
+        /// Gets the timestamp at which the order was created.
         /// </summary>
         public long CreatedTimeStamp { get; }
 
         /// <summary>
-        /// Gets or sets the timestamp at which the order was filled
+        /// Gets or sets the timestamp at which the order was filled.
         /// </summary>
         public long FilledTimeStamp { get; set; }
 
@@ -169,22 +169,22 @@
         public OrderSide Side { get; }
 
         /// <summary>
-        /// Gets or sets the status of the order
+        /// Gets or sets the status of the order.
         /// </summary>
         public OrderStatus Status { get; set; }
 
         /// <summary>
-        /// Gets the trading pair of the order
+        /// Gets the trading pair of the order.
         /// </summary>
         public TradingPair Pair { get; }
 
         /// <summary>
-        /// Gets the total setQuantity of the order
+        /// Gets the total setQuantity of the order.
         /// </summary>
         public decimal SetQuantity { get; }
 
         /// <summary>
-        /// Gets or sets the total filledQuantity of the order
+        /// Gets or sets the total filledQuantity of the order.
         /// </summary>
         public decimal FilledQuantity { get; set; }
 
