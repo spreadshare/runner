@@ -404,6 +404,12 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private void UpdateAllocation(OrderUpdate order)
         {
+            // Skip untracked orders
+            if (_openOrders.All(o => o.OrderId != order.OrderId))
+            {
+                return;
+            }
+ 
             TradeExecution exec;
             if (order.Side == OrderSide.Buy)
             {
