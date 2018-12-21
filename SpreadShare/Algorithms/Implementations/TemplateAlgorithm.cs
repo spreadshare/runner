@@ -5,7 +5,6 @@ using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.SupportServices.SettingsServices;
 
 #pragma warning disable SA1402
-#pragma warning disable
 
 namespace SpreadShare.Algorithms.Implementations
 {
@@ -19,15 +18,15 @@ namespace SpreadShare.Algorithms.Implementations
 
         private class WelcomeState : EntryState<TemplateAlgorithmSettings>
         {
+            public override State<TemplateAlgorithmSettings> OnTimerElapsed()
+            {
+                return new TemplateState();
+            }
+
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 Logger.LogInformation("Welcome to the TemplateAlgorithm");
                 SetTimer(TimeSpan.Zero);
-            }
-
-            public override State<TemplateAlgorithmSettings> OnTimerElapsed()
-            {
-                return new TemplateState();
             }
         }
 
@@ -50,4 +49,3 @@ namespace SpreadShare.Algorithms.Implementations
 }
 
 #pragma warning restore SA1402
-#pragma warning restore
