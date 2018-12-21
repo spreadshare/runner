@@ -19,6 +19,6 @@
         /// <summary>
         /// The action was successful
         /// </summary>
-        Success
+        Success,
     }
 }

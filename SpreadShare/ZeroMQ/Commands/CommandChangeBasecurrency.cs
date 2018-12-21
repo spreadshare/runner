@@ -13,7 +13,7 @@ namespace SpreadShare.ZeroMQ.Commands
         /// <inheritdoc />
         protected override Dictionary<string, string> Arguments => new Dictionary<string, string>()
         {
-            { "arg_currency", null }
+            { "arg_currency", null },
         };
 
         /// <inheritdoc />

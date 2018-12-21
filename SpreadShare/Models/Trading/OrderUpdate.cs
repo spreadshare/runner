@@ -120,7 +120,7 @@
             /// <summary>
             /// A limit maker order
             /// </summary>
-            LimitMaker
+            LimitMaker,
         }
 
         /// <summary>

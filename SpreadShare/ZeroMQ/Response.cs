@@ -54,7 +54,7 @@ namespace SpreadShare.ZeroMQ
             /// Action executed successfully
             /// </summary>
             [EnumMember(Value = "success")]
-            Success
+            Success,
         }
 
         /// <summary>

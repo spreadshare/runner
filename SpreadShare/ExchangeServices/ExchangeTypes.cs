@@ -13,6 +13,6 @@
         /// <summary>
         /// Backtesting for all exchanges
         /// </summary>
-        Backtesting
+        Backtesting,
     }
 }

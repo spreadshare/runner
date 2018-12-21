@@ -128,7 +128,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             string data = JsonConvert.SerializeObject(new
             {
                 BeginTime = _timer.BeginTime.ToUnixTimeMilliseconds(),
-                EndTime = _timer.EndTime.ToUnixTimeMilliseconds()
+                EndTime = _timer.EndTime.ToUnixTimeMilliseconds(),
             });
 
             WriteAllText(filepath, data);

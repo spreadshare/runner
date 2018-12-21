@@ -113,7 +113,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                     TradingPair.Parse(orderInfoUpdate.Symbol),
                     orderInfoUpdate.Quantity)
                 {
-                    Status = BinanceUtilities.ToInternal(orderInfoUpdate.Status)
+                    Status = BinanceUtilities.ToInternal(orderInfoUpdate.Status),
                 }));
 
             // Set error handlers
