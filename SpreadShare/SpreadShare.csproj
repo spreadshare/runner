@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Binance.Net" Version="3.3.0" />
+    <PackageReference Include="Binance.Net" Version="4.0.3" />
     <PackageReference Include="CommandLineParser" Version="2.3.0" />
     <PackageReference Include="Cron" Version="1.0.2" />
     <PackageReference Include="Dawn.Guard" Version="1.6.0" />
