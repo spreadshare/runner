@@ -1,7 +1,7 @@
-﻿namespace SpreadShare.ZeroMQ.Commands
+namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to revert to the base currency immediately
+    /// Command to revert to the base currency immediately.
     /// </summary>
     internal class CommandRevertBaseCurrency : Command
     {

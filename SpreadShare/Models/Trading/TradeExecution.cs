@@ -8,8 +8,8 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Initializes a new instance of the <see cref="TradeExecution"/> class.
         /// </summary>
-        /// <param name="from">The asset value on the left side of the trade</param>
-        /// <param name="to">The asset value on the right side of the trade</param>
+        /// <param name="from">The asset value on the left side of the trade.</param>
+        /// <param name="to">The asset value on the right side of the trade.</param>
         public TradeExecution(Balance from, Balance to)
         {
             From = from;
@@ -17,12 +17,12 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Gets the left side of the executed trade
+        /// Gets the left side of the executed trade.
         /// </summary>
         public Balance From { get; }
 
         /// <summary>
-        /// Gets the right side of the executed trade
+        /// Gets the right side of the executed trade.
         /// </summary>
         public Balance To { get; }
     }

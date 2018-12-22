@@ -21,9 +21,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestTimerProvider"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Used to create output</param>
-        /// <param name="database">The database context for flushing</param>
-        /// <param name="settings">Provides startDate, endDate and outputFolder</param>
+        /// <param name="loggerFactory">Used to create output.</param>
+        /// <param name="database">The database context for flushing.</param>
+        /// <param name="settings">Provides startDate, endDate and outputFolder.</param>
         public BacktestTimerProvider(ILoggerFactory loggerFactory, DatabaseContext database, BacktestSettings settings)
         {
             _logger = loggerFactory.CreateLogger(GetType());
@@ -40,12 +40,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public override DateTimeOffset CurrentTime => _currentTime;
 
         /// <summary>
-        /// Gets the date at which the backtest started
+        /// Gets the date at which the backtest started.
         /// </summary>
         public DateTimeOffset BeginTime { get; }
 
         /// <summary>
-        /// Gets the date at which the backtest ended
+        /// Gets the date at which the backtest ended.
         /// </summary>
         public DateTimeOffset EndTime { get; }
 

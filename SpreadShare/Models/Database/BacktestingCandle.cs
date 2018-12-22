@@ -10,13 +10,13 @@ namespace SpreadShare.Models.Database
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestingCandle"/> class.
         /// </summary>
-        /// <param name="timestamp">CreatedTimestamp of the candle</param>
-        /// <param name="open">Opening price of candle</param>
-        /// <param name="close">Closing price of candle</param>
-        /// <param name="high">Highest price during time period</param>
-        /// <param name="low">Lowest price during time period</param>
-        /// <param name="volume">Volume in the time period</param>
-        /// <param name="tradingPair">Tradingpair of the candle</param>
+        /// <param name="timestamp">CreatedTimestamp of the candle.</param>
+        /// <param name="open">Opening price of candle.</param>
+        /// <param name="close">Closing price of candle.</param>
+        /// <param name="high">Highest price during time period.</param>
+        /// <param name="low">Lowest price during time period.</param>
+        /// <param name="volume">Volume in the time period.</param>
+        /// <param name="tradingPair">Tradingpair of the candle.</param>
         public BacktestingCandle(long timestamp, decimal open, decimal close, decimal high, decimal low, decimal volume, string tradingPair)
         {
             Timestamp = timestamp;
@@ -65,7 +65,7 @@ namespace SpreadShare.Models.Database
         public string TradingPair { get; set; }
 
         /// <summary>
-        /// Gets the average price (not weighted)
+        /// Gets the average price (not weighted).
         /// </summary>
         public decimal Average => (High + Low) / 2M;
     }

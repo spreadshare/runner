@@ -24,8 +24,8 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Modifies the allocation based on the executed trade.
         /// </summary>
-        /// <param name="algo">The algorithm to attribute the trade to</param>
-        /// <param name="trade">The trade proposal</param>
+        /// <param name="algo">The algorithm to attribute the trade to.</param>
+        /// <param name="trade">The trade proposal.</param>
         public void ApplyTradeExecution(Type algo, TradeExecution trade)
         {
             Guard.Argument(algo).NotNull().Require(
@@ -47,15 +47,15 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Determines if an algorithm has any defined allocation.
         /// </summary>
-        /// <param name="algo">The type of the algorithm to evaluate</param>
-        /// <returns>Boolean indicating the presence of an allocation object</returns>
+        /// <param name="algo">The type of the algorithm to evaluate.</param>
+        /// <returns>Boolean indicating the presence of an allocation object.</returns>
         public bool IsAllocated(Type algo) => _allocations.ContainsKey(algo);
 
         /// <summary>
-        /// Returns the allocation of a certain algorithm
+        /// Returns the allocation of a certain algorithm.
         /// </summary>
-        /// <param name="algo">The algorithm type to evaluate</param>
-        /// <returns>The algorithm's portfolio</returns>
+        /// <param name="algo">The algorithm type to evaluate.</param>
+        /// <returns>The algorithm's portfolio.</returns>
         public Portfolio GetAlgorithmAllocation(Type algo)
         {
             Guard.Argument(algo).NotNull().Require(
@@ -73,8 +73,8 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Set the allocation of a certain algorithm using an assets representation.
         /// </summary>
-        /// <param name="algo">The algorithm type to evaluate</param>
-        /// <param name="alloc">The allocation as assets</param>
+        /// <param name="algo">The algorithm type to evaluate.</param>
+        /// <param name="alloc">The allocation as assets.</param>
         public void SetAlgorithmAllocation(Type algo, Portfolio alloc)
         {
             Guard.Argument(algo).NotNull().Require(
@@ -95,7 +95,7 @@ namespace SpreadShare.Models.Trading
         /// Returns a new portfolio containing the sum of all allocated portfolios
         /// In other words, all the assets for the particular exchange.
         /// </summary>
-        /// <returns>Summed portfolio</returns>
+        /// <returns>Summed portfolio.</returns>
         public Portfolio GetSummedChildren()
         {
             return _allocations.Values.Aggregate(Portfolio.Empty, Portfolio.Add);

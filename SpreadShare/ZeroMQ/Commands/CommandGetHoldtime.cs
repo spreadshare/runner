@@ -1,7 +1,7 @@
-﻿namespace SpreadShare.ZeroMQ.Commands
+namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to retrieve the HoldTime
+    /// Command to retrieve the HoldTime.
     /// </summary>
     internal class CommandGetHoldtime : Command
     {

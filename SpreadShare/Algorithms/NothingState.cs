@@ -5,9 +5,9 @@ using SpreadShare.SupportServices.SettingsServices;
 namespace SpreadShare.Algorithms
 {
     /// <summary>
-    /// Class representing a non existing state
+    /// Class representing a non existing state.
     /// </summary>
-    /// <typeparam name="T">Kind of algorithm settings</typeparam>
+    /// <typeparam name="T">Kind of algorithm settings.</typeparam>
     internal sealed class NothingState<T> : State<T>
         where T : AlgorithmSettings
     {

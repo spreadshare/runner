@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to switch to a different currency
+    /// Command to switch to a different currency.
     /// </summary>
     internal class CommandSwitchCurrency : Command
     {
@@ -13,7 +13,7 @@ namespace SpreadShare.ZeroMQ.Commands
         /// <inheritdoc />
         protected override Dictionary<string, string> Arguments => new Dictionary<string, string>()
         {
-            { "arg_currency", null }
+            { "arg_currency", null },
         };
 
         /// <inheritdoc />

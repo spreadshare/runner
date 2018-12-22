@@ -8,21 +8,21 @@ using Xunit.Abstractions;
 namespace SpreadShare.Tests.Models
 {
     /// <summary>
-    /// Test collection for the portfolio model
+    /// Test collection for the portfolio model.
     /// </summary>
     public class PortfolioTests : BaseTest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PortfolioTests"/> class.
         /// </summary>
-        /// <param name="outputHelper">Generates output</param>
+        /// <param name="outputHelper">Generates output.</param>
         public PortfolioTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
         }
 
         /// <summary>
-        /// Tests valid parsing of values after the constructor
+        /// Tests valid parsing of values after the constructor.
         /// </summary>
         [Fact]
         public void ConstructorHappyFlow()
@@ -30,7 +30,7 @@ namespace SpreadShare.Tests.Models
             Currency c = new Currency("ETH");
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
             {
-                { c, new Balance(c, 1.0M, 0.0M) }
+                { c, new Balance(c, 1.0M, 0.0M) },
             });
 
             Assert.Equal(1.0M, portfolio.GetAllocation(new Currency("ETH")).Free);
@@ -48,7 +48,7 @@ namespace SpreadShare.Tests.Models
             Currency c = new Currency("ETH");
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>
             {
-                { c, new Balance(c, 4, 0.0001M) }
+                { c, new Balance(c, 4, 0.0001M) },
             });
 
             Assert.Equal(4, portfolio.GetAllocation(c).Free);
@@ -63,13 +63,13 @@ namespace SpreadShare.Tests.Models
         }
 
         /// <summary>
-        /// Tests a number of cases to see of adding to portfolio adds the balances correctly
+        /// Tests a number of cases to see of adding to portfolio adds the balances correctly.
         /// </summary>
-        /// <param name="currency">Currency</param>
-        /// <param name="free1">Free balance for the first</param>
-        /// <param name="locked1">Locked balance for the first</param>
-        /// <param name="free2">Free balance for the second</param>
-        /// <param name="locked2">Locked balance for the second</param>
+        /// <param name="currency">Currency.</param>
+        /// <param name="free1">Free balance for the first.</param>
+        /// <param name="locked1">Locked balance for the first.</param>
+        /// <param name="free2">Free balance for the second.</param>
+        /// <param name="locked2">Locked balance for the second.</param>
         [Theory]
         [InlineData("ETH", 1.0, 0.0, 3.0, 5.0)]
         [InlineData("BTC", 0.000002, -4, 9943043.234, -343.232)]
@@ -79,12 +79,12 @@ namespace SpreadShare.Tests.Models
             Currency c = new Currency(currency);
             var first = new Portfolio(new Dictionary<Currency, Balance>()
             {
-                { c, new Balance(c, free1, locked1) }
+                { c, new Balance(c, free1, locked1) },
             });
 
             var second = new Portfolio(new Dictionary<Currency, Balance>()
             {
-                { c, new Balance(c, free2, locked2) }
+                { c, new Balance(c, free2, locked2) },
             });
 
             var result = Portfolio.Add(first, second);
@@ -106,13 +106,13 @@ namespace SpreadShare.Tests.Models
             var first = new Portfolio(new Dictionary<Currency, Balance>()
             {
                 { c1, new Balance(c1, 4.0M, 1M) },
-                { c2, new Balance(c2, 1.0M, 5.5M) }
+                { c2, new Balance(c2, 1.0M, 5.5M) },
             });
 
             var second = new Portfolio(new Dictionary<Currency, Balance>()
             {
                 { c1, new Balance(c1, 0.02M, 0) },
-                { c3, new Balance(c3, 66.5M, 0.0000000004M) }
+                { c3, new Balance(c3, 66.5M, 0.0000000004M) },
             });
 
             var result = Portfolio.Add(first, second);
@@ -133,12 +133,12 @@ namespace SpreadShare.Tests.Models
 
             var first = new Portfolio(new Dictionary<Currency, Balance>()
             {
-                { c1, new Balance(c1, 4.0M, 1M) }
+                { c1, new Balance(c1, 4.0M, 1M) },
             });
 
             var second = new Portfolio(new Dictionary<Currency, Balance>()
             {
-                { c2, new Balance(c2, 1.0M, 5.5M) }
+                { c2, new Balance(c2, 1.0M, 5.5M) },
             });
 
             var result = Portfolio.Add(first, second);
@@ -163,7 +163,7 @@ namespace SpreadShare.Tests.Models
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("VET"), new Balance(new Currency("VET"), 0, 0) },
-                { new Currency("BTC"), new Balance(new Currency("BTC"), 0, 0) }
+                { new Currency("BTC"), new Balance(new Currency("BTC"), 0, 0) },
             });
 
             var balances = portfolio.AllBalances().ToList();
@@ -193,7 +193,7 @@ namespace SpreadShare.Tests.Models
 
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
             {
-                { c1, new Balance(c1, 2.5M, 0.0M) }
+                { c1, new Balance(c1, 2.5M, 0.0M) },
             });
 
             portfolio.UpdateAllocation(trade);
@@ -212,7 +212,7 @@ namespace SpreadShare.Tests.Models
 
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
             {
-                { c1, new Balance(c1, 2.5M, 0.0M) }
+                { c1, new Balance(c1, 2.5M, 0.0M) },
             });
 
             portfolio.UpdateAllocation(trade);
@@ -254,7 +254,7 @@ namespace SpreadShare.Tests.Models
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>
             {
                 { c1, new Balance(c1, 4, 8) },
-                { c2, new Balance(c2, 5, 0.001M) }
+                { c2, new Balance(c2, 5, 0.001M) },
             });
 
             var scaled = Portfolio.DuplicateWithScale(portfolio, 0.7M);
@@ -287,7 +287,7 @@ namespace SpreadShare.Tests.Models
         }
 
         /// <summary>
-        /// Tests if the difference between to portfolios is correct
+        /// Tests if the difference between to portfolios is correct.
         /// </summary>
         [Fact]
         public void BalancesAreSubtractedHappyFlow()
@@ -300,14 +300,14 @@ namespace SpreadShare.Tests.Models
             {
                 { c1, new Balance(c1, 0.4M, 10M) },
                 { c2, new Balance(c2, -0.45M, 0) },
-                { c3, new Balance(c3, 0.66M, 1.0M) }
+                { c3, new Balance(c3, 0.66M, 1.0M) },
             });
 
             var second = new Portfolio(new Dictionary<Currency, Balance>
             {
                 { c1, new Balance(c2, 10M, 10M) },
                 { c2, new Balance(c2, 0.6M, 0M) },
-                { c4, new Balance(c4, 4.2M, -0.00000001M) }
+                { c4, new Balance(c4, 4.2M, -0.00000001M) },
             });
 
             var diff = Portfolio.SubtractedDifferences(first, second);
@@ -321,10 +321,10 @@ namespace SpreadShare.Tests.Models
                          Assert.Equal(-9.6M, balance.Free);
                          Assert.Equal(0.0M, balance.Locked);
                          break;
-                    case "ETH":
-                        Assert.Equal(-1.05M, balance.Free);
-                        Assert.Equal(0.0M, balance.Locked);
-                        break;
+                     case "ETH":
+                         Assert.Equal(-1.05M, balance.Free);
+                         Assert.Equal(0.0M, balance.Locked);
+                         break;
                      case "VET":
                          Assert.Equal(0.66M, balance.Free);
                          Assert.Equal(1.0m, balance.Locked);
@@ -355,7 +355,7 @@ namespace SpreadShare.Tests.Models
             {
                 { c1, new Balance(c1, 1.0M, 2.0M) },
                 { c2, new Balance(c2, 99.0M, 0.0M) },
-                { c3, new Balance(c3, 0.0M, 0.0M) }
+                { c3, new Balance(c3, 0.0M, 0.0M) },
             });
 
             string str = portfolio.ToJson();

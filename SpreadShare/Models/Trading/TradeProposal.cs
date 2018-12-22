@@ -10,8 +10,8 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Initializes a new instance of the <see cref="TradeProposal"/> class.
         /// </summary>
-        /// <param name="pair">Used to round the balance</param>
-        /// <param name="from">The asset value on the left side of the trade</param>
+        /// <param name="pair">Used to round the balance.</param>
+        /// <param name="from">The asset value on the left side of the trade.</param>
         public TradeProposal(TradingPair pair, Balance from)
         {
             Guard.Argument(pair).NotNull().Require(
@@ -21,7 +21,7 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Gets the left side of the proposed trade
+        /// Gets the left side of the proposed trade.
         /// </summary>
         public Balance From { get; }
     }

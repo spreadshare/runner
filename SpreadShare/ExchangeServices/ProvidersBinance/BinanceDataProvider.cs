@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Binance.Net.Objects;
@@ -20,8 +20,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceDataProvider"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Used to create output stream</param>
-        /// <param name="communications">For communication with Binance</param>
+        /// <param name="loggerFactory">Used to create output stream.</param>
+        /// <param name="communications">For communication with Binance.</param>
         public BinanceDataProvider(ILoggerFactory loggerFactory, BinanceCommunicationsService communications)
             : base(loggerFactory, communications)
         {

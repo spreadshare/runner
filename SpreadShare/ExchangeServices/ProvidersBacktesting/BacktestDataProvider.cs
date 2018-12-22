@@ -24,10 +24,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestDataProvider"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Used to create output</param>
-        /// <param name="database">The backtest database database</param>
-        /// <param name="timerProvider">Used to keep track of time</param>
-        /// <param name="backtestCommunicationService">Communicates with backtesting and provides order updates</param>
+        /// <param name="loggerFactory">Used to create output.</param>
+        /// <param name="database">The backtest database database.</param>
+        /// <param name="timerProvider">Used to keep track of time.</param>
+        /// <param name="backtestCommunicationService">Communicates with backtesting and provides order updates.</param>
         public BacktestDataProvider(ILoggerFactory loggerFactory, DatabaseContext database, BacktestTimerProvider timerProvider, BacktestCommunicationService backtestCommunicationService)
             : base(loggerFactory, backtestCommunicationService)
         {
@@ -37,7 +37,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <summary>
-        /// Sets the DataProvider that implements this BackTestTradingProvider
+        /// Sets the DataProvider that implements this BackTestTradingProvider.
         /// </summary>
         public DataProvider ParentImplementation { private get; set; }
 
@@ -105,10 +105,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <summary>
-        /// Get a value of the portfolio using the parent wrapper
+        /// Get a value of the portfolio using the parent wrapper.
         /// </summary>
-        /// <param name="portfolio">Portfolio to evaluate</param>
-        /// <returns>value of portfolio in base currency</returns>
+        /// <param name="portfolio">Portfolio to evaluate.</param>
+        /// <returns>value of portfolio in base currency.</returns>
         public decimal ValuatePortfolioInBaseCurrency(Portfolio portfolio)
         {
             return ParentImplementation.ValuatePortfolioInBaseCurrency(portfolio);
@@ -117,9 +117,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <summary>
         /// Find candle that matches the timestamp most closely.
         /// </summary>
-        /// <param name="pair">Candle's trading pair</param>
-        /// <param name="timestamp">CreatedTimestamp to match</param>
-        /// <returns>Candle matching timestamp most closely</returns>
+        /// <param name="pair">Candle's trading pair.</param>
+        /// <param name="timestamp">CreatedTimestamp to match.</param>
+        /// <returns>Candle matching timestamp most closely.</returns>
         private BacktestingCandle FindCandle(TradingPair pair, long timestamp)
         {
             if (!_buffers.ContainsKey(pair.ToString()))

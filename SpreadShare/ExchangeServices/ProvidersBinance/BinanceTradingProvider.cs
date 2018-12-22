@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using Binance.Net.Objects;
@@ -25,9 +25,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceTradingProvider"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Used to create output stream</param>
-        /// <param name="communications">For communication with Binance</param>
-        /// <param name="timer">Timer for subscribing to periodic updates</param>
+        /// <param name="loggerFactory">Used to create output stream.</param>
+        /// <param name="communications">For communication with Binance.</param>
+        /// <param name="timer">Timer for subscribing to periodic updates.</param>
         public BinanceTradingProvider(ILoggerFactory loggerFactory, BinanceCommunicationsService communications, TimerProvider timer)
             : base(loggerFactory, timer)
         {

@@ -15,7 +15,7 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Initializes a new instance of the <see cref="Portfolio"/> class.
         /// </summary>
-        /// <param name="dict">The initial values</param>
+        /// <param name="dict">The initial values.</param>
         public Portfolio(Dictionary<Currency, Balance> dict)
         {
             Guard.Argument(dict, nameof(dict)).NotNull();
@@ -28,11 +28,11 @@ namespace SpreadShare.Models.Trading
         public static Portfolio Empty => new Portfolio(new Dictionary<Currency, Balance>());
 
         /// <summary>
-        /// Adds to portfolio instances and returns the result
+        /// Adds to portfolio instances and returns the result.
         /// </summary>
-        /// <param name="first">First portfolio</param>
-        /// <param name="second">Second portfolio</param>
-        /// <returns>Combined portfolio</returns>
+        /// <param name="first">First portfolio.</param>
+        /// <param name="second">Second portfolio.</param>
+        /// <returns>Combined portfolio.</returns>
         public static Portfolio Add(Portfolio first, Portfolio second)
         {
             Guard.Argument(first).NotNull();
@@ -48,11 +48,11 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Gets a copy of the Assets scaled down with given scale
+        /// Gets a copy of the Assets scaled down with given scale.
         /// </summary>
-        /// <param name="portfolio">The portfolio to duplicate</param>
-        /// <param name="scale">Decimal between 0 and 1 indicating the scale</param>
-        /// <returns>Exchange balance corresponding to the given currency</returns>
+        /// <param name="portfolio">The portfolio to duplicate.</param>
+        /// <param name="scale">Decimal between 0 and 1 indicating the scale.</param>
+        /// <returns>Exchange balance corresponding to the given currency.</returns>
         public static Portfolio DuplicateWithScale(Portfolio portfolio, decimal scale)
         {
             Guard.Argument(portfolio).NotNull();
@@ -71,11 +71,11 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Calculates the substracted difference (both free and locked) between two portfolios
+        /// Calculates the substracted difference (both free and locked) between two portfolios.
         /// </summary>
-        /// <param name="first">The first portfolio</param>
-        /// <param name="second">The second portfolio</param>
-        /// <returns>List of balances representing the differences</returns>
+        /// <param name="first">The first portfolio.</param>
+        /// <param name="second">The second portfolio.</param>
+        /// <returns>List of balances representing the differences.</returns>
         public static List<Balance> SubtractedDifferences(Portfolio first, Portfolio second)
         {
             Guard.Argument(first).NotNull();
@@ -91,10 +91,10 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Returns the quantity of allocated funds, will return 0 if nothing is allocated
+        /// Returns the quantity of allocated funds, will return 0 if nothing is allocated.
         /// </summary>
-        /// <param name="c">Currency to query</param>
-        /// <returns>Allocated funds</returns>
+        /// <param name="c">Currency to query.</param>
+        /// <returns>Allocated funds.</returns>
         public Balance GetAllocation(Currency c)
         {
             Guard.Argument(c).NotNull();
@@ -103,9 +103,9 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Update the allocation of an algorithm
+        /// Update the allocation of an algorithm.
         /// </summary>
-        /// <param name="trade">The trade proposal to digest</param>
+        /// <param name="trade">The trade proposal to digest.</param>
         public void UpdateAllocation(TradeExecution trade)
         {
             Guard.Argument(trade).NotNull();
@@ -129,18 +129,18 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Returns all balances as a list
+        /// Returns all balances as a list.
         /// </summary>
-        /// <returns>list of balances</returns>
+        /// <returns>list of balances.</returns>
         public IEnumerable<Balance> AllBalances()
         {
             return _dict.Values;
         }
 
         /// <summary>
-        /// Returns a string format JSON representation of the portfolio
+        /// Returns a string format JSON representation of the portfolio.
         /// </summary>
-        /// <returns>JSON string</returns>
+        /// <returns>JSON string.</returns>
         public string ToJson()
         {
             return JsonConvert.SerializeObject(_dict.Where(
