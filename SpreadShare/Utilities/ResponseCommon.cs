@@ -15,10 +15,10 @@ namespace SpreadShare.Utilities
             new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused");
 
         /// <summary>
-        /// Gets a response object indicating a failed order
+        /// Gets a response object indicating a failed order.
         /// </summary>
-        /// <param name="reason">The reason for the failure</param>
-        /// <returns>Desired response object</returns>
+        /// <param name="reason">The reason for the failure.</param>
+        /// <returns>Desired response object.</returns>
         public static ResponseObject<OrderUpdate> OrderPlacementFailed(string reason) =>
             new ResponseObject<OrderUpdate>(ResponseCode.Error, $"Error while placing order: {reason}");
     }

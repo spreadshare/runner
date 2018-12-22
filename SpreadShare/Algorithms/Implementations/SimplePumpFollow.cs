@@ -10,7 +10,7 @@ namespace SpreadShare.Algorithms.Implementations
 {
     /// <summary>
     /// The first short dip algorithm.
-    /// buys when the market has an unesecary dip, and sell after recovery
+    /// buys when the market has an unesecary dip, and sell after recovery.
     /// </summary>
     internal class SimplePumpFollow : BaseAlgorithm<SimplePumpFollowSettings>
     {
@@ -123,32 +123,32 @@ namespace SpreadShare.Algorithms.Implementations
      }
 
     /// <summary>
-    /// The SimplePumpFollow settings
+    /// The SimplePumpFollow settings.
     /// </summary>
     internal class SimplePumpFollowSettings : AlgorithmSettings
     {
         /// <summary>
-        /// Gets or sets how much something needs to fall to be considered a dip
+        /// Gets or sets how much something needs to fall to be considered a dip.
         /// </summary>
         public decimal FirstCheck { get; set; }
 
         /// <summary>
-        /// Gets or sets The diptime, how quickly the dip needs to happen to be considered a dip
+        /// Gets or sets The diptime, how quickly the dip needs to happen to be considered a dip.
         /// </summary>
         public decimal SecondCheck { get; set; }
 
         /// <summary>
-        /// Gets or sets recovery, determines how much profit the system should try to get before selling
+        /// Gets or sets recovery, determines how much profit the system should try to get before selling.
         /// </summary>
         public decimal ProfitTake { get; set; }
 
         /// <summary>
-        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again
+        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again.
         /// </summary>
         public int StopTime { get; set; }
 
         /// <summary>
-        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again
+        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again.
         /// </summary>
         public decimal StopPrice { get; set; }
     }

@@ -5,18 +5,18 @@ using SpreadShare.Models;
 namespace SpreadShare.Utilities
 {
     /// <summary>
-    /// Collection of helper methods
+    /// Collection of helper methods.
     /// </summary>
     internal static class HelperMethods
     {
         /// <summary>
         /// Retry a ReponseObject method a number of times.
         /// </summary>
-        /// <param name="method">The method to retry</param>
-        /// <param name="logger">Logger to report to</param>
-        /// <param name="maxRetries">Maximum number of retries (default 5)</param>
-        /// <typeparam name="T">Type of the result</typeparam>
-        /// <returns>First (if any) success response of <see pref="method"/></returns>
+        /// <param name="method">The method to retry.</param>
+        /// <param name="logger">Logger to report to.</param>
+        /// <param name="maxRetries">Maximum number of retries (default 5).</param>
+        /// <typeparam name="T">Type of the result.</typeparam>
+        /// <returns>First (if any) success response of <see pref="method"/>.</returns>
         public static ResponseObject<T> RetryMethod<T>(Func<ResponseObject<T>> method, ILogger logger, int maxRetries = 5)
         {
             for (int i = 0; i < maxRetries; i++)
@@ -36,10 +36,10 @@ namespace SpreadShare.Utilities
         /// <summary>
         /// Retry a Response object method a number of times.
         /// </summary>
-        /// <param name="method">The method to retry</param>
-        /// <param name="logger">Logger to report to</param>
-        /// <param name="maxRetries">Maximum number of retries (default 5)</param>
-        /// <returns>First (if any) success response of the <see pref="method"/></returns>
+        /// <param name="method">The method to retry.</param>
+        /// <param name="logger">Logger to report to.</param>
+        /// <param name="maxRetries">Maximum number of retries (default 5).</param>
+        /// <returns>First (if any) success response of the <see pref="method"/>.</returns>
         public static ResponseObject RetryMethod(Func<ResponseObject> method, ILogger logger, int maxRetries = 5)
         {
             var query = RetryMethod<string>(method, logger, maxRetries);
@@ -47,11 +47,11 @@ namespace SpreadShare.Utilities
         }
 
         /// <summary>
-        /// A division that returns zero if the denominator is zero
+        /// A division that returns zero if the denominator is zero.
         /// </summary>
-        /// <param name="numerator">The numerator</param>
-        /// <param name="denominator">The denominator</param>
-        /// <returns>safe division result</returns>
+        /// <param name="numerator">The numerator.</param>
+        /// <param name="denominator">The denominator.</param>
+        /// <returns>safe division result.</returns>
         public static decimal SafeDiv(decimal numerator, decimal denominator)
         {
             return denominator == 0 ? 0 : numerator / denominator;

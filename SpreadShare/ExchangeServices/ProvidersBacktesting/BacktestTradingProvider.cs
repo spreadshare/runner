@@ -28,11 +28,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestTradingProvider"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Used to create output</param>
-        /// <param name="timer">Timer provider for registering trades</param>
-        /// <param name="data">Data provider for confirming trades</param>
-        /// <param name="comm">Communication service for updating remote portfolio</param>
-        /// <param name="database">Database context for logging trades</param>
+        /// <param name="loggerFactory">Used to create output.</param>
+        /// <param name="timer">Timer provider for registering trades.</param>
+        /// <param name="data">Data provider for confirming trades.</param>
+        /// <param name="comm">Communication service for updating remote portfolio.</param>
+        /// <param name="database">Database context for logging trades.</param>
         public BacktestTradingProvider(
             ILoggerFactory loggerFactory,
             BacktestTimerProvider timer,
