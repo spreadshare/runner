@@ -50,7 +50,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 return new ResponseObject<string>(ResponseCode.Error);
             }
 
-            _listenKey = getListenKey.Data.ListenKey;
+            _listenKey = getListenKey.Data;
 
             // Set timer every 30 min for autorenewal
             SetTimer();

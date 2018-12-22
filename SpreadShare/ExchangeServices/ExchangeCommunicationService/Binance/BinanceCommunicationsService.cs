@@ -130,17 +130,14 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                         FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
                     }));
 
-            // Set error handlers
-            succesOrderBook.Data.Closed += () =>
+            // Set error handler
+            succesOrderBook.Data.ConnectionLost += () =>
             {
                 _logger.LogCritical($"Connection got closed at {DateTime.UtcNow}. Attempt to open socket");
                 EnableStreams();
             };
-            succesOrderBook.Data.Error += e =>
-            {
-                _logger.LogError($"Connection got error at {DateTime.UtcNow}: {e}");
-                EnableStreams();
-            };
+
+            succesOrderBook.Data.ConnectionRestored += t => _logger.LogCritical($"Connection was restored after {t}");
 
             _logger.LogInformation("Binance Communication Service was successfully started!");
         }
