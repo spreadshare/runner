@@ -53,7 +53,7 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 OrderUpdate buyorder =
-                    trading.PlaceFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First()).Data;
+                    trading.ExecuteFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First()).Data;
                 Portfolio portfolio = trading.GetPortfolio();
                 limitsell = trading.PlaceLimitOrderSell(
                     AlgorithmSettings.ActiveTradingPairs.First(),
@@ -93,8 +93,8 @@ namespace SpreadShare.Algorithms.Implementations
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                trading.CancelOrder(oldlimit.Pair, oldlimit.OrderId);
-                OrderUpdate mktsell = trading.PlaceFullMarketOrderSell(AlgorithmSettings.ActiveTradingPairs.First())
+                trading.CancelOrder(oldlimit);
+                OrderUpdate mktsell = trading.ExecuteFullMarketOrderSell(AlgorithmSettings.ActiveTradingPairs.First())
                     .Data;
                 SetTimer(TimeSpan.Zero);
             }

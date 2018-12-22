@@ -205,6 +205,10 @@ namespace SpreadShare.ExchangeServices.Allocation
                                    $"Assuming the remote portfolio as truth value whilst blaming {algorithm}.\n" +
                                    $"local portfolio: {local.ToJson()}\n" +
                                    $"remote portfolio: {remote.ToJson()}\n");
+                foreach (var balance in diff)
+                {
+                    _logger.LogWarning($"diff {balance.Symbol}: ({balance.Free}, {balance.Locked})");
+                }
             }
 
             // Compensate discrepancy by blaming and correcting the local allocation for the current algorithm.
