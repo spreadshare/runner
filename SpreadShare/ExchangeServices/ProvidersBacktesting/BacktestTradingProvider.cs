@@ -81,7 +81,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 Status = OrderUpdate.OrderStatus.Filled,
                 AverageFilledPrice = priceEstimate,
                 FilledQuantity = quantity,
-                FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds()
+                FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds(),
             };
 
             // Write the trade to the database

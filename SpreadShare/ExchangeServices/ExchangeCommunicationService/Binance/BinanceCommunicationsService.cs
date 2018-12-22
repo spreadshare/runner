@@ -127,7 +127,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                         AverageFilledPrice = HelperMethods.SafeDiv(
                             orderInfoUpdate.CummulativeQuoteQuantity,
                             orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
-                        FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades
+                        FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
                     }));
 
             // Set error handlers

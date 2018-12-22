@@ -96,7 +96,7 @@ namespace SpreadShare.ExchangeServices
         private ExchangeProvidersContainer BuildBinanceContainer(AlgorithmSettings settings, WeakAllocationManager allocationManager)
         {
             // Makes sure that the communication is enabled
-           _binanceCommunications.Connect();
+            _binanceCommunications.Connect();
             var timerProvider = new ExchangeTimerProvider();
             var dataImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
             var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications, timerProvider);
