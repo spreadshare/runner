@@ -1,10 +1,7 @@
 using System;
 using System.Linq;
-using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.Models;
 using SpreadShare.Models.Trading;
-using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.SettingsServices;
 
 #pragma warning disable SA1402
