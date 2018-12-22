@@ -16,10 +16,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     /// <summary>
     /// Trading provider implementation for backtesting purposes.
     /// </summary>
-    internal class BacktestTradingProvider : AbstractTradingProvider, IObserver<long>
+    internal class BacktestTradingProvider : AbstractTradingProvider
     {
         private readonly ILogger _logger;
-        private readonly BacktestTimerProvider _timer;
         private readonly BacktestDataProvider _dataProvider;
         private readonly BacktestCommunicationService _comm;
         private readonly DatabaseContext _database;
@@ -40,18 +39,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             BacktestDataProvider data,
             BacktestCommunicationService comm,
             DatabaseContext database)
-            : base(loggerFactory)
+            : base(loggerFactory, timer)
         {
             _logger = loggerFactory.CreateLogger(GetType());
-            _timer = timer;
             _dataProvider = data;
             _comm = comm;
             _database = database;
-            timer.Subscribe(this);
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> PlaceMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
+        public override ResponseObject<OrderUpdate> ExecuteMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
         {
             // Keep the remote updated by mocking a trade execution and letting the communications know.
             TradeExecution exec;
@@ -75,7 +72,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 _mockOrderCounter++,
                 tradeId,
                 OrderUpdate.OrderTypes.Market,
-                _timer.CurrentTime.ToUnixTimeMilliseconds(),
+                Timer.CurrentTime.ToUnixTimeMilliseconds(),
                 priceEstimate,
                 side,
                 pair,
@@ -84,7 +81,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 Status = OrderUpdate.OrderStatus.Filled,
                 AverageFilledPrice = priceEstimate,
                 FilledQuantity = quantity,
-                FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds()
+                FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds()
             };
 
             // Write the trade to the database
@@ -125,7 +122,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 _mockOrderCounter,
                 tradeId,
                 OrderUpdate.OrderTypes.Limit,
-                _timer.CurrentTime.ToUnixTimeMilliseconds(),
+                Timer.CurrentTime.ToUnixTimeMilliseconds(),
                 price,
                 side,
                 pair,
@@ -164,7 +161,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 _mockOrderCounter,
                 tradeId,
                 OrderUpdate.OrderTypes.StopLoss,
-                _timer.CurrentTime.ToUnixTimeMilliseconds(),
+                Timer.CurrentTime.ToUnixTimeMilliseconds(),
                 price,
                 side,
                 pair,
@@ -182,7 +179,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             var order = GetOrderInfo(pair, orderId).Data;
             order.Status = OrderUpdate.OrderStatus.Cancelled;
-            order.FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
+            order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
 
             if (WatchList.ContainsKey(orderId))
             {
@@ -227,13 +224,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public void OnCompleted() => Expression.Empty();
+        public override void OnCompleted() => Expression.Empty();
 
         /// <inheritdoc />
-        public void OnError(Exception error) => Expression.Empty();
+        public override void OnError(Exception error) => Expression.Empty();
 
         /// <inheritdoc />
-        public void OnNext(long value)
+        public override void OnNext(long value)
         {
             foreach (var order in WatchList.Values.ToList())
             {
@@ -248,15 +245,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     continue;
                 }
 
-                Logger.LogInformation($"Order {order.OrderId} confirmed at {_timer.CurrentTime}");
+                Logger.LogInformation($"Order {order.OrderId} confirmed at {Timer.CurrentTime}");
                 order.Status = OrderUpdate.OrderStatus.Filled;
 
                 // Set the actual price for the order
                 order.AverageFilledPrice = order.SetPrice;
                 order.FilledQuantity = order.SetQuantity;
                 order.LastFillIncrement = order.SetQuantity;
-                order.LastFillPrice = price;
-                order.FilledTimeStamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
+                order.LastFillPrice = order.SetPrice;
+                order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
 
                 // Calculate a trade execution to keep the remote portfolio up-to-date
                 TradeExecution exec;

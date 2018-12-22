@@ -1,6 +1,10 @@
 using System;
 using Binance.Net.Objects;
+using CryptoExchange.Net.Objects;
+using Microsoft.Extensions.Logging;
+using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.Utilities;
 using OrderSide = SpreadShare.Models.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance
@@ -10,6 +14,28 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
     /// </summary>
     internal static class BinanceUtilities
     {
+        /// <summary>
+        /// Retry a Binance CallResult method a number of times
+        /// </summary>
+        /// <param name="method">The method to retry</param>
+        /// <param name="logger">Logger to write errors to</param>
+        /// <param name="maxRetries">Maximum number of retries (default 5)</param>
+        /// <typeparam name="T">The type of the result</typeparam>
+        /// <returns>First (if any) success response of <see pref="method"/></returns>
+        public static ResponseObject<T> RetryMethod<T>(Func<CallResult<T>> method, ILogger logger, int maxRetries = 5)
+        {
+            return HelperMethods.RetryMethod(
+            () =>
+            {
+                var result = method();
+                return result.Success
+                    ? new ResponseObject<T>(ResponseCode.Success, result.Data)
+                    : new ResponseObject<T>(ResponseCode.Error, result.Error.Message);
+            },
+            logger,
+            maxRetries);
+        }
+
         /// <summary>
         /// Convert Binance.Net to SpreadShare.Models
         /// </summary>

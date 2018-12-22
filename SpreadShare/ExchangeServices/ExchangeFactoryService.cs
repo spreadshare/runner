@@ -51,6 +51,22 @@ namespace SpreadShare.ExchangeServices
             _binanceCommunications = binanceComm;
             _backtestCommunicationService = backtestCom;
 
+            // TODO: Reflections magic
+            foreach (var item in settingsService.AllocationSettings)
+            {
+                switch (item.Key)
+                {
+                    case Exchange.Binance:
+                        _binanceCommunications.Connect();
+                        break;
+                    case Exchange.Backtesting:
+                        _backtestCommunicationService.Connect();
+                        break;
+                    default:
+                        throw new MissingFieldException($"No communications instance for {item} in ExchangeFactory");
+                }
+            }
+
             _allocationManager = alloc;
         }
 
@@ -81,12 +97,12 @@ namespace SpreadShare.ExchangeServices
         {
             // Makes sure that the communication is enabled
            _binanceCommunications.Connect();
+            var timerProvider = new ExchangeTimerProvider();
             var dataImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
-            var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications);
+            var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications, timerProvider);
 
             var dataProvider = new DataProvider(dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
-            var timerProvider = new ExchangeTimerProvider();
             return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider);
         }
 

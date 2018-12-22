@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.SupportServices.SettingsServices;
 
@@ -11,12 +14,28 @@ namespace SpreadShare.Algorithms.Implementations
     internal class TemplateAlgorithm : BaseAlgorithm<TemplateAlgorithmSettings>
     {
         /// <inheritdoc />
-        protected override EntryState<TemplateAlgorithmSettings> Initial => new TemplateState();
+        protected override EntryState<TemplateAlgorithmSettings> Initial => new WelcomeState();
+
+        private class WelcomeState : EntryState<TemplateAlgorithmSettings>
+        {
+            public override State<TemplateAlgorithmSettings> OnTimerElapsed()
+            {
+                return new TemplateState();
+            }
+
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
+                Logger.LogInformation("Welcome to the TemplateAlgorithm");
+                SetTimer(TimeSpan.Zero);
+            }
+        }
 
         private class TemplateState : EntryState<TemplateAlgorithmSettings>
         {
             protected override void Run(TradingProvider trading, DataProvider data)
             {
+                Logger.LogInformation("Placing full buy market order");
+                trading.ExecuteFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
             }
         }
     }
