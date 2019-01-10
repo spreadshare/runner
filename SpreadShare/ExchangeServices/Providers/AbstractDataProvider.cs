@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService;
 using SpreadShare.Models;
+using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 
 namespace SpreadShare.ExchangeServices.Providers
@@ -63,6 +64,14 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="hoursBack">Number of hours to look back.</param>
         /// <returns>A response object with the performance on success.</returns>
         public abstract ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack);
+
+        /// <summary>
+        /// Gets a certain number of minute candles.
+        /// </summary>
+        /// <param name="pair">TradingPair.</param>
+        /// <param name="limit">Number of candles to fetch.</param>
+        /// <returns>ResponseObject containing a candle array.</returns>
+        public abstract ResponseObject<BacktestingCandle[]> GetMinuteCandles(TradingPair pair, int limit);
 
         /// <summary>
         /// Gets the top performing trading pair.
