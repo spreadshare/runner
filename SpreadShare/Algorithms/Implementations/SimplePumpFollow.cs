@@ -12,8 +12,8 @@ using SpreadShare.SupportServices.SettingsServices;
 namespace SpreadShare.Algorithms.Implementations
 {
     /// <summary>
-    /// The first short dip algorithm.
-    /// buys when the market has an unesecary dip, and sell after recovery
+    /// The first pumpfollowing algorithm.
+    /// buys when the market has an large pump, and sells into an expected future pump
     /// </summary>
     internal class SimplePumpFollow : BaseAlgorithm<SimplePumpFollowSettings>
     {
