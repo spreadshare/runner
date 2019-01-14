@@ -108,11 +108,6 @@ namespace SpreadShare.Algorithms.Implementations
         public double DipTime { get; set; }
 
         /// <summary>
-        /// Gets or sets recovery, determines how much profit the system should try to get before selling
-        /// </summary>
-        public decimal Recovery { get; set; }
-
-        /// <summary>
         /// Gets or sets Stoptime, determines how long to wait untill we get out and try again
         /// </summary>
         public int ExitTime { get; set; }
