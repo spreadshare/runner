@@ -65,7 +65,7 @@ namespace SpreadShare.Algorithms.Implementations
 
              protected override void Run(TradingProvider trading, DataProvider data)
              {
-                 var buyorder = trading.PlaceFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
+                 buyorder = trading.PlaceFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First()).Data;
                  SetTimer(TimeSpan.FromHours(AlgorithmSettings.ExitTime));
              }
          }
@@ -76,7 +76,7 @@ namespace SpreadShare.Algorithms.Implementations
 
              public ExitState(OrderUpdate buyorder)
              {
-                 oldbuy = oldbuy;
+                 oldbuy = buyorder;
              }
 
              public override State<TimedShortDipSettings> OnTimerElapsed()
