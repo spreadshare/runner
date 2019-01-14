@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to add a trading pair
+    /// Command to add a trading pair.
     /// </summary>
     internal class CommandAddTradingpair : Command
     {
@@ -14,7 +14,7 @@ namespace SpreadShare.ZeroMQ.Commands
         /// <inheritdoc />
         protected override Dictionary<string, string> Arguments => new Dictionary<string, string>()
         {
-            { "arg_tradingpair", null }
+            { "arg_tradingpair", null },
         };
 
         /// <inheritdoc />

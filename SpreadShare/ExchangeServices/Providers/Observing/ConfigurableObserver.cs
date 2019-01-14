@@ -4,9 +4,9 @@ using Dawn;
 namespace SpreadShare.ExchangeServices.Providers.Observing
 {
     /// <summary>
-    /// Type of observer who's functionality can be set a construction time
+    /// Type of observer who's functionality can be set a construction time.
     /// </summary>
-    /// <typeparam name="T">Type of data to observe</typeparam>
+    /// <typeparam name="T">Type of data to observe.</typeparam>
     internal class ConfigurableObserver<T> : IObserver<T>
     {
         private readonly Action<T> _actionOnNext;
@@ -16,9 +16,9 @@ namespace SpreadShare.ExchangeServices.Providers.Observing
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurableObserver{T}"/> class.
         /// </summary>
-        /// <param name="onNext">Callback for observing new data</param>
-        /// <param name="onCompleted">Callback for observing end of stream</param>
-        /// <param name="onError">Callback for observing errors</param>
+        /// <param name="onNext">Callback for observing new data.</param>
+        /// <param name="onCompleted">Callback for observing end of stream.</param>
+        /// <param name="onError">Callback for observing errors.</param>
         public ConfigurableObserver(Action<T> onNext, Action onCompleted, Action<Exception> onError)
         {
             Guard.Argument(onNext).NotNull();

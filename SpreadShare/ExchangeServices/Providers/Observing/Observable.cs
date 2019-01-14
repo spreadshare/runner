@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SpreadShare.ExchangeServices.Providers.Observing
@@ -6,7 +6,7 @@ namespace SpreadShare.ExchangeServices.Providers.Observing
     /// <summary>
     /// Observable object that can give an update to observers.
     /// </summary>
-    /// <typeparam name="T">Type of the observable</typeparam>
+    /// <typeparam name="T">Type of the observable.</typeparam>
     internal abstract class Observable<T> : IObservable<T>
     {
         private readonly List<IObserver<T>> _observers;
@@ -30,7 +30,7 @@ namespace SpreadShare.ExchangeServices.Providers.Observing
         /// <summary>
         /// Update all observers with new data.
         /// </summary>
-        /// <param name="data">New data</param>
+        /// <param name="data">New data.</param>
         protected void UpdateObservers(T data)
         {
             foreach (var observer in _observers)
@@ -50,8 +50,8 @@ namespace SpreadShare.ExchangeServices.Providers.Observing
             /// <summary>
             /// Initializes a new instance of the <see cref="Unsubscriber"/> class.
             /// </summary>
-            /// <param name="observers">Observers list to remove observer from</param>
-            /// <param name="observer">Observer that wants to unsubscribe</param>
+            /// <param name="observers">Observers list to remove observer from.</param>
+            /// <param name="observer">Observer that wants to unsubscribe.</param>
             public Unsubscriber(List<IObserver<T>> observers, IObserver<T> observer)
             {
                 _observers = observers;

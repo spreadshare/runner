@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to change the CheckTime
+    /// Command to change the CheckTime.
     /// </summary>
     internal class CommandChangeChecktime : Command
     {
@@ -13,7 +13,7 @@ namespace SpreadShare.ZeroMQ.Commands
         /// <inheritdoc />
         protected override Dictionary<string, string> Arguments => new Dictionary<string, string>()
         {
-            { "arg_time", null }
+            { "arg_time", null },
         };
 
         /// <inheritdoc />

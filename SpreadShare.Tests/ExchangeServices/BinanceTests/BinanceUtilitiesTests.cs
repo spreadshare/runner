@@ -6,14 +6,14 @@ using Xunit.Abstractions;
 namespace SpreadShare.Tests.ExchangeServices.BinanceTests
 {
     /// <summary>
-    /// Test collection for the Binance utilities
+    /// Test collection for the Binance utilities.
     /// </summary>
     public class BinanceUtilitiesTests : BaseTest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceUtilitiesTests"/> class.
         /// </summary>
-        /// <param name="outputHelper">Used to create output</param>
+        /// <param name="outputHelper">Used to create output.</param>
         public BinanceUtilitiesTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
@@ -22,7 +22,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
         /// <summary>
         /// Tests conversion from internal to binance objects.
         /// </summary>
-        /// <param name="side">SpreadShare.Models order side</param>
+        /// <param name="side">SpreadShare.Models order side.</param>
         [Theory]
         [InlineData(OrderSide.Buy)]
         [InlineData(OrderSide.Sell)]
@@ -36,9 +36,9 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
         }
 
         /// <summary>
-        /// Tests conversion from binance objects to internal
+        /// Tests conversion from binance objects to internal.
         /// </summary>
-        /// <param name="side">Binance.Net order side</param>
+        /// <param name="side">Binance.Net order side.</param>
         [Theory]
         [InlineData(Binance.Net.Objects.OrderSide.Buy)]
         [InlineData(Binance.Net.Objects.OrderSide.Sell)]

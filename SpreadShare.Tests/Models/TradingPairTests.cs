@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using SpreadShare.Models.Trading;
 using Xunit;
@@ -18,19 +18,21 @@ namespace SpreadShare.Tests.Models
         {
             var left = new Currency("BNB");
             var right = new Currency("ETH");
-            int decimals = 0;
-            var pair = new TradingPair(left, right, decimals);
+            int quantityDecimals = 1;
+            int priceDecimals = 2;
+            var pair = new TradingPair(left, right, quantityDecimals, priceDecimals);
             Assert.Equal(left, pair.Left);
             Assert.Equal(right, pair.Right);
-            Assert.Equal(decimals, pair.Decimals);
+            Assert.Equal(quantityDecimals, pair.QuantityDecimals);
+            Assert.Equal(priceDecimals, pair.PriceDecimals);
         }
 
         [Fact]
         public void ConstructorNull()
         {
             var currency = new Currency("ETH");
-            Assert.Throws<ArgumentNullException>(() => new TradingPair(null, currency, 0));
-            Assert.Throws<ArgumentNullException>(() => new TradingPair(currency, null, 0));
+            Assert.Throws<ArgumentNullException>(() => new TradingPair(null, currency, 0, 0));
+            Assert.Throws<ArgumentNullException>(() => new TradingPair(currency, null, 0, 0));
         }
 
         [Fact]
@@ -38,8 +40,7 @@ namespace SpreadShare.Tests.Models
         {
             var left = new Currency("ETH");
             var right = new Currency("ETH");
-            int decimals = 0;
-            Assert.Throws<ArgumentException>(() => new TradingPair(left, right, decimals));
+            Assert.Throws<ArgumentException>(() => new TradingPair(left, right, 0, 0));
         }
 
         [Fact]
@@ -47,8 +48,8 @@ namespace SpreadShare.Tests.Models
         {
             var left = new Currency("BNB");
             var right = new Currency("ETH");
-            int decimals = -1;
-            Assert.Throws<ArgumentOutOfRangeException>(() => new TradingPair(left, right, decimals));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new TradingPair(left, right, -1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new TradingPair(left, right, 0, -1));
         }
 
         [Fact]
@@ -60,7 +61,8 @@ namespace SpreadShare.Tests.Models
 
             Assert.Equal(pair.Left, parsed.Left);
             Assert.Equal(pair.Right, parsed.Right);
-            Assert.Equal(pair.Decimals, parsed.Decimals);
+            Assert.Equal(pair.QuantityDecimals, parsed.QuantityDecimals);
+            Assert.Equal(pair.PriceDecimals, parsed.PriceDecimals);
         }
 
         [Fact]
@@ -72,7 +74,7 @@ namespace SpreadShare.Tests.Models
 
             Assert.Equal(pair.Left, parsed.Left);
             Assert.Equal(pair.Right, parsed.Right);
-            Assert.Equal(pair.Decimals, parsed.Decimals);
+            Assert.Equal(pair.PriceDecimals, parsed.PriceDecimals);
         }
 
         [Fact]
@@ -84,7 +86,8 @@ namespace SpreadShare.Tests.Models
 
             Assert.Equal(pair.Left, parsed.Left);
             Assert.Equal(pair.Right, parsed.Right);
-            Assert.Equal(pair.Decimals, parsed.Decimals);
+            Assert.Equal(pair.QuantityDecimals, parsed.QuantityDecimals);
+            Assert.Equal(pair.PriceDecimals, parsed.PriceDecimals);
         }
 
         [Fact]
@@ -108,14 +111,15 @@ namespace SpreadShare.Tests.Models
         [Fact]
         public void AddParseEntryOverwrites()
         {
-            var pre = GetTradingPair("BNB", "ETH", 0);
+            var pre = GetTradingPair("BNB", "ETH", 0, 0);
             TradingPair.AddParseEntry("BNBETH", pre);
 
-            var post = GetTradingPair("BNB", "ETH", 1);
+            var post = GetTradingPair("BNB", "ETH", 1, 1);
             TradingPair.AddParseEntry("BNBETH", post);
 
             var postParse = TradingPair.Parse("BNBETH");
-            Assert.NotEqual(pre.Decimals, postParse.Decimals);
+            Assert.NotEqual(pre.QuantityDecimals, postParse.QuantityDecimals);
+            Assert.NotEqual(pre.PriceDecimals, postParse.PriceDecimals);
         }
 
         [Fact]
@@ -173,11 +177,29 @@ namespace SpreadShare.Tests.Models
             Assert.Throws<ArgumentOutOfRangeException>(() => pair.RoundToTradable(balance));
         }
 
-        internal static TradingPair GetTradingPair(string strLeft, string strRight, int decimals = 0)
+        [Fact]
+        public void RoundToPricableHappyFlow()
+        {
+            var pair = GetTradingPair("BNB", "ETH", 0, 4);
+            decimal amount = 521.4923842M;
+            decimal corrected = 521.4923M;
+            decimal calc = pair.RoundToPriceable(amount);
+            Assert.Equal(corrected, calc);
+        }
+
+        [Fact]
+        public void RoundToPriceableNegativeNumber()
+        {
+            var pair = GetTradingPair("BNB", "ETH", 0, 2);
+            var price = -1M;
+            Assert.Throws<ArgumentOutOfRangeException>(() => pair.RoundToPriceable(price));
+        }
+
+        internal static TradingPair GetTradingPair(string strLeft, string strRight, int quantityDecimals = 0, int priceDecimals = 0)
         {
             Currency left = new Currency(strLeft);
             Currency right = new Currency(strRight);
-            return new TradingPair(left, right, decimals);
+            return new TradingPair(left, right, quantityDecimals, priceDecimals);
         }
     }
 }

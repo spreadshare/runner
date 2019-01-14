@@ -8,23 +8,23 @@ using Xunit.Abstractions;
 namespace SpreadShare.Tests.Models
 {
     /// <summary>
-    /// Tests regarding currencies
+    /// Tests regarding currencies.
     /// </summary>
     public class CurrencyTests : BaseTest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CurrencyTests"/> class.
         /// </summary>
-        /// <param name="outputHelper">Used to create output</param>
+        /// <param name="outputHelper">Used to create output.</param>
         public CurrencyTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
         }
 
         /// <summary>
-        /// Constructor should create Currency
+        /// Constructor should create Currency.
         /// </summary>
-        /// <param name="symbol">Symbol of currency</param>
+        /// <param name="symbol">Symbol of currency.</param>
         [Theory]
         [InlineData("ETH")]
         [InlineData("eth")]
@@ -165,7 +165,7 @@ namespace SpreadShare.Tests.Models
         }
 
         /// <summary>
-        /// Equals method should report False if one currency is instantiated and the other is null
+        /// Equals method should report False if one currency is instantiated and the other is null.
         /// </summary>
         [Fact]
         public void EqualsNullEqualityAndCurrency()
@@ -266,7 +266,7 @@ namespace SpreadShare.Tests.Models
         }
 
         /// <summary>
-        /// == operator should report False if one currency is instantiated and the other is null
+        /// == operator should report False if one currency is instantiated and the other is null.
         /// </summary>
         [Fact]
         public void EqualOperatorNullEqualityAndCurrency()
@@ -342,9 +342,9 @@ namespace SpreadShare.Tests.Models
         }
 
         /// <summary>
-        /// Tests if the serialized version of a currency is the correct JSON string
+        /// Tests if the serialized version of a currency is the correct JSON string.
         /// </summary>
-        /// <param name="input">Input currency as string</param>
+        /// <param name="input">Input currency as string.</param>
         [Theory]
         [InlineData("ETH")]
         [InlineData("eth")]
@@ -359,7 +359,7 @@ namespace SpreadShare.Tests.Models
         /// <summary>
         /// Tests if a JSON string is correctly deserialized to a Currency instance.
         /// </summary>
-        /// <param name="input">Input currency as string</param>
+        /// <param name="input">Input currency as string.</param>
         [Theory]
         [InlineData("ETH")]
         [InlineData("eth")]
@@ -372,7 +372,7 @@ namespace SpreadShare.Tests.Models
         /// <summary>
         /// Tests if the combined operation of serialization and deserialization results in an identity function.
         /// </summary>
-        /// <param name="input">Input currency as string    </param>
+        /// <param name="input">Input currency as string.    </param>
         [Theory]
         [InlineData("ETH")]
         [InlineData("eth")]

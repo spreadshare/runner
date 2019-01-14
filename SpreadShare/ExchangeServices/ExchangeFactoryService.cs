@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
@@ -12,7 +12,7 @@ using SpreadShare.SupportServices.SettingsServices;
 namespace SpreadShare.ExchangeServices
 {
     /// <summary>
-    /// Creates containers with Data-, Timer- and TradingProviders
+    /// Creates containers with Data-, Timer- and TradingProviders.
     /// </summary>
     internal class ExchangeFactoryService
     {
@@ -27,12 +27,12 @@ namespace SpreadShare.ExchangeServices
         /// <summary>
         /// Initializes a new instance of the <see cref="ExchangeFactoryService"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Provides logging</param>
-        /// <param name="context">Injected database context</param>
-        /// <param name="alloc">Injected AllocationManager service</param>
-        /// <param name="settingsService">Injected settings</param>
-        /// <param name="binanceComm">Injected binance communication service</param>
-        /// <param name="backtestCom">Injected backtest communication service</param>
+        /// <param name="loggerFactory">Provides logging.</param>
+        /// <param name="context">Injected database context.</param>
+        /// <param name="alloc">Injected AllocationManager service.</param>
+        /// <param name="settingsService">Injected settings.</param>
+        /// <param name="binanceComm">Injected binance communication service.</param>
+        /// <param name="backtestCom">Injected backtest communication service.</param>
         public ExchangeFactoryService(
             ILoggerFactory loggerFactory,
             DatabaseContext context,
@@ -51,14 +51,30 @@ namespace SpreadShare.ExchangeServices
             _binanceCommunications = binanceComm;
             _backtestCommunicationService = backtestCom;
 
+            // TODO: Reflections magic
+            foreach (var item in settingsService.AllocationSettings)
+            {
+                switch (item.Key)
+                {
+                    case Exchange.Binance:
+                        _binanceCommunications.Connect();
+                        break;
+                    case Exchange.Backtesting:
+                        _backtestCommunicationService.Connect();
+                        break;
+                    default:
+                        throw new MissingFieldException($"No communications instance for {item} in ExchangeFactory");
+                }
+            }
+
             _allocationManager = alloc;
         }
 
         /// <summary>
-        /// Builds container for Binance
+        /// Builds container for Binance.
         /// </summary>
-        /// <param name="algorithm">The type of the algorithm</param>
-        /// <returns>Binance container with providers</returns>
+        /// <param name="algorithm">The type of the algorithm.</param>
+        /// <returns>Binance container with providers.</returns>
         public ExchangeProvidersContainer BuildContainer(Type algorithm)
         {
             var algorithmSettings = _settingsService.GetAlgorithSettings(algorithm);
@@ -80,13 +96,13 @@ namespace SpreadShare.ExchangeServices
         private ExchangeProvidersContainer BuildBinanceContainer(AlgorithmSettings settings, WeakAllocationManager allocationManager)
         {
             // Makes sure that the communication is enabled
-           _binanceCommunications.Connect();
+            _binanceCommunications.Connect();
+            var timerProvider = new ExchangeTimerProvider();
             var dataImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
-            var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications);
+            var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications, timerProvider);
 
             var dataProvider = new DataProvider(dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
-            var timerProvider = new ExchangeTimerProvider();
             return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider);
         }
 

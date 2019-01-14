@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 
 namespace SpreadShare.ExchangeServices.Providers.Observing
@@ -7,7 +7,7 @@ namespace SpreadShare.ExchangeServices.Providers.Observing
     /// Observer class that allows implementations to only override the required
     /// functions (<see cref="OnCompleted"/>, <see cref="OnError"/>, <see cref="OnNext"/>).
     /// </summary>
-    /// <typeparam name="T">Type of the data returned to the observer</typeparam>
+    /// <typeparam name="T">Type of the data returned to the observer.</typeparam>
     internal abstract class Observer<T> : IObserver<T>
     {
         private readonly IDisposable _unsubscriber;
@@ -15,7 +15,7 @@ namespace SpreadShare.ExchangeServices.Providers.Observing
         /// <summary>
         /// Initializes a new instance of the <see cref="Observer{T}"/> class.
         /// </summary>
-        /// <param name="observable"><see cref="Observable{T}"/> to subscribe to</param>
+        /// <param name="observable"><see cref="Observable{T}"/> to subscribe to.</param>
         protected Observer(IObservable<T> observable) => _unsubscriber = observable.Subscribe(this);
 
         /// <inheritdoc />

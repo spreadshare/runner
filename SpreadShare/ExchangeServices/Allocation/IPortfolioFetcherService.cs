@@ -1,4 +1,4 @@
-﻿using SpreadShare.Models;
+using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 
 namespace SpreadShare.ExchangeServices.Allocation
@@ -11,8 +11,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <summary>
         /// Gets the portfolio of the user.
         /// </summary>
-        /// <returns>The portfolio</returns>
-        /// <param name="exchange">Exchange to be used</param>
+        /// <returns>The portfolio.</returns>
+        /// <param name="exchange">Exchange to be used.</param>
         ResponseObject<Portfolio> GetPortfolio(Exchange exchange);
     }
 }

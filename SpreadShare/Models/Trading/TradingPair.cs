@@ -6,7 +6,7 @@ using Dawn;
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
-    /// Object representation of a trading pair
+    /// Object representation of a trading pair.
     /// </summary>
     internal class TradingPair
     {
@@ -15,39 +15,47 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Initializes a new instance of the <see cref="TradingPair"/> class.
         /// </summary>
-        /// <param name="left">Left side of the trading pair</param>
-        /// <param name="right">Right side of the trading pair</param>
-        /// <param name="decimals">Number of decimals the trading pair can be expressed in</param>
-        public TradingPair(Currency left, Currency right, int decimals)
+        /// <param name="left">Left side of the trading pair.</param>
+        /// <param name="right">Right side of the trading pair.</param>
+        /// <param name="quantityDecimals">Number of decimals the TradingPairs' volume can be expressed in.</param>
+        /// <param name="priceDecimals">Number of decimals the TradingPairs' price can be expressed in. </param>
+        public TradingPair(Currency left, Currency right, int quantityDecimals, int priceDecimals)
         {
             Guard.Argument(left).NotNull().NotEqual(Guard.Argument(right).NotNull());
-            Guard.Argument(decimals).NotNegative();
+            Guard.Argument(quantityDecimals).NotNegative();
+            Guard.Argument(priceDecimals).NotNegative();
 
             Left = left;
             Right = right;
-            Decimals = decimals;
+            QuantityDecimals = quantityDecimals;
+            PriceDecimals = priceDecimals;
         }
 
         /// <summary>
-        /// Gets the left side of the trading pair
+        /// Gets the left side of the trading pair.
         /// </summary>
         public Currency Left { get; }
 
         /// <summary>
-        /// Gets the right side of the trading pair
+        /// Gets the right side of the trading pair.
         /// </summary>
         public Currency Right { get; }
 
         /// <summary>
-        /// Gets the number of decimals
+        /// Gets the number of quantityDecimals.
         /// </summary>
-        public int Decimals { get; }
+        public int QuantityDecimals { get; }
 
         /// <summary>
-        /// This function adds a parse option tot the table, this should only be used to initialize the environment
+        /// Gets the number of priceDecimals.
         /// </summary>
-        /// <param name="tradingPairString">String representation of the trading pair</param>
-        /// <param name="tradingPair">The trading pair</param>
+        public int PriceDecimals { get; }
+
+        /// <summary>
+        /// This function adds a parse option tot the table, this should only be used to initialize the environment.
+        /// </summary>
+        /// <param name="tradingPairString">String representation of the trading pair.</param>
+        /// <param name="tradingPair">The trading pair.</param>
         public static void AddParseEntry(string tradingPairString, TradingPair tradingPair)
         {
             Guard.Argument(tradingPairString).NotNull().NotEmpty().NotWhiteSpace();
@@ -66,10 +74,10 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Parse given string to trading pair
+        /// Parse given string to trading pair.
         /// </summary>
-        /// <param name="tradingPairString">String representation of tradingPair</param>
-        /// <returns>The trading pair matching the string</returns>
+        /// <param name="tradingPairString">String representation of tradingPair.</param>
+        /// <returns>The trading pair matching the string.</returns>
         public static TradingPair Parse(string tradingPairString)
         {
             Guard.Argument(tradingPairString).NotNull().NotEmpty().NotWhiteSpace();
@@ -86,11 +94,11 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Parse given two currencies
+        /// Parse given two currencies.
         /// </summary>
-        /// <param name="left">Left currency</param>
-        /// <param name="right">Right currency</param>
-        /// <returns>Parsed trading pair</returns>
+        /// <param name="left">Left currency.</param>
+        /// <param name="right">Right currency.</param>
+        /// <returns>Parsed trading pair.</returns>
         public static TradingPair Parse(Currency left, Currency right)
         {
             Guard.Argument(left).NotNull();
@@ -106,22 +114,34 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Round unrounded quantity to the tradable quantity conform to the TradingPair's specification
+        /// Round unrounded quantity to the tradable quantity conform to the TradingPairs' specification.
         /// </summary>
-        /// <param name="quantity">Unrounded quantity</param>
-        /// <returns>Rounded quantity</returns>
+        /// <param name="quantity">Unrounded quantity.</param>
+        /// <returns>Rounded quantity.</returns>
         public decimal RoundToTradable(decimal quantity)
         {
             Guard.Argument(quantity).NotNegative(x => $"Quantity is negative namely: {x}");
-            decimal value = Math.Round(quantity, Decimals);
-            return value <= quantity ? value : value - (decimal)Math.Pow(10, -Decimals);
+            decimal value = Math.Round(quantity, QuantityDecimals);
+            return value <= quantity ? value : value - (decimal)Math.Pow(10, -QuantityDecimals);
         }
 
         /// <summary>
-        /// Round unrounded balance to tradable quantity conform to the TradingPair's specification
+        /// Round unrounded price to a priceable amount conform the the TradingPairs' specification.
         /// </summary>
-        /// <param name="balance">Balance to round</param>
-        /// <returns>Rounded Balance</returns>
+        /// <param name="price">Unrounded price.</param>
+        /// <returns>Rounded price.</returns>
+        public decimal RoundToPriceable(decimal price)
+        {
+            Guard.Argument(price).NotNegative(x => $"Price is negative name: {x}");
+            decimal value = Math.Round(price, PriceDecimals);
+            return value <= price ? value : value - (decimal)Math.Pow(10, -PriceDecimals);
+        }
+
+        /// <summary>
+        /// Round unrounded balance to tradable quantity conform to the TradingPair's specification.
+        /// </summary>
+        /// <param name="balance">Balance to round.</param>
+        /// <returns>Rounded Balance.</returns>
         public Balance RoundToTradable(Balance balance)
         {
             return new Balance(
@@ -131,9 +151,9 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Returns a string representation of the trading pair
+        /// Returns a string representation of the trading pair.
         /// </summary>
-        /// <returns>A string representation of the trading pair</returns>
+        /// <returns>A string representation of the trading pair.</returns>
         public override string ToString()
         {
             return $"{Left}{Right}";

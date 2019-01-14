@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using Binance.Net;
@@ -11,14 +11,14 @@ using Xunit.Abstractions;
 namespace SpreadShare.Tests.UserService
 {
     /// <summary>
-    /// Tests of the <ListenKeyManager cref="ListenKeyManager"/> class
+    /// Tests of the <ListenKeyManager cref="ListenKeyManager"/> class.
     /// </summary>
     public class ListenKeyManagerTests : BaseTest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ListenKeyManagerTests"/> class.
         /// </summary>
-        /// <param name="outputHelper">Output helper that writes to TestOutput</param>
+        /// <param name="outputHelper">Output helper that writes to TestOutput.</param>
         public ListenKeyManagerTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
@@ -26,7 +26,7 @@ namespace SpreadShare.Tests.UserService
 
         /// <summary>
         /// Tests if a ListenKey can be obtained
-        /// Assumption: Correct API Credentials
+        /// Assumption: Correct API Credentials.
         /// </summary>
         [Fact]
         public void ListenKeyObtainTest()
@@ -48,7 +48,7 @@ namespace SpreadShare.Tests.UserService
 
         /// <summary>
         /// Validates that an error response is given when the API
-        /// Credentials are wrong
+        /// Credentials are wrong.
         /// </summary>
         [Fact]
         public void ListenKeyInvalidCredentialsTest()
@@ -65,7 +65,7 @@ namespace SpreadShare.Tests.UserService
         }
 
         /// <summary>
-        /// Tests whether the listenkey is automatically renewed
+        /// Tests whether the listenkey is automatically renewed.
         /// </summary>
         [Fact]
         public void ListenKeyRenewalTest()
@@ -90,10 +90,10 @@ namespace SpreadShare.Tests.UserService
         }
 
         /// <summary>
-        /// Create a valid ListenKeyManager
+        /// Create a valid ListenKeyManager.
         /// </summary>
-        /// <param name="interval">Autorenewal interval</param>
-        /// <returns>Valid ListenKeyManager</returns>
+        /// <param name="interval">Autorenewal interval.</param>
+        /// <returns>Valid ListenKeyManager.</returns>
         private static ListenKeyManager Setup(int interval)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
@@ -111,10 +111,10 @@ namespace SpreadShare.Tests.UserService
         }
 
         /// <summary>
-        /// Create an invalid ListenKeyManager (wrong credentials)
+        /// Create an invalid ListenKeyManager (wrong credentials).
         /// </summary>
-        /// <param name="interval">Autorenewal interval</param>
-        /// <returns>ListenKeyManager with incorrect credentials</returns>
+        /// <param name="interval">Autorenewal interval.</param>
+        /// <returns>ListenKeyManager with incorrect credentials.</returns>
         private static ListenKeyManager SetupInvalidCredentials(int interval)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;

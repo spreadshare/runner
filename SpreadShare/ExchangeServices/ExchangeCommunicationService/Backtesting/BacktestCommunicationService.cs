@@ -6,7 +6,7 @@ using SpreadShare.SupportServices.SettingsServices;
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting
 {
     /// <summary>
-    /// Mocking class for faking communication with a remote exchange
+    /// Mocking class for faking communication with a remote exchange.
     /// </summary>
     internal class BacktestCommunicationService : ExchangeCommunications
     {
@@ -15,8 +15,8 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestCommunicationService"/> class.
         /// </summary>
-        /// <param name="settings">Injected settings service</param>
-        /// <param name="factory">Injected loggin service</param>
+        /// <param name="settings">Injected settings service.</param>
+        /// <param name="factory">Injected loggin service.</param>
         public BacktestCommunicationService(SettingsService settings, ILoggerFactory factory)
         {
             _logger = factory.CreateLogger(GetType());

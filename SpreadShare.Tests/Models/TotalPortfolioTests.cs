@@ -69,13 +69,13 @@ namespace SpreadShare.Tests.Models
             total.SetAlgorithmAllocation(algo1, new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 2.001M, 4) },
-                { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) }
+                { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) },
             }));
 
             total.SetAlgorithmAllocation(algo2, new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 5, 40) },
-                { new Currency("BTC"), new Balance(new Currency("BTC"), -6, 32.00000000001M) }
+                { new Currency("BTC"), new Balance(new Currency("BTC"), -6, 32.00000000001M) },
             }));
 
             Assert.Equal(2.001M, total.GetAlgorithmAllocation(algo1).GetAllocation(new Currency("ETH")).Free);
@@ -121,13 +121,13 @@ namespace SpreadShare.Tests.Models
             total.SetAlgorithmAllocation(algo, new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 2.001M, 4) },
-                { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) }
+                { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) },
             }));
 
             total.SetAlgorithmAllocation(algo, new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 5, 40) },
-                { new Currency("BTC"), new Balance(new Currency("BTC"), -6, 32.00000000001M) }
+                { new Currency("BTC"), new Balance(new Currency("BTC"), -6, 32.00000000001M) },
             }));
 
             Assert.Equal(5, total.GetAlgorithmAllocation(algo).GetAllocation(new Currency("ETH")).Free);
@@ -147,7 +147,7 @@ namespace SpreadShare.Tests.Models
             total.SetAlgorithmAllocation(algo, new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 2.001M, 4) },
-                { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) }
+                { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) },
             }));
 
             Assert.True(total.IsAllocated(algo));
@@ -164,7 +164,7 @@ namespace SpreadShare.Tests.Models
             total.SetAlgorithmAllocation(typeof(TemplateAlgorithm), new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 2.001M, 4) },
-                { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) }
+                { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) },
             }));
 
             Assert.False(total.IsAllocated(algo));
@@ -220,7 +220,7 @@ namespace SpreadShare.Tests.Models
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 2.002M, 2345342) },
                 { new Currency("BTC"), new Balance(new Currency("BTC"), -4, 1) },
-                { new Currency("BNB"), new Balance(new Currency("BNB"), -6, 9000.000000001M) }
+                { new Currency("BNB"), new Balance(new Currency("BNB"), -6, 9000.000000001M) },
             }));
 
             var summed = total.GetSummedChildren();
@@ -241,7 +241,7 @@ namespace SpreadShare.Tests.Models
             total.SetAlgorithmAllocation(algo, new Portfolio(new Dictionary<Currency, Balance>
             {
                 { new Currency("ETH"), new Balance(new Currency("ETH"), 2.001M, 4) },
-                { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) }
+                { new Currency("BTC"), new Balance(new Currency("BTC"), 7, 1) },
             }));
 
             return total;

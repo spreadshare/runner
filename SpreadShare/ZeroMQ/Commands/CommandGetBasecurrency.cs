@@ -1,7 +1,7 @@
-﻿namespace SpreadShare.ZeroMQ.Commands
+namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to retrieve the base currency
+    /// Command to retrieve the base currency.
     /// </summary>
     internal class CommandGetBasecurrency : Command
     {

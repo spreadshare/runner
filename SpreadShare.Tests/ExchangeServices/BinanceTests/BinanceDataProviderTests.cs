@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 namespace SpreadShare.Tests.ExchangeServices.BinanceTests
 {
     /// <summary>
-    /// Tests for binance data provider
+    /// Tests for binance data provider.
     /// </summary>
     public class BinanceDataProviderTests : BaseProviderTests
     {
@@ -16,7 +16,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceDataProviderTests"/> class.
         /// </summary>
-        /// <param name="outputHelper">Used to create output</param>
+        /// <param name="outputHelper">Used to create output.</param>
         public BinanceDataProviderTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
@@ -24,9 +24,9 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
         }
 
         /// <summary>
-        /// Check if the last trade price is a non zero decimal
+        /// Check if the last trade price is a non zero decimal.
         /// </summary>
-        /// <param name="input">String representation of the pair</param>
+        /// <param name="input">String representation of the pair.</param>
         [Theory]
         [InlineData("BNBETH")]
         [InlineData("VETETH")]
@@ -44,9 +44,9 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
         }
 
         /// <summary>
-        /// Check if the top bid is lower than lowest ask
+        /// Check if the top bid is lower than lowest ask.
         /// </summary>
-        /// <param name="input">String representation of the pair</param>
+        /// <param name="input">String representation of the pair.</param>
         [Theory]
         [InlineData("XRPBTC")]
         [InlineData("NEOBNB")]
