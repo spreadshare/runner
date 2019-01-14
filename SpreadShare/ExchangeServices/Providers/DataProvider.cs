@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Dawn;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
@@ -77,6 +79,37 @@ namespace SpreadShare.ExchangeServices.Providers
         public ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
         {
             return _implementation.GetTopPerformance(pairs, hoursBack);
+        }
+
+        /// <summary>
+        /// Get the Average True Range of a certain number of minute candles.
+        /// </summary>
+        /// <param name="pair">TradingPair.</param>
+        /// <param name="numberOfCandles">Number of candles to evaluate.</param>
+        /// <returns>ResponseObject containing the Average True Range.</returns>
+        public ResponseObject<decimal> GetAverageTrueRange(TradingPair pair, int numberOfCandles)
+        {
+            Guard.Argument(numberOfCandles).Require(x => x >= 2, x => $"Average true range needs at least 2 candles");
+            var candles = _implementation.GetMinuteCandles(pair, numberOfCandles).Data.ToArray();
+            decimal highLow = candles.Max(x => x.High - x.Low);
+            decimal highPreviousClose = 0;
+            decimal lowPreviousClose = 0;
+            for (int i = 1; i < candles.Length; i++)
+            {
+                decimal highPreviousCloseValue = candles[i].High - candles[i - 1].Close;
+                if (highPreviousCloseValue > highPreviousClose)
+                {
+                    highPreviousClose = highPreviousCloseValue;
+                }
+
+                decimal lowPreviousCloseValue = candles[i].Low - candles[i - 1].Close;
+                if (lowPreviousCloseValue > lowPreviousClose)
+                {
+                    lowPreviousClose = lowPreviousCloseValue;
+                }
+            }
+
+            return new ResponseObject<decimal>(ResponseCode.Success, (highLow + highPreviousClose + lowPreviousClose) / 3M);
         }
 
         /// <summary>

@@ -65,6 +65,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
+        public override ResponseObject<BacktestingCandle[]> GetMinuteCandles(TradingPair pair, int limit)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
         public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
         {
             if (hoursBack <= 0)
