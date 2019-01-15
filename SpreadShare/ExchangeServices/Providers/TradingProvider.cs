@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
@@ -98,6 +99,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate ExecuteMarketOrderBuy(TradingPair pair, decimal quantity)
         {
+            Guard.Argument(pair).NotNull(nameof(pair));
             var currency = pair.Right;
             var priceEstimate = _dataProvider.GetCurrentPriceTopAsk(pair);
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * priceEstimate, 0));
@@ -128,6 +130,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate ExecuteMarketOrderSell(TradingPair pair, decimal quantity)
         {
+            Guard.Argument(pair).NotNull(nameof(pair));
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
@@ -163,6 +166,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
+            Guard.Argument(pair).NotNull(nameof(pair));
             var currency = pair.Right;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
@@ -193,6 +197,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
         {
+            Guard.Argument(pair).NotNull(nameof(pair));
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
@@ -338,6 +343,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>boolean indicating success.</returns>
         public bool CancelOrder(OrderUpdate order)
         {
+            Guard.Argument(order).NotNull(nameof(order));
             TradeExecution exec;
             if (order.Side == OrderSide.Buy)
             {
@@ -372,6 +378,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>OrderUpdate object containing the state of the order.</returns>
         public OrderUpdate GetOrderInfo(TradingPair pair, long orderId)
         {
+            Guard.Argument(pair).NotNull(nameof(pair));
             var query = HelperMethods.RetryMethod(() => _implementation.GetOrderInfo(pair, orderId), _logger);
             if (query.Success)
             {
