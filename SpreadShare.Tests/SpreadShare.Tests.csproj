@@ -46,4 +46,10 @@
     <DotNetCliToolReference Include="MiniCover" Version="2.0.0-ci-*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Models\Poco\AdministratorSettingsPocoTest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -1,7 +1,7 @@
 using System;
 using Dawn;
 using Newtonsoft.Json;
-using SpreadShare.Models.Serializers;
+using SpreadShare.Serializers;
 
 namespace SpreadShare.Models.Trading
 {

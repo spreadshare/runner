@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;

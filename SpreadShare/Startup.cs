@@ -10,6 +10,7 @@ using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.ErrorServices;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare
@@ -115,6 +116,9 @@ namespace SpreadShare
 
             // Configuration files globals
             services.AddSingleton<SettingsService, SettingsService>();
+
+            // Error service
+            services.AddSingleton<ErrorService, ErrorService>();
 
             // Add Portfolio fetching
             services.AddSingleton<IPortfolioFetcherService, PortfolioFetcherService>();

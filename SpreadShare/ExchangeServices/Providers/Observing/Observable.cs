@@ -33,9 +33,10 @@ namespace SpreadShare.ExchangeServices.Providers.Observing
         /// <param name="data">New data.</param>
         protected void UpdateObservers(T data)
         {
-            foreach (var observer in _observers)
+            // This can't be a foreach loop because the observer list can mutate during iteration
+            for (int i = 0; i < _observers.Count; i++)
             {
-                observer.OnNext(data);
+                _observers[i].OnNext(data);
             }
         }
 
