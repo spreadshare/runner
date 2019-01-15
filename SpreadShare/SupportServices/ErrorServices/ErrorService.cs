@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Net.Mail;
+using System.Reflection.Emit;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
@@ -69,21 +70,23 @@ namespace SpreadShare.SupportServices.ErrorServices
             StackFrame stackFrame,
             string msg)
         {
-            string errorMsg = GetReport(algorithm, state, stackFrame, msg);
+            stackFrame = stackFrame ?? new StackFrame();
+            string algorithmName = algorithm.Name ?? "Null";
+            string errorMsg = GetReport(algorithmName, state, stackFrame, msg);
             _logger.LogError(errorMsg);
-            _logger.LogCritical($"Attempting to stop {algorithm.Name}");
+            _logger.LogCritical($"Attempting to stop {algorithmName}");
             var query = _algorithmService.StopAlgorithm(algorithm);
             if (!query.Success)
             {
-                _logger.LogError($"{algorithm.Name} could not be stopped, shutting down");
+                _logger.LogError($"{algorithmName} could not be stopped, shutting down");
                 SendReport(
                     "Program killed",
-                    $"The program was killed after {algorithm.Name} reported a critical error but was unsuccessfully stopped \n\n {errorMsg}");
+                    $"The program was killed after {algorithmName} reported a critical error but was unsuccessfully stopped \n\n {errorMsg}");
                 Program.ExitProgramWithCode(ExitCode.AlgorithmNotStopping);
             }
 
-            _logger.LogCritical($"{algorithm.Name} successfully killed");
-            SendReport($"{algorithm.Name} Killed", errorMsg);
+            _logger.LogCritical($"{algorithmName} successfully killed");
+            SendReport($"{algorithmName} Killed", errorMsg);
         }
 
         /// <inheritdoc />
@@ -105,10 +108,10 @@ namespace SpreadShare.SupportServices.ErrorServices
             }
         }
 
-        private static string GetReport(Type algorithm, string state, StackFrame stackFrame, string msg)
+        private static string GetReport(string algorithm, string state, StackFrame stackFrame, string msg)
         {
             return $"UTC Timestamp: {DateTimeOffset.UtcNow}\n" +
-                   $"Algorithm: {algorithm.Name}\n" +
+                   $"Algorithm: {algorithm}\n" +
                    $"State: {state}\n" +
                    $"Method: {stackFrame.GetMethod().Name}\n" +
                    $"File: {stackFrame.GetFileName()}\n" +
