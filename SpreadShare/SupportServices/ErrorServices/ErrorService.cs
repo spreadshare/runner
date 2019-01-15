@@ -1,6 +1,6 @@
 using System;
+using System.Diagnostics;
 using System.Net.Mail;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
@@ -60,18 +60,16 @@ namespace SpreadShare.SupportServices.ErrorServices
         /// Report an error to the administrator list and shutdown the Algorithm.
         /// </summary>
         /// <param name="algorithm">The algorithm to stop.</param>
+        /// <param name="state">The state the algorithm was in.</param>
+        /// <param name="stackFrame">The stackframe associated with the exception that caused the error.</param>
         /// <param name="msg">The message accompanying the report.</param>
-        /// <param name="callerName">callerName is inserted at runtime.</param>
-        /// <param name="fileName">fileName is inserted at runtime.</param>
-        /// <param name="lineNumber">lineNumber is inserted at runtime.</param>
         public void ReportCriticalError(
             Type algorithm,
-            string msg,
-            [CallerMemberName] string callerName = "",
-            [CallerFilePath] string fileName = "",
-            [CallerLineNumber] int lineNumber = 0)
+            string state,
+            StackFrame stackFrame,
+            string msg)
         {
-            string errorMsg = GetReport(algorithm, callerName, fileName, lineNumber, msg);
+            string errorMsg = GetReport(algorithm, state, stackFrame, msg);
             _logger.LogError(errorMsg);
             _logger.LogCritical($"Attempting to stop {algorithm.Name}");
             var query = _algorithmService.StopAlgorithm(algorithm);
@@ -80,7 +78,7 @@ namespace SpreadShare.SupportServices.ErrorServices
                 _logger.LogError($"{algorithm.Name} could not be stopped, shutting down");
                 SendReport(
                     "Program killed",
-                    $"The program was killed after {algorithm.Name}.{callerName} reported a critical error but was unsuccessfully stopped \n\n {errorMsg}");
+                    $"The program was killed after {algorithm.Name} reported a critical error but was unsuccessfully stopped \n\n {errorMsg}");
                 Program.ExitProgramWithCode(ExitCode.AlgorithmNotStopping);
             }
 
@@ -107,14 +105,15 @@ namespace SpreadShare.SupportServices.ErrorServices
             }
         }
 
-        private static string GetReport(Type algorithm, string method, string file, int line, string msg)
+        private static string GetReport(Type algorithm, string state, StackFrame stackFrame, string msg)
         {
-            return $"UTC Timestamp: {DateTimeOffset.UtcNow}" +
+            return $"UTC Timestamp: {DateTimeOffset.UtcNow}\n" +
                    $"Algorithm: {algorithm.Name}\n" +
-                   $"Method: {method}\n" +
-                   $"File: {file}\n" +
-                   $"Line: {line}\n" +
-                   $"Message: {msg}";
+                   $"State: {state}\n" +
+                   $"Method: {stackFrame.GetMethod().Name}\n" +
+                   $"File: {stackFrame.GetFileName()}\n" +
+                   $"Line: {stackFrame.GetFileLineNumber()}\n" +
+                   $"Message: {msg}\n";
         }
 
         private void SendReport(string header, string message)

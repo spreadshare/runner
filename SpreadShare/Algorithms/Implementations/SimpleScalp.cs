@@ -33,16 +33,16 @@ namespace SpreadShare.Algorithms.Implementations
 
         private class EntryState : EntryState<SimpleScalpSettings>
         {
-            private OrderUpdate limitsell;
+            private OrderUpdate _limitsell;
 
             public override State<SimpleScalpSettings> OnTimerElapsed()
             {
-                return new StopState(limitsell);
+                return new StopState(_limitsell);
             }
 
             public override State<SimpleScalpSettings> OnOrderUpdate(OrderUpdate order)
             {
-                if (order.Status == OrderUpdate.OrderStatus.Filled && order.OrderId == limitsell.OrderId)
+                if (order.Status == OrderUpdate.OrderStatus.Filled && order.OrderId == _limitsell.OrderId)
                 {
                     return new WaitState();
                 }
@@ -53,12 +53,12 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 OrderUpdate buyorder =
-                    trading.ExecuteFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First()).Data;
+                    trading.ExecuteFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
                 Portfolio portfolio = trading.GetPortfolio();
-                limitsell = trading.PlaceLimitOrderSell(
+                _limitsell = trading.PlaceLimitOrderSell(
                     AlgorithmSettings.ActiveTradingPairs.First(),
                     portfolio.GetAllocation(AlgorithmSettings.ActiveTradingPairs.First().Left).Free,
-                    buyorder.AverageFilledPrice * AlgorithmSettings.TakeProfit).Data;
+                    buyorder.AverageFilledPrice * AlgorithmSettings.TakeProfit);
                 SetTimer(TimeSpan.FromHours(AlgorithmSettings.StopTime));
             }
         }
@@ -94,8 +94,8 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 trading.CancelOrder(oldlimit);
-                OrderUpdate mktsell = trading.ExecuteFullMarketOrderSell(AlgorithmSettings.ActiveTradingPairs.First())
-                    .Data;
+
+                // OrderUpdate mktsell = trading.ExecuteFullMarketOrderSell(AlgorithmSettings.ActiveTradingPairs.First());
                 SetTimer(TimeSpan.Zero);
             }
         }

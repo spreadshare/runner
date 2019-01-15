@@ -21,6 +21,8 @@ namespace SpreadShare.ExchangeServices.Providers
                 UpdateObservers(DateTimeOffset.Now.ToUnixTimeMilliseconds());
                 await Task.Delay(2000).ConfigureAwait(false);
             }
+
+            // ReSharper disable once FunctionNeverReturns
         }
     }
 }

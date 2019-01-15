@@ -5,7 +5,7 @@ namespace SpreadShare.Models.Exceptions
     /// <summary>
     /// Exception thrown when an email address is invalid.
     /// </summary>
-    public class InvalidEmailException : Exception
+    public class InvalidEmailException : InvalidConfigurationException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidEmailException"/> class.

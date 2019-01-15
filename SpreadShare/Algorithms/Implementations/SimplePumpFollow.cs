@@ -37,10 +37,10 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 bool longPerformance = data.GetPerformancePastHours(
                                            AlgorithmSettings.ActiveTradingPairs.First(),
-                                           8).Data > (1 + AlgorithmSettings.FirstCheck);
+                                           8) > (1 + AlgorithmSettings.FirstCheck);
                 bool shortPerformance = data.GetPerformancePastHours(
                                             AlgorithmSettings.ActiveTradingPairs.First(),
-                                            3).Data < (1 - AlgorithmSettings.SecondCheck);
+                                            3) < (1 - AlgorithmSettings.SecondCheck);
                 if (longPerformance && shortPerformance)
                 {
                     return new BuyState();
@@ -56,14 +56,14 @@ namespace SpreadShare.Algorithms.Implementations
 
         private class BuyState : State<SimplePumpFollowSettings>
         {
-            private OrderUpdate limitsell;
-            private bool stophit;
+            private OrderUpdate _limitsell;
+            private bool _stophit;
 
             public override State<SimplePumpFollowSettings> OnMarketCondition(DataProvider data)
             {
-                if (stophit)
+                if (_stophit)
                 {
-                    return new StopState(limitsell);
+                    return new StopState(_limitsell);
                 }
 
                 return new NothingState<SimplePumpFollowSettings>();
@@ -71,12 +71,12 @@ namespace SpreadShare.Algorithms.Implementations
 
             public override State<SimplePumpFollowSettings> OnTimerElapsed()
             {
-                return new StopState(limitsell);
+                return new StopState(_limitsell);
             }
 
             public override State<SimplePumpFollowSettings> OnOrderUpdate(OrderUpdate order)
             {
-                if (order.OrderId == limitsell.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                if (order.OrderId == _limitsell.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return new EntryState();
                 }
@@ -87,15 +87,15 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 var buyorder = trading.ExecuteFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
-                limitsell = trading.PlaceFullLimitOrderSell(
+                _limitsell = trading.PlaceFullLimitOrderSell(
                     AlgorithmSettings.ActiveTradingPairs.First(),
-                    buyorder.Data.AverageFilledPrice * AlgorithmSettings.ProfitTake).Data;
+                    buyorder.AverageFilledPrice * AlgorithmSettings.ProfitTake);
                 SetTimer(TimeSpan.FromHours(AlgorithmSettings.StopTime));
 
-                var currentPrice = data.GetCurrentPriceLastTrade(AlgorithmSettings.ActiveTradingPairs.First()).Data;
-                var sellPrice = buyorder.Data.AverageFilledPrice * AlgorithmSettings.StopPrice;
+                var currentPrice = data.GetCurrentPriceLastTrade(AlgorithmSettings.ActiveTradingPairs.First());
+                var sellPrice = buyorder.AverageFilledPrice * AlgorithmSettings.StopPrice;
 
-                stophit = currentPrice < sellPrice;
+                _stophit = currentPrice < sellPrice;
             }
         }
 

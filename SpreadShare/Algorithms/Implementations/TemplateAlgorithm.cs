@@ -34,8 +34,7 @@ namespace SpreadShare.Algorithms.Implementations
         {
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                Logger.LogInformation("Placing full buy market order");
-                trading.ExecuteFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
+                Logger.LogInformation("Placing full sell market order");
             }
         }
     }

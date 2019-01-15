@@ -56,6 +56,8 @@ namespace SpreadShare.Tests
                 {
                     Thread.Sleep(1000);
                 }
+
+                // ReSharper disable once FunctionNeverReturns
             });
             t.Start();
             t.Join();

@@ -22,7 +22,7 @@ namespace SpreadShare.Tests.Algorithms
         [Fact]
         public void ConstructorHappyFlow()
         {
-            var state = new TestState();
+            var unused = new TestState();
         }
 
         [Fact]
