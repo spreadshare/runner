@@ -34,7 +34,7 @@ namespace SpreadShare.Algorithms.Implementations
         {
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                Logger.LogInformation("Placing full sell market order");
+                Logger.LogInformation("I wonder if Miss Bitcoin think I should buy...");
             }
         }
     }
