@@ -95,13 +95,17 @@ namespace SpreadShare.SupportServices.SettingsServices
             try
             {
                 // Enables parsing functionality for currencies and should be called first.
-                AdministratorSettings = new AdministratorSettings(
-                    _configuration
-                        .GetSection(nameof(AdministratorSettings))
-                        .Get<AdministratorSettingsPoco>(opt => opt.BindNonPublicProperties = true));
-                ParseAllocationSettings();
                 DownloadCurrencies();
                 ParseAlgorithmSettings();
+                if (Program.CommandLineArgs.Trading)
+                {
+                    AdministratorSettings = new AdministratorSettings(
+                        _configuration
+                            .GetSection(nameof(AdministratorSettings))
+                            .Get<AdministratorSettingsPoco>(opt => opt.BindNonPublicProperties = true));
+                }
+
+                ParseAllocationSettings();
                 BinanceSettings = _configuration.GetSection("BinanceClientSettings").Get<BinanceSettings>();
                 BackTestSettings = ParseBacktestSettings();
             }

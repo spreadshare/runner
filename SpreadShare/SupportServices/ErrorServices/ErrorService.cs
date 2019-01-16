@@ -71,7 +71,7 @@ namespace SpreadShare.SupportServices.ErrorServices
             string msg)
         {
             stackFrame = stackFrame ?? new StackFrame();
-            string algorithmName = algorithm.Name ?? "Null";
+            string algorithmName = algorithm is null ? "Null" : algorithm.Name;
             string errorMsg = GetReport(algorithmName, state, stackFrame, msg);
             _logger.LogError(errorMsg);
             _logger.LogCritical($"Attempting to stop {algorithmName}");

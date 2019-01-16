@@ -87,6 +87,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public decimal GetPerformancePastHours(TradingPair pair, double hoursBack)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(hoursBack).NotZero().NotNegative();
             var query = HelperMethods.RetryMethod(() => _implementation.GetPerformancePastHours(pair, hoursBack), _logger);
             return query.Success
                 ? query.Data

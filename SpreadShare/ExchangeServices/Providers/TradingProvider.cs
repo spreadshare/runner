@@ -73,6 +73,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject with an OrderUpdate.</returns>
         public OrderUpdate ExecuteFullMarketOrderBuy(TradingPair pair)
         {
+            Guard.Argument(pair).NotNull();
             var currency = pair.Right;
             var balance = _allocationManager.GetAvailableFunds(currency);
             var quantity = GetBuyQuantityEstimate(pair, balance.Free);
@@ -86,6 +87,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject with an OrderUpdate.</returns>
         public OrderUpdate ExecuteFullMarketOrderSell(TradingPair pair)
         {
+            Guard.Argument(pair).NotNull();
             var currency = pair.Left;
             var balance = _allocationManager.GetAvailableFunds(currency);
             return ExecuteMarketOrderSell(pair, balance.Free);
@@ -233,6 +235,8 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceFullLimitOrderSell(TradingPair pair, decimal price)
         {
+            Guard.Argument(pair).NotNull();
+            Guard.Argument(price).NotNegative();
             var currency = pair.Left;
             var quantity = _allocationManager.GetAvailableFunds(currency).Free;
             return PlaceLimitOrderSell(pair, quantity, price);
@@ -246,6 +250,8 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing and OrderUpdate.</returns>
         public OrderUpdate PlaceFullLimitOrderBuy(TradingPair pair, decimal price)
         {
+            Guard.Argument(pair).NotNull();
+            Guard.Argument(price).NotNegative();
             var currency = pair.Right;
             var quantity = _allocationManager.GetAvailableFunds(currency).Free;
             decimal estimation = quantity / price;
@@ -329,6 +335,8 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceFullStoplossSell(TradingPair pair, decimal price)
         {
+            Guard.Argument(pair).NotNull();
+            Guard.Argument(price).NotNegative();
             var currency = pair.Left;
             decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
             return PlaceStoplossSell(pair, quantity, price);
@@ -342,6 +350,8 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceFullStoplossBuy(TradingPair pair, decimal price)
         {
+            Guard.Argument(pair).NotNull();
+            Guard.Argument(price).NotNegative();
             var currency = pair.Right;
             decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
             return PlaceStoplossBuy(pair, quantity, price);

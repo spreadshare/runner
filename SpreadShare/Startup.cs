@@ -118,7 +118,10 @@ namespace SpreadShare
             services.AddSingleton<SettingsService, SettingsService>();
 
             // Error service
-            services.AddSingleton<ErrorService, ErrorService>();
+            if (Program.CommandLineArgs.Trading)
+            {
+                services.AddSingleton<ErrorService, ErrorService>();
+            }
 
             // Add Portfolio fetching
             services.AddSingleton<IPortfolioFetcherService, PortfolioFetcherService>();
