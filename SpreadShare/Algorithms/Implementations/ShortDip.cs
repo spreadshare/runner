@@ -37,7 +37,7 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 bool performance = data.GetPerformancePastHours(
                                        AlgorithmSettings.ActiveTradingPairs.First(),
-                                       AlgorithmSettings.DipTime).Data < (1 - AlgorithmSettings.DipPercent);
+                                       AlgorithmSettings.DipTime) < (1 - AlgorithmSettings.DipPercent);
                 if (performance)
                 {
                     return new BuyState();
@@ -53,16 +53,16 @@ namespace SpreadShare.Algorithms.Implementations
 
         private class BuyState : State<ShortDipSettings>
         {
-            private OrderUpdate limitsell;
+            private OrderUpdate _limitsell;
 
             public override State<ShortDipSettings> OnTimerElapsed()
             {
-                return new CancelState(limitsell);
+                return new CancelState(_limitsell);
             }
 
             public override State<ShortDipSettings> OnOrderUpdate(OrderUpdate order)
             {
-                if (order.OrderId == limitsell.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                if (order.OrderId == _limitsell.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return new EntryState();
                 }
@@ -73,9 +73,9 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 var buyorder = trading.ExecuteFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
-                limitsell = trading.PlaceFullLimitOrderSell(
+                _limitsell = trading.PlaceFullLimitOrderSell(
                     AlgorithmSettings.ActiveTradingPairs.First(),
-                    buyorder.Data.AverageFilledPrice * AlgorithmSettings.Recovery).Data;
+                    buyorder.AverageFilledPrice * AlgorithmSettings.Recovery);
                 SetTimer(TimeSpan.FromHours(AlgorithmSettings.StopTime));
             }
         }

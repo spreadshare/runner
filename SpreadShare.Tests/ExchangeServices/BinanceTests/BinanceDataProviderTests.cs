@@ -35,12 +35,8 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
             var pair = TradingPair.Parse(input);
             var data = _container.DataProvider;
             var query = data.GetCurrentPriceTopAsk(pair);
-            if (!query.Success)
-            {
-                Assert.True(false, query.ToString());
-            }
 
-            Assert.True(query.Data > 0, $"{query.Data} is not a valid price ({pair})");
+            Assert.True(query > 0, $"{query} is not a valid price ({pair})");
         }
 
         /// <summary>
@@ -56,12 +52,8 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
             var data = _container.DataProvider;
             var topAsk = data.GetCurrentPriceTopAsk(pair);
             var topBid = data.GetCurrentPriceTopBid(pair);
-            if (!topAsk.Success || !topBid.Success)
-            {
-                Assert.True(false, $"{topAsk}\n{topBid}");
-            }
 
-            Assert.True(topAsk.Data > topBid.Data, $"Top bid is higher than lowest ask (bid: {topBid.Data}, ask: {topAsk.Data}");
+            Assert.True(topAsk > topBid, $"Top bid is higher than lowest ask (bid: {topBid}, ask: {topAsk}");
         }
     }
 }

@@ -83,8 +83,10 @@ namespace SpreadShare
         {
             ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
             SettingsService settings = serviceProvider.GetService<SettingsService>();
-            ErrorService errorService = serviceProvider.GetService<ErrorService>();
-            errorService.Bind();
+            if (CommandLineArgs.Trading)
+            {
+                serviceProvider.GetService<ErrorService>().Bind();
+            }
 
             // Check if allocation either completely set as backtesting, or the --trading flag was used
             if (!CommandLineArgs.Trading)

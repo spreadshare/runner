@@ -3,7 +3,7 @@ namespace SpreadShare.SupportServices.ErrorServices
     /// <summary>
     /// Enumeration of exit codes.
     /// </summary>
-    internal enum ExitCode
+    public enum ExitCode
     {
         /// <summary>
         /// Successful termination

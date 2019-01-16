@@ -1,12 +1,15 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models.Database;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.ErrorServices;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare.Algorithms
@@ -15,7 +18,7 @@ namespace SpreadShare.Algorithms
     /// Object managing the active state and related resources.
     /// </summary>
     /// <typeparam name="T">The type of the parent algorithm settings.</typeparam>
-    internal class StateManager<T> : IDisposable
+    internal sealed class StateManager<T> : IDisposable
         where T : AlgorithmSettings
     {
         private readonly object _lock = new object();
@@ -103,15 +106,40 @@ namespace SpreadShare.Algorithms
             }
         }
 
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
         /// <summary>
         /// Evaluates the active state's market condition predicate.
         /// </summary>
-        public void OnMarketConditionEval()
+        private void OnMarketConditionEval()
         {
             lock (_lock)
             {
-                var next = _activeState.OnMarketCondition(Container.DataProvider);
-                SwitchState(next);
+                try
+                {
+                    var next = _activeState.OnMarketCondition(Container.DataProvider);
+                    SwitchState(next);
+                }
+                catch (ProviderException e)
+                {
+                    ErrorService.Instance.ReportCriticalError(
+                        Container.Algorithm,
+                        _activeState.GetType().Name,
+                        e.StackFrame,
+                        e.Message);
+                }
+                catch (Exception e)
+                {
+                    ErrorService.Instance.ReportCriticalError(
+                        Container.Algorithm,
+                        _activeState.GetType().Name,
+                        new StackFrame(),
+                        e.Message);
+                }
             }
         }
 
@@ -119,27 +147,39 @@ namespace SpreadShare.Algorithms
         /// Evaluates the active state's order update condition.
         /// </summary>
         /// <param name="order">Update of a certain order.</param>
-        public void OnOrderUpdateEval(OrderUpdate order)
+        private void OnOrderUpdateEval(OrderUpdate order)
         {
             lock (_lock)
             {
-                var next = _activeState.OnOrderUpdate(order);
-                SwitchState(next);
+                try
+                {
+                    var next = _activeState.OnOrderUpdate(order);
+                    SwitchState(next);
+                }
+                catch (ProviderException e)
+                {
+                    ErrorService.Instance.ReportCriticalError(
+                        Container.Algorithm,
+                        _activeState.GetType().Name,
+                        e.StackFrame,
+                        e.Message);
+                }
+                catch (Exception e)
+                {
+                    ErrorService.Instance.ReportCriticalError(
+                        Container.Algorithm,
+                        _activeState.GetType().Name,
+                        new StackFrame(),
+                        e.Message);
+                }
             }
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         /// <summary>
         /// Dispose the StateManager.
         /// </summary>
         /// <param name="disposing">Actually do it.</param>
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -197,11 +237,30 @@ namespace SpreadShare.Algorithms
         {
             lock (_lock)
             {
-                if (!_activeState.TimerTriggered && _activeState.EndTime <= Container.TimerProvider.CurrentTime)
+                try
                 {
-                    _activeState.TimerTriggered = true;
-                    var next = _activeState.OnTimerElapsed();
-                    SwitchState(next);
+                    if (!_activeState.TimerTriggered && _activeState.EndTime <= Container.TimerProvider.CurrentTime)
+                    {
+                        _activeState.TimerTriggered = true;
+                        var next = _activeState.OnTimerElapsed();
+                        SwitchState(next);
+                    }
+                }
+                catch (ProviderException e)
+                {
+                    ErrorService.Instance.ReportCriticalError(
+                        Container.Algorithm,
+                        _activeState.GetType().Name,
+                        e.StackFrame,
+                        e.Message);
+                }
+                catch (Exception e)
+                {
+                    ErrorService.Instance.ReportCriticalError(
+                        Container.Algorithm,
+                        _activeState.GetType().Name,
+                        new StackFrame(),
+                        e.Message);
                 }
             }
         }

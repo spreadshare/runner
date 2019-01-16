@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
@@ -116,44 +114,6 @@ namespace SpreadShare.Algorithms
         {
             // Sets initial configuration
             _allocationManager.SetInitialConfiguration(_settingsService.AllocationSettings);
-        }
-
-        /// <summary>
-        /// Gets the exchange from the algorithm settings.
-        /// </summary>
-        /// <param name="algorithmSettingsType">Type of the settings of the algorithm.</param>
-        /// <returns>The settings of the algorithm with configured values.</returns>
-        private ResponseObject<AlgorithmSettings> GetSettings(Type algorithmSettingsType)
-        {
-            // Get type of SettingsService as declared in Startup.cs
-            Type settingsType = _settingsService.GetType();
-
-            // Get public non-static properties in settings
-            var publicInstanceProperties = settingsType.GetProperties(
-                BindingFlags.Public | BindingFlags.Instance);
-
-            // Get all properties with returnType = algorithmSettingsType
-            List<PropertyInfo> list = publicInstanceProperties
-                .Where(methodInfo => methodInfo.PropertyType == algorithmSettingsType).ToList();
-
-            // Check if any property with searched settings return type is declared
-            if (list.Count < 1)
-            {
-                var msg = $"No settings could be found for {algorithmSettingsType}. " +
-                          "Did you add settings to appsettings.json?";
-                return new ResponseObject<AlgorithmSettings>(ResponseCode.Error, msg);
-            }
-
-            // Check if multiple properties with searched settings return type are declared
-            if (list.Count > 1)
-            {
-                var msg = $"Multiple settings were found for {algorithmSettingsType}. Do you have duplicate settings " +
-                          "in appsettings.json?";
-                return new ResponseObject<AlgorithmSettings>(ResponseCode.Error, msg);
-            }
-
-            return new ResponseObject<AlgorithmSettings>(
-                ResponseCode.Success, (AlgorithmSettings)list[0].GetValue(_settingsService));
         }
     }
 }

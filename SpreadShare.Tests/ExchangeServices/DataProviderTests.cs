@@ -20,7 +20,7 @@ namespace SpreadShare.Tests.ExchangeServices
         [Fact]
         public void AverageTrueRangeHappyFlow()
         {
-            Assert.True(_data.GetAverageTrueRange(TradingPair.Parse("VETETH"), 5).Success);
+            _data.GetAverageTrueRange(TradingPair.Parse("VETETH"), 5);
         }
     }
 }

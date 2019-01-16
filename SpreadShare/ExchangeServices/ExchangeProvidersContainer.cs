@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 
@@ -15,16 +16,19 @@ namespace SpreadShare.ExchangeServices
         /// <param name="dataProvider">Provides data gathering capabilities.</param>
         /// <param name="timerProvider">Provides timer and scheduling capabilities.</param>
         /// <param name="tradingProvider">Provides trading capabilities.</param>
+        /// <param name="algorithm">The algorithm to represent.</param>
         public ExchangeProvidersContainer(
             ILoggerFactory loggerFactory,
             DataProvider dataProvider,
             TimerProvider timerProvider,
-            TradingProvider tradingProvider)
+            TradingProvider tradingProvider,
+            Type algorithm)
         {
             LoggerFactory = loggerFactory;
             DataProvider = dataProvider;
             TimerProvider = timerProvider;
             TradingProvider = tradingProvider;
+            Algorithm = algorithm;
         }
 
         /// <summary>
@@ -46,5 +50,10 @@ namespace SpreadShare.ExchangeServices
         /// Gets the provider for trading capabilities.
         /// </summary>
         public TradingProvider TradingProvider { get; }
+
+        /// <summary>
+        /// Gets the type of the algorithm this container represents.
+        /// </summary>
+        public Type Algorithm { get; }
     }
 }

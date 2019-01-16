@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Poco;
 using SpreadShare.SupportServices.SettingsServices;
@@ -35,7 +33,7 @@ namespace SpreadShare.Tests.Models.Poco
             Assert.False(string.IsNullOrEmpty(poco.AdminEmail));
             Assert.False(string.IsNullOrEmpty(poco.AdminPassword));
             Assert.NotEmpty(poco.Recipients);
-            var temp = new AdministratorSettings(poco);
+            var unused = new AdministratorSettings(poco);
         }
 
         [Fact]

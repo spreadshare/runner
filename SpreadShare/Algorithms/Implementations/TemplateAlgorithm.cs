@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.SupportServices.SettingsServices;
@@ -34,8 +33,7 @@ namespace SpreadShare.Algorithms.Implementations
         {
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                Logger.LogInformation("Placing full buy market order");
-                trading.ExecuteFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
+                Logger.LogInformation("I wonder if Miss Bitcoin think I should buy...");
             }
         }
     }
