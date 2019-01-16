@@ -99,6 +99,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate ExecuteMarketOrderBuy(TradingPair pair, decimal quantity)
         {
+            Guard.Argument(quantity).NotNegative();
             Guard.Argument(pair).NotNull(nameof(pair));
             var currency = pair.Right;
             var priceEstimate = _dataProvider.GetCurrentPriceTopAsk(pair);
@@ -131,6 +132,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate ExecuteMarketOrderSell(TradingPair pair, decimal quantity)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(quantity).NotNegative();
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
@@ -167,6 +169,8 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(quantity).NotNegative();
+            Guard.Argument(price).NotNegative();
             var currency = pair.Right;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
@@ -198,6 +202,8 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(quantity).NotNegative();
+            Guard.Argument(price).NotNegative();
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
@@ -250,11 +256,14 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Place a sell stoploss order.
         /// </summary>
         /// <param name="pair">TradingPair to consider.</param>
-        /// <param name="price">Price to set the order at.</param>
         /// <param name="quantity">Quantity of non base currency.</param>
+        /// <param name="price">Price to set the order at.</param>
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
-        public OrderUpdate PlaceStoplossSell(TradingPair pair, decimal price, decimal quantity)
+        public OrderUpdate PlaceStoplossSell(TradingPair pair, decimal quantity, decimal price)
         {
+            Guard.Argument(pair).NotNull();
+            Guard.Argument(quantity).NotNegative();
+            Guard.Argument(price).NotNegative();
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
@@ -282,11 +291,13 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Place a buy stoploss order.
         /// </summary>
         /// <param name="pair">TradingPair.</param>
-        /// <param name="price">Price to set the order at.</param>
         /// <param name="quantity">Quantity of none base currency to trade with.</param>
+        /// <param name="price">Price to set the order at.</param>
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
-        public OrderUpdate PlaceStoplossBuy(TradingPair pair, decimal price, decimal quantity)
+        public OrderUpdate PlaceStoplossBuy(TradingPair pair, decimal quantity, decimal price)
         {
+            Guard.Argument(pair).NotNull();
+            Guard.Argument(price).NotNegative();
             var currency = pair.Right;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
@@ -320,7 +331,7 @@ namespace SpreadShare.ExchangeServices.Providers
         {
             var currency = pair.Left;
             decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
-            return PlaceStoplossSell(pair, price, quantity);
+            return PlaceStoplossSell(pair, quantity, price);
         }
 
         /// <summary>
@@ -333,7 +344,7 @@ namespace SpreadShare.ExchangeServices.Providers
         {
             var currency = pair.Right;
             decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
-            return PlaceStoplossBuy(pair, price, quantity);
+            return PlaceStoplossBuy(pair, quantity, price);
         }
 
         /// <summary>
