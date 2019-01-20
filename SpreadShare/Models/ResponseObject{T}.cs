@@ -1,3 +1,5 @@
+using Dawn;
+
 namespace SpreadShare.Models
 {
     /// <summary>
@@ -13,6 +15,9 @@ namespace SpreadShare.Models
         /// <param name="msg">Message concerning the status.</param>
         public ResponseObject(ResponseCode code, string msg)
         {
+            Guard.Argument(code).NotEqual(
+                ResponseCode.Success,
+                x => $"ResponseObject cannot have code {x} but have no data");
             Code = code;
             Message = msg;
         }
@@ -25,9 +30,26 @@ namespace SpreadShare.Models
         /// <param name="message">Message concerning the status.</param>
         public ResponseObject(ResponseCode code, T data, string message = "")
         {
+            if (code == ResponseCode.Success)
+            {
+                Guard.Argument(data).HasValue();
+            }
+
             Code = code;
             Data = data;
             Message = message;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResponseObject{T}"/> class with a success code.
+        /// </summary>
+        /// <param name="data">Data object for the response.</param>
+        public ResponseObject(T data)
+        {
+            Guard.Argument(data).HasValue();
+            Code = ResponseCode.Success;
+            Data = data;
+            Message = string.Empty;
         }
 
         /// <summary>
@@ -53,7 +75,7 @@ namespace SpreadShare.Models
         /// <summary>
         /// Gets the data of the response.
         /// </summary>
-        public T Data { get; }
+        public virtual T Data { get; }
 
         /// <summary>
         /// Gets a value indicating whether returns whether the response was a success.

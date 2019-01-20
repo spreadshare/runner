@@ -10,6 +10,7 @@ using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
+using OrderSide = SpreadShare.Models.OrderSide;
 
 namespace SpreadShare.Tests.ExchangeServices.AllocationTests
 {
@@ -55,7 +56,16 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                 new TradeProposal(TradingPair.Parse("EOSETH"), new Balance(c, 10, 10)),
                 typeof(TemplateAlgorithm),
                 Exchange.Backtesting,
-                () => new TradeExecution(Balance.Empty(c), Balance.Empty(c))));
+                () => new OrderUpdate(
+                    orderId: 0,
+                    tradeId: 0,
+                    orderStatus: OrderUpdate.OrderStatus.New,
+                    orderType: OrderUpdate.OrderTypes.Limit,
+                    createdTimeStamp: 0,
+                    setPrice: 0,
+                    side: OrderSide.Buy,
+                    pair: TradingPair.Parse("EOSETH"),
+                    setQuantity: 0)));
         }
 
         [Theory]
@@ -109,24 +119,36 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             var weak = alloc.GetWeakAllocationManager(algo, Exchange.Backtesting);
 
             // Get most valuable asset from backtesting settings.
-            Balance balance = SortedSettingsBalances.First();
+            Balance balance = new Balance(new Currency("ETH"), 10, 0);
 
             var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), balance);
-            bool result = weak.QueueTrade(proposal, () =>
+
+            var result = weak.QueueTrade(proposal, () =>
             {
                 Logger.LogInformation($"Trading all of the {proposal.From.Free}{proposal.From.Symbol}");
-                var exec = new TradeExecution(
-                    proposal.From,
-                    new Balance(new Currency("BTC"), 1, 0));
 
                 // Mock real world side effects by changing the 'remote' portfolio
-                _comms.RemotePortfolio.UpdateAllocation(exec);
-                return exec;
+                var order = new OrderUpdate(
+                    orderId: 0,
+                    tradeId: 0,
+                    orderStatus: OrderUpdate.OrderStatus.New,
+                    orderType: OrderUpdate.OrderTypes.Market,
+                    createdTimeStamp: 0,
+                    setPrice: 1,
+                    side: OrderSide.Buy,
+                    pair: TradingPair.Parse("EOSETH"),
+                    setQuantity: 10)
+                {
+                    AverageFilledPrice = 1,
+                    FilledQuantity = 10,
+                };
+                _comms.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
+                return order;
             });
 
-            Assert.True(result, "Valid trade was declared invalid");
+            Assert.True(result.Success, "Valid trade was declared invalid");
             Assert.Equal(0.0M, weak.GetAvailableFunds(balance.Symbol).Free);
-            Assert.Equal(1.0M, weak.GetAvailableFunds(new Currency("BTC")).Free);
+            Assert.Equal(10.0M, weak.GetAvailableFunds(new Currency("EOS")).Free);
         }
 
         [Fact]
@@ -140,14 +162,14 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                 balance.Free + 1,
                 balance.Locked));
 
-            bool result = alloc.QueueTrade(proposal, () =>
+            var result = alloc.QueueTrade(proposal, () =>
             {
                 Logger.LogCritical("Invalid trade is being executed");
                 Assert.True(false, "Trade callback of invalid trade is being executed");
                 return null;
             });
 
-            Assert.False(result, "Invalid proposal was reported as executed");
+            Assert.False(result.Success, "Invalid proposal was reported as executed");
         }
 
         [Fact]
@@ -166,8 +188,9 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
             var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), balance);
 
-            bool result = alloc.QueueTrade(proposal, () => null);
-            Assert.True(result, "Valid proposal was not executed");
+            var result = alloc.QueueTrade(proposal, () =>
+                new OrderUpdate(0, 0, OrderUpdate.OrderStatus.Filled, OrderUpdate.OrderTypes.Limit, 0, 0, OrderSide.Buy, TradingPair.Parse("EOSETH"), 0));
+            Assert.True(result.Success, "Valid proposal was not executed");
 
             // Assert that the allocation was not mutated
             Assert.Equal(proposal.From.Free, alloc.GetAvailableFunds(proposal.From.Symbol).Free);

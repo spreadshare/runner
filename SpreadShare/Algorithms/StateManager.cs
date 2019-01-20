@@ -254,14 +254,17 @@ namespace SpreadShare.Algorithms
                         e.StackFrame,
                         e.Message);
                 }
+                /*
                 catch (Exception e)
                 {
+                    throw e;
                     ErrorService.Instance.ReportCriticalError(
                         Container.Algorithm,
                         _activeState.GetType().Name,
-                        new StackFrame(),
+                        new StackFrame(5, true),
                         e.Message);
                 }
+                */
             }
         }
     }

@@ -3,6 +3,7 @@ using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
@@ -110,10 +111,14 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 {
                     // TODO: Implement AccountInfoUpdate callback
                 },
-                orderInfoUpdate => UpdateObservers(new OrderUpdate(
+                orderInfoUpdate =>
+                {
+                    _logger.LogInformation(JsonConvert.SerializeObject(orderInfoUpdate));
+                    UpdateObservers(new OrderUpdate(
                         orderId: orderInfoUpdate.OrderId,
                         tradeId: 0,
                         orderType: BinanceUtilities.ToInternal(orderInfoUpdate.Type),
+                        orderStatus: BinanceUtilities.ToInternal(orderInfoUpdate.Status),
                         createdTimeStamp: DateTimeOffset.FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime())
                             .ToUnixTimeMilliseconds(),
                         setPrice: orderInfoUpdate.Price,
@@ -121,14 +126,14 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                         pair: TradingPair.Parse(orderInfoUpdate.Symbol),
                         setQuantity: orderInfoUpdate.Quantity)
                     {
-                        Status = BinanceUtilities.ToInternal(orderInfoUpdate.Status),
                         LastFillIncrement = orderInfoUpdate.QuantityOfLastFilledTrade,
                         LastFillPrice = orderInfoUpdate.PriceLastFilledTrade,
                         AverageFilledPrice = HelperMethods.SafeDiv(
                             orderInfoUpdate.CummulativeQuoteQuantity,
                             orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
                         FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
-                    }));
+                    });
+                });
 
             // Set error handler
             succesOrderBook.Data.ConnectionLost += () =>

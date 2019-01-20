@@ -71,6 +71,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var orderUpdate = new OrderUpdate(
                 _mockOrderCounter++,
                 tradeId,
+                OrderUpdate.OrderStatus.Filled,
                 OrderUpdate.OrderTypes.Market,
                 Timer.CurrentTime.ToUnixTimeMilliseconds(),
                 priceEstimate,
@@ -78,7 +79,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 pair,
                 quantity)
             {
-                Status = OrderUpdate.OrderStatus.Filled,
                 AverageFilledPrice = priceEstimate,
                 FilledQuantity = quantity,
                 FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds(),
@@ -121,6 +121,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             OrderUpdate order = new OrderUpdate(
                 _mockOrderCounter,
                 tradeId,
+                OrderUpdate.OrderStatus.New,
                 OrderUpdate.OrderTypes.Limit,
                 Timer.CurrentTime.ToUnixTimeMilliseconds(),
                 price,
@@ -160,6 +161,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             OrderUpdate order = new OrderUpdate(
                 _mockOrderCounter,
                 tradeId,
+                OrderUpdate.OrderStatus.New,
                 OrderUpdate.OrderTypes.StopLoss,
                 Timer.CurrentTime.ToUnixTimeMilliseconds(),
                 price,

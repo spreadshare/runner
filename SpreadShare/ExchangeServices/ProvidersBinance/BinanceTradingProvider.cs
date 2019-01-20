@@ -74,6 +74,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             OrderUpdate result = new OrderUpdate(
                 orderId: order.OrderId,
                 tradeId: tradeId,
+                orderStatus: OrderUpdate.OrderStatus.Filled,
                 orderType: BinanceUtilities.ToInternal(order.Type),
                 createdTimeStamp: DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 setPrice: 0, // This information is unknown for market orders
@@ -81,7 +82,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 pair: pair,
                 setQuantity: quantity)
             {
-                Status = OrderUpdate.OrderStatus.Filled,
                 FilledQuantity = query.Data.ExecutedQuantity,
                 FilledTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
             };
@@ -125,6 +125,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     new OrderUpdate(
                         query.Data.OrderId,
                         tradeId,
+                        OrderUpdate.OrderStatus.New,
                         OrderUpdate.OrderTypes.Limit,
                         DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                         price,

@@ -1,4 +1,5 @@
 using System;
+using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 
 namespace SpreadShare.ExchangeServices.Allocation
@@ -54,7 +55,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="p">TradeProposal to be verified.</param>
         /// <param name="tradeCallback">Trade callback to be executed if verification was succesful.</param>
         /// <returns>Boolean indicating succesful execution.</returns>
-        public bool QueueTrade(TradeProposal p, Func<TradeExecution> tradeCallback)
+        public ResponseObject<OrderUpdate> QueueTrade(TradeProposal p, Func<OrderUpdate> tradeCallback)
             => _allocationManager.QueueTrade(p, _algorithm, _exchange, tradeCallback);
     }
 }
