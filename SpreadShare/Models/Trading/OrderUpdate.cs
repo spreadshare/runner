@@ -198,8 +198,7 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Gets a value indicating whether the order status will ever change.
         /// </summary>
-        public bool Finalized => Status == OrderStatus.Filled || Status == OrderStatus.Rejected ||
-                                 Status == OrderStatus.Cancelled || Status == OrderStatus.Rejected;
-
+        public bool Finalized => Status == OrderStatus.Filled || Status == OrderStatus.Rejected
+                                 || Status == OrderStatus.Cancelled || Status == OrderStatus.Rejected;
     }
 }
