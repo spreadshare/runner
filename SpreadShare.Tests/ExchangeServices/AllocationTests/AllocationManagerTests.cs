@@ -137,10 +137,10 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                     setPrice: 1,
                     side: OrderSide.Buy,
                     pair: TradingPair.Parse("EOSETH"),
-                    setQuantity: 10)
+                    setQuantity: proposal.From.Free)
                 {
                     AverageFilledPrice = 1,
-                    FilledQuantity = 10,
+                    FilledQuantity = proposal.From.Free,
                 };
                 _comms.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
                 return order;
@@ -148,7 +148,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
 
             Assert.True(result.Success, "Valid trade was declared invalid");
             Assert.Equal(0.0M, weak.GetAvailableFunds(balance.Symbol).Free);
-            Assert.Equal(10.0M, weak.GetAvailableFunds(new Currency("EOS")).Free);
+            Assert.Equal(proposal.From.Free, weak.GetAvailableFunds(new Currency("EOS")).Free);
         }
 
         [Fact]
