@@ -65,7 +65,7 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(order.Pair.Right, exec.To.Symbol);
             Assert.Equal(40M, exec.From.Free);
             Assert.Equal(0, exec.From.Locked);
-            Assert.Equal(40M / 0.401M, exec.To.Free);
+            Assert.Equal(40M * 0.401M, exec.To.Free);
             Assert.Equal(0, exec.To.Locked);
         }
 

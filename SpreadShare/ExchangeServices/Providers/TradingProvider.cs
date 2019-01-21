@@ -407,7 +407,7 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private void HandleOrderUpdate(OrderUpdate order)
         {
-            if (!_openOrders.ContainsKey(order.OrderId))
+            if (!_openOrders.ContainsKey(order.OrderId) && order.OrderType != OrderUpdate.OrderTypes.Market)
             {
                 _logger.LogWarning($"Observed order {order.OrderId} as {order.Status} but the order was not tracked");
                 return;

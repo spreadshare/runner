@@ -37,7 +37,7 @@ namespace SpreadShare.Algorithms.Implementations
                 Logger.LogInformation("I wonder if Miss Bitcoin thinks I should buy...");
                 var pair = AlgorithmSettings.ActiveTradingPairs.First();
                 var price = data.GetCurrentPriceTopBid(pair);
-                trading.PlaceFullLimitOrderBuy(pair, price * 1.01M);
+                trading.PlaceFullLimitOrderBuy(pair, price * 0.99M);
             }
         }
     }

@@ -1,5 +1,4 @@
 using Dawn;
-using SpreadShare.Utilities;
 using static SpreadShare.Models.Trading.OrderUpdate.OrderTypes;
 
 namespace SpreadShare.Models.Trading
@@ -38,7 +37,7 @@ namespace SpreadShare.Models.Trading
             var currencyFrom = order.Side == OrderSide.Buy ? order.Pair.Right : order.Pair.Left;
             var currencyTo = order.Side == OrderSide.Buy ? order.Pair.Left : order.Pair.Right;
             var quantityFrom = order.FilledQuantity * (order.Side == OrderSide.Buy ? order.AverageFilledPrice : 1M);
-            var quantityTo = HelperMethods.SafeDiv(order.FilledQuantity, order.Side == OrderSide.Sell ? order.AverageFilledPrice : 1M);
+            var quantityTo = order.FilledQuantity * (order.Side == OrderSide.Sell ? order.AverageFilledPrice : 1M);
             var from = new Balance(currencyFrom, quantityFrom, 0M);
             var to = new Balance(currencyTo, quantityTo, 0M);
             return new TradeExecution(from, to);

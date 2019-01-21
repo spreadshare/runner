@@ -1,8 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
@@ -22,6 +22,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private readonly BacktestDataProvider _dataProvider;
         private readonly BacktestCommunicationService _comm;
         private readonly DatabaseContext _database;
+        private readonly Queue<OrderUpdate> _orderCache;
 
         private long _mockOrderCounter;
 
@@ -45,30 +46,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _dataProvider = data;
             _comm = comm;
             _database = database;
+            _orderCache = new Queue<OrderUpdate>();
         }
 
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> ExecuteMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
         {
-            // Keep the remote updated by mocking a trade execution and letting the communications know.
-            TradeExecution exec;
             decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
-            if (side == OrderSide.Buy)
-            {
-                exec = new TradeExecution(
-                    new Balance(pair.Right, quantity * priceEstimate, 0.0M),
-                    new Balance(pair.Left, quantity, 0.0M));
-            }
-            else
-            {
-                exec = new TradeExecution(
-                    new Balance(pair.Left, quantity, 0.0M),
-                    new Balance(pair.Right, quantity * priceEstimate, 0.0M));
-            }
 
-            _comm.RemotePortfolio.UpdateAllocation(exec);
-
-            var orderUpdate = new OrderUpdate(
+            var order = new OrderUpdate(
                 _mockOrderCounter++,
                 tradeId,
                 OrderUpdate.OrderStatus.Filled,
@@ -86,37 +72,20 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             // Write the trade to the database
             _database.Trades.Add(new DatabaseTrade(
-                orderUpdate,
+                order,
                 _comm.RemotePortfolio.ToJson(),
                 _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
 
+            _comm.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
+
             return new ResponseObject<OrderUpdate>(
                 ResponseCode.Success,
-                orderUpdate);
+                order);
         }
 
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
         {
-            // Keep the remote updated by mocking a trade execution
-            TradeExecution exec;
-
-            // Mock the remote portfolio by providing it an update
-            if (side == OrderSide.Buy)
-            {
-                exec = new TradeExecution(
-                    new Balance(pair.Right, quantity * price, 0),
-                    new Balance(pair.Right, 0, quantity * price));
-            }
-            else
-            {
-                exec = new TradeExecution(
-                    new Balance(pair.Left, quantity, 0),
-                    new Balance(pair.Left, 0, quantity));
-            }
-
-            _comm.RemotePortfolio.UpdateAllocation(exec);
-
             // Add the order to the watchlist
             OrderUpdate order = new OrderUpdate(
                 _mockOrderCounter,
@@ -131,32 +100,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             WatchList.Add(_mockOrderCounter, order);
             _mockOrderCounter++;
 
+            _comm.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
+            _orderCache.Enqueue(order);
+
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
         }
 
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> PlaceStoplossOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
         {
-            _logger.LogInformation("Placing a stoploss order");
-
-            // Keep the remote updated by mocking a TradeExecution
-            TradeExecution exec;
-
-            if (side == OrderSide.Buy)
-            {
-                exec = new TradeExecution(
-                    new Balance(pair.Right, quantity * price, 0),
-                    new Balance(pair.Right, 0, quantity * price));
-            }
-            else
-            {
-                exec = new TradeExecution(
-                    new Balance(pair.Left, quantity, 0),
-                    new Balance(pair.Left, 0, quantity));
-            }
-
-            _comm.RemotePortfolio.UpdateAllocation(exec);
-
             // Add the order to the watchlist
             OrderUpdate order = new OrderUpdate(
                 _mockOrderCounter,
@@ -171,7 +123,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             WatchList.Add(_mockOrderCounter, order);
             _mockOrderCounter++;
 
-            _logger.LogInformation(JsonConvert.SerializeObject(order));
+            _comm.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
+            _orderCache.Enqueue(order);
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
         }
@@ -188,28 +141,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 WatchList.Remove(orderId);
             }
 
-            // Update the remote portfolio
-            TradeExecution exec;
-            if (order.Side == OrderSide.Buy)
-            {
-                exec = new TradeExecution(
-                    new Balance(order.Pair.Right, 0, order.SetQuantity * order.SetPrice),
-                    new Balance(order.Pair.Right, order.SetQuantity * order.SetPrice, 0));
-            }
-            else
-            {
-                exec = new TradeExecution(
-                    new Balance(order.Pair.Left, 0, order.SetQuantity),
-                    new Balance(order.Pair.Left, order.SetQuantity, 0));
-            }
-
-            _comm.RemotePortfolio.UpdateAllocation(exec);
-
             // Add cancelled order to the database
             _database.Trades.Add(new DatabaseTrade(
                 order,
                 _comm.RemotePortfolio.ToJson(),
                 _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
+
+            _comm.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
+            UpdateObservers(order);
 
             return new ResponseObject(ResponseCode.Success);
         }
@@ -234,6 +173,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override void OnNext(long value)
         {
+            while (_orderCache.TryDequeue(out var cachedOrder))
+            {
+                UpdateObservers(cachedOrder);
+            }
+
             foreach (var order in WatchList.Values.ToList())
             {
                 decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
