@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Dawn;
 using Microsoft.Extensions.Logging;
@@ -126,6 +125,7 @@ namespace SpreadShare.Algorithms
                 }
                 catch (ProviderException e)
                 {
+                    _logger.LogError(e.Message);
                     ErrorService.Instance.ReportCriticalError(
                         Container.Algorithm,
                         _activeState.GetType().Name,
@@ -134,11 +134,8 @@ namespace SpreadShare.Algorithms
                 }
                 catch (Exception e)
                 {
-                    ErrorService.Instance.ReportCriticalError(
-                        Container.Algorithm,
-                        _activeState.GetType().Name,
-                        new StackFrame(),
-                        e.Message);
+                    _logger.LogError(e.ToString());
+                    throw;
                 }
             }
         }
@@ -158,6 +155,7 @@ namespace SpreadShare.Algorithms
                 }
                 catch (ProviderException e)
                 {
+                    _logger.LogError(e.Message);
                     ErrorService.Instance.ReportCriticalError(
                         Container.Algorithm,
                         _activeState.GetType().Name,
@@ -166,11 +164,8 @@ namespace SpreadShare.Algorithms
                 }
                 catch (Exception e)
                 {
-                    ErrorService.Instance.ReportCriticalError(
-                        Container.Algorithm,
-                        _activeState.GetType().Name,
-                        new StackFrame(),
-                        e.Message);
+                    _logger.LogError(e.ToString());
+                    throw;
                 }
             }
         }
@@ -248,6 +243,7 @@ namespace SpreadShare.Algorithms
                 }
                 catch (ProviderException e)
                 {
+                    _logger.LogError(e.Message);
                     ErrorService.Instance.ReportCriticalError(
                         Container.Algorithm,
                         _activeState.GetType().Name,
@@ -256,11 +252,8 @@ namespace SpreadShare.Algorithms
                 }
                 catch (Exception e)
                 {
-                    ErrorService.Instance.ReportCriticalError(
-                        Container.Algorithm,
-                        _activeState.GetType().Name,
-                        new StackFrame(5, true),
-                        e.Message);
+                    _logger.LogError(e.ToString());
+                    throw;
                 }
             }
         }

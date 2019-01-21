@@ -55,7 +55,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
 
             var order = new OrderUpdate(
-                _mockOrderCounter++,
+                _mockOrderCounter,
                 tradeId,
                 OrderUpdate.OrderStatus.Filled,
                 OrderUpdate.OrderTypes.Market,
@@ -69,6 +69,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 FilledQuantity = quantity,
                 FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds(),
             };
+            WatchList.Add(_mockOrderCounter++, order);
 
             // Write the trade to the database
             _database.Trades.Add(new DatabaseTrade(
@@ -132,7 +133,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
-            var order = GetOrderInfo(pair, orderId).Data;
+            var order = GetOrderInfo(orderId).Data;
             order.Status = OrderUpdate.OrderStatus.Cancelled;
             order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
 
@@ -154,7 +155,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
+        public override ResponseObject<OrderUpdate> GetOrderInfo(long orderId)
         {
             if (WatchList.ContainsKey(orderId))
             {

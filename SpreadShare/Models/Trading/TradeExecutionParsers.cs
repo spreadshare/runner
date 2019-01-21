@@ -39,7 +39,7 @@ namespace SpreadShare.Models.Trading
             var quantityFrom = order.FilledQuantity * (order.Side == OrderSide.Buy ? order.AverageFilledPrice : 1M);
             var quantityTo = order.FilledQuantity * (order.Side == OrderSide.Sell ? order.AverageFilledPrice : 1M);
             var from = new Balance(currencyFrom, quantityFrom, 0M);
-            var to = new Balance(currencyTo, quantityTo, 0M);
+            var to = new Balance(currencyTo, quantityTo - order.Commission, 0M);
             return new TradeExecution(from, to);
         }
 
@@ -55,17 +55,20 @@ namespace SpreadShare.Models.Trading
                 return FromNewMarketOrder(order);
             }
 
+            // Only subtract the commission when the entire order is filled.
+            decimal commission = order.Status == OrderUpdate.OrderStatus.Filled ? order.Commission : 0;
+
             if (order.Side == OrderSide.Buy)
             {
                 return new TradeExecution(
                     new Balance(order.Pair.Right, 0.0M, order.LastFillIncrement * order.SetPrice),
-                    new Balance(order.Pair.Left, order.LastFillIncrement, 0.0M));
+                    new Balance(order.Pair.Left, order.LastFillIncrement - commission, 0.0M));
             }
             else
             {
                 return new TradeExecution(
                     new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                    new Balance(order.Pair.Right, order.LastFillIncrement * order.LastFillPrice, 0));
+                    new Balance(order.Pair.Right, (order.LastFillIncrement * order.LastFillPrice) - commission, 0));
             }
         }
 

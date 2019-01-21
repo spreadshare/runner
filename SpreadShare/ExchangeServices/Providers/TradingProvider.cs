@@ -108,8 +108,9 @@ namespace SpreadShare.ExchangeServices.Providers
 
             var result = _allocationManager.QueueTrade(proposal, () =>
             {
-                return HelperMethods.RetryMethod(
+                var order = HelperMethods.RetryMethod(
                     () => _implementation.ExecuteMarketOrder(pair, OrderSide.Buy, quantity, TradeId), _logger).Data;
+                return WaitForOrderConfirmation(order.OrderId);
             });
 
             if (!result.Success)
@@ -135,8 +136,9 @@ namespace SpreadShare.ExchangeServices.Providers
 
             var result = _allocationManager.QueueTrade(proposal, () =>
             {
-                return HelperMethods.RetryMethod(
+                var order = HelperMethods.RetryMethod(
                     () => _implementation.ExecuteMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId), _logger).Data;
+                return WaitForOrderConfirmation(order.OrderId);
             });
 
             if (!result.Success)
@@ -363,7 +365,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate GetOrderInfo(TradingPair pair, long orderId)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
-            var query = HelperMethods.RetryMethod(() => _implementation.GetOrderInfo(pair, orderId), _logger);
+            var query = HelperMethods.RetryMethod(() => _implementation.GetOrderInfo(orderId), _logger);
             if (query.Success)
             {
                 return query.Data;
@@ -443,6 +445,25 @@ namespace SpreadShare.ExchangeServices.Providers
             if (order.Finalized)
             {
                 _openOrders.Remove(order.OrderId);
+            }
+        }
+
+        private OrderUpdate WaitForOrderConfirmation(long orderId)
+        {
+            var start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            while (true)
+            {
+                var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                if (now - start > 10000)
+                {
+                    throw new ExchangeTimeoutException($"Order {orderId} was not filled within 10 seconds.");
+                }
+
+                var query = _implementation.GetOrderInfo(orderId);
+                if (query.Success)
+                {
+                    return query.Data;
+                }
             }
         }
     }

@@ -129,6 +129,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                             orderInfoUpdate.CummulativeQuoteQuantity,
                             orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
                         FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
+                        Commission = orderInfoUpdate.Commission,
                     }));
 
             // Set error handler

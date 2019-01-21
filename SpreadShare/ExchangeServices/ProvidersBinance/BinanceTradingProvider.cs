@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Linq.Expressions;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.Providers.Observing;
@@ -82,19 +82,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 pair: pair,
                 setQuantity: quantity)
             {
-                FilledQuantity = query.Data.ExecutedQuantity,
+                FilledQuantity = order.ExecutedQuantity,
                 FilledTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                AverageFilledPrice = HelperMethods.SafeDiv(order.CummulativeQuoteQuantity, order.ExecutedQuantity),
             };
-
-            // Prevent division by zero
-            if (order.ExecutedQuantity == 0)
-            {
-                Logger.LogWarning($"Market order could not be priced --> {JsonConvert.SerializeObject(order)}");
-                return new ResponseObject<OrderUpdate>(ResponseCode.Success, result);
-            }
-
-            // Calculate the price
-            result.AverageFilledPrice = order.CummulativeQuoteQuantity / query.Data.ExecutedQuantity;
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, result);
         }
@@ -163,9 +154,18 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
+        public override ResponseObject<OrderUpdate> GetOrderInfo(long orderId)
         {
-            throw new NotImplementedException();
+            var values = _orderQueue.ToList();
+            foreach (var order in values)
+            {
+                if (order.OrderId == orderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                {
+                    return new ResponseObject<OrderUpdate>(order);
+                }
+            }
+
+            return new ResponseObject<OrderUpdate>(ResponseCode.NotFound);
         }
 
         /// <inheritdoc />
