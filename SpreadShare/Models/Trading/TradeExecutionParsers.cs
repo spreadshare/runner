@@ -50,9 +50,11 @@ namespace SpreadShare.Models.Trading
         /// <param name="order">OrderUpdate.</param>
         private static TradeExecution FromFillOrder(OrderUpdate order)
         {
-            Guard.Argument(order.OrderType).Require(
-                x => x != Market,
-                x => $"{x} orders are already declared filled at execution time");
+            // Some market orders are declared filled right away, redirect their parsing
+            if (order.OrderType == Market)
+            {
+                return FromNewMarketOrder(order);
+            }
 
             if (order.Side == OrderSide.Buy)
             {

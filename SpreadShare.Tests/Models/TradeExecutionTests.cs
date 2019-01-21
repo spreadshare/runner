@@ -233,7 +233,7 @@ namespace SpreadShare.Tests.Models
         [Theory]
         [InlineData(OrderSide.Buy)]
         [InlineData(OrderSide.Sell)]
-        internal void ParseFromMarketFilledOrderInvalid(OrderSide side)
+        internal void ParseFromMarketFilled(OrderSide side)
         {
             var order = new OrderUpdate(
                 orderId: 0,
@@ -245,7 +245,12 @@ namespace SpreadShare.Tests.Models
                 side: side,
                 pair: TradingPair.Parse("EOSETH"),
                 setQuantity: 100M);
-            Assert.Throws<ArgumentException>(() => TradeExecution.FromOrder(order));
+            var exec = TradeExecution.FromOrder(order);
+
+            // Assert that the order is calculated as a complete market order
+            Assert.NotEqual(exec.From.Symbol, exec.To.Symbol);
+            Assert.Equal(0M, exec.From.Locked);
+            Assert.Equal(0M, exec.To.Locked);
         }
 
         [Theory]
