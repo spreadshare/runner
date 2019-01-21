@@ -119,7 +119,9 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             var weak = alloc.GetWeakAllocationManager(algo, Exchange.Backtesting);
 
             // Get most valuable asset from backtesting settings.
-            Balance balance = new Balance(new Currency("ETH"), 10, 0);
+            decimal total = weak.GetAvailableFunds(new Currency("ETH")).Free;
+            decimal quote = weak.GetAvailableFunds(new Currency("EOS")).Free;
+            Balance balance = new Balance(new Currency("ETH"), total, 0);
 
             var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), balance);
 
@@ -141,22 +143,24 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                 {
                     AverageFilledPrice = 1,
                     FilledQuantity = proposal.From.Free,
+                    LastFillPrice = 1,
+                    LastFillIncrement = proposal.From.Free,
                 };
                 _comms.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
                 return order;
             });
 
             Assert.True(result.Success, "Valid trade was declared invalid");
-            Assert.Equal(0.0M, weak.GetAvailableFunds(balance.Symbol).Free);
-            Assert.Equal(proposal.From.Free, weak.GetAvailableFunds(new Currency("EOS")).Free);
+            Assert.Equal(total - proposal.From.Free, weak.GetAvailableFunds(balance.Symbol).Free);
+            Assert.Equal(quote + proposal.From.Free, weak.GetAvailableFunds(new Currency("EOS")).Free);
         }
 
         [Fact]
         public void QueueTradeInvalid()
         {
             Type algo = typeof(TemplateAlgorithm);
-            Balance balance = SortedSettingsBalances.First();
             var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
+            Balance balance = alloc.GetAvailableFunds(new Currency("ETH"));
             var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), new Balance(
                 balance.Symbol,
                 balance.Free + 1,
@@ -181,15 +185,24 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         }
 
         [Fact]
-        public void QueueTradeReportNull()
+        public void QueueTradeReportZero()
         {
             Type algo = typeof(TemplateAlgorithm);
-            Balance balance = SortedSettingsBalances.First();
             var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
+            Balance balance = alloc.GetAvailableFunds(new Currency("ETH"));
             var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), balance);
 
             var result = alloc.QueueTrade(proposal, () =>
-                new OrderUpdate(0, 0, OrderUpdate.OrderStatus.Filled, OrderUpdate.OrderTypes.Limit, 0, 0, OrderSide.Buy, TradingPair.Parse("EOSETH"), 0));
+                new OrderUpdate(
+                    0,
+                    0,
+                    OrderUpdate.OrderStatus.Filled,
+                    OrderUpdate.OrderTypes.Limit,
+                    0,
+                    0,
+                    OrderSide.Buy,
+                    TradingPair.Parse("EOSETH"),
+                    0));
             Assert.True(result.Success, "Valid proposal was not executed");
 
             // Assert that the allocation was not mutated
@@ -236,6 +249,13 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                 },
             });
 
+            // Free up at least 10 ETH
+            alloc.UpdateAllocation(
+                Exchange.Backtesting,
+                typeof(TemplateAlgorithm),
+                new TradeExecution(
+                    Balance.Empty(new Currency("ETH")),
+                    new Balance(new Currency("ETH"), 10, 0)));
             return alloc;
         }
     }
