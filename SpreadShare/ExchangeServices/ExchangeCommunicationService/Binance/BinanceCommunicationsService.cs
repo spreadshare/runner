@@ -3,7 +3,6 @@ using Binance.Net;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
@@ -112,8 +111,6 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                     // TODO: Implement AccountInfoUpdate callback
                 },
                 orderInfoUpdate =>
-                {
-                    _logger.LogInformation(JsonConvert.SerializeObject(orderInfoUpdate));
                     UpdateObservers(new OrderUpdate(
                         orderId: orderInfoUpdate.OrderId,
                         tradeId: 0,
@@ -132,8 +129,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                             orderInfoUpdate.CummulativeQuoteQuantity,
                             orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
                         FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
-                    });
-                });
+                    }));
 
             // Set error handler
             succesOrderBook.Data.ConnectionLost += () =>
