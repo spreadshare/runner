@@ -378,7 +378,7 @@ namespace SpreadShare.Tests.Models
                 orderStatus: Filled,
                 createdTimeStamp: 0,
                 setPrice: 0.2M,
-                side: OrderSide.Buy,
+                side: OrderSide.Sell,
                 pair: TradingPair.Parse("EOSETH"),
                 setQuantity: 100M)
             {
@@ -392,8 +392,8 @@ namespace SpreadShare.Tests.Models
             var exec = TradeExecution.FromOrder(order);
 
             Assert.Equal(0M, exec.From.Free);
-            Assert.Equal(100M * 0.2M, exec.From.Locked);
-            Assert.Equal(100M - 0.7M, exec.To.Free);
+            Assert.Equal(100M, exec.From.Locked);
+            Assert.Equal(100M * 0.15M, exec.To.Free);
             Assert.Equal(0M, exec.To.Locked);
         }
     }

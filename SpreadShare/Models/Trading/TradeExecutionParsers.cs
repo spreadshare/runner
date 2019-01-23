@@ -68,7 +68,7 @@ namespace SpreadShare.Models.Trading
             {
                 return new TradeExecution(
                     new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                    new Balance(order.Pair.Right, (order.LastFillIncrement * order.LastFillPrice) - commission, 0));
+                    new Balance(order.Pair.Right, order.LastFillIncrement * order.LastFillPrice, 0));
             }
         }
 
