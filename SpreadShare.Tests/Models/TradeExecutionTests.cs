@@ -72,7 +72,7 @@ namespace SpreadShare.Tests.Models
         [Theory]
         [InlineData(OrderSide.Buy)]
         [InlineData(OrderSide.Sell)]
-        internal void ParseFromMarketOrderZero(OrderSide side)
+        internal void ParseFromMarketOrderPriceZero(OrderSide side)
         {
             var order = new OrderUpdate(
                 orderId: 0,
@@ -86,6 +86,43 @@ namespace SpreadShare.Tests.Models
                 setQuantity: 40M)
             {
                 AverageFilledPrice = 0M,
+                FilledQuantity = 10M,
+            };
+
+            var exec = TradeExecution.FromOrder(order);
+            Assert.Equal(exec.From.Locked, decimal.Zero);
+
+            if (side == OrderSide.Sell)
+            {
+                Assert.Equal(10M, exec.From.Free);
+                Assert.Equal(decimal.Zero, exec.To.Free);
+            }
+            else
+            {
+                Assert.Equal(decimal.Zero, exec.From.Free);
+                Assert.Equal(10M, exec.To.Free);
+            }
+
+            Assert.Equal(exec.To.Locked, decimal.Zero);
+        }
+
+        [Theory]
+        [InlineData(OrderSide.Buy)]
+        [InlineData(OrderSide.Sell)]
+        internal void ParseFromMarketOrderQuantityZero(OrderSide side)
+        {
+            var order = new OrderUpdate(
+                orderId: 0,
+                tradeId: 0,
+                orderType: Market,
+                orderStatus: New,
+                createdTimeStamp: 0,
+                setPrice: 0.4M,
+                side: side,
+                pair: TradingPair.Parse("EOSETH"),
+                setQuantity: 40M)
+            {
+                AverageFilledPrice = 0.3M,
                 FilledQuantity = 0M,
             };
 
