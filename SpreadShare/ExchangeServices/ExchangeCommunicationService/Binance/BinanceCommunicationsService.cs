@@ -113,7 +113,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 },
                 orderInfoUpdate =>
                 {
-                    JsonConvert.SerializeObject(orderInfoUpdate);
+                    _logger.LogInformation(JsonConvert.SerializeObject(orderInfoUpdate));
                     UpdateObservers(new OrderUpdate(
                         orderId: orderInfoUpdate.OrderId,
                         tradeId: 0,
@@ -132,7 +132,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                             orderInfoUpdate.CummulativeQuoteQuantity,
                             orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
                         FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
-                        Commission = orderInfoUpdate.Commission,
+                        Commission = (orderInfoUpdate.Commission, new Currency(orderInfoUpdate.CommissionAsset)),
                     });
                 });
 

@@ -350,7 +350,7 @@ namespace SpreadShare.Tests.Models
                 AverageFilledPrice = 0.15M,
                 LastFillIncrement = 100M,
                 LastFillPrice = 0.15M,
-                Commission = 2.3M,
+                Commission = (2.3M, new Currency("EOS")),
             };
 
             var exec = TradeExecution.FromOrder(order);
@@ -363,7 +363,7 @@ namespace SpreadShare.Tests.Models
             else
             {
                 Assert.Equal(100M, exec.From.Free);
-                Assert.Equal((100M * 0.15M) - 2.3M, exec.To.Free);
+                Assert.Equal((100M * 0.15M) - (2.3M * 0.15M), exec.To.Free);
             }
 
             Assert.Equal(0, exec.To.Locked);
@@ -391,7 +391,7 @@ namespace SpreadShare.Tests.Models
                 AverageFilledPrice = 0.15M,
                 LastFillIncrement = 100M,
                 LastFillPrice = 0.15M,
-                Commission = 2.6M,
+                Commission = (2.6M, new Currency("EOS")),
             };
 
             var exec = TradeExecution.FromOrder(order);
@@ -423,14 +423,14 @@ namespace SpreadShare.Tests.Models
                 AverageFilledPrice = 0.15M,
                 LastFillIncrement = 100M,
                 LastFillPrice = 0.15M,
-                Commission = 0.7M,
+                Commission = (0.7M, new Currency("EOS")),
             };
 
             var exec = TradeExecution.FromOrder(order);
 
             Assert.Equal(0M, exec.From.Free);
             Assert.Equal(100M, exec.From.Locked);
-            Assert.Equal(100M * 0.15M, exec.To.Free);
+            Assert.Equal((100M * 0.15M) - (0.7M * 0.15M), exec.To.Free);
             Assert.Equal(0M, exec.To.Locked);
         }
     }

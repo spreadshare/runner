@@ -64,7 +64,7 @@ namespace SpreadShare.Algorithms.Implementations
             }
         }
 
-        // On a succesfull trade, wait WaitTime minutes long and then restart putting in orders
+        // On a successful trade, wait WaitTime minutes long and then restart putting in orders
         private class WaitState : State<SimpleScalpSettings>
         {
             public override State<SimpleScalpSettings> OnTimerElapsed()

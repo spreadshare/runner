@@ -1,4 +1,5 @@
 using Dawn;
+using SpreadShare.Utilities;
 using static SpreadShare.Models.Trading.OrderUpdate.OrderTypes;
 
 namespace SpreadShare.Models.Trading
@@ -38,8 +39,18 @@ namespace SpreadShare.Models.Trading
             var currencyTo = order.Side == OrderSide.Buy ? order.Pair.Left : order.Pair.Right;
             var quantityFrom = order.FilledQuantity * (order.Side == OrderSide.Buy ? order.AverageFilledPrice : 1M);
             var quantityTo = order.FilledQuantity * (order.Side == OrderSide.Sell ? order.AverageFilledPrice : 1M);
+
+            var (commission, asset) = order.Commission;
+            if (asset != currencyTo)
+            {
+                commission = order.Side == OrderSide.Buy
+                    ? HelperMethods.SafeDiv(commission, order.AverageFilledPrice)
+                    : commission * order.AverageFilledPrice;
+            }
+
+            // Only subtract commission for buy orders
             var from = new Balance(currencyFrom, quantityFrom, 0M);
-            var to = new Balance(currencyTo, quantityTo - order.Commission, 0M);
+            var to = new Balance(currencyTo, quantityTo - commission, 0M);
             return new TradeExecution(from, to);
         }
 
@@ -55,20 +66,28 @@ namespace SpreadShare.Models.Trading
                 return FromNewMarketOrder(order);
             }
 
-            // Only subtract the commission when the entire order is filled.
-            decimal commission = order.Status == OrderUpdate.OrderStatus.Filled ? order.Commission : 0;
+            var from = order.Side == OrderSide.Buy ? order.Pair.Right : order.Pair.Left;
+            var to = order.Side == OrderSide.Buy ? order.Pair.Left : order.Pair.Right;
+
+            var (commission, asset) = order.Commission;
+            if (asset != to)
+            {
+                commission = order.Side == OrderSide.Buy
+                    ? HelperMethods.SafeDiv(commission, order.AverageFilledPrice)
+                    : commission * order.AverageFilledPrice;
+            }
 
             if (order.Side == OrderSide.Buy)
             {
                 return new TradeExecution(
-                    new Balance(order.Pair.Right, 0.0M, order.LastFillIncrement * order.SetPrice),
-                    new Balance(order.Pair.Left, order.LastFillIncrement - commission, 0.0M));
+                    new Balance(from, 0.0M, order.LastFillIncrement * order.SetPrice),
+                    new Balance(to, order.LastFillIncrement - commission, 0.0M));
             }
             else
             {
                 return new TradeExecution(
-                    new Balance(order.Pair.Left, 0, order.LastFillIncrement),
-                    new Balance(order.Pair.Right, order.LastFillIncrement * order.LastFillPrice, 0));
+                    new Balance(from, 0, order.LastFillIncrement),
+                    new Balance(to, (order.LastFillIncrement * order.LastFillPrice) - commission, 0));
             }
         }
 

@@ -108,9 +108,23 @@ namespace SpreadShare.ExchangeServices.Providers
 
             var result = _allocationManager.QueueTrade(proposal, () =>
             {
-                var order = HelperMethods.RetryMethod(
-                    () => _implementation.ExecuteMarketOrder(pair, OrderSide.Buy, quantity, TradeId), _logger).Data;
-                return WaitForOrderConfirmation(order.OrderId);
+                var orderQuery = HelperMethods.RetryMethod(
+                    () =>
+                    {
+                        var attempt = _implementation.ExecuteMarketOrder(pair, OrderSide.Buy, quantity, TradeId);
+                        if (attempt.Success)
+                        {
+                            return attempt;
+                        }
+
+                        _logger.LogInformation($"Retrying with slightly lower quantity");
+                        quantity *= 0.999M;
+                        return new ResponseObject<OrderUpdate>(ResponseCode.Error, attempt.Message);
+                    }, _logger);
+
+                return orderQuery.Success
+                    ? WaitForOrderConfirmation(orderQuery.Data.OrderId)
+                    : throw new OrderFailedException(orderQuery.Message);
             });
 
             if (!result.Success)
@@ -136,9 +150,12 @@ namespace SpreadShare.ExchangeServices.Providers
 
             var result = _allocationManager.QueueTrade(proposal, () =>
             {
-                var order = HelperMethods.RetryMethod(
-                    () => _implementation.ExecuteMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId), _logger).Data;
-                return WaitForOrderConfirmation(order.OrderId);
+                var orderQuery = HelperMethods.RetryMethod(
+                    () => _implementation.ExecuteMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId), _logger);
+
+                return orderQuery.Success
+                    ? WaitForOrderConfirmation(orderQuery.Data.OrderId)
+                    : throw new OrderFailedException(orderQuery.Message);
             });
 
             if (!result.Success)
@@ -181,7 +198,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 return result.Data;
             }
 
-            throw new OrderRefusedException();
+            throw new OrderRefusedException(result.Message);
         }
 
         /// <summary>
@@ -460,7 +477,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 }
 
                 var query = _implementation.GetOrderInfo(orderId);
-                if (query.Success)
+                if (query.Success && query.Data.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return query.Data;
                 }

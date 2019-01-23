@@ -196,9 +196,9 @@ namespace SpreadShare.Models.Trading
         public decimal LastFillIncrement { get; set; }
 
         /// <summary>
-        /// Gets or sets the quantity of non base currency paid as fee.
+        /// Gets or sets the commission and asset in which is is paid for this order.
         /// </summary>
-        public decimal Commission { get; set; }
+        public (decimal, Currency) Commission { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether the order status will ever change.
