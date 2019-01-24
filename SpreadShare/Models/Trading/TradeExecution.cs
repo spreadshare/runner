@@ -3,7 +3,8 @@ using System;
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
-    /// Model containing information about an executed trade.
+    /// Model containing information about an executed trade,
+    /// Parsers are found in another partial class in TradeExecutionParsers.cs.
     /// </summary>
     internal partial class TradeExecution
     {

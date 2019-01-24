@@ -5,10 +5,15 @@ using static SpreadShare.Models.Trading.OrderUpdate.OrderTypes;
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
-    /// <see cref="TradeExecution"/>.
+    /// Parsing functionality, split from <see cref="TradeExecution"/>.
     /// </summary>
     internal partial class TradeExecution
     {
+        /// <summary>
+        /// Parse from a new order, redirects either to <see cref="FromNewMarketOrder"/>  or <see cref="FromNewNonMarketOrder"/>.
+        /// </summary>
+        /// <param name="order">OrderUpdate.</param>
+        /// <returns>Parsed trade execution.</returns>
         private static TradeExecution FromNewOrder(OrderUpdate order) =>
             order.OrderType == Market
                 ? FromNewMarketOrder(order)
@@ -23,6 +28,8 @@ namespace SpreadShare.Models.Trading
             var currency = order.Side == OrderSide.Buy ? order.Pair.Right : order.Pair.Left;
             var quantity = order.SetQuantity - order.FilledQuantity;
             quantity = order.Side == OrderSide.Buy ? quantity * order.SetPrice : quantity;
+
+            // For market orders, fees are incorporated in the quantity.
             var free = new Balance(currency, quantity, 0M);
             var locked = new Balance(currency, 0M, quantity);
             return new TradeExecution(free, locked);
