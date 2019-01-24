@@ -20,6 +20,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private readonly ILogger _logger;
         private readonly BacktestDataProvider _dataProvider;
         private readonly DatabaseContext _database;
+
+        /// <summary>
+        /// This queue is used to cache orders until the next clock tick. It is used to confirm order placements.
+        /// </summary>
         private readonly Queue<OrderUpdate> _orderCache;
 
         private long _mockOrderCounter;
@@ -45,7 +49,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <summary>
-        /// Gets or sets the parent implementation.
+        /// Gets or sets the parent implementation, needed to get the portfolio.
         /// </summary>
         public TradingProvider ParentImplementation { get; set; }
 
