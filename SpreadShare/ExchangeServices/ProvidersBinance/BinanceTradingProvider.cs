@@ -20,6 +20,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
     internal class BinanceTradingProvider : AbstractTradingProvider
     {
         private readonly BinanceCommunicationsService _communications;
+
+        /// <summary>
+        /// This queue is used to cache orders until the next clock tick. It is also used to confirm order placements.
+        /// </summary>
         private readonly ConcurrentQueue<OrderUpdate> _orderCache;
 
         /// <summary>
