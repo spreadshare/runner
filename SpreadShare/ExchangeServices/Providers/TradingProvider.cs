@@ -380,8 +380,8 @@ namespace SpreadShare.ExchangeServices.Providers
             try
             {
                 var confirmation = WaitForOrderStatus(order.OrderId, OrderUpdate.OrderStatus.Cancelled);
-                _allocationManager.UpdateAllocation(TradeExecution.FromOrder(confirmation));
-                _openOrders.Remove(order.OrderId);
+                UpdateAllocation(confirmation);
+                _openOrders.Remove(confirmation.OrderId);
             }
             catch
             {
@@ -485,7 +485,6 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private OrderUpdate WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
         {
-            _logger.LogCritical($"Wait for order {orderId} to reach the state {status}");
             var start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             while (true)
             {
@@ -496,7 +495,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 }
 
                 var query = _implementation.WaitForOrderStatus(orderId, status);
-                if (query.Success && query.Data.Status == status)
+                if (query.Success)
                 {
                     return query.Data;
                 }

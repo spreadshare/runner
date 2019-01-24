@@ -112,13 +112,14 @@ namespace SpreadShare.ExchangeServices
 
             var backtestTimer = new BacktestTimerProvider(_loggerFactory, _databaseContext, _settingsService.BackTestSettings);
             var dataImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, backtestTimer, _backtestCommunicationService);
-            var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation, _backtestCommunicationService, _databaseContext);
+            var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation, _databaseContext);
 
             var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
 
             // Doubly linked inheritance for backtesting edge case
             dataImplementation.ParentImplementation = dataProvider;
+            tradingImplementation.ParentImplementation = tradingProvider;
 
             return new ExchangeProvidersContainer(_loggerFactory, dataProvider, backtestTimer, tradingProvider, algorithm);
         }

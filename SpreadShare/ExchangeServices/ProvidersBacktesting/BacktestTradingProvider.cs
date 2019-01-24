@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
@@ -20,7 +19,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private readonly ILogger _logger;
         private readonly BacktestDataProvider _dataProvider;
-        private readonly BacktestCommunicationService _comm;
         private readonly DatabaseContext _database;
         private readonly Queue<OrderUpdate> _orderCache;
 
@@ -32,22 +30,24 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="loggerFactory">Used to create output.</param>
         /// <param name="timer">Timer provider for registering trades.</param>
         /// <param name="data">Data provider for confirming trades.</param>
-        /// <param name="comm">Communication service for updating remote portfolio.</param>
         /// <param name="database">Database context for logging trades.</param>
         public BacktestTradingProvider(
             ILoggerFactory loggerFactory,
             BacktestTimerProvider timer,
             BacktestDataProvider data,
-            BacktestCommunicationService comm,
             DatabaseContext database)
             : base(loggerFactory, timer)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _dataProvider = data;
-            _comm = comm;
             _database = database;
             _orderCache = new Queue<OrderUpdate>();
         }
+
+        /// <summary>
+        /// Gets or sets the parent implementation.
+        /// </summary>
+        public TradingProvider ParentImplementation { get; set; }
 
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> ExecuteMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
@@ -55,7 +55,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             decimal priceEstimate = _dataProvider.GetCurrentPriceTopBid(pair).Data;
 
             var order = new OrderUpdate(
-                _mockOrderCounter,
+                _mockOrderCounter++,
                 tradeId,
                 OrderUpdate.OrderStatus.Filled,
                 OrderUpdate.OrderTypes.Market,
@@ -69,15 +69,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 FilledQuantity = quantity,
                 FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds(),
             };
-            WatchList.Add(_mockOrderCounter++, order);
+
+            // Add to order cache to confirm filled
+            _orderCache.Enqueue(order);
 
             // Write the trade to the database
             _database.Trades.Add(new DatabaseTrade(
                 order,
-                _comm.RemotePortfolio.ToJson(),
-                _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
-
-            _comm.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
+                ParentImplementation.GetPortfolio().ToJson(),
+                _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
 
             return new ResponseObject<OrderUpdate>(
                 ResponseCode.Success,
@@ -89,7 +89,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             // Add the order to the watchlist
             OrderUpdate order = new OrderUpdate(
-                _mockOrderCounter,
+                _mockOrderCounter++,
                 tradeId,
                 OrderUpdate.OrderStatus.New,
                 OrderUpdate.OrderTypes.Limit,
@@ -98,11 +98,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 side,
                 pair,
                 quantity);
-            WatchList.Add(_mockOrderCounter, order);
-            _mockOrderCounter++;
 
-            _comm.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
+            // Add to order cache to confirm placement
             _orderCache.Enqueue(order);
+
+            // Add to watch list to check if filled
+            WatchList.Add(order.OrderId, order);
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
         }
@@ -112,7 +113,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             // Add the order to the watchlist
             OrderUpdate order = new OrderUpdate(
-                _mockOrderCounter,
+                _mockOrderCounter++,
                 tradeId,
                 OrderUpdate.OrderStatus.New,
                 OrderUpdate.OrderTypes.StopLoss,
@@ -121,11 +122,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 side,
                 pair,
                 quantity);
-            WatchList.Add(_mockOrderCounter, order);
-            _mockOrderCounter++;
 
-            _comm.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
+            // Add to order cache to confirm placement.
             _orderCache.Enqueue(order);
+
+            // Add to watchlist to check if filled
+            WatchList.Add(order.OrderId, order);
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, order);
         }
@@ -133,23 +135,23 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
-            var order = WaitForOrderStatus(orderId, OrderUpdate.OrderStatus.Cancelled).Data;
+            var order = GetOrderInfo(orderId).Data;
             order.Status = OrderUpdate.OrderStatus.Cancelled;
             order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
 
             if (WatchList.ContainsKey(orderId))
             {
-                WatchList.Remove(orderId);
+                WatchList.Remove(order.OrderId);
             }
+
+            // Add to order cache to confirm cancelled.
+            _orderCache.Enqueue(order);
 
             // Add cancelled order to the database
             _database.Trades.Add(new DatabaseTrade(
                 order,
-                _comm.RemotePortfolio.ToJson(),
-                _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
-
-            _comm.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
-            UpdateObservers(order);
+                ParentImplementation.GetPortfolio().ToJson(),
+                _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
 
             return new ResponseObject(ResponseCode.Success);
         }
@@ -157,12 +159,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
         {
-            var order = GetOrderInfo(orderId);
-            return order.Success
-                ? order.Data.Status == status
-                    ? new ResponseObject<OrderUpdate>(order.Data)
-                    : new ResponseObject<OrderUpdate>(ResponseCode.Error, $"Order {orderId} with status {status} was not found")
-                : order;
+            foreach (var order in _orderCache)
+            {
+                if (order.OrderId == orderId && order.Status == status)
+                {
+                    return new ResponseObject<OrderUpdate>(order);
+                }
+            }
+
+            return new ResponseObject<OrderUpdate>(ResponseCode.Error, "Backtest order was not added to the cache correctly");
         }
 
         /// <inheritdoc/>
@@ -193,6 +198,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             foreach (var order in WatchList.Values.ToList())
             {
                 decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
+
                 if (order.OrderType == OrderUpdate.OrderTypes.Limit && !FilledLimitOrder(order, price))
                 {
                     continue;
@@ -213,34 +219,19 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 order.LastFillPrice = order.SetPrice;
                 order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
 
-                // Calculate a trade execution to keep the remote portfolio up-to-date
-                TradeExecution exec;
-                if (order.Side == OrderSide.Buy)
-                {
-                    exec = new TradeExecution(
-                        new Balance(order.Pair.Right, 0.0M, order.SetQuantity * order.SetPrice),
-                        new Balance(order.Pair.Left, order.LastFillIncrement, 0.0M));
-                }
-                else
-                {
-                    exec = new TradeExecution(
-                        new Balance(order.Pair.Left, 0.0M, order.LastFillIncrement),
-                        new Balance(order.Pair.Right, order.SetQuantity * order.AverageFilledPrice, 0.0M));
-                }
-
-                _comm.RemotePortfolio.UpdateAllocation(exec);
-
                 // Write the filled trade to the database
                 _database.Trades.Add(new DatabaseTrade(
                     order,
-                    _comm.RemotePortfolio.ToJson(),
-                    _dataProvider.ValuatePortfolioInBaseCurrency(_comm.RemotePortfolio)));
+                    ParentImplementation.GetPortfolio().ToJson(),
+                    _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
 
                 UpdateObservers(order);
             }
 
             // Clean up filled orders
-            WatchList = WatchList.Where(keyPair => keyPair.Value.Status != OrderUpdate.OrderStatus.Filled)
+            WatchList = WatchList.Where(keyPair =>
+                       keyPair.Value.Status != OrderUpdate.OrderStatus.Filled
+                    && keyPair.Value.Status != OrderUpdate.OrderStatus.Cancelled)
                 .ToDictionary(p => p.Key, p => p.Value);
         }
 
