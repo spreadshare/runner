@@ -81,10 +81,20 @@ namespace SpreadShare.ExchangeServices.Providers
         public abstract ResponseObject CancelOrder(TradingPair pair, long orderId);
 
         /// <summary>
-        /// Gets the info regarding an order.
+        /// Search for a certain order with a certain status.
+        /// This method differs from GetOrderInfo because the implementation can
+        /// choose to source this information from its local cache.
         /// </summary>
         /// <param name="orderId">The id of the order.</param>
-        /// <returns>OrderUpdate containing the state of an order.</returns>
+        /// <param name="status">the status of the order.</param>
+        /// <returns>ResponseObject containing the order.</returns>
+        public abstract ResponseObject<OrderUpdate> WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status);
+
+        /// <summary>
+        /// Gets the info of a certain order.
+        /// </summary>
+        /// <param name="orderId">The id of the order.</param>
+        /// <returns>ResponseObject containing the order.</returns>
         public abstract ResponseObject<OrderUpdate> GetOrderInfo(long orderId);
 
         /// <inheritdoc />

@@ -20,7 +20,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
     internal class BinanceTradingProvider : AbstractTradingProvider
     {
         private readonly BinanceCommunicationsService _communications;
-        private ConcurrentQueue<OrderUpdate> _orderQueue;
+        private readonly ConcurrentQueue<OrderUpdate> _orderCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceTradingProvider"/> class.
@@ -32,11 +32,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             : base(loggerFactory, timer)
         {
             _communications = communications;
-            _orderQueue = new ConcurrentQueue<OrderUpdate>();
+            _orderCache = new ConcurrentQueue<OrderUpdate>();
 
             // Push order updates from the websocket in a concurrent queue
             communications.Subscribe(new ConfigurableObserver<OrderUpdate>(
-                order => _orderQueue.Enqueue(order),
+                order => _orderCache.Enqueue(order),
                 () => { },
                 e => { }));
         }
@@ -154,18 +154,24 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> GetOrderInfo(long orderId)
+        public override ResponseObject<OrderUpdate> WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
         {
-            var values = _orderQueue.ToList();
+            var values = _orderCache.ToList();
             foreach (var order in values)
             {
-                if (order.OrderId == orderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                if (order.OrderId == orderId && order.Status == status)
                 {
                     return new ResponseObject<OrderUpdate>(order);
                 }
             }
 
             return new ResponseObject<OrderUpdate>(ResponseCode.NotFound);
+        }
+
+        /// <inheritdoc/>
+        public override ResponseObject<OrderUpdate> GetOrderInfo(long orderId)
+        {
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
@@ -178,7 +184,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         public override void OnNext(long value)
         {
             // Flush the queue of pending order updates
-            while (_orderQueue.TryDequeue(out var order))
+            while (_orderCache.TryDequeue(out var order))
             {
                 UpdateObservers(order);
             }

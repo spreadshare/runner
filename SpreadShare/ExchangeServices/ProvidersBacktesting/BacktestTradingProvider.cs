@@ -133,7 +133,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
-            var order = GetOrderInfo(orderId).Data;
+            var order = WaitForOrderStatus(orderId, OrderUpdate.OrderStatus.Cancelled).Data;
             order.Status = OrderUpdate.OrderStatus.Cancelled;
             order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
 
@@ -155,6 +155,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
+        public override ResponseObject<OrderUpdate> WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
+        {
+            var order = GetOrderInfo(orderId);
+            return order.Success
+                ? order.Data.Status == status
+                    ? new ResponseObject<OrderUpdate>(order.Data)
+                    : new ResponseObject<OrderUpdate>(ResponseCode.Error, $"Order {orderId} with status {status} was not found")
+                : order;
+        }
+
+        /// <inheritdoc/>
         public override ResponseObject<OrderUpdate> GetOrderInfo(long orderId)
         {
             if (WatchList.ContainsKey(orderId))
@@ -162,7 +173,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 return new ResponseObject<OrderUpdate>(ResponseCode.Success, WatchList[orderId]);
             }
 
-            return new ResponseObject<OrderUpdate>(ResponseCode.Error, $"Order {orderId} was not found");
+            return new ResponseObject<OrderUpdate>(ResponseCode.Error, $"Order {orderId} with was not found");
         }
 
         /// <inheritdoc />

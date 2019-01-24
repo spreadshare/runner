@@ -123,7 +123,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     }, _logger);
 
                 return orderQuery.Success
-                    ? WaitForOrderConfirmation(orderQuery.Data.OrderId)
+                    ? WaitForOrderStatus(orderQuery.Data.OrderId, OrderUpdate.OrderStatus.Filled)
                     : throw new OrderFailedException(orderQuery.Message);
             });
 
@@ -154,7 +154,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     () => _implementation.ExecuteMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId), _logger);
 
                 return orderQuery.Success
-                    ? WaitForOrderConfirmation(orderQuery.Data.OrderId)
+                    ? WaitForOrderStatus(orderQuery.Data.OrderId, OrderUpdate.OrderStatus.Filled)
                     : throw new OrderFailedException(orderQuery.Message);
             });
 
@@ -194,8 +194,9 @@ namespace SpreadShare.ExchangeServices.Providers
 
             if (result.Success)
             {
-                _openOrders[result.Data.OrderId] = result.Data;
-                return result.Data;
+                var order = WaitForOrderStatus(result.Data.OrderId, OrderUpdate.OrderStatus.New);
+                _openOrders[result.Data.OrderId] = order;
+                return order;
             }
 
             throw new OrderRefusedException(result.Message);
@@ -229,8 +230,9 @@ namespace SpreadShare.ExchangeServices.Providers
 
             if (result.Success)
             {
-                _openOrders[result.Data.OrderId] = result.Data;
-                return result.Data;
+                var order = WaitForOrderStatus(result.Data.OrderId, OrderUpdate.OrderStatus.New);
+                _openOrders[result.Data.OrderId] = order;
+                return order;
             }
 
             throw new OrderRefusedException(result.Message);
@@ -370,6 +372,22 @@ namespace SpreadShare.ExchangeServices.Providers
                 () => _implementation.CancelOrder(order.Pair, order.OrderId),
                 _logger);
 
+            if (!query.Success)
+            {
+                return false;
+            }
+
+            try
+            {
+                var confirmation = WaitForOrderStatus(order.OrderId, OrderUpdate.OrderStatus.Cancelled);
+                _allocationManager.UpdateAllocation(TradeExecution.FromOrder(confirmation));
+                _openOrders.Remove(order.OrderId);
+            }
+            catch
+            {
+                return false;
+            }
+
             return query.Success;
         }
 
@@ -465,8 +483,9 @@ namespace SpreadShare.ExchangeServices.Providers
             }
         }
 
-        private OrderUpdate WaitForOrderConfirmation(long orderId)
+        private OrderUpdate WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
         {
+            _logger.LogCritical($"Wait for order {orderId} to reach the state {status}");
             var start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             while (true)
             {
@@ -476,8 +495,8 @@ namespace SpreadShare.ExchangeServices.Providers
                     throw new ExchangeTimeoutException($"Order {orderId} was not filled within 10 seconds.");
                 }
 
-                var query = _implementation.GetOrderInfo(orderId);
-                if (query.Success && query.Data.Status == OrderUpdate.OrderStatus.Filled)
+                var query = _implementation.WaitForOrderStatus(orderId, status);
+                if (query.Success && query.Data.Status == status)
                 {
                     return query.Data;
                 }

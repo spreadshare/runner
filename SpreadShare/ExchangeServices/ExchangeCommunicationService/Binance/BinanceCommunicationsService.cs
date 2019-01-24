@@ -113,27 +113,51 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 },
                 orderInfoUpdate =>
                 {
-                    _logger.LogInformation(JsonConvert.SerializeObject(orderInfoUpdate));
-                    UpdateObservers(new OrderUpdate(
-                        orderId: orderInfoUpdate.OrderId,
-                        tradeId: 0,
-                        orderType: BinanceUtilities.ToInternal(orderInfoUpdate.Type),
-                        orderStatus: BinanceUtilities.ToInternal(orderInfoUpdate.Status),
-                        createdTimeStamp: DateTimeOffset.FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime())
-                            .ToUnixTimeMilliseconds(),
-                        setPrice: orderInfoUpdate.Price,
-                        side: BinanceUtilities.ToInternal(orderInfoUpdate.Side),
-                        pair: TradingPair.Parse(orderInfoUpdate.Symbol),
-                        setQuantity: orderInfoUpdate.Quantity)
+                    // ##########################################################################
+                    // ####### WARNING ##########################################################
+                    // ### Any exception will cause this method to shutdown without warning,
+                    // ### causing the observers to hear nothing. This is completely shitty behavior,
+                    // ### do not make the mistake i made and waste your time.
+                    // ##########################################################################
+                    try
                     {
-                        LastFillIncrement = orderInfoUpdate.QuantityOfLastFilledTrade,
-                        LastFillPrice = orderInfoUpdate.PriceLastFilledTrade,
-                        AverageFilledPrice = HelperMethods.SafeDiv(
-                            orderInfoUpdate.CummulativeQuoteQuantity,
-                            orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
-                        FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
-                        Commission = (orderInfoUpdate.Commission, new Currency(orderInfoUpdate.CommissionAsset)),
-                    });
+                        var order = new OrderUpdate(
+                            orderId: orderInfoUpdate.OrderId,
+                            tradeId: 0,
+                            orderType: BinanceUtilities.ToInternal(orderInfoUpdate.Type),
+                            orderStatus: BinanceUtilities.ToInternal(orderInfoUpdate.Status),
+                            createdTimeStamp: DateTimeOffset
+                                .FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime())
+                                .ToUnixTimeMilliseconds(),
+                            setPrice: orderInfoUpdate.Price,
+                            side: BinanceUtilities.ToInternal(orderInfoUpdate.Side),
+                            pair: TradingPair.Parse(orderInfoUpdate.Symbol),
+                            setQuantity: orderInfoUpdate.Quantity)
+                        {
+                            LastFillIncrement = orderInfoUpdate.QuantityOfLastFilledTrade,
+                            LastFillPrice = orderInfoUpdate.PriceLastFilledTrade,
+                            AverageFilledPrice = HelperMethods.SafeDiv(
+                                orderInfoUpdate.CummulativeQuoteQuantity,
+                                orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
+                            FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
+                        };
+
+                        try
+                        {
+                            order.Commission = (orderInfoUpdate.Commission,
+                                new Currency(orderInfoUpdate.CommissionAsset));
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
+
+                        UpdateObservers(order);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError($"Error parsing a BinanceOrderInfoUpdate: {e.Message} \n {JsonConvert.SerializeObject(orderInfoUpdate)}");
+                    }
                 });
 
             // Set error handler
