@@ -11,9 +11,12 @@ namespace SpreadShare.Models
         /// <param name="code">Status of the response.</param>
         /// <param name="data">Data concerning the response.</param>
         public ResponseObject(ResponseCode code, string data = "")
-            : base(code, data)
+            : base(code, data, data)
         {
         }
+
+        /// <inheritdoc/>
+        public override string Data => Message;
 
         /// <inheritdoc />
         public override string ToString() => $"{Code} | msg: {Message}";

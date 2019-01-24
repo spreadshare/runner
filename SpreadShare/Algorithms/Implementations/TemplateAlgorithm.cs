@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.SupportServices.SettingsServices;
@@ -33,7 +34,16 @@ namespace SpreadShare.Algorithms.Implementations
         {
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                Logger.LogInformation("I wonder if Miss Bitcoin think I should buy...");
+                Logger.LogInformation("I wonder if Miss Bitcoin thinks I should buy...");
+                ShowAlloc(trading);
+            }
+
+            private string ShowAlloc(TradingProvider trading)
+            {
+                var alloc = trading.GetPortfolio();
+                var left = AlgorithmSettings.ActiveTradingPairs.First().Left;
+                var right = AlgorithmSettings.ActiveTradingPairs.First().Right;
+                return $"Total alloc: {alloc.GetAllocation(left)}{left} -- {alloc.GetAllocation(right)}{right}";
             }
         }
     }

@@ -70,7 +70,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 return new ResponseObject<decimal>(ResponseCode.Error);
             }
 
-            decimal ret = response.Data.Asks.Max(x => x.Price);
+            decimal ret = response.Data.Asks.Min(x => x.Price);
             return new ResponseObject<decimal>(ResponseCode.Success, ret);
         }
 
