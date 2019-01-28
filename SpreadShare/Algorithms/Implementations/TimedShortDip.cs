@@ -98,17 +98,17 @@ namespace SpreadShare.Algorithms.Implementations
     internal class TimedShortDipSettings : AlgorithmSettings
     {
         /// <summary>
-        /// Gets or sets how much something needs to fall to be considered a dip
+        /// Gets or sets how much something needs to fall to be considered a dip, a 3% dip is given as 0.03
         /// </summary>
         public decimal DipPercent { get; set; }
 
         /// <summary>
-        /// Gets or sets The diptime, how quickly the dip needs to happen to be considered a dip
+        /// Gets or sets The diptime, how quickly the dip needs to happen to be considered a dip in hours
         /// </summary>
         public double DipTime { get; set; }
 
         /// <summary>
-        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again
+        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again in hours
         /// </summary>
         public int ExitTime { get; set; }
     }
