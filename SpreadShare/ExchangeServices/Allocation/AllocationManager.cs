@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Dawn;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.Allocation
 {
@@ -127,8 +129,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="exec">The trade execution to process.</param>
         public void UpdateAllocation(Exchange exchange, Type algo, TradeExecution exec)
         {
+            _logger.LogInformation($"Allocation Update: {JsonConvert.SerializeObject(exec)}");
             _allocations[exchange].ApplyTradeExecution(algo, exec);
-            UpdatePortfolioUsingRemote(exchange, algo);
         }
 
         /// <summary>
@@ -149,7 +151,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="exchange">The exchange in question.</param>
         /// <param name="tradeCallback">Trade callback to be executed if verification was successful.</param>
         /// <returns>Boolean indicating successful execution of the callback.</returns>
-        public bool QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<TradeExecution> tradeCallback)
+        public ResponseObject<OrderUpdate> QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<OrderUpdate> tradeCallback)
         {
             Guard.Argument(_allocations).NotNull("Initialise allocations first");
             Guard.Argument(p).NotNull();
@@ -160,62 +162,26 @@ namespace SpreadShare.ExchangeServices.Allocation
                 _logger.LogCritical($"Got trade proposal for ({p.From}, but allocation " +
                                     $"showed only ({alloc}) was available\n" +
                                     "Trade will not be executed.");
-                return false;
+                return ResponseCommon.OrderRefused;
             }
 
             // Let the provider execute the trade and save the execution report
-            var exec = tradeCallback();
+            var order = tradeCallback();
 
             // TradingProvider can give a null execution report when it decides not to trade.
             // if this happens the portfolio will be checked against the remote using an 'empty' or 'monoid' trade execution.
-            if (exec is null)
+            if (order is null)
             {
-                _logger.LogWarning("TradeExecution report was null, assuming TradingProvider cancelled proposed trade");
-
-                // Check that the portfolio did not mutate by proceeding with a monodic execution
-                exec = new TradeExecution(Balance.Empty(p.From.Symbol), Balance.Empty(p.From.Symbol));
+                _logger.LogWarning("TradingProvider implementation returned a null OrderUpdate");
+                return ResponseCommon.OrderPlacementFailed("Implementation returned a null OrderUpdate");
             }
+
+            TradeExecution exec = TradeExecution.FromOrder(order);
 
             // Update the local information
-            _allocations[exchange].ApplyTradeExecution(algorithm, exec);
+            UpdateAllocation(exchange, algorithm, exec);
 
-            UpdatePortfolioUsingRemote(exchange, algorithm);
-
-            return true;
-        }
-
-        private void UpdatePortfolioUsingRemote(Exchange exchange, Type algorithm)
-        {
-            // Fetch the remote portfolio
-            var query = _portfolioFetcherService.GetPortfolio(exchange);
-            if (!query.Success)
-            {
-                _logger.LogWarning("Remote portfolio could not be fetched and the not trade could confirmed, " +
-                                   "Assuming local version for now.");
-                return;
-            }
-
-            var remote = query.Data;
-            var local = _allocations[exchange].GetSummedChildren();
-            var diff = Portfolio.SubtractedDifferences(remote, local);
-
-            if (diff.Any(x => Math.Abs(x.Free) > DustThreshold || Math.Abs(x.Locked) > DustThreshold))
-            {
-                _logger.LogWarning("There was a significant discrepancy between the remote and local portfolio, " +
-                                   $"Assuming the remote portfolio as truth value whilst blaming {algorithm}.\n" +
-                                   $"local portfolio: {local.ToJson()}\n" +
-                                   $"remote portfolio: {remote.ToJson()}\n");
-                foreach (var balance in diff)
-                {
-                    _logger.LogWarning($"diff {balance.Symbol}: ({balance.Free}, {balance.Locked})");
-                }
-            }
-
-            // Compensate discrepancy by blaming and correcting the local allocation for the current algorithm.
-            // This is done by adding the differences to the current algorithms allocation.
-            var old = _allocations[exchange].GetAlgorithmAllocation(algorithm);
-            var diffPortfolio = new Portfolio(diff.ToDictionary(x => x.Symbol, x => x));
-            _allocations[exchange].SetAlgorithmAllocation(algorithm, Portfolio.Add(old, diffPortfolio));
+            return new ResponseObject<OrderUpdate>(order);
         }
     }
 }

@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dawn;
-using SpreadShare.Models;
+using Microsoft.Extensions.Logging;
+using SpreadShare.Models.Database;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
@@ -15,16 +18,19 @@ namespace SpreadShare.ExchangeServices.Providers
     {
         private readonly AbstractDataProvider _implementation;
         private readonly AlgorithmSettings _settings;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataProvider"/> class.
         /// </summary>
+        /// <param name="factory">for generating output.</param>
         /// <param name="implementation">Exchange implementation of data provider.</param>
         /// <param name="settings">The settings of the algorithm.</param>
-        public DataProvider(AbstractDataProvider implementation, AlgorithmSettings settings)
+        public DataProvider(ILoggerFactory factory, AbstractDataProvider implementation, AlgorithmSettings settings)
         {
             _implementation = implementation;
             _settings = settings;
+            _logger = factory.CreateLogger(GetType());
         }
 
         /// <summary>
@@ -32,9 +38,13 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">The trading pair.</param>
         /// <returns>The current price.</returns>
-        public ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair)
+        public decimal GetCurrentPriceLastTrade(TradingPair pair)
         {
-            return _implementation.GetCurrentPriceLastTrade(pair);
+            Guard.Argument(pair).NotNull(nameof(pair));
+            var query = HelperMethods.RetryMethod(() => _implementation.GetCurrentPriceLastTrade(pair), _logger);
+            return query.Success
+                ? query.Data
+                : throw new ExchangeConnectionException(query.Message);
         }
 
         /// <summary>
@@ -43,9 +53,13 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">The trading pair.</param>
         /// <returns>The current price.</returns>
-        public ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair)
+        public decimal GetCurrentPriceTopBid(TradingPair pair)
         {
-            return _implementation.GetCurrentPriceTopBid(pair);
+            Guard.Argument(pair).NotNull(nameof(pair));
+            var query = HelperMethods.RetryMethod(() => _implementation.GetCurrentPriceTopBid(pair), _logger);
+            return query.Success
+                ? query.Data
+                : throw new ExchangeConnectionException(query.Message);
         }
 
         /// <summary>
@@ -54,9 +68,13 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="pair">The trading pair.</param>
         /// <returns>The current price.</returns>
-        public ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair)
+        public decimal GetCurrentPriceTopAsk(TradingPair pair)
         {
-            return _implementation.GetCurrentPriceTopAsk(pair);
+            Guard.Argument(pair).NotNull(nameof(pair));
+            var query = HelperMethods.RetryMethod(() => _implementation.GetCurrentPriceTopAsk(pair), _logger);
+            return query.Success
+                ? query.Data
+                : throw new ExchangeConnectionException(query.Message);
         }
 
         /// <summary>
@@ -65,9 +83,14 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">Trading pair to obtain performance of.</param>
         /// <param name="hoursBack">Number of hours to look back.</param>
         /// <returns>A response object with the performance on success.</returns>
-        public ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack)
+        public decimal GetPerformancePastHours(TradingPair pair, double hoursBack)
         {
-            return _implementation.GetPerformancePastHours(pair, hoursBack);
+            Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(hoursBack).NotZero().NotNegative();
+            var query = HelperMethods.RetryMethod(() => _implementation.GetPerformancePastHours(pair, hoursBack), _logger);
+            return query.Success
+                ? query.Data
+                : throw new ExchangeConnectionException(query.Message);
         }
 
         /// <summary>
@@ -76,9 +99,30 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pairs">A list of trading pairs to evaluate.</param>
         /// <param name="hoursBack">Number of hours to look back.</param>
         /// <returns>Top performing trading pair.</returns>
-        public ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
+        public Tuple<TradingPair, decimal> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
         {
-            return _implementation.GetTopPerformance(pairs, hoursBack);
+            Guard.Argument(pairs).NotNull(nameof(pairs)).NotEmpty();
+            Guard.Argument(hoursBack).NotNegative();
+            var query = HelperMethods.RetryMethod(() => _implementation.GetTopPerformance(pairs, hoursBack), _logger);
+            return query.Success
+                ? query.Data
+                : throw new ExchangeConnectionException(query.Message);
+        }
+
+        /// <summary>
+        /// Get a certain number of minute candles.
+        /// </summary>
+        /// <param name="pair">TradingPair.</param>
+        /// <param name="numberOfCandles">Number of minute candles to request (>0).</param>
+        /// <returns>Array of candles.</returns>
+        public BacktestingCandle[] GetMinuteCandles(TradingPair pair, int numberOfCandles)
+        {
+            Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(numberOfCandles).NotZero().NotNegative();
+            var query = HelperMethods.RetryMethod(() => _implementation.GetMinuteCandles(pair, numberOfCandles), _logger);
+            return query.Success
+                ? query.Data
+                : throw new ExchangeConnectionException(query.Message);
         }
 
         /// <summary>
@@ -87,10 +131,12 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">TradingPair.</param>
         /// <param name="numberOfCandles">Number of candles to evaluate.</param>
         /// <returns>ResponseObject containing the Average True Range.</returns>
-        public ResponseObject<decimal> GetAverageTrueRange(TradingPair pair, int numberOfCandles)
+        public decimal GetAverageTrueRange(TradingPair pair, int numberOfCandles)
         {
+            Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(numberOfCandles).Require(x => x >= 2, x => $"Average true range needs at least 2 candles");
-            var candles = _implementation.GetMinuteCandles(pair, numberOfCandles).Data.ToArray();
+            var candles = GetMinuteCandles(pair, numberOfCandles);
+
             decimal highLow = candles.Max(x => x.High - x.Low);
             decimal highPreviousClose = 0;
             decimal lowPreviousClose = 0;
@@ -109,7 +155,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 }
             }
 
-            return new ResponseObject<decimal>(ResponseCode.Success, (highLow + highPreviousClose + lowPreviousClose) / 3M);
+            return (highLow + highPreviousClose + lowPreviousClose) / 3M;
         }
 
         /// <summary>
@@ -119,6 +165,11 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>Value in base currency.</returns>
         public decimal ValuatePortfolioInBaseCurrency(Portfolio portfolio)
         {
+            if (portfolio is null)
+            {
+                return 0M;
+            }
+
             var balances = portfolio.AllBalances();
             decimal sum = 0;
             foreach (var balance in balances)
@@ -130,7 +181,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 }
 
                 TradingPair pair = TradingPair.Parse(balance.Symbol, _settings.BaseCurrency);
-                decimal price = _implementation.GetCurrentPriceLastTrade(pair).Data;
+                decimal price = GetCurrentPriceLastTrade(pair);
                 sum += (balance.Free + balance.Locked) * price;
             }
 

@@ -12,7 +12,7 @@ namespace SpreadShare.Utilities
         /// Gets a response object indicating a refused order.
         /// </summary>
         public static ResponseObject<OrderUpdate> OrderRefused =>
-            new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused");
+            new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused by allocation manager");
 
         /// <summary>
         /// Gets a response object indicating a failed order.

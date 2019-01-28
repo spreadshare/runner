@@ -2,7 +2,7 @@ using System;
 using Newtonsoft.Json;
 using SpreadShare.Models.Trading;
 
-namespace SpreadShare.Models.Serializers
+namespace SpreadShare.Serializers
 {
     /// <summary>
     /// Specifies JSON reading and writing routines that facilitate serialization and deserialization.

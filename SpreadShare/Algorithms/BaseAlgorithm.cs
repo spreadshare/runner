@@ -1,3 +1,4 @@
+using System;
 using Dawn;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
@@ -33,7 +34,15 @@ namespace SpreadShare.Algorithms
         /// <inheritdoc />
         public ResponseObject Stop()
         {
-            StateManager.Dispose();
+            try
+            {
+                StateManager.Dispose();
+            }
+            catch (Exception e)
+            {
+                return new ResponseObject(ResponseCode.Error, e.Message);
+            }
+
             return new ResponseObject(ResponseCode.Success);
         }
 

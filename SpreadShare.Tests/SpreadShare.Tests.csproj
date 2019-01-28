@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -44,6 +44,12 @@
 
   <ItemGroup>
     <DotNetCliToolReference Include="MiniCover" Version="2.0.0-ci-*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Models\Poco\AdministratorSettingsPocoTest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

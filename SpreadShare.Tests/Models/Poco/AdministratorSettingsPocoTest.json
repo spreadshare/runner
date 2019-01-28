@@ -1,0 +1,37 @@
+{
+  "HappyFlow" : {
+    "AdminEmail" : "admin@gmail.com",
+    "AdminPassword": "password",
+    "Recipients": ["recipient@domain.com"]
+  },
+  "AdminEmailInvalid" : {
+    "AdminEmail" : "admingmail.com",
+    "AdminPassword": "password",
+    "Recipients": ["recipient@domain.com"]
+  },
+  "AdminEmailNonGmail" : {
+    "AdminEmail" : "admin@hotmail.com",
+    "AdminPassword": "password",
+    "Recipients": ["recipient@domain.com"]
+  },
+  "AdminEmailMissing" : {
+    "AdminPassword": "password",
+    "Recipients": ["recipient@domain.com"]
+  },
+  "AdminPasswordMissing" : {
+    "AdminEmail" : "admin@gmail.com",
+    "Recipients": ["recipient@domain.com"]
+  },
+  "RecipientsMissing" : {
+    "AdminEmail" : "admin@gmail.com",
+    "AdminPassword": "password"
+  },
+  "RecipientsNotAllValid" : {
+    "AdminEmail" : "admin@gmail.com",
+    "AdminPassword": "password",
+    "Recipients": [
+      "recipient@domain.com",
+      "funds are safu"
+    ]
+  }
+}

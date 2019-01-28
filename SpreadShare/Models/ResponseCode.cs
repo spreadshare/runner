@@ -20,5 +20,10 @@ namespace SpreadShare.Models
         /// The action was successful
         /// </summary>
         Success,
+
+        /// <summary>
+        /// The requested information was not found.
+        /// </summary>
+        NotFound,
     }
 }

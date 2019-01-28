@@ -9,6 +9,7 @@ namespace SpreadShare.Models.Trading
         /// Initializes a new instance of the <see cref="OrderUpdate"/> class.
         /// </summary>
         /// <param name="tradeId">The id of the trade.</param>
+        /// <param name="orderStatus">The status of the order.</param>
         /// <param name="orderType">The type of the order.</param>
         /// <param name="createdTimeStamp">The timestamp at which the order is created.</param>
         /// <param name="setPrice">SetPrice at which the order was set.</param>
@@ -19,6 +20,7 @@ namespace SpreadShare.Models.Trading
         public OrderUpdate(
             long orderId,
             long tradeId,
+            OrderStatus orderStatus,
             OrderTypes orderType,
             long createdTimeStamp,
             decimal setPrice,
@@ -32,7 +34,7 @@ namespace SpreadShare.Models.Trading
             CreatedTimeStamp = createdTimeStamp;
             SetPrice = setPrice;
             Side = side;
-            Status = OrderStatus.New;
+            Status = orderStatus;
             Pair = pair;
             SetQuantity = setQuantity;
             SetPrice = setPrice;
@@ -192,5 +194,16 @@ namespace SpreadShare.Models.Trading
         /// Gets or sets the last filled portion of the order.
         /// </summary>
         public decimal LastFillIncrement { get; set; }
+
+        /// <summary>
+        /// Gets or sets the commission and asset in which is is paid for this order.
+        /// </summary>
+        public (decimal, Currency) Commission { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the order status will ever change.
+        /// </summary>
+        public bool Finalized => Status == OrderStatus.Filled || Status == OrderStatus.Rejected
+                                 || Status == OrderStatus.Cancelled || Status == OrderStatus.Rejected;
     }
 }
