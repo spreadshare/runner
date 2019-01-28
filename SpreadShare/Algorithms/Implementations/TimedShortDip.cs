@@ -108,7 +108,7 @@ namespace SpreadShare.Algorithms.Implementations
         public double DipTime { get; set; }
 
         /// <summary>
-        /// Gets or sets Stoptime, after how many hours we consider the trade lost and marketsell out. 
+        /// Gets or sets Stoptime, after how many hours we consider the trade lost and marketsell out.
         /// </summary>
         public double ExitTime { get; set; }
     }
