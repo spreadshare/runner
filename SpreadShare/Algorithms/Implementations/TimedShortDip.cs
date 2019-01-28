@@ -98,17 +98,17 @@ namespace SpreadShare.Algorithms.Implementations
     internal class TimedShortDipSettings : AlgorithmSettings
     {
         /// <summary>
-        /// Gets or sets how much something needs to fall to be considered a dip, a 3% dip is given as 0.03.
+        /// Gets or sets the percentage price needs to fall to start an entry, a 3% dip is written as 0.03.
         /// </summary>
         public decimal DipPercent { get; set; }
 
         /// <summary>
-        /// Gets or sets The diptime, how quickly the dip needs to happen to be considered a dip in hours.
+        /// Gets or sets The diptime, within how many hours the dip needs to happen.
         /// </summary>
         public double DipTime { get; set; }
 
         /// <summary>
-        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again in hours.
+        /// Gets or sets Stoptime, after how many hours we consider the trade lost and marketsell out. 
         /// </summary>
         public double ExitTime { get; set; }
     }
