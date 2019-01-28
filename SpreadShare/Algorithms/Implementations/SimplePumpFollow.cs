@@ -37,10 +37,10 @@ namespace SpreadShare.Algorithms.Implementations
              {
                  bool longPerformance = data.GetPerformancePastHours(
                                             AlgorithmSettings.ActiveTradingPairs.First(),
-                                            8) > (1 + AlgorithmSettings.FirstCheck);
+                                            8) > (1 + AlgorithmSettings.LongCheck);
                  bool shortPerformance = data.GetPerformancePastHours(
                                             AlgorithmSettings.ActiveTradingPairs.First(),
-                                            3) < (1 - AlgorithmSettings.SecondCheck);
+                                            3) < (1 - AlgorithmSettings.ShortCheck);
                  if (longPerformance && shortPerformance)
                  {
                     return new BuyState();
@@ -128,27 +128,27 @@ namespace SpreadShare.Algorithms.Implementations
     internal class SimplePumpFollowSettings : AlgorithmSettings
     {
         /// <summary>
-        /// Gets or sets how much something needs to rise in a short time to be considered a pump.
+        /// Gets or sets The longer check time to find the first pump. In hours.
         /// </summary>
-        public decimal FirstCheck { get; set; }
+        public decimal LongCheck { get; set; }
 
         /// <summary>
-        /// Gets or sets The SecondCheck, how much something needs to rise to be considered a followthrough.
+        /// Gets or sets The shorter check time, to indicate whether there is some followthrough. In hours.
         /// </summary>
-        public decimal SecondCheck { get; set; }
+        public decimal ShortCheck { get; set; }
 
         /// <summary>
-        /// Gets or sets profittake, determines where our exit should be.
+        /// Gets or sets determines where our exit should be in percent. 5% is 1.05.
         /// </summary>
         public decimal ProfitTake { get; set; }
 
         /// <summary>
-        /// Gets or sets Stoptime, determines how long to wait untill we get out no matter the PnL.
+        /// Gets or sets Stoptime, determines how long to wait untill we get out no matter the PnL. In Hours.
         /// </summary>
         public int StopTime { get; set; }
 
         /// <summary>
-        /// Gets or sets StopPrice, determines how low our stop should be placed.
+        /// Gets or sets StopPrice, determines how low our stop should be placed, 5% below is 0.95.
         /// </summary>
         public decimal StopPrice { get; set; }
     }
