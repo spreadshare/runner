@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using Binance.Net;
 using Microsoft.Extensions.Logging;
@@ -7,7 +7,7 @@ using SpreadShare.Models;
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 {
     /// <summary>
-    /// Object for obtaining and renewing listen keys for Binance
+    /// Object for obtaining and renewing listen keys for Binance.
     /// </summary>
     internal class ListenKeyManager : IDisposable
     {
@@ -21,11 +21,11 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ListenKeyManager"/> class.
-        /// Create logger and sets BinanceClient
+        /// Create logger and sets BinanceClient.
         /// </summary>
-        /// <param name="loggerFactory">Creates logger</param>
-        /// <param name="client">Creates BinanceClient</param>
-        /// <param name="interval">Renewal interval (default: 30min)</param>
+        /// <param name="loggerFactory">Creates logger.</param>
+        /// <param name="client">Creates BinanceClient.</param>
+        /// <param name="interval">Renewal interval (default: 30min).</param>
         public ListenKeyManager(ILoggerFactory loggerFactory, BinanceClient client, int interval = 30 * 60 * 1000)
         {
             _logger = loggerFactory.CreateLogger("ListenKeyManager");
@@ -34,9 +34,9 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Obtain listenkey that is valid for 24 hours (auto renews every 30 min)
+        /// Obtain listenkey that is valid for 24 hours (auto renews every 30 min).
         /// </summary>
-        /// <returns>ListenKey valid for 24 hours</returns>
+        /// <returns>ListenKey valid for 24 hours.</returns>
         public ResponseObject<string> Obtain()
         {
             // Cleanup previous instance
@@ -50,7 +50,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                 return new ResponseObject<string>(ResponseCode.Error);
             }
 
-            _listenKey = getListenKey.Data.ListenKey;
+            _listenKey = getListenKey.Data;
 
             // Set timer every 30 min for autorenewal
             SetTimer();
@@ -66,9 +66,9 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Disposes the current object's resource
+        /// Disposes the current object's resource.
         /// </summary>
-        /// <param name="disposing">Whether to dispose the resources of the object</param>
+        /// <param name="disposing">Whether to dispose the resources of the object.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -79,7 +79,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Clears timer and listenkey
+        /// Clears timer and listenkey.
         /// </summary>
         private void Cleanup()
         {
@@ -94,7 +94,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Set timer for every 30 minutes autorenewal
+        /// Set timer for every 30 minutes autorenewal.
         /// </summary>
         private void SetTimer()
         {
@@ -105,9 +105,9 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Renew listenkey
+        /// Renew listenkey.
         /// </summary>
-        /// <param name="stateInfo">Given context from the method starting the timer</param>
+        /// <param name="stateInfo">Given context from the method starting the timer.</param>
         private void Renew(object stateInfo)
         {
             _logger.LogInformation($"{DateTime.UtcNow} | Requesting renewal of listenKey: {_listenKey}");

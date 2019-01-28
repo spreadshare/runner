@@ -1,7 +1,7 @@
-﻿namespace SpreadShare.ExchangeServices
+namespace SpreadShare.ExchangeServices
 {
     /// <summary>
-    /// Distinguishes the exchange used or backtesting used
+    /// Distinguishes the exchange used or backtesting used.
     /// </summary>
     internal enum Exchange
     {
@@ -13,6 +13,6 @@
         /// <summary>
         /// Backtesting for all exchanges
         /// </summary>
-        Backtesting
+        Backtesting,
     }
 }

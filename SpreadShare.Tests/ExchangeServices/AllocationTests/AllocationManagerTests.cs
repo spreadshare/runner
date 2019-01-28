@@ -70,9 +70,9 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                   Exchange.Backtesting,
                   new Dictionary<Type, decimal>
                   {
-                     { typeof(TemplateAlgorithm), factor }
+                     { typeof(TemplateAlgorithm), factor },
                   }
-                }
+                },
             });
 
             Currency c = new Currency("ETH");
@@ -94,9 +94,9 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                     Exchange.Backtesting,
                     new Dictionary<Type, decimal>
                     {
-                        { typeof(TemplateAlgorithm), factor }
+                        { typeof(TemplateAlgorithm), factor },
                     }
-                }
+                },
             }));
         }
 
@@ -191,7 +191,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             var totalalloc = new AllocationManager(LoggerFactory, _fetcher);
             totalalloc.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>
             {
-                { Exchange.Backtesting, new Dictionary<Type, decimal>() }
+                { Exchange.Backtesting, new Dictionary<Type, decimal>() },
             });
             var alloc = totalalloc.GetWeakAllocationManager(algo, Exchange.Backtesting);
             var funds = alloc.GetAllFunds();
@@ -208,9 +208,9 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                     Exchange.Backtesting,
                     new Dictionary<Type, decimal>
                     {
-                        { typeof(TemplateAlgorithm), scale }
+                        { typeof(TemplateAlgorithm), scale },
                     }
-                }
+                },
             });
 
             return alloc;

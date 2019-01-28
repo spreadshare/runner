@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace SpreadShare.ExchangeServices.Providers
 {
     /// <summary>
-    /// Exchange implementation of the TimerProvider
+    /// Exchange implementation of the TimerProvider.
     /// </summary>
     internal class ExchangeTimerProvider : TimerProvider
     {
@@ -12,7 +12,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public override DateTimeOffset CurrentTime => DateTimeOffset.Now;
 
         /// <summary>
-        /// Notifies the observer periodically
+        /// Notifies the observer periodically.
         /// </summary>
         public override async void RunPeriodicTimer()
         {

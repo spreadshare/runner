@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 namespace SpreadShare.Tests.ExchangeServices.AllocationTests
 {
     /// <summary>
-    /// Tests the functionality of the portfolio fetcher service
+    /// Tests the functionality of the portfolio fetcher service.
     /// </summary>
     public class PortfolioFetcherTests : BaseTest
     {
@@ -21,7 +21,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         /// <summary>
         /// Initializes a new instance of the <see cref="PortfolioFetcherTests"/> class.
         /// </summary>
-        /// <param name="outputHelper">Used to create output</param>
+        /// <param name="outputHelper">Used to create output.</param>
         public PortfolioFetcherTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {

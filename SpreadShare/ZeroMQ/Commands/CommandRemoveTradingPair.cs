@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to remove a trading pair
+    /// Command to remove a trading pair.
     /// </summary>
     internal class CommandRemoveTradingPair : Command
     {
@@ -13,7 +13,7 @@ namespace SpreadShare.ZeroMQ.Commands
         /// <inheritdoc />
         protected override Dictionary<string, string> Arguments => new Dictionary<string, string>()
         {
-            { "arg_tradingpair", null }
+            { "arg_tradingpair", null },
         };
 
         /// <inheritdoc />

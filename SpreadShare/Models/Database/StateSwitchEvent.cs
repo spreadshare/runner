@@ -3,16 +3,16 @@ using System.ComponentModel.DataAnnotations;
 namespace SpreadShare.Models.Database
 {
     /// <summary>
-    /// Models a state switch event in the database
+    /// Models a state switch event in the database.
     /// </summary>
     internal class StateSwitchEvent : ICsvSerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
         /// </summary>
-        /// <param name="timestamp">Timestamp</param>
-        /// <param name="from">Origin state</param>
-        /// <param name="to">Goal state</param>
+        /// <param name="timestamp">Timestamp.</param>
+        /// <param name="from">Origin state.</param>
+        /// <param name="to">Goal state.</param>
         public StateSwitchEvent(long timestamp, string from, string to)
         {
             Timestamp = timestamp;
@@ -27,25 +27,25 @@ namespace SpreadShare.Models.Database
         public long Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the timestamp of the event
+        /// Gets or sets the timestamp of the event.
         /// </summary>
         public long Timestamp { get; set; }
 
         /// <summary>
-        /// Gets or sets the state from which was switched
+        /// Gets or sets the state from which was switched.
         /// </summary>
         public string From { get; set; }
 
         /// <summary>
-        /// Gets or sets the state to which was switched
+        /// Gets or sets the state to which was switched.
         /// </summary>
         public string To { get; set; }
 
         /// <summary>
-        /// Get a header matching the format of the CSV representation
+        /// Get a header matching the format of the CSV representation.
         /// </summary>
-        /// <param name="delimiter">Delimiter</param>
-        /// <returns>csv header</returns>
+        /// <param name="delimiter">Delimiter.</param>
+        /// <returns>csv header.</returns>
         public static string GetStaticCsvHeader(char delimiter)
         {
             return $"{nameof(Id)}{delimiter}" +

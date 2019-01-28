@@ -1,11 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Binance.Net.Objects;
+using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
+using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance
@@ -20,8 +22,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceDataProvider"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Used to create output stream</param>
-        /// <param name="communications">For communication with Binance</param>
+        /// <param name="loggerFactory">Used to create output stream.</param>
+        /// <param name="communications">For communication with Binance.</param>
         public BinanceDataProvider(ILoggerFactory loggerFactory, BinanceCommunicationsService communications)
             : base(loggerFactory, communications)
         {
@@ -100,12 +102,38 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
+        public override ResponseObject<BacktestingCandle[]> GetMinuteCandles(TradingPair pair, int limit)
+        {
+            var client = _communications.Client;
+            var response = client.GetKlines(
+                pair.ToString(),
+                KlineInterval.OneMinute,
+                DateTime.UtcNow - TimeSpan.FromMinutes(limit),
+                DateTime.UtcNow,
+                limit);
+
+            if (!response.Success)
+            {
+                return new ResponseObject<BacktestingCandle[]>(ResponseCode.Error, response.Error.Message);
+            }
+
+            var candles = response.Data.Select(x =>
+                new BacktestingCandle(
+                    new DateTimeOffset(x.OpenTime).ToUnixTimeMilliseconds(),
+                    x.Open,
+                    x.Close,
+                    x.High,
+                    x.Low,
+                    x.Volume,
+                    pair.ToString())).ToArray();
+
+            return new ResponseObject<BacktestingCandle[]>(ResponseCode.Success, candles);
+        }
+
+        /// <inheritdoc />
         public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
         {
-            if (hoursBack <= 0)
-            {
-                throw new ArgumentException("Argument hoursBack should be larger than 0.");
-            }
+            Guard.Argument(hoursBack).NotNegative(x => $"{nameof(hoursBack)} cannot be negative: {x}");
 
             decimal max = -1;
             TradingPair maxTradingPair = null;

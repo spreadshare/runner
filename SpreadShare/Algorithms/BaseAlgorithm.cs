@@ -1,4 +1,4 @@
-﻿using Dawn;
+using Dawn;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
@@ -7,14 +7,14 @@ using SpreadShare.SupportServices.SettingsServices;
 namespace SpreadShare.Algorithms
 {
     /// <summary>
-    /// Base class for all algorithms
+    /// Base class for all algorithms.
     /// </summary>
-    /// <typeparam name="T">The derived AlgorithmSettings</typeparam>
+    /// <typeparam name="T">The derived AlgorithmSettings.</typeparam>
     internal abstract class BaseAlgorithm<T> : IBaseAlgorithm
         where T : AlgorithmSettings
     {
         /// <summary>
-        /// Gets the the EntryState of the algorithm
+        /// Gets the the EntryState of the algorithm.
         /// </summary>
         protected abstract EntryState<T> Initial { get; }
 

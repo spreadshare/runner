@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace SpreadShare.Tests
 {
     /// <summary>
-    /// Singleton for ServiceProvider
+    /// Singleton for ServiceProvider.
     /// </summary>
     internal sealed class ServiceProviderSingleton
     {
@@ -33,12 +33,12 @@ namespace SpreadShare.Tests
         }
 
         /// <summary>
-        /// Gets the instance of a ServiceProviderSingleton
+        /// Gets the instance of a ServiceProviderSingleton.
         /// </summary>
         public static ServiceProviderSingleton Instance => Lazy.Value;
 
         /// <summary>
-        /// Gets the ServiceProvider
+        /// Gets the ServiceProvider.
         /// </summary>
         public IServiceProvider ServiceProvider { get; }
     }

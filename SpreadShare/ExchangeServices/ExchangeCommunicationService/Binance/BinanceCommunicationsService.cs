@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 {
@@ -22,22 +23,28 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceCommunicationsService"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Used to create a logger to create output</param>
-        /// <param name="settings">Used to extract the binance settings</param>
+        /// <param name="loggerFactory">Used to create a logger to create output.</param>
+        /// <param name="settings">Used to extract the binance settings.</param>
         public BinanceCommunicationsService(ILoggerFactory loggerFactory, SettingsService settings)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _loggerFactory = loggerFactory;
             _authy = settings.BinanceSettings.Credentials;
+            ReceiveWindow = settings.BinanceSettings.ReceiveWindow;
         }
 
         /// <summary>
-        /// Gets the instance of the binance client
+        /// Gets the number of ticks before timeout should be declared. This value is set in the configuration.
+        /// </summary>\
+        public long ReceiveWindow { get; }
+
+        /// <summary>
+        /// Gets the instance of the binance client.
         /// </summary>
         public BinanceClient Client { get; private set; }
 
         /// <summary>
-        /// Gets the instance of the binance user socket
+        /// Gets the instance of the binance user socket.
         /// </summary>
         public BinanceSocketClient Socket { get; private set; }
 
@@ -49,9 +56,9 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Disposes the current object's resource
+        /// Disposes the current object's resource.
         /// </summary>
-        /// <param name="disposing">Whether to dispose the resources of the object</param>
+        /// <param name="disposing">Whether to dispose the resources of the object.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -78,7 +85,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Enable streams for 24 hours
+        /// Enable streams for 24 hours.
         /// </summary>
         private void EnableStreams()
         {
@@ -104,29 +111,33 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                     // TODO: Implement AccountInfoUpdate callback
                 },
                 orderInfoUpdate => UpdateObservers(new OrderUpdate(
-                    orderInfoUpdate.OrderId,
-                    0,
-                    BinanceUtilities.ToInternal(orderInfoUpdate.Type),
-                    DateTimeOffset.FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime()).ToUnixTimeMilliseconds(),
-                    orderInfoUpdate.Price,
-                    BinanceUtilities.ToInternal(orderInfoUpdate.Side),
-                    TradingPair.Parse(orderInfoUpdate.Symbol),
-                    orderInfoUpdate.Quantity)
-                {
-                    Status = BinanceUtilities.ToInternal(orderInfoUpdate.Status)
-                }));
+                        orderId: orderInfoUpdate.OrderId,
+                        tradeId: 0,
+                        orderType: BinanceUtilities.ToInternal(orderInfoUpdate.Type),
+                        createdTimeStamp: DateTimeOffset.FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime())
+                            .ToUnixTimeMilliseconds(),
+                        setPrice: orderInfoUpdate.Price,
+                        side: BinanceUtilities.ToInternal(orderInfoUpdate.Side),
+                        pair: TradingPair.Parse(orderInfoUpdate.Symbol),
+                        setQuantity: orderInfoUpdate.Quantity)
+                    {
+                        Status = BinanceUtilities.ToInternal(orderInfoUpdate.Status),
+                        LastFillIncrement = orderInfoUpdate.QuantityOfLastFilledTrade,
+                        LastFillPrice = orderInfoUpdate.PriceLastFilledTrade,
+                        AverageFilledPrice = HelperMethods.SafeDiv(
+                            orderInfoUpdate.CummulativeQuoteQuantity,
+                            orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
+                        FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
+                    }));
 
-            // Set error handlers
-            succesOrderBook.Data.Closed += () =>
+            // Set error handler
+            succesOrderBook.Data.ConnectionLost += () =>
             {
                 _logger.LogCritical($"Connection got closed at {DateTime.UtcNow}. Attempt to open socket");
                 EnableStreams();
             };
-            succesOrderBook.Data.Error += e =>
-            {
-                _logger.LogError($"Connection got error at {DateTime.UtcNow}: {e}");
-                EnableStreams();
-            };
+
+            succesOrderBook.Data.ConnectionRestored += t => _logger.LogCritical($"Connection was restored after {t}");
 
             _logger.LogInformation("Binance Communication Service was successfully started!");
         }

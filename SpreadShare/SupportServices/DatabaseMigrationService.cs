@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
 {
     /// <summary>
-    /// Service for migrating the database
+    /// Service for migrating the database.
     /// </summary>
     internal class DatabaseMigrationService : IDatabaseMigrationService
     {
@@ -13,16 +13,16 @@ namespace SpreadShare.SupportServices
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseMigrationService"/> class.
         /// </summary>
-        /// <param name="dbContext">Context of the database to migrate</param>
+        /// <param name="dbContext">Context of the database to migrate.</param>
         public DatabaseMigrationService(DatabaseContext dbContext)
         {
             _dbContext = dbContext;
         }
 
         /// <summary>
-        /// Migrate the database
+        /// Migrate the database.
         /// </summary>
-        /// <returns>The result of the migration</returns>
+        /// <returns>The result of the migration.</returns>
         public ResponseObject Migrate()
         {
             try

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,9 +22,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestOutputLogger"/> class.
         /// </summary>
-        /// <param name="databaseContext">DatabaseContext to fetch trades and switches</param>
-        /// <param name="timer">BacktestTimerProvider to get timespan information</param>
-        /// <param name="outputFolder">General backtest output folder</param>
+        /// <param name="databaseContext">DatabaseContext to fetch trades and switches.</param>
+        /// <param name="timer">BacktestTimerProvider to get timespan information.</param>
+        /// <param name="outputFolder">General backtest output folder.</param>
         public BacktestOutputLogger(DatabaseContext databaseContext, BacktestTimerProvider timer, string outputFolder)
         {
             DatabaseContext = databaseContext;
@@ -76,7 +76,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <summary>
         /// Output appsettings.json (without credentials) to output folder.
         /// </summary>
-        /// <param name="filepath">Filepath to store configuration at</param>
+        /// <param name="filepath">Filepath to store configuration at.</param>
         private static void OutputConfiguration(string filepath)
         {
             string rawjson = ReadAllText(Program.CommandLineArgs.ConfigurationPath);
@@ -93,7 +93,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <summary>
         /// Output all executed trades to filepath.
         /// </summary>
-        /// <param name="filepath">Filepath to store trades at</param>
+        /// <param name="filepath">Filepath to store trades at.</param>
         private void OutputTrades(string filepath)
         {
             var builder = new StringBuilder();
@@ -110,7 +110,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <summary>
         /// Output all executed state switches to filepath.
         /// </summary>
-        /// <param name="filepath">Filepath to store trades at</param>
+        /// <param name="filepath">Filepath to store trades at.</param>
         private void OutputStateSwitches(string filepath)
         {
             var builder = new StringBuilder();
@@ -128,7 +128,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             string data = JsonConvert.SerializeObject(new
             {
                 BeginTime = _timer.BeginTime.ToUnixTimeMilliseconds(),
-                EndTime = _timer.EndTime.ToUnixTimeMilliseconds()
+                EndTime = _timer.EndTime.ToUnixTimeMilliseconds(),
             });
 
             WriteAllText(filepath, data);

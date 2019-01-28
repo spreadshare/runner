@@ -1,7 +1,7 @@
-﻿namespace SpreadShare.ZeroMQ.Commands
+namespace SpreadShare.ZeroMQ.Commands
 {
     /// <summary>
-    /// Command to retrieve the CheckTime
+    /// Command to retrieve the CheckTime.
     /// </summary>
     internal class CommandGetChecktime : Command
     {

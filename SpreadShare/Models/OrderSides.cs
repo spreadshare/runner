@@ -13,6 +13,6 @@ namespace SpreadShare.Models
         /// <summary>
         /// Sell order
         /// </summary>
-        Sell
+        Sell,
     }
 }

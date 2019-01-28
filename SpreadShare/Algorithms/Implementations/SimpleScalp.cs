@@ -10,7 +10,7 @@ namespace SpreadShare.Algorithms.Implementations
 {
     /// <summary>
     /// The first simple scalp algorithm.
-    /// buys without entryconditions and immediately sets an exit sell, with a time-based stop loss
+    /// buys without entryconditions and immediately sets an exit sell, with a time-based stop loss.
     /// </summary>
     internal class SimpleScalp : BaseAlgorithm<SimpleScalpSettings>
     {
@@ -53,7 +53,7 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 OrderUpdate buyorder =
-                    trading.PlaceFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First()).Data;
+                    trading.ExecuteFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First()).Data;
                 Portfolio portfolio = trading.GetPortfolio();
                 limitsell = trading.PlaceLimitOrderSell(
                     AlgorithmSettings.ActiveTradingPairs.First(),
@@ -93,8 +93,8 @@ namespace SpreadShare.Algorithms.Implementations
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                trading.CancelOrder(oldlimit.Pair, oldlimit.OrderId);
-                OrderUpdate mktsell = trading.PlaceFullMarketOrderSell(AlgorithmSettings.ActiveTradingPairs.First())
+                trading.CancelOrder(oldlimit);
+                OrderUpdate mktsell = trading.ExecuteFullMarketOrderSell(AlgorithmSettings.ActiveTradingPairs.First())
                     .Data;
                 SetTimer(TimeSpan.Zero);
             }
@@ -102,22 +102,22 @@ namespace SpreadShare.Algorithms.Implementations
     }
 
     /// <summary>
-    /// The SimpleScalp settings
+    /// The SimpleScalp settings.
     /// </summary>
     internal class SimpleScalpSettings : AlgorithmSettings
     {
         /// <summary>
-        /// Gets or sets At what point you take profit
+        /// Gets or sets At what point you take profit.
         /// </summary>
         public decimal TakeProfit { get; set; }
 
         /// <summary>
-        /// Gets or sets The waittime, basically a cooldown after exiting a trade
+        /// Gets or sets The waittime, basically a cooldown after exiting a trade.
         /// </summary>
         public int WaitTime { get; set; }
 
         /// <summary>
-        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again
+        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again.
         /// </summary>
         public int StopTime { get; set; }
     }

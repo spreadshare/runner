@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using NetMQ;
@@ -10,14 +10,14 @@ using Xunit.Abstractions;
 namespace SpreadShare.Tests.ZeroMQ
 {
     /// <summary>
-    /// Tests of the <ZeroMqService cref="ZeroMqService"/> class
+    /// Tests of the <ZeroMqService cref="ZeroMqService"/> class.
     /// </summary>
     public class ZeroMqTests : BaseTest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ZeroMqTests"/> class.
         /// </summary>
-        /// <param name="outputHelper">Output helper that writes to TestOutput</param>
+        /// <param name="outputHelper">Output helper that writes to TestOutput.</param>
         public ZeroMqTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
@@ -27,9 +27,9 @@ namespace SpreadShare.Tests.ZeroMQ
         }
 
         /// <summary>
-        /// Tests the broadcasting functionality of the ZeroMQ services
+        /// Tests the broadcasting functionality of the ZeroMQ services.
         /// </summary>
-        /// <param name="topics">Topics to subscribe to</param>
+        /// <param name="topics">Topics to subscribe to.</param>
         [Theory(Skip = "Test takes too long")]
         [InlineData("topic_status", "topic_holdtime")]
         public void BroadcastingAllTopicsTest(params string[] topics)
