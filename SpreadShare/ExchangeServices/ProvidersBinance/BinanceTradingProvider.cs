@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Linq.Expressions;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.Providers.Observing;
@@ -20,7 +20,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
     internal class BinanceTradingProvider : AbstractTradingProvider
     {
         private readonly BinanceCommunicationsService _communications;
-        private ConcurrentQueue<OrderUpdate> _orderQueue;
+
+        /// <summary>
+        /// This queue is used to cache orders until the next clock tick. It is also used to confirm order placements.
+        /// </summary>
+        private readonly ConcurrentQueue<OrderUpdate> _orderCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceTradingProvider"/> class.
@@ -32,11 +36,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             : base(loggerFactory, timer)
         {
             _communications = communications;
-            _orderQueue = new ConcurrentQueue<OrderUpdate>();
+            _orderCache = new ConcurrentQueue<OrderUpdate>();
 
             // Push order updates from the websocket in a concurrent queue
             communications.Subscribe(new ConfigurableObserver<OrderUpdate>(
-                order => _orderQueue.Enqueue(order),
+                order => _orderCache.Enqueue(order),
                 () => { },
                 e => { }));
         }
@@ -74,6 +78,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             OrderUpdate result = new OrderUpdate(
                 orderId: order.OrderId,
                 tradeId: tradeId,
+                orderStatus: OrderUpdate.OrderStatus.Filled,
                 orderType: BinanceUtilities.ToInternal(order.Type),
                 createdTimeStamp: DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 setPrice: 0, // This information is unknown for market orders
@@ -81,20 +86,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 pair: pair,
                 setQuantity: quantity)
             {
-                Status = OrderUpdate.OrderStatus.Filled,
-                FilledQuantity = query.Data.ExecutedQuantity,
+                FilledQuantity = order.ExecutedQuantity,
                 FilledTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                AverageFilledPrice = HelperMethods.SafeDiv(order.CummulativeQuoteQuantity, order.ExecutedQuantity),
             };
-
-            // Prevent division by zero
-            if (order.ExecutedQuantity == 0)
-            {
-                Logger.LogWarning($"Market order could not be priced --> {JsonConvert.SerializeObject(order)}");
-                return new ResponseObject<OrderUpdate>(ResponseCode.Success, result);
-            }
-
-            // Calculate the price
-            result.AverageFilledPrice = order.CummulativeQuoteQuantity / query.Data.ExecutedQuantity;
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Success, result);
         }
@@ -125,6 +120,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     new OrderUpdate(
                         query.Data.OrderId,
                         tradeId,
+                        OrderUpdate.OrderStatus.New,
                         OrderUpdate.OrderTypes.Limit,
                         DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                         price,
@@ -162,7 +158,22 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> GetOrderInfo(TradingPair pair, long orderId)
+        public override ResponseObject<OrderUpdate> WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
+        {
+            var values = _orderCache.ToList();
+            foreach (var order in values)
+            {
+                if (order.OrderId == orderId && order.Status == status)
+                {
+                    return new ResponseObject<OrderUpdate>(order);
+                }
+            }
+
+            return new ResponseObject<OrderUpdate>(ResponseCode.NotFound);
+        }
+
+        /// <inheritdoc/>
+        public override ResponseObject<OrderUpdate> GetOrderInfo(long orderId)
         {
             throw new NotImplementedException();
         }
@@ -177,7 +188,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         public override void OnNext(long value)
         {
             // Flush the queue of pending order updates
-            while (_orderQueue.TryDequeue(out var order))
+            while (_orderCache.TryDequeue(out var order))
             {
                 UpdateObservers(order);
             }

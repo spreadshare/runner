@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
@@ -21,7 +20,7 @@ namespace SpreadShare.Tests.ExchangeServices
         [Fact]
         public void AverageTrueRangeHappyFlow()
         {
-            Assert.True(_data.GetAverageTrueRange(TradingPair.Parse("VETETH"), 5).Success);
+            _data.GetAverageTrueRange(TradingPair.Parse("VETETH"), 5);
         }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
+using SpreadShare.SupportServices.ErrorServices;
 using SpreadShare.SupportServices.SettingsServices;
 
 namespace SpreadShare
@@ -31,7 +32,7 @@ namespace SpreadShare
         /// <returns>Status code.</returns>
         public static int Main(string[] args)
         {
-            // Bind command line args to local variable.
+            // Start command line args to local variable.
             Parser.Default.ParseArguments<CommandLineArgs>(args)
                 .WithParsed(o => _commandLineArgs = o);
 
@@ -64,16 +65,16 @@ namespace SpreadShare
         /// <summary>
         /// Cause the Main() to return with a given status code.
         /// </summary>
-        /// <param name="statusCode">Status code.</param>
-        public static void ExitProgramWithCode(int statusCode)
+        /// <param name="exitCode">Reason for termination.</param>
+        public static void ExitProgramWithCode(ExitCode exitCode)
         {
             // Flush the logs by disposing the factory
             _loggerFactory.Dispose();
-            Environment.Exit(statusCode);
+            Environment.Exit((int)exitCode);
         }
 
         /// <summary>
-        /// Start business services.
+        /// Bind business services.
         /// </summary>
         /// <param name="serviceProvider">Service provider.</param>
         /// <param name="loggerFactory">LoggerFactory for creating a logger.</param>
@@ -82,6 +83,10 @@ namespace SpreadShare
         {
             ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
             SettingsService settings = serviceProvider.GetService<SettingsService>();
+            if (CommandLineArgs.Trading)
+            {
+                serviceProvider.GetService<ErrorService>().Bind();
+            }
 
             // Check if allocation either completely set as backtesting, or the --trading flag was used
             if (!CommandLineArgs.Trading)
@@ -110,7 +115,7 @@ namespace SpreadShare
                 }
             }
 
-            // Start allocated services
+            // Bind allocated services
             var algorithmService = serviceProvider.GetService<IAlgorithmService>();
             foreach (var algo in settings.EnabledAlgorithms)
             {

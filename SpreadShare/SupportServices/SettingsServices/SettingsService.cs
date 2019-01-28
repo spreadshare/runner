@@ -14,7 +14,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
+using SpreadShare.Models.Poco;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.ErrorServices;
 using SpreadShare.Utilities;
 
 namespace SpreadShare.SupportServices.SettingsServices
@@ -66,6 +68,11 @@ namespace SpreadShare.SupportServices.SettingsServices
         /// </summary>
         public BacktestSettings BackTestSettings { get; private set; }
 
+        /// <summary>
+        /// Gets the administrator settings.
+        /// </summary>
+        public AdministratorSettings AdministratorSettings { get; private set; }
+
         private AlgorithmSettings BacktestedAlgorithm =>
             _algorithmSettingsLookup.Values.First(x => x.Exchange == Exchange.Backtesting);
 
@@ -88,9 +95,17 @@ namespace SpreadShare.SupportServices.SettingsServices
             try
             {
                 // Enables parsing functionality for currencies and should be called first.
-                ParseAllocationSettings();
                 DownloadCurrencies();
                 ParseAlgorithmSettings();
+                if (Program.CommandLineArgs.Trading)
+                {
+                    AdministratorSettings = new AdministratorSettings(
+                        _configuration
+                            .GetSection(nameof(AdministratorSettings))
+                            .Get<AdministratorSettingsPoco>(opt => opt.BindNonPublicProperties = true));
+                }
+
+                ParseAllocationSettings();
                 BinanceSettings = _configuration.GetSection("BinanceClientSettings").Get<BinanceSettings>();
                 BackTestSettings = ParseBacktestSettings();
             }
@@ -98,14 +113,14 @@ namespace SpreadShare.SupportServices.SettingsServices
             {
                 _logger.LogError(e.Message);
                 _logger.LogError("Database not available, are you running inside the docker container?");
-                Program.ExitProgramWithCode(1);
+                Program.ExitProgramWithCode(ExitCode.DatabaseUnreachable);
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
                 _logger.LogError($"SettingsService failed to start, aborting other services\n" +
                                  $"Validate that SpreadShare/{Program.CommandLineArgs.ConfigurationPath} is in the correct format.");
-                Program.ExitProgramWithCode(1);
+                Program.ExitProgramWithCode(ExitCode.InvalidConfiguration);
             }
         }
 

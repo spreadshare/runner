@@ -83,17 +83,17 @@ namespace SpreadShare.ExchangeServices
             switch (algorithmSettings.Exchange)
             {
                 case Exchange.Binance:
-                    return BuildBinanceContainer(algorithmSettings, allocationManager);
+                    return BuildBinanceContainer(algorithmSettings, allocationManager, algorithm);
 
                 case Exchange.Backtesting:
-                    return BuildBacktestingContainer(algorithmSettings, allocationManager);
+                    return BuildBacktestingContainer(algorithmSettings, allocationManager, algorithm);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(algorithm));
             }
         }
 
-        private ExchangeProvidersContainer BuildBinanceContainer(AlgorithmSettings settings, WeakAllocationManager allocationManager)
+        private ExchangeProvidersContainer BuildBinanceContainer(AlgorithmSettings settings, WeakAllocationManager allocationManager, Type algorithm)
         {
             // Makes sure that the communication is enabled
             _binanceCommunications.Connect();
@@ -101,26 +101,27 @@ namespace SpreadShare.ExchangeServices
             var dataImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
             var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications, timerProvider);
 
-            var dataProvider = new DataProvider(dataImplementation, settings);
+            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
-            return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider);
+            return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider, algorithm);
         }
 
-        private ExchangeProvidersContainer BuildBacktestingContainer(AlgorithmSettings settings, WeakAllocationManager allocationManager)
+        private ExchangeProvidersContainer BuildBacktestingContainer(AlgorithmSettings settings, WeakAllocationManager allocationManager, Type algorithm)
         {
             _backtestCommunicationService.Connect();
 
             var backtestTimer = new BacktestTimerProvider(_loggerFactory, _databaseContext, _settingsService.BackTestSettings);
             var dataImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, backtestTimer, _backtestCommunicationService);
-            var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation, _backtestCommunicationService, _databaseContext);
+            var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation, _databaseContext);
 
-            var dataProvider = new DataProvider(dataImplementation, settings);
+            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
 
             // Doubly linked inheritance for backtesting edge case
             dataImplementation.ParentImplementation = dataProvider;
+            tradingImplementation.ParentImplementation = tradingProvider;
 
-            return new ExchangeProvidersContainer(_loggerFactory, dataProvider, backtestTimer, tradingProvider);
+            return new ExchangeProvidersContainer(_loggerFactory, dataProvider, backtestTimer, tradingProvider, algorithm);
         }
     }
 }

@@ -2,6 +2,11 @@
     "ConnectionStrings": {
         "LocalConnection": "Server=db;Database=spreadshare;User ID=postgres;Password=password;Integrated Security=true;Pooling=true;"
     },
+    "AdministratorSettings" : {
+        "AdminEmail": "bitconnect@gmail.com",
+        "AdminPassword": "password",
+        "Recipients": ["spam@pindakaas.nl"]
+    },
     "BinanceClientSettings": {
         "ReceiveWindow": 10000000,
         "Credentials": {

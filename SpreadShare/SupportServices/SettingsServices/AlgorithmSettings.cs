@@ -37,7 +37,7 @@ namespace SpreadShare.SupportServices.SettingsServices
             foreach (var property in GetType().GetProperties(
                 BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
             {
-                object temp = section.GetSection(
+                object unused = section.GetSection(
                                   $"{algorithmName}:{property.Name}").Get(property.PropertyType)
                     ?? throw new InvalidDataException(
                                   $"{algorithmName}:{property.Name} was not present the the configuration");

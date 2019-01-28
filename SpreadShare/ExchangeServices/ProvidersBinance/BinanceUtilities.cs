@@ -77,7 +77,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// </summary>
         /// <param name="status">Binance.Net.OrderStatus.</param>
         /// <returns>SpreadShare.Models.OrderUpdate.OrderStatus.</returns>
-        public static OrderUpdate.OrderStatus ToInternal(Binance.Net.Objects.OrderStatus status)
+        public static OrderUpdate.OrderStatus ToInternal(OrderStatus status)
         {
             switch (status)
             {
@@ -105,7 +105,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// </summary>
         /// <param name="type">Binance.Net.OrderType.</param>
         /// <returns>parsed for internal usage.</returns>
-        public static OrderUpdate.OrderTypes ToInternal(Binance.Net.Objects.OrderType type)
+        public static OrderUpdate.OrderTypes ToInternal(OrderType type)
         {
             switch (type)
             {
