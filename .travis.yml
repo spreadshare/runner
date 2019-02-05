@@ -1,9 +1,0 @@
-language: minimal
-
-sudo: required
-
-services:
-  - docker
-
-script:
-  - docker build --build-arg API_READ_KEY=${API_READ_KEY} --build-arg API_READ_SECRET=${API_READ_SECRET} -f .travis.dockerfile .
