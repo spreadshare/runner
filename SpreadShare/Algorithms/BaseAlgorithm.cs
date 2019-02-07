@@ -3,16 +3,16 @@ using Dawn;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.SupportServices;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.Algorithms
 {
     /// <summary>
     /// Base class for all algorithms.
     /// </summary>
-    /// <typeparam name="T">The derived AlgorithmSettings.</typeparam>
+    /// <typeparam name="T">The derived AlgorithmConfiguration.</typeparam>
     internal abstract class BaseAlgorithm<T> : IBaseAlgorithm
-        where T : AlgorithmSettings
+        where T : AlgorithmConfiguration
     {
         /// <summary>
         /// Gets the the EntryState of the algorithm.
@@ -22,12 +22,12 @@ namespace SpreadShare.Algorithms
         private StateManager<T> StateManager { get; set; }
 
         /// <inheritdoc />
-        public ResponseObject Start(AlgorithmSettings settings, ExchangeProvidersContainer container, DatabaseContext database)
+        public ResponseObject Start(AlgorithmConfiguration configuration, ExchangeProvidersContainer container, DatabaseContext database)
         {
-            Guard.Argument(settings).Require(
+            Guard.Argument(configuration).Require(
                 x => x is T,
-                x => $"{x} cannot not be converted to {typeof(T)}, please make sure to use the correct AlgorithmSettings");
-            Start(settings as T, container, database);
+                x => $"{x} cannot not be converted to {typeof(T)}, please make sure to use the correct AlgorithmConfiguration");
+            Start(configuration as T, container, database);
             return new ResponseObject(ResponseCode.Success);
         }
 
@@ -46,7 +46,7 @@ namespace SpreadShare.Algorithms
             return new ResponseObject(ResponseCode.Success);
         }
 
-        private void Start(T settings, ExchangeProvidersContainer container, DatabaseContext database)
-            => StateManager = new StateManager<T>(settings, Initial, container, database);
+        private void Start(T configuration, ExchangeProvidersContainer container, DatabaseContext database)
+            => StateManager = new StateManager<T>(configuration, Initial, container, database);
     }
 }

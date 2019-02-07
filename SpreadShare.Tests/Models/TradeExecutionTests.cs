@@ -350,7 +350,8 @@ namespace SpreadShare.Tests.Models
                 AverageFilledPrice = 0.15M,
                 LastFillIncrement = 100M,
                 LastFillPrice = 0.15M,
-                Commission = (2.3M, new Currency("EOS")),
+                Commission = 2.3M,
+                CommissionAsset = new Currency("EOS"),
             };
 
             var exec = TradeExecution.FromOrder(order);
@@ -391,7 +392,8 @@ namespace SpreadShare.Tests.Models
                 AverageFilledPrice = 0.15M,
                 LastFillIncrement = 100M,
                 LastFillPrice = 0.15M,
-                Commission = (2.6M, new Currency("EOS")),
+                Commission = 2.6M,
+                CommissionAsset = new Currency("EOS"),
             };
 
             var exec = TradeExecution.FromOrder(order);
@@ -423,7 +425,8 @@ namespace SpreadShare.Tests.Models
                 AverageFilledPrice = 0.15M,
                 LastFillIncrement = 100M,
                 LastFillPrice = 0.15M,
-                Commission = (0.7M, new Currency("EOS")),
+                Commission = 0.7M,
+                CommissionAsset = new Currency("EOS"),
             };
 
             var exec = TradeExecution.FromOrder(order);
@@ -431,6 +434,113 @@ namespace SpreadShare.Tests.Models
             Assert.Equal(0M, exec.From.Free);
             Assert.Equal(100M, exec.From.Locked);
             Assert.Equal((100M * 0.15M) - (0.7M * 0.15M), exec.To.Free);
+            Assert.Equal(0M, exec.To.Locked);
+        }
+
+        [Theory]
+        [InlineData(OrderSide.Buy)]
+        [InlineData(OrderSide.Sell)]
+        internal void ParseFromMarketOrderForeignCommission(OrderSide side)
+        {
+            var order = new OrderUpdate(
+                orderId: 0,
+                tradeId: 0,
+                orderType: OrderUpdate.OrderTypes.Market,
+                orderStatus: Filled,
+                createdTimeStamp: 0,
+                setPrice: 0.2M,
+                side: side,
+                pair: TradingPair.Parse("EOSETH"),
+                setQuantity: 100M)
+            {
+                FilledQuantity = 100M,
+                AverageFilledPrice = 0.15M,
+                LastFillIncrement = 100M,
+                LastFillPrice = 0.15M,
+                Commission = 42.69M,
+                CommissionAsset = new Currency("BNB"),
+            };
+
+            var exec = TradeExecution.FromOrder(order);
+
+            if (side == OrderSide.Buy)
+            {
+                Assert.Equal(100M * 0.15M, exec.From.Free);
+                Assert.Equal(100M, exec.To.Free);
+            }
+            else
+            {
+                Assert.Equal(100M, exec.From.Free);
+                Assert.Equal(100M * 0.15M, exec.To.Free);
+            }
+
+            Assert.Equal(0, exec.To.Locked);
+            Assert.Equal(0, exec.From.Locked);
+        }
+
+        [Theory]
+        [InlineData(Limit)]
+        [InlineData(StopLoss)]
+        [InlineData(StopLossLimit)]
+        internal void ParseFromNonMarketSellOrderForeignCommission(OrderUpdate.OrderTypes type)
+        {
+            var order = new OrderUpdate(
+                orderId: 0,
+                tradeId: 0,
+                orderType: type,
+                orderStatus: Filled,
+                createdTimeStamp: 0,
+                setPrice: 0.2M,
+                side: OrderSide.Sell,
+                pair: TradingPair.Parse("EOSETH"),
+                setQuantity: 100M)
+            {
+                FilledQuantity = 100M,
+                AverageFilledPrice = 0.15M,
+                LastFillIncrement = 100M,
+                LastFillPrice = 0.15M,
+                Commission = 42M,
+                CommissionAsset = new Currency("BNB"),
+            };
+
+            var exec = TradeExecution.FromOrder(order);
+
+            Assert.Equal(0M, exec.From.Free);
+            Assert.Equal(100M, exec.From.Locked);
+            Assert.Equal(100M * 0.15M, exec.To.Free);
+            Assert.Equal(0M, exec.To.Locked);
+        }
+
+        [Theory]
+        [InlineData(Limit)]
+        [InlineData(StopLoss)]
+        [InlineData(StopLossLimit)]
+        internal void ParseFromNonMarketBuyOrderForeignCommission(OrderUpdate.OrderTypes type)
+        {
+            var order = new OrderUpdate(
+                orderId: 0,
+                tradeId: 0,
+                orderType: type,
+                orderStatus: Filled,
+                createdTimeStamp: 0,
+                setPrice: 0.2M,
+                side: OrderSide.Buy,
+                pair: TradingPair.Parse("EOSETH"),
+                setQuantity: 100M)
+            {
+                FilledQuantity = 100M,
+                AverageFilledPrice = 0.15M,
+                LastFillIncrement = 100M,
+                LastFillPrice = 0.15M,
+                Commission = 96.42M,
+                CommissionAsset = new Currency("BNB"),
+            };
+
+            var exec = TradeExecution.FromOrder(order);
+
+            Assert.Equal(0M, exec.From.Free);
+            Assert.Equal(100M * 0.2M, exec.From.Locked);
+            Assert.Equal(100M, exec.To.Free);
             Assert.Equal(0M, exec.To.Locked);
         }
     }

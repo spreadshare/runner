@@ -46,7 +46,7 @@ backtesting-output
 .env
 
 # Configuration (until secrets work)
-SpreadShare/appsettings.json
+SpreadShare/appsettings.yaml
 
 # Minicover test coverage
 coverage-html

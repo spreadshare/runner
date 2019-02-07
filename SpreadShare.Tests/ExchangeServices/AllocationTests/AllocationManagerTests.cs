@@ -8,6 +8,7 @@ using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.Configuration;
 using Xunit;
 using Xunit.Abstractions;
 using OrderSide = SpreadShare.Models.OrderSide;
@@ -28,7 +29,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         }
 
         private static IEnumerable<Balance> SortedSettingsBalances =>
-            SettingsService.BackTestSettings.InitialPortfolio.AllBalances().OrderByDescending(x => x.Free);
+            Configuration.Instance.BacktestSettings.Portfolio.AllBalances().OrderByDescending(x => x.Free);
 
         [Fact]
         public void ConstructorHappyFlow()
@@ -86,7 +87,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             });
 
             Currency c = new Currency("ETH");
-            var local = SettingsService.BackTestSettings.InitialPortfolio.GetAllocation(c);
+            var local = Configuration.Instance.BacktestSettings.Portfolio.GetAllocation(c);
             var amount = alloc.GetAvailableFunds(Exchange.Backtesting, typeof(TemplateAlgorithm), c);
             Assert.Equal(local.Free * factor, amount.Free);
         }

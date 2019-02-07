@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SpreadShare.Models;
 
 namespace SpreadShare.Tests
 {
@@ -17,11 +18,15 @@ namespace SpreadShare.Tests
         /// </summary>
         private ServiceProviderSingleton()
         {
+            // Inject commandline args
+            var args = new CommandLineArgs { Trading = false, VerboseLogging = true };
+            typeof(Program).GetProperty("CommandLineArgs").SetValue(null, new CommandLineArgs());
+
             // Create service collection
             IServiceCollection services = new ServiceCollection();
 
-            // Configure services - Provide depencies for services
-            Startup startup = new Startup("appsettings.json");
+            // Configure services - Provide dependencies for services
+            Startup startup = new Startup("appsettings.yaml");
             startup.ConfigureServices(services);
             Startup.ConfigureBusinessServices(services);
 

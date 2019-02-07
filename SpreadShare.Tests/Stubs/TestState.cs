@@ -4,7 +4,7 @@ using SpreadShare.ExchangeServices.Providers;
 
 namespace SpreadShare.Tests.Stubs
 {
-    internal class TestState : State<TemplateAlgorithmSettings>
+    internal class TestState : State<TemplateAlgorithmConfiguration>
     {
         protected override void Run(TradingProvider trading, DataProvider data)
         {

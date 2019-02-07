@@ -47,13 +47,7 @@ namespace SpreadShare.Models.Trading
             var quantityFrom = order.FilledQuantity * (order.Side == OrderSide.Buy ? order.AverageFilledPrice : 1M);
             var quantityTo = order.FilledQuantity * (order.Side == OrderSide.Sell ? order.AverageFilledPrice : 1M);
 
-            var (commission, asset) = order.Commission;
-            if (asset != currencyTo)
-            {
-                commission = order.Side == OrderSide.Buy
-                    ? HelperMethods.SafeDiv(commission, order.AverageFilledPrice)
-                    : commission * order.AverageFilledPrice;
-            }
+            decimal commission = GetConvertedCommission(order, currencyTo);
 
             // Only subtract commission for buy orders
             var from = new Balance(currencyFrom, quantityFrom, 0M);
@@ -76,14 +70,7 @@ namespace SpreadShare.Models.Trading
             var from = order.Side == OrderSide.Buy ? order.Pair.Right : order.Pair.Left;
             var to = order.Side == OrderSide.Buy ? order.Pair.Left : order.Pair.Right;
 
-            var (commission, asset) = order.Commission;
-            if (asset != to)
-            {
-                commission = order.Side == OrderSide.Buy
-                    ? HelperMethods.SafeDiv(commission, order.AverageFilledPrice)
-                    : commission * order.AverageFilledPrice;
-            }
-
+            var commission = GetConvertedCommission(order, to);
             if (order.Side == OrderSide.Buy)
             {
                 return new TradeExecution(
@@ -114,6 +101,22 @@ namespace SpreadShare.Models.Trading
             var free = new Balance(currency, quantity, 0M);
             var locked = new Balance(currency, 0M, quantity);
             return new TradeExecution(locked, free);
+        }
+
+        private static decimal GetConvertedCommission(OrderUpdate order, Currency to)
+        {
+            var commission = order.Commission;
+            var asset = order.CommissionAsset;
+            return
+                asset is null
+                    ? 0M // There is no commission asset at all
+                    : asset != order.Pair.Right && asset != order.Pair.Left
+                        ? 0M // Fee is paid in neither currency (e.g. bnb for fees)
+                        : asset == to
+                            ? commission // Commission is already in the correct currency.
+                            : order.Side == OrderSide.Buy // Correct commission to other asset
+                                ? HelperMethods.SafeDiv(commission, order.AverageFilledPrice)
+                                : commission * order.AverageFilledPrice;
         }
     }
 }

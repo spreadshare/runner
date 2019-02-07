@@ -1,6 +1,6 @@
 using System;
 using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.Algorithms
 {
@@ -9,7 +9,7 @@ namespace SpreadShare.Algorithms
     /// </summary>
     /// <typeparam name="T">Kind of algorithm settings.</typeparam>
     internal sealed class NothingState<T> : State<T>
-        where T : AlgorithmSettings
+        where T : AlgorithmConfiguration
     {
         /// <inheritdoc />
         protected override void Run(TradingProvider trading, DataProvider data)

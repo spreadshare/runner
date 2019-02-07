@@ -15,6 +15,4 @@ RUN dotnet publish SpreadShare.csproj -c Release -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
-ENTRYPOINT ["dotnet", "SpreadShare.dll", "--verbose"]
-# Run the container like a deamon
-#ENTRYPOINT ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["dotnet", "SpreadShare.dll", "--backtest"]

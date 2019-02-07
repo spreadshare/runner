@@ -20,7 +20,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceTests
         public BinanceDataProviderTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            _container = ExchangeFactoryService.BuildContainer(typeof(TemplateAlgorithm));
+            _container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
         }
 
         /// <summary>

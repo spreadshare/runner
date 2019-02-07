@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.SupportServices.Configuration;
 
 #pragma warning disable SA1402
 
@@ -11,14 +11,14 @@ namespace SpreadShare.Algorithms.Implementations
     /// <summary>
     /// Stud algorithm, used for testing.
     /// </summary>
-    internal class TemplateAlgorithm : BaseAlgorithm<TemplateAlgorithmSettings>
+    internal class TemplateAlgorithm : BaseAlgorithm<TemplateAlgorithmConfiguration>
     {
         /// <inheritdoc />
-        protected override EntryState<TemplateAlgorithmSettings> Initial => new WelcomeState();
+        protected override EntryState<TemplateAlgorithmConfiguration> Initial => new WelcomeState();
 
-        private class WelcomeState : EntryState<TemplateAlgorithmSettings>
+        private class WelcomeState : EntryState<TemplateAlgorithmConfiguration>
         {
-            public override State<TemplateAlgorithmSettings> OnTimerElapsed()
+            public override State<TemplateAlgorithmConfiguration> OnTimerElapsed()
             {
                 return new TemplateState();
             }
@@ -30,19 +30,19 @@ namespace SpreadShare.Algorithms.Implementations
             }
         }
 
-        private class TemplateState : EntryState<TemplateAlgorithmSettings>
+        private class TemplateState : EntryState<TemplateAlgorithmConfiguration>
         {
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 Logger.LogInformation("I wonder if Miss Bitcoin thinks I should buy...");
-                ShowAlloc(trading);
+                Logger.LogInformation(ShowAlloc(trading));
             }
 
             private string ShowAlloc(TradingProvider trading)
             {
                 var alloc = trading.GetPortfolio();
-                var left = AlgorithmSettings.ActiveTradingPairs.First().Left;
-                var right = AlgorithmSettings.ActiveTradingPairs.First().Right;
+                var left = AlgorithmConfiguration.TradingPairs.First().Left;
+                var right = AlgorithmConfiguration.TradingPairs.First().Right;
                 return $"Total alloc: {alloc.GetAllocation(left)}{left} -- {alloc.GetAllocation(right)}{right}";
             }
         }
@@ -51,7 +51,7 @@ namespace SpreadShare.Algorithms.Implementations
     /// <summary>
     /// Stud algorithm settings, used for testing.
     /// </summary>
-    internal class TemplateAlgorithmSettings : AlgorithmSettings
+    internal class TemplateAlgorithmConfiguration : AlgorithmConfiguration
     {
     }
 }

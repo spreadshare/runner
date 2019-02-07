@@ -4,7 +4,7 @@ using System.Net.Mail;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
-using SpreadShare.SupportServices.SettingsServices;
+using AdministratorSettings = SpreadShare.SupportServices.Configuration.AdministratorSettings;
 
 namespace SpreadShare.SupportServices.ErrorServices
 {
@@ -17,30 +17,34 @@ namespace SpreadShare.SupportServices.ErrorServices
         private readonly AdministratorSettings _administrationSettings;
         private readonly ILogger _logger;
         private readonly SmtpClient _client;
+        private readonly bool _mailerEnabled;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorService"/> class.
         /// </summary>
         /// <param name="factory">LoggerFactory for generating a logger.</param>
         /// <param name="algorithmService">Algorithm service to stop algorithms.</param>
-        /// <param name="settings">Settings for email authentication.</param>
-        public ErrorService(ILoggerFactory factory, IAlgorithmService algorithmService, SettingsService settings)
+        public ErrorService(ILoggerFactory factory, IAlgorithmService algorithmService)
         {
             _algorithmService = algorithmService;
             _logger = factory.CreateLogger(GetType());
-            _administrationSettings = settings.AdministratorSettings;
-            _client = new SmtpClient
+            _administrationSettings = Configuration.Configuration.Instance.AdministratorSettings;
+            _mailerEnabled = Configuration.Configuration.Instance.MailerEnabled;
+            if (_mailerEnabled)
             {
-                Port = 587,
-                Host = "smtp.gmail.com",
-                EnableSsl = true,
-                Timeout = 10000,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
-                Credentials = new System.Net.NetworkCredential(
-                    _administrationSettings.AdminEmail.Address,
-                    _administrationSettings.AdminPassword),
-            };
+                _client = new SmtpClient
+                {
+                    Port = 587,
+                    Host = "smtp.gmail.com",
+                    EnableSsl = true,
+                    Timeout = 10000,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false,
+                    Credentials = new System.Net.NetworkCredential(
+                        _administrationSettings.AdminEmail,
+                        _administrationSettings.AdminPassword),
+                };
+            }
         }
 
         /// <summary>
@@ -85,7 +89,11 @@ namespace SpreadShare.SupportServices.ErrorServices
             }
 
             _logger.LogCritical($"{algorithmName} successfully killed");
-            SendReport($"{algorithmName} Killed", errorMsg);
+
+            if (_mailerEnabled)
+            {
+                SendReport($"{algorithmName} Killed", errorMsg);
+            }
         }
 
         /// <inheritdoc />
@@ -124,7 +132,7 @@ namespace SpreadShare.SupportServices.ErrorServices
             {
                 MailMessage mm = new MailMessage(
                     "donotreply@spreadshare.com",
-                    recipient.Address,
+                    recipient,
                     header,
                     message);
                 mm.BodyEncoding = Encoding.UTF8;

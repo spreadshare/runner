@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Dawn;
 using SpreadShare.Algorithms;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.Utilities
 {
@@ -16,8 +17,20 @@ namespace SpreadShare.Utilities
         /// <summary>
         /// Gets a one time initialized property for the assembly.
         /// </summary>
-        private static Assembly ThisAssembly { get; } = Array.Find(AppDomain.CurrentDomain.GetAssemblies(), assembly
+        public static Assembly ThisAssembly { get; } = Array.Find(AppDomain.CurrentDomain.GetAssemblies(), assembly
             => assembly.ManifestModule.Name.Contains("SpreadShare.dll", StringComparison.InvariantCulture));
+
+        /// <summary>
+        /// Gets a list of all types that implement <see cref="IBaseAlgorithm"/>.
+        /// </summary>
+        public static List<Type> AllAlgorithms
+            => GetAllImplementations(typeof(IBaseAlgorithm)).ToList();
+
+        /// <summary>
+        /// Gets a list of all types that are a subtype of <see cref="AlgorithmConfiguration"/>.
+        /// </summary>
+        public static List<Type> AllAlgorithmConfigurations
+            => GetAllSubtypes(typeof(AlgorithmConfiguration)).ToList();
 
         /// <summary>
         /// Fetches a collection of types which are explicit subtypes of the given abstract type.
@@ -55,9 +68,38 @@ namespace SpreadShare.Utilities
         /// <param name="t">Type to check.</param>
         /// <returns>Whether the provided type is an algorithm.</returns>
         public static bool IsAlgorithm(Type t)
+            => t.GetInterfaces().Contains(typeof(IBaseAlgorithm));
+
+        /// <summary>
+        /// Retrieves the configuration type that matches an algorithm.
+        /// </summary>
+        /// <param name="algorithm">The type of the algorithm to match to.</param>
+        /// <returns>The type of matching AlgorithmConfiguration.</returns>
+        public static Type GetMatchingConfigurationsType(Type algorithm)
         {
-            return t.GetInterfaces().Contains(typeof(IBaseAlgorithm));
+            Guard.Argument(algorithm).Require(IsAlgorithm, x => $"{x} is not an algorithm");
+            return AllAlgorithmConfigurations.First(x => AlgorithmMatchesConfiguration(algorithm, x));
         }
+
+        /// <summary>
+        /// Retrieves the algorithm type that matches an algorithm.
+        /// </summary>
+        /// <param name="configuration">The type of configuration to match.</param>
+        /// <returns>The type of matching algorithm.</returns>
+        public static Type GetMatchingAlgorithmType(Type configuration)
+        {
+            Guard.Argument(configuration)
+                .Require(IsAlgorithmConfiguration, x => $"{x} is not an algorithm configuration");
+            return AllAlgorithms.First(x => AlgorithmMatchesConfiguration(x, configuration));
+        }
+
+        /// <summary>
+        /// Check wheter a type inherits from AlgorithmConfiguration.
+        /// </summary>
+        /// <param name="t">Type to check.</param>
+        /// <returns>Whether the provided type is an AlgorithmConfiguration.</returns>
+        public static bool IsAlgorithmConfiguration(Type t)
+            => t.IsSubclassOf(typeof(AlgorithmConfiguration));
 
         /// <summary>
         /// Get a dictionary of classes with class name.
@@ -94,6 +136,19 @@ namespace SpreadShare.Utilities
             }
 
             return classes;
+        }
+
+        /// <summary>
+        /// Check whether an algorithm and an AlgorithmConfiguration match.
+        /// </summary>
+        /// <param name="algo">Type of the algorithm.</param>
+        /// <param name="settings">Type of the algorithm settings.</param>
+        /// <returns>Whether they match.</returns>
+        public static bool AlgorithmMatchesConfiguration(Type algo, Type settings)
+        {
+            Guard.Argument(algo).Require(IsAlgorithm, x => $"{algo} is not an algorithm");
+            Guard.Argument(settings).Require(IsAlgorithmConfiguration, x => $"{settings} is not an algorithm settings");
+            return $"{algo.Name}Configuration" == settings.Name;
         }
     }
 }

@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Binance.Net;
+using Binance.Net.Objects;
 using Dawn;
+using Microsoft.Extensions.Logging;
 
 namespace SpreadShare.Models.Trading
 {
@@ -111,6 +115,82 @@ namespace SpreadShare.Models.Trading
             }
 
             throw new KeyNotFoundException($"{str} not found in parse table");
+        }
+
+        /// <summary>
+        /// Download all currencies from Binance.
+        /// </summary>
+        /// <param name="logger">Used to create output.</param>
+        public static void Sync(ILogger logger)
+        {
+            using (var client = new BinanceClient())
+            {
+                // Disect by extracting the known base pairs.
+                Regex rx = new Regex(
+                    "(.*)(BTC|ETH|USDT|BNB|PAX)",
+                    RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+                var listQuery = client.GetExchangeInfo();
+                if (!listQuery.Success)
+                {
+                    throw new Exception("Could not fetch TradingPair info, no connection to Binance!");
+                }
+
+                foreach (var item in listQuery.Data.Symbols)
+                {
+                    decimal stepSize = 0;
+                    decimal pricePrecision = 0;
+
+                    // Extract the pair from the string
+                    var pair = rx.Match(item.Name);
+                    if (!pair.Success)
+                    {
+                        logger.LogWarning($"Could not extract pairs from {item.Name}, skipping");
+                        continue;
+                    }
+
+                    string left = pair.Groups[1].Value;
+                    string right = pair.Groups[2].Value;
+                    if (string.IsNullOrEmpty(left) || string.IsNullOrEmpty(right))
+                    {
+                        logger.LogWarning($"Either left: |{left}| or right: |{right}|  --> was a null or empty string (from {item.Name})");
+                        continue;
+                    }
+
+                    // Extract the stepSize from the filter
+                    foreach (var filter in item.Filters)
+                    {
+                        if (filter is BinanceSymbolLotSizeFilter filter1)
+                        {
+                            stepSize = filter1.StepSize;
+                        }
+
+                        if (filter is BinanceSymbolPriceFilter filter2)
+                        {
+                            pricePrecision = filter2.TickSize;
+                        }
+                    }
+
+                    if (stepSize == 0 || pricePrecision == 0)
+                    {
+                        logger.LogWarning($"Could not extract all filters from {item.Name}, skipping");
+                        continue;
+                    }
+
+                    // Add the instance to the parseTable to make it available for parsing
+                    int quantityDecimals = -(int)Math.Log10((double)stepSize);
+                    int priceDecimals = -(int)Math.Log10((double)pricePrecision);
+                    var result = new TradingPair(new Currency(left), new Currency(right), quantityDecimals, priceDecimals);
+                    try
+                    {
+                        AddParseEntry(pair.Value, result);
+                    }
+                    catch (ArgumentException)
+                    {
+                        // Double entries because of binance
+                    }
+                }
+            }
         }
 
         /// <summary>

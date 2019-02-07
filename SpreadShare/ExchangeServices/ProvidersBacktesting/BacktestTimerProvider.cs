@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.SupportServices;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.SupportServices.BacktestDaemon;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
@@ -49,6 +50,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         public DateTimeOffset EndTime { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the backtest is finished.
+        /// </summary>
+        public bool Finished { get; private set; }
+
         /// <inheritdoc />
         public override async void RunPeriodicTimer()
         {
@@ -60,6 +66,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"StateSwitchEvents\"");
             _database.SaveChanges();
 
+            Console.WriteLine($"From {BeginTime} to {EndTime}");
+
             DateTimeOffset start = DateTimeOffset.Now;
             while (CurrentTime < EndTime)
             {
@@ -70,14 +78,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _logger.LogCritical($"STOP THE TIMERS! Backtest took {(DateTimeOffset.Now - start).TotalMilliseconds}ms");
             _logger.LogCritical("Flushing the trades to the database...");
             _database.SaveChanges();
-            _logger.LogCritical("...DONE");
+            _logger.LogCritical("Writing output");
 
             // Output to database
             var outputLogger = new BacktestOutputLogger(_database, this, _outputFolder);
             outputLogger.Output();
 
-            // Exit the application
-            Program.ExitProgramWithCode(0);
+            // Notify third party applications that the backtest with their id has finished.
+            _logger.LogCritical($"BACKTEST_FINISHED={BacktestDaemonService.Instance.State.CurrentBacktestID}");
+
+            // Declare completion (hands over control back to CLI)
+            Finished = true;
         }
     }
 }
