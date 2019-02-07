@@ -1,7 +1,5 @@
 using System.Threading;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.SupportServices.SettingsServices;
 using Xunit.Abstractions;
 
 namespace SpreadShare.Tests
@@ -11,12 +9,6 @@ namespace SpreadShare.Tests
     /// </summary>
     public abstract class BaseTest
     {
-        /// <summary>
-        /// One time initialized instance of the settings service.
-        /// </summary>
-        internal static readonly SettingsService SettingsService =
-            ServiceProviderSingleton.Instance.ServiceProvider.GetService<SettingsService>();
-
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseTest"/> class.
         /// </summary>

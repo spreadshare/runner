@@ -6,9 +6,9 @@ stages:
 
 before_script:
     # Set configuration
-    -  cp SpreadShare/appsettings.json.example SpreadShare/appsettings.json
-    -  sed -i "s/api_key/${API_READ_KEY}/g" SpreadShare/appsettings.json
-    -  sed -i "s/api_secret/${API_READ_SECRET}/g" SpreadShare/appsettings.json
+    -  cp SpreadShare/appsettings.yaml.example SpreadShare/appsettings.yaml
+    -  sed -i "s/api_key/${API_READ_KEY2}/g" SpreadShare/appsettings.yaml
+    -  sed -i "s/api_secret/${API_READ_SECRET2}/g" SpreadShare/appsettings.yaml
 
 build:
     stage: build

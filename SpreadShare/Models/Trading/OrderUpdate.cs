@@ -196,9 +196,14 @@ namespace SpreadShare.Models.Trading
         public decimal LastFillIncrement { get; set; }
 
         /// <summary>
-        /// Gets or sets the commission and asset in which is is paid for this order.
+        /// Gets or sets the commission amount.
         /// </summary>
-        public (decimal, Currency) Commission { get; set; }
+        public decimal Commission { get; set; }
+
+        /// <summary>
+        /// Gets or sets the commission asset.
+        /// </summary>
+        public Currency CommissionAsset { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether the order status will ever change.

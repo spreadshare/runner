@@ -5,6 +5,7 @@ using Binance.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
+using SpreadShare.SupportServices.Configuration;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -103,8 +104,8 @@ namespace SpreadShare.Tests.UserService
             var client = new BinanceClient();
 
             // Set credentials
-            string apikey = SettingsService.BinanceSettings.Credentials.Key;
-            string apisecret = SettingsService.BinanceSettings.Credentials.Secret;
+            string apikey = Configuration.Instance.BinanceClientSettings.Credentials.Key;
+            string apisecret = Configuration.Instance.BinanceClientSettings.Credentials.Secret;
             client.SetApiCredentials(apikey, apisecret);
 
             return new ListenKeyManager(loggerFactory, client, interval);

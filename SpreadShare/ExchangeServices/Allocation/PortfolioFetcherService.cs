@@ -5,6 +5,7 @@ using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.ExchangeServices.Allocation
 {
@@ -55,7 +56,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <returns>The portfolio.</returns>
         private ResponseObject<Portfolio> GetBinancePortfolio()
         {
-            var accountInfo = _binance.Client.GetAccountInfo();
+            var accountInfo = _binance.Client.GetAccountInfo(Configuration.Instance.BinanceClientSettings.ReceiveWindow);
             if (!accountInfo.Success)
             {
                 _logger.LogCritical($"Could not get assets: {accountInfo.Error.Message}");

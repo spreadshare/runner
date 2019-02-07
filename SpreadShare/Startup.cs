@@ -1,7 +1,7 @@
 using System;
+using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
@@ -9,9 +9,12 @@ using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.BacktestDaemon;
+using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.ErrorServices;
-using SpreadShare.SupportServices.SettingsServices;
+using YamlDotNet.Serialization;
 
 namespace SpreadShare
 {
@@ -25,10 +28,8 @@ namespace SpreadShare
         /// Empty constructor, visited by EF core cli tools.
         /// </summary>
         public Startup()
+            : this("appsettings.yaml")
         {
-            Configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
         }
 
         /// <summary>
@@ -38,15 +39,15 @@ namespace SpreadShare
         /// <param name="filepath">Location of the configuration file.</param>
         public Startup(string filepath)
         {
-            Configuration = new ConfigurationBuilder()
-                .AddJsonFile(filepath)
-                .Build();
+            using (var file = new StreamReader(filepath))
+            {
+                var configuration = new DeserializerBuilder()
+                    .Build()
+                    .Deserialize<Configuration>(file);
+                ConfigurationValidator.ValidateConstraintsRecursively(configuration);
+                configuration.Bind();
+            }
         }
-
-        /// <summary>
-        /// Gets the configuration of the application.
-        /// </summary>
-        public IConfiguration Configuration { get; }
 
         /// <summary>
         /// Configure business logic services such as fetching exchange data.
@@ -78,18 +79,18 @@ namespace SpreadShare
         {
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
 
+            TradingPair.Sync(logger);
+
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
             if (!service.Migrate().Success)
             {
                 logger.LogError("Could not migrate database");
             }
-
-            // Setup Settings service
-            var settings = serviceProvider.GetService<SettingsService>();
-            settings.Start();
         }
 
+        // CA1822: method can be static (method could be static but breaks the logical flow of DI.)
+        #pragma warning disable CA1822
         /// <summary>
         /// Configure support services such as databases and logging.
         /// </summary>
@@ -98,34 +99,32 @@ namespace SpreadShare
         {
             // Add Database context dependency
             services.AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>(opt
-                => opt.UseNpgsql(Configuration.GetConnectionString("LocalConnection")));
+                => opt.UseNpgsql(Configuration.Instance.ConnectionStrings.LocalConnection));
 
             // TODO: Add layered timeout for unsuccesfully connecting to DB
             // Add Logging dependency
             services.AddLogging(loggingBuilder => loggingBuilder
                 .AddConsole(opt => opt.DisableColors = false)
                 .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
-                .AddFilter("SpreadShare", Program.CommandLineArgs.VerboseLogging ? LogLevel.Information : LogLevel.Warning)
+                .AddFilter("SpreadShare", Program.CommandLineArgs.VerboseLogging ? LogLevel.Information : LogLevel.Critical)
                 .SetMinimumLevel(LogLevel.Information));
-
-            // Add Configuration dependency (provides access to appsettings.json)
-            services.AddSingleton(Configuration);
 
             // Add MyService dependency
             services.AddSingleton<IDatabaseMigrationService, DatabaseMigrationService>();
 
-            // Configuration files globals
-            services.AddSingleton<SettingsService, SettingsService>();
-
             // Error service
-            if (Program.CommandLineArgs.Trading)
-            {
-                services.AddSingleton<ErrorService, ErrorService>();
-            }
+            services.AddSingleton<ErrorService, ErrorService>();
+
+            // Database utilities
+            services.AddSingleton<DatabaseUtilities, DatabaseUtilities>();
+
+            // Backtesting service.
+            services.AddSingleton<BacktestDaemonService, BacktestDaemonService>();
 
             // Add Portfolio fetching
             services.AddSingleton<IPortfolioFetcherService, PortfolioFetcherService>();
         }
+        #pragma warning restore CA1822
 
         /// <summary>
         /// Creates database context.
@@ -136,7 +135,7 @@ namespace SpreadShare
         {
             // Add Database context dependency
             var builder = new DbContextOptionsBuilder<DatabaseContext>();
-            builder.UseNpgsql(Configuration.GetConnectionString("LocalConnection"));
+            builder.UseNpgsql(Configuration.Instance.ConnectionStrings.LocalConnection);
             return new DatabaseContext(builder.Options);
         }
     }

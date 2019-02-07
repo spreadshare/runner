@@ -1,3 +1,5 @@
+using SpreadShare.Models;
+
 namespace SpreadShare.SupportServices.ErrorServices
 {
     /// <summary>
@@ -11,14 +13,14 @@ namespace SpreadShare.SupportServices.ErrorServices
         Success = 0,
 
         /// <summary>
-        /// This status code is not in use
+        /// This status indicated a general error
         /// </summary>
-        Undefined = 1,
+        GeneralError = 1,
 
         /// <summary>
-        /// An algorithm failed to be stopped, the program terminated to prevent further risk.
+        /// Application was interrupted by Bash
         /// </summary>
-        AlgorithmNotStopping = 2,
+        GeneralInterrupt = 2,
 
         /// <summary>
         /// Database was unavailable, this is often caused by the program running outside the docker container
@@ -29,5 +31,20 @@ namespace SpreadShare.SupportServices.ErrorServices
         /// The configuration file was invalid, more detailed information can be found in the logs
         /// </summary>
         InvalidConfiguration = 4,
+
+        /// <summary>
+        /// The user instructed a shutdown via an exit command.
+        /// </summary>
+        UserShutdown = 5,
+
+        /// <summary>
+        /// The given command line arguments where not valid, see <see cref="CommandLineArgs"/>
+        /// </summary>
+        InvalidCommandLineArguments = 6,
+
+        /// <summary>
+        /// An algorithm failed to be stopped, the program terminated to prevent further risk.
+        /// </summary>
+        AlgorithmNotStopping = 7,
     }
 }

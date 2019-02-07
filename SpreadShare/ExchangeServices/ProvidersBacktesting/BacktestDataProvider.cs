@@ -17,9 +17,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     /// </summary>
     internal class BacktestDataProvider : AbstractDataProvider
     {
+        private static Dictionary<string, BacktestingCandle[]> _buffers;
         private readonly BacktestTimerProvider _timer;
         private readonly DatabaseContext _database;
-        private readonly Dictionary<string, BacktestingCandle[]> _buffers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestDataProvider"/> class.
@@ -33,7 +33,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             _database = database;
             _timer = timerProvider;
-            _buffers = new Dictionary<string, BacktestingCandle[]>();
+            if (_buffers == null)
+            {
+                _buffers = new Dictionary<string, BacktestingCandle[]>();
+            }
         }
 
         /// <summary>

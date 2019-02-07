@@ -8,15 +8,21 @@ namespace SpreadShare.Models
     internal class CommandLineArgs
     {
         /// <summary>
-        /// Gets or sets a value indicating whether the --trading flag was used.
+        /// Gets or sets a value indicating whether the --trading flag was used, mutually exclusive with --backtest.
         /// </summary>
-        [Option("trading", Default = false, HelpText = "Needs to be enabled to actually perform trades.")]
+        [Option("trading", Default = false, Required = true, SetName= "trading", HelpText = "Needs to be enabled to actually perform trades.")]
         public bool Trading { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the --backtesting flag used. mutually exclusive with --trading.
+        /// </summary>
+        [Option("backtest", Default = false, Required = true, SetName = "backtest", HelpText = "Enable the backtest daemon.")]
+        public bool Backtesting { get; set; }
 
         /// <summary>
         /// Gets or sets the filepath of the configuration JSON.
         /// </summary>
-        [Option("configpath", Default = "appsettings.json", HelpText = "The path to the configuration.json file")]
+        [Option("configpath", Default = "appsettings.yaml", HelpText = "The path to the configuration.yaml file")]
         public string ConfigurationPath { get; set; }
 
         /// <summary>

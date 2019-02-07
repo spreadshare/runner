@@ -2,11 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using SpreadShare.Models.Database;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.BacktestDaemon;
 using static System.IO.File;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
@@ -61,7 +60,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             Directory.CreateDirectory(OutputFolder);
 
             // Copy configuration
-            OutputConfiguration(Path.Combine(OutputFolder, "appsettings.json"));
+            OutputConfiguration(Path.Combine(OutputFolder, "appsettings.yaml"));
 
             // Output trades
             OutputTrades(Path.Combine(OutputFolder, "trades.csv"));
@@ -79,15 +78,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="filepath">Filepath to store configuration at.</param>
         private static void OutputConfiguration(string filepath)
         {
-            string rawjson = ReadAllText(Program.CommandLineArgs.ConfigurationPath);
-            rawjson = Regex.Replace(rawjson, "Password=.+?\\;", "Password=[...];");
-
-            JObject configuration = JObject.Parse(rawjson);
-
-            configuration["BinanceClientSettings"]["Credentials"]["Key"] = "api-key";
-            configuration["BinanceClientSettings"]["Credentials"]["Secret"] = "api-secret";
-
-            WriteAllText(filepath, configuration.ToString(Formatting.Indented));
+            Copy(BacktestDaemonService.Instance.State.CurrentBacktestConfigurationPath, filepath, true);
         }
 
         /// <summary>

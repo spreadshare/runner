@@ -39,9 +39,6 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="initialAllocations">Initial set of allocations.</param>
         public void SetInitialConfiguration(Dictionary<Exchange, Dictionary<Type, decimal>> initialAllocations)
         {
-            // Make sure AllocationManager is not already configured
-            Guard.Argument(_allocations).Null(_ => "Allocation manager is already configured");
-
             // Initialise _allocations
             _allocations = new Dictionary<Exchange, TotalPortfolio>();
 

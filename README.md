@@ -7,7 +7,7 @@ Using a simple bandwagon algorithm for cryptocurrency trading on Binance
 3. Create volume postgres-data 
 ```docker volume create --name postgres-data```
 4. Create an `.env` file from the `.env.example` file. Replace the default passwords with randomly generated passwords.
-5. Create an `appsettings.json` file from the `appsettings.json.example` file. Replace the API credentials with actual credentials.
+5. Create an `appsettings.yaml` file from the `appsettings.yaml.example` file. Replace the API credentials with actual credentials.
 5. Run Visual Studio with Docker Compose configuration or run
 ```docker-compose up```
 
@@ -16,7 +16,7 @@ Using a simple bandwagon algorithm for cryptocurrency trading on Binance
 sudo apt-get install -y docker-ce && docker-compose
 docker volume create --name postgres-data
 cp .env.example .env
-cp SpreadShare/appsettings.json.example SpreadShare/appsettings.json
+cp SpreadShare/appsettings.json.example SpreadShare/appsettings.yaml
 docker-compose up
 ```
 

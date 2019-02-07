@@ -13,7 +13,7 @@ namespace SpreadShare.Tests.ExchangeServices
         public DataProviderTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            var container = ExchangeFactoryService.BuildContainer(typeof(TemplateAlgorithm));
+            var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
             _data = container.DataProvider;
         }
 

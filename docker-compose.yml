@@ -19,19 +19,21 @@ services:
       - db
     volumes:
       - ./backtesting-output:/app/backtesting-output # Path-based volume
+    tty: true
+    stdin_open: true
 
-  datapump:
-    build:
-      context: DataPump
-      dockerfile: Dockerfile
-    entrypoint: python
-    command: -u datapump.py
-    env_file:
-      - .env
-    depends_on: 
-      - db
-    volumes:
-      - ./DataPump/input-data:/app/input-data # Path-based volume
+  # datapump:
+  #  build:
+  #    context: DataPump
+  #    dockerfile: Dockerfile
+  #  entrypoint: python
+  #  command: -u datapump.py
+  #  env_file:
+  #    - .env
+  #  depends_on: 
+  #    - db
+  #  volumes:
+  #    - ./DataPump/input-data:/app/input-data # Path-based volume
 
   db:
     image: "postgres"

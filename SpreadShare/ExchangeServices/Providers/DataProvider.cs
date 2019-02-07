@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.Providers
@@ -17,7 +17,7 @@ namespace SpreadShare.ExchangeServices.Providers
     internal class DataProvider
     {
         private readonly AbstractDataProvider _implementation;
-        private readonly AlgorithmSettings _settings;
+        private readonly AlgorithmConfiguration _settings;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="factory">for generating output.</param>
         /// <param name="implementation">Exchange implementation of data provider.</param>
         /// <param name="settings">The settings of the algorithm.</param>
-        public DataProvider(ILoggerFactory factory, AbstractDataProvider implementation, AlgorithmSettings settings)
+        public DataProvider(ILoggerFactory factory, AbstractDataProvider implementation, AlgorithmConfiguration settings)
         {
             _implementation = implementation;
             _settings = settings;

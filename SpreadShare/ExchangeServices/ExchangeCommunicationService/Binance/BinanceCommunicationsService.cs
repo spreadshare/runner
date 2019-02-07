@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models.Trading;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
@@ -18,20 +18,19 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
     {
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly BinanceCredentials _authy;
+        private readonly BinanceClientSettings.CredentialsWrapper _authy;
         private ListenKeyManager _listenKeyManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceCommunicationsService"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create a logger to create output.</param>
-        /// <param name="settings">Used to extract the binance settings.</param>
-        public BinanceCommunicationsService(ILoggerFactory loggerFactory, SettingsService settings)
+        public BinanceCommunicationsService(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _loggerFactory = loggerFactory;
-            _authy = settings.BinanceSettings.Credentials;
-            ReceiveWindow = settings.BinanceSettings.ReceiveWindow;
+            _authy = Configuration.Instance.BinanceClientSettings.Credentials;
+            ReceiveWindow = Configuration.Instance.BinanceClientSettings.ReceiveWindow;
         }
 
         /// <summary>
@@ -121,6 +120,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                     // ##########################################################################
                     try
                     {
+                        _logger.LogInformation(JsonConvert.SerializeObject(orderInfoUpdate));
                         var order = new OrderUpdate(
                             orderId: orderInfoUpdate.OrderId,
                             tradeId: 0,
@@ -144,8 +144,8 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 
                         try
                         {
-                            order.Commission = (orderInfoUpdate.Commission,
-                                new Currency(orderInfoUpdate.CommissionAsset));
+                            order.Commission = orderInfoUpdate.Commission;
+                            order.CommissionAsset = new Currency(orderInfoUpdate.CommissionAsset);
                         }
                         catch
                         {

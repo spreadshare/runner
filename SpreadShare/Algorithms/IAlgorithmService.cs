@@ -1,5 +1,6 @@
 using System;
 using SpreadShare.Models;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.Algorithms
 {
@@ -9,11 +10,21 @@ namespace SpreadShare.Algorithms
     internal interface IAlgorithmService
     {
         /// <summary>
-        /// Starts the algorithm.
+        /// Starts the algorithm using a custom configuration object.
         /// </summary>
-        /// <param name="algorithmType">Algorithm to start.</param>
+        /// <param name="configuration">Configuration object.</param>
+        /// <typeparam name="T">The type of algorithm to start.</typeparam>
         /// <returns>If the algorithm was started successfully.</returns>
-        ResponseObject StartAlgorithm(Type algorithmType);
+        ResponseObject StartAlgorithm<T>(AlgorithmConfiguration configuration)
+            where T : IBaseAlgorithm;
+
+        /// <summary>
+        /// Starts the algorithm using a custom configuration object.
+        /// </summary>
+        /// <param name="algorithm">Algorithm to start.</param>
+        /// <param name="configuration">Configuration object.</param>
+        /// <returns>If the algorithm was started successfully.</returns>
+        ResponseObject StartAlgorithm(Type algorithm, AlgorithmConfiguration configuration);
 
         /// <summary>
         /// Stops the given algorithm.

@@ -249,9 +249,9 @@ namespace SpreadShare.Tests.Models
 
         // Disable warning about classes that are not instantiated
         #pragma warning disable CA1812
-        private class OtherAlgorithm : BaseAlgorithm<TemplateAlgorithmSettings>
+        private class OtherAlgorithm : BaseAlgorithm<TemplateAlgorithmConfiguration>
         {
-            protected override EntryState<TemplateAlgorithmSettings> Initial { get; }
+            protected override EntryState<TemplateAlgorithmConfiguration> Initial { get; }
         }
         #pragma warning restore CA1812
     }

@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
+using SpreadShare.ExchangeServices.Providers;
+using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.Models;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Utilities;
 
 namespace SpreadShare.Algorithms
@@ -17,7 +22,6 @@ namespace SpreadShare.Algorithms
     internal class AlgorithmService : IAlgorithmService
     {
         private readonly ILogger _logger;
-        private readonly SettingsService _settingsService;
         private readonly AllocationManager _allocationManager;
         private readonly ExchangeFactoryService _exchangeFactoryService;
         private readonly Dictionary<Type, IBaseAlgorithm> _algorithms;
@@ -27,66 +31,99 @@ namespace SpreadShare.Algorithms
         /// Initializes a new instance of the <see cref="AlgorithmService"/> class.
         /// </summary>
         /// <param name="loggerFactory">Provides logging capabilities.</param>
-        /// <param name="settingsService">Provides allocation and algorithm settings.</param>
         /// <param name="database">The database context.</param>
-        /// <param name="allocationManager">Provides allocation management.</param>
+        /// <param name="allocationManager">Set allocations on startup.</param>
         /// <param name="exchangeFactoryService">Provides containers for algorithms.</param>
         public AlgorithmService(
             ILoggerFactory loggerFactory,
-            SettingsService settingsService,
             DatabaseContext database,
             AllocationManager allocationManager,
             ExchangeFactoryService exchangeFactoryService)
         {
             _logger = loggerFactory.CreateLogger<AlgorithmService>();
-            _database = database;
             _allocationManager = allocationManager;
+            _database = database;
             _exchangeFactoryService = exchangeFactoryService;
-            _settingsService = settingsService;
             _algorithms = new Dictionary<Type, IBaseAlgorithm>();
 
-            SetInitialAllocation();
+            if (Program.CommandLineArgs.Trading)
+            {
+                SetInitialAllocation();
+            }
         }
 
         /// <inheritdoc />
-        public ResponseObject StartAlgorithm(Type algorithmType)
+        public ResponseObject StartAlgorithm<T>(AlgorithmConfiguration configuration)
+            where T : IBaseAlgorithm
         {
-            // Check if type is an algorithm
-            if (!Reflections.IsAlgorithm(algorithmType))
+            if (!Reflections.AlgorithmMatchesConfiguration(typeof(T), configuration.GetType()))
             {
-                return new ResponseObject(ResponseCode.Error, $"Provided type {algorithmType} is not an algorithm.");
+                return new ResponseObject(ResponseCode.Error, $"Provided settings object is of type {configuration.GetType()} and does not match {typeof(T)}");
             }
 
             // Check if algorithm is in a stopped state
-            if (_algorithms.ContainsKey(algorithmType))
+            if (_algorithms.ContainsKey(typeof(T)))
             {
-                return new ResponseObject(ResponseCode.Error, "Algorithm was already started.");
+                return new ResponseObject(ResponseCode.Error, $"Algorithm {typeof(T).Name} was already started.");
+            }
+
+            // Prevent starting real deployment without flag.
+            if (configuration.Exchange != Exchange.Backtesting && Program.CommandLineArgs.Trading)
+            {
+                throw new PermissionDeniedException($"Cannot deploy {typeof(T).Name} on non trading mode.");
             }
 
             // Figure out which container to get
-            IBaseAlgorithm algorithm = (IBaseAlgorithm)Activator.CreateInstance(algorithmType);
-
-            AlgorithmSettings settings = _settingsService.GetAlgorithSettings(algorithmType);
+            IBaseAlgorithm algorithm = (IBaseAlgorithm)Activator.CreateInstance(typeof(T));
 
             // Build container
-            var container = _exchangeFactoryService.BuildContainer(algorithmType);
+            var container = _exchangeFactoryService.BuildContainer<T>(configuration);
 
             // Start the timer provider
             container.TimerProvider.RunPeriodicTimer();
 
             // Initialise algorithm with container
-            var startResponse = algorithm.Start(settings, container, _database);
+            var startResponse = algorithm.Start(configuration, container, _database);
 
             if (!startResponse.Success)
             {
                 return startResponse;
             }
 
-            // Set status Running to True
-            _algorithms[algorithmType] = algorithm;
+            // Run backtest asynchronously by awaiting the timer.
+            if (configuration.Exchange == Exchange.Backtesting)
+            {
+                if (container.TimerProvider is BacktestTimerProvider backtestTimer)
+                {
+                    while (!backtestTimer.Finished)
+                    {
+                        Thread.Sleep(10);
+                    }
+                }
+                else
+                {
+                    throw new InvalidStateException(
+                        $"Error starting {typeof(T).Name}, configuration defined exchange as {configuration.Exchange}, " +
+                        $"but the container did not contain a {typeof(ExchangeTimerProvider).Name}");
+                }
+            }
+            else
+            {
+                // Set status Running to True
+                _algorithms[typeof(T)] = algorithm;
+            }
 
             // Return a success
             return new ResponseObject(ResponseCode.Success);
+        }
+
+        /// <inheritdoc/>
+        public ResponseObject StartAlgorithm(Type algorithm, AlgorithmConfiguration configuration)
+        {
+           return GetType()
+                .GetMethod(nameof(StartAlgorithm), new[] { typeof(AlgorithmConfiguration) })
+                .MakeGenericMethod(algorithm)
+                .Invoke(this, new object[] { configuration }) as ResponseObject;
         }
 
         /// <inheritdoc />
@@ -110,10 +147,21 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Sets the initial allocation in AllocationManager.
         /// </summary>
+        // TODO: Use actual values.
         private void SetInitialAllocation()
         {
             // Sets initial configuration
-            _allocationManager.SetInitialConfiguration(_settingsService.AllocationSettings);
+            _allocationManager.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>()
+            {
+                {
+                    Exchange.Backtesting,
+                    new Dictionary<Type, decimal> { { Configuration.Instance.EnabledAlgorithms.First(), 1 } }
+                },
+                {
+                    Exchange.Binance,
+                    new Dictionary<Type, decimal> { { Configuration.Instance.EnabledAlgorithms.First(), 1 } }
+                },
+            });
         }
     }
 }
