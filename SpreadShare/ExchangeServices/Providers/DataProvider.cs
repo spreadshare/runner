@@ -115,11 +115,11 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">TradingPair.</param>
         /// <param name="numberOfCandles">Number of minute candles to request (>0).</param>
         /// <returns>Array of candles.</returns>
-        public BacktestingCandle[] GetMinuteCandles(TradingPair pair, int numberOfCandles)
+        public BacktestingCandle[] GetFiveMinuteCandles(TradingPair pair, int numberOfCandles)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(numberOfCandles).NotZero().NotNegative();
-            var query = HelperMethods.RetryMethod(() => _implementation.GetMinuteCandles(pair, numberOfCandles), _logger);
+            var query = HelperMethods.RetryMethod(() => _implementation.GetFiveMinuteCandles(pair, numberOfCandles), _logger);
             return query.Success
                 ? query.Data
                 : throw new ExchangeConnectionException(query.Message);
@@ -135,7 +135,7 @@ namespace SpreadShare.ExchangeServices.Providers
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(numberOfCandles).Require(x => x >= 2, x => $"Average true range needs at least 2 candles");
-            var candles = GetMinuteCandles(pair, numberOfCandles);
+            var candles = GetFiveMinuteCandles(pair, numberOfCandles);
 
             decimal highLow = candles.Max(x => x.High - x.Low);
             decimal highPreviousClose = 0;

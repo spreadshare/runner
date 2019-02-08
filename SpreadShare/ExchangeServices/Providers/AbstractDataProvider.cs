@@ -71,7 +71,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">TradingPair.</param>
         /// <param name="limit">Number of candles to fetch.</param>
         /// <returns>ResponseObject containing a candle array.</returns>
-        public abstract ResponseObject<BacktestingCandle[]> GetMinuteCandles(TradingPair pair, int limit);
+        public abstract ResponseObject<BacktestingCandle[]> GetFiveMinuteCandles(TradingPair pair, int limit);
 
         /// <summary>
         /// Gets the top performing trading pair.
