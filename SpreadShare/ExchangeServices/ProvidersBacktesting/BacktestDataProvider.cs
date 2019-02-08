@@ -68,7 +68,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<BacktestingCandle[]> GetMinuteCandles(TradingPair pair, int limit)
+        public override ResponseObject<BacktestingCandle[]> GetFiveMinuteCandles(TradingPair pair, int limit)
         {
             throw new NotImplementedException();
         }
