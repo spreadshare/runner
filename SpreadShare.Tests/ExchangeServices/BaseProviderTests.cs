@@ -39,6 +39,6 @@ namespace SpreadShare.Tests.ExchangeServices
             ConfigurationValidator.ValidateConstraintsRecursively(AlgorithmConfiguration);
         }
 
-        internal TemplateAlgorithmConfiguration AlgorithmConfiguration { get; private set; }
+        internal TemplateAlgorithmConfiguration AlgorithmConfiguration { get; }
     }
 }
