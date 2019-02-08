@@ -5,7 +5,8 @@ AdministratorSettings:
   AdminEmail: example@gmail.com
   AdminPassword: password
   Recipients: [recipient@domain.com]
-  
+  SentryDSN: "https://XXXX@sentry.io/XXXXXXX"
+
 EnabledAlgorithms:
   - TemplateAlgorithm
 
