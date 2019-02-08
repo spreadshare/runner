@@ -3,6 +3,7 @@ using System.Threading;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Sentry;
 using SpreadShare.Algorithms;
 using SpreadShare.Models;
 using SpreadShare.SupportServices.BacktestDaemon;
@@ -53,16 +54,19 @@ namespace SpreadShare
 
             // --------------------------------------------------
             // Setup finished --> Execute business logic services
-            bool successfulStart = ExecuteBusinessLogic(serviceProvider, _loggerFactory);
-            if (!successfulStart)
+            using (SentrySdk.Init(Configuration.Instance.AdministratorSettings.SentryDSN))
             {
-                return 1;
-            }
+                bool successfulStart = ExecuteBusinessLogic(serviceProvider, _loggerFactory);
+                if (!successfulStart)
+                {
+                    return 1;
+                }
 
-            if (CommandLineArgs.Backtesting)
-            {
-                var daemonService = serviceProvider.GetService<BacktestDaemonService>();
-                return (int)daemonService.Run();
+                if (CommandLineArgs.Backtesting)
+                {
+                    var daemonService = serviceProvider.GetService<BacktestDaemonService>();
+                    return (int)daemonService.Run();
+                }
             }
 
             return KeepRunningForever();

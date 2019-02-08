@@ -70,6 +70,9 @@ namespace SpreadShare.SupportServices.Configuration
         [Required]
         [ForAll(typeof(Email))]
         public List<string> Recipients { get; private set; }
+
+        [Required]
+        public string SentryDSN { get; private set; }
     }
 
     internal class BinanceClientSettings
