@@ -54,7 +54,8 @@ namespace SpreadShare
 
             // --------------------------------------------------
             // Setup finished --> Execute business logic services
-            using (SentrySdk.Init(Configuration.Instance.AdministratorSettings.SentryDSN))
+            SentryLogger.GetDsn(out var dsn);
+            using (SentrySdk.Init(dsn))
             {
                 bool successfulStart = ExecuteBusinessLogic(serviceProvider, _loggerFactory);
                 if (!successfulStart)
@@ -97,7 +98,6 @@ namespace SpreadShare
         private static bool ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
-            serviceProvider.GetService<ErrorService>().Bind();
             serviceProvider.GetService<DatabaseUtilities>().Bind();
             serviceProvider.GetService<BacktestDaemonService>().Bind();
 
