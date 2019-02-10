@@ -79,13 +79,17 @@ namespace SpreadShare
         {
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
 
+            // Add Sentry to ErrorLogging
+            loggerFactory.AddProvider(new SentryLoggerProvider());
+
+            // Download all currencies from Binance
             TradingPair.Sync(logger);
 
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
             if (!service.Migrate().Success)
             {
-                logger.LogError("Could not migrate database");
+                logger.LogWarning("Could not migrate database");
             }
         }
 
@@ -101,7 +105,7 @@ namespace SpreadShare
             services.AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>(opt
                 => opt.UseNpgsql(Configuration.Instance.ConnectionStrings.LocalConnection));
 
-            // TODO: Add layered timeout for unsuccesfully connecting to DB
+            // TODO: Add layered timeout for unsuccessfully connecting to DB
             // Add Logging dependency
             services.AddLogging(loggingBuilder => loggingBuilder
                 .AddConsole(opt => opt.DisableColors = false)
@@ -111,9 +115,6 @@ namespace SpreadShare
 
             // Add MyService dependency
             services.AddSingleton<IDatabaseMigrationService, DatabaseMigrationService>();
-
-            // Error service
-            services.AddSingleton<ErrorService, ErrorService>();
 
             // Database utilities
             services.AddSingleton<DatabaseUtilities, DatabaseUtilities>();

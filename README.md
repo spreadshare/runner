@@ -85,3 +85,8 @@ find . -name '*.cs' -exec sed -i 's/\s*$//g' {} +
 You have to set the script executable using `chmod +x .git/hooks/pre-commit`
 
 Each time you commit, this command will remove trailing whitespace.
+
+**In JetBrain Products:** 
+```
+Settings > Editor > General > Strip trailing spaces on Save & corresponding dropdown menu
+```

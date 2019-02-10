@@ -1,17 +1,14 @@
-ConnectionStrings: 
+ConnectionStrings:
   LocalConnection: Server=db;Database=spreadshare;User ID=postgres;Password=password;Integrated Security=true;Pooling=true;
 
-AdministratorSettings:
-  AdminEmail: example@gmail.com
-  AdminPassword: password
-  Recipients: [recipient@domain.com]
-  SentryDSN: "https://XXXX@sentry.io/XXXXXXX"
+LoggingSettings:
+  SentryDSN: null # Format: https://XX@sentry.io/XX
 
 EnabledAlgorithms:
   - TemplateAlgorithm
 
 BinanceClientSettings:
-  ReceiveWindow: 5000 
+  ReceiveWindow: 5000
   Credentials:
     Key: api_key
     Secret: api_secret

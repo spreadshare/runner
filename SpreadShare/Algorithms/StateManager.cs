@@ -9,7 +9,6 @@ using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.Configuration;
-using SpreadShare.SupportServices.ErrorServices;
 
 namespace SpreadShare.Algorithms
 {
@@ -126,11 +125,6 @@ namespace SpreadShare.Algorithms
                 catch (ProviderException e)
                 {
                     _logger.LogError(e.Message);
-                    ErrorService.Instance.ReportCriticalError(
-                        Container.Algorithm,
-                        _activeState.GetType().Name,
-                        e.StackFrame,
-                        e.Message);
                 }
                 catch (Exception e)
                 {
@@ -156,11 +150,6 @@ namespace SpreadShare.Algorithms
                 catch (ProviderException e)
                 {
                     _logger.LogError(e.Message);
-                    ErrorService.Instance.ReportCriticalError(
-                        Container.Algorithm,
-                        _activeState.GetType().Name,
-                        e.StackFrame,
-                        e.Message);
                 }
                 catch (Exception e)
                 {
@@ -244,11 +233,6 @@ namespace SpreadShare.Algorithms
                 catch (ProviderException e)
                 {
                     _logger.LogError(e.Message);
-                    ErrorService.Instance.ReportCriticalError(
-                        Container.Algorithm,
-                        _activeState.GetType().Name,
-                        e.StackFrame,
-                        e.Message);
                 }
                 catch (Exception e)
                 {

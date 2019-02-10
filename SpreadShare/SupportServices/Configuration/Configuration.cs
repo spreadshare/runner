@@ -23,15 +23,13 @@ namespace SpreadShare.SupportServices.Configuration
         [Required]
         public ConnectionStrings ConnectionStrings { get; private set; }
 
-        public AdministratorSettings AdministratorSettings { get; private set; }
+        public LoggingSettings LoggingSettings { get; private set; }
 
         [Required]
         public BinanceClientSettings BinanceClientSettings { get; private set; }
 
         [Required]
         public BacktestSettings BacktestSettings { get; private set; }
-
-        public bool MailerEnabled => AdministratorSettings != null;
 
         [YamlMember(Alias = "EnabledAlgorithms")]
         [Required]
@@ -55,23 +53,13 @@ namespace SpreadShare.SupportServices.Configuration
         /// Gets the LocalConnection information for database connections.
         /// </summary>
         [Required]
+        [YamlMember(SerializeAs = typeof(object))] // redacted
         public string LocalConnection { get; private set; }
     }
 
-    internal class AdministratorSettings
+    internal class LoggingSettings
     {
-        [Required]
-        [Email(HostName = "gmail.com")]
-        public string AdminEmail { get; private set; }
-
-        [Required]
-        public string AdminPassword { get; private set; }
-
-        [Required]
-        [ForAll(typeof(Email))]
-        public List<string> Recipients { get; private set; }
-
-        [Required]
+        [YamlMember(SerializeAs = typeof(object))] // redacted
         public string SentryDSN { get; private set; }
     }
 
@@ -86,9 +74,11 @@ namespace SpreadShare.SupportServices.Configuration
         public class CredentialsWrapper
         {
             [Required]
+            [YamlMember(SerializeAs = typeof(object))] // redacted
             public string Key { get; private set; }
 
             [Required]
+            [YamlMember(SerializeAs = typeof(object))] // redacted
             public string Secret { get; private set; }
         }
     }
