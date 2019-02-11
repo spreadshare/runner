@@ -9,53 +9,53 @@ using SpreadShare.SupportServices.Configuration;
 namespace SpreadShare.Algorithms.Implementations
 {
     /// <summary>
-    /// The first short dip algorithm.
-    /// buys when the market has an unesecary dip, and sell after recovery.
+    /// The first pumpfollowing algorithm.
+    /// buys when the market has an large pump, and sells into an expected future pump.
     /// </summary>
     internal class SimplePumpFollow : BaseAlgorithm<SimplePumpFollowConfiguration>
     {
-        /// <inheritdoc />
-        protected override EntryState<SimplePumpFollowConfiguration> Initial => new WelcomeState();
+         /// <inheritdoc />
+         protected override EntryState<SimplePumpFollowConfiguration> Initial => new WelcomeState();
 
-        // Buy when the price dips more than X percent in Y minutes, and sell after Z% recovery or after A hours
-        private class WelcomeState : EntryState<SimplePumpFollowConfiguration>
-        {
-            public override State<SimplePumpFollowConfiguration> OnTimerElapsed()
-            {
-                return new EntryState();
-            }
+         // Buy when the price rises more than X percent in Y minutes, and sell after Z% followthrough or after A hours.
+         private class WelcomeState : EntryState<SimplePumpFollowConfiguration>
+         {
+             public override State<SimplePumpFollowConfiguration> OnTimerElapsed()
+             {
+                 return new EntryState();
+             }
 
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-                SetTimer(TimeSpan.Zero);
-            }
-        }
+             protected override void Run(TradingProvider trading, DataProvider data)
+             {
+                 SetTimer(TimeSpan.Zero);
+             }
+         }
 
-        private class EntryState : EntryState<SimplePumpFollowConfiguration>
-        {
-            public override State<SimplePumpFollowConfiguration> OnMarketCondition(DataProvider data)
-            {
+         private class EntryState : EntryState<SimplePumpFollowConfiguration>
+         {
+             public override State<SimplePumpFollowConfiguration> OnMarketCondition(DataProvider data)
+             {
                 bool longPerformance = data.GetPerformancePastHours(
                                            AlgorithmConfiguration.TradingPairs.First(),
-                                           8) > (1 + AlgorithmConfiguration.FirstCheck);
+                                           8) > (1 + AlgorithmConfiguration.LongCheck);
                 bool shortPerformance = data.GetPerformancePastHours(
                                             AlgorithmConfiguration.TradingPairs.First(),
-                                            3) < (1 - AlgorithmConfiguration.SecondCheck);
+                                            3) < (1 - AlgorithmConfiguration.ShortCheck);
                 if (longPerformance && shortPerformance)
                 {
                     return new BuyState();
                 }
 
                 return new NothingState<SimplePumpFollowConfiguration>();
-            }
+             }
 
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-            }
-        }
+             protected override void Run(TradingProvider trading, DataProvider data)
+             {
+             }
+         }
 
-        private class BuyState : State<SimplePumpFollowConfiguration>
-        {
+         private class BuyState : State<SimplePumpFollowConfiguration>
+         {
             private OrderUpdate _limitsell;
             private bool _stophit;
 
@@ -97,29 +97,29 @@ namespace SpreadShare.Algorithms.Implementations
 
                 _stophit = currentPrice < sellPrice;
             }
-        }
+         }
 
-        private class StopState : State<SimplePumpFollowConfiguration>
-        {
-            private OrderUpdate oldlimit;
+         private class StopState : State<SimplePumpFollowConfiguration>
+         {
+             private OrderUpdate oldlimit;
 
-            public StopState(OrderUpdate limitsell)
-            {
-                oldlimit = limitsell;
-            }
+             public StopState(OrderUpdate limitsell)
+             {
+                 oldlimit = limitsell;
+             }
 
-            public override State<SimplePumpFollowConfiguration> OnTimerElapsed()
-            {
-                return new EntryState();
-            }
+             public override State<SimplePumpFollowConfiguration> OnTimerElapsed()
+             {
+                 return new EntryState();
+             }
 
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-                trading.CancelOrder(oldlimit);
-                trading.ExecuteFullMarketOrderSell(AlgorithmConfiguration.TradingPairs.First());
-                SetTimer(TimeSpan.Zero);
-            }
-        }
+             protected override void Run(TradingProvider trading, DataProvider data)
+             {
+                 trading.CancelOrder(oldlimit);
+                 trading.ExecuteFullMarketOrderSell(AlgorithmConfiguration.TradingPairs.First());
+                 SetTimer(TimeSpan.Zero);
+             }
+         }
     }
 
     /// <summary>
@@ -128,27 +128,27 @@ namespace SpreadShare.Algorithms.Implementations
     internal class SimplePumpFollowConfiguration : AlgorithmConfiguration
     {
         /// <summary>
-        /// Gets or sets how much something needs to fall to be considered a dip.
+        /// Gets or sets The longer check time to find the first pump. In hours.
         /// </summary>
-        public decimal FirstCheck { get; set; }
+        public decimal LongCheck { get; set; }
 
         /// <summary>
-        /// Gets or sets The diptime, how quickly the dip needs to happen to be considered a dip.
+        /// Gets or sets The shorter check time, to indicate whether there is some followthrough. In hours.
         /// </summary>
-        public decimal SecondCheck { get; set; }
+        public decimal ShortCheck { get; set; }
 
         /// <summary>
-        /// Gets or sets recovery, determines how much profit the system should try to get before selling.
+        /// Gets or sets determines where our exit should be in percent. 5% is 1.05.
         /// </summary>
         public decimal ProfitTake { get; set; }
 
         /// <summary>
-        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again.
+        /// Gets or sets Stoptime, determines how long to wait untill we get out no matter the PnL. In Hours.
         /// </summary>
         public int StopTime { get; set; }
 
         /// <summary>
-        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again.
+        /// Gets or sets StopPrice, determines how low our stop should be placed, 5% below is 0.95.
         /// </summary>
         public decimal StopPrice { get; set; }
     }
