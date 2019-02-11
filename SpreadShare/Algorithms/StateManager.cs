@@ -8,17 +8,16 @@ using SpreadShare.Models.Database;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
-using SpreadShare.SupportServices.ErrorServices;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.Algorithms
 {
     /// <summary>
     /// Object managing the active state and related resources.
     /// </summary>
-    /// <typeparam name="T">The type of the parent algorithm settings.</typeparam>
+    /// <typeparam name="T">The type of the parent algorithm configuration.</typeparam>
     internal sealed class StateManager<T> : IDisposable
-        where T : AlgorithmSettings
+        where T : AlgorithmConfiguration
     {
         private readonly object _lock = new object();
         private readonly ILogger _logger;
@@ -31,14 +30,14 @@ namespace SpreadShare.Algorithms
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateManager{T}"/> class.
-        /// Sets active state with an initial state and sets basic settings.
+        /// Sets active state with an initial state and sets basic configuration.
         /// </summary>
-        /// <param name="algorithmSettings">The settings of the algorithm settings.</param>
+        /// <param name="algorithmConfiguration">The configuration of the algorithm.</param>
         /// <param name="initial">Initial state of the algorithm.</param>
         /// <param name="container">Exchange service container.</param>
         /// <param name="database">The database context for logging state switches.</param>
         public StateManager(
-            T algorithmSettings,
+            T algorithmConfiguration,
             EntryState<T> initial,
             ExchangeProvidersContainer container,
             DatabaseContext database)
@@ -50,8 +49,8 @@ namespace SpreadShare.Algorithms
                 _logger = container.LoggerFactory.CreateLogger(GetType());
                 _loggerFactory = container.LoggerFactory;
 
-                // Link the parent algorithm setting
-                AlgorithmSettings = algorithmSettings;
+                // Link the parent algorithm configuration
+                AlgorithmConfiguration = algorithmConfiguration;
 
                 Container = container;
 
@@ -77,7 +76,7 @@ namespace SpreadShare.Algorithms
 
                 // Setup initial state
                 _activeState = initial;
-                _activeState.Activate(algorithmSettings, container, _loggerFactory);
+                _activeState.Activate(algorithmConfiguration, container, _loggerFactory);
             }
         }
 
@@ -87,9 +86,9 @@ namespace SpreadShare.Algorithms
         private ExchangeProvidersContainer Container { get; }
 
         /// <summary>
-        /// Gets a link to the algorithm settings.
+        /// Gets a link to the algorithm configuration.
         /// </summary>
-        private T AlgorithmSettings { get; }
+        private T AlgorithmConfiguration { get; }
 
         /// <summary>
         /// Gets the current active state.
@@ -126,11 +125,6 @@ namespace SpreadShare.Algorithms
                 catch (ProviderException e)
                 {
                     _logger.LogError(e.Message);
-                    ErrorService.Instance.ReportCriticalError(
-                        Container.Algorithm,
-                        _activeState.GetType().Name,
-                        e.StackFrame,
-                        e.Message);
                 }
                 catch (Exception e)
                 {
@@ -156,11 +150,6 @@ namespace SpreadShare.Algorithms
                 catch (ProviderException e)
                 {
                     _logger.LogError(e.Message);
-                    ErrorService.Instance.ReportCriticalError(
-                        Container.Algorithm,
-                        _activeState.GetType().Name,
-                        e.StackFrame,
-                        e.Message);
                 }
                 catch (Exception e)
                 {
@@ -221,7 +210,7 @@ namespace SpreadShare.Algorithms
 
                 _activeState = child;
 
-                _activeState.Activate(AlgorithmSettings, Container, _loggerFactory);
+                _activeState.Activate(AlgorithmConfiguration, Container, _loggerFactory);
             }
         }
 
@@ -244,11 +233,6 @@ namespace SpreadShare.Algorithms
                 catch (ProviderException e)
                 {
                     _logger.LogError(e.Message);
-                    ErrorService.Instance.ReportCriticalError(
-                        Container.Algorithm,
-                        _activeState.GetType().Name,
-                        e.StackFrame,
-                        e.Message);
                 }
                 catch (Exception e)
                 {

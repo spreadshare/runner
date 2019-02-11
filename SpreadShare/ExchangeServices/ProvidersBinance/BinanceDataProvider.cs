@@ -102,7 +102,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<BacktestingCandle[]> GetMinuteCandles(TradingPair pair, int limit)
+        public override ResponseObject<BacktestingCandle[]> GetFiveMinuteCandles(TradingPair pair, int limit)
         {
             var client = _communications.Client;
             var response = client.GetKlines(

@@ -1,11 +1,8 @@
 using System;
 using System.Linq;
-using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.Models;
 using SpreadShare.Models.Trading;
-using SpreadShare.SupportServices;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.SupportServices.Configuration;
 
 #pragma warning disable SA1402
 
@@ -13,17 +10,17 @@ namespace SpreadShare.Algorithms.Implementations
 {
     /// <summary>
     /// The first short dip algorithm.
-    /// buys when the market has an unesecary dip, and sell after a set amount of time.
+    /// buys when the market has an unnecessary dip, and sell after a set amount of time.
     /// </summary>
-    internal class TimedShortDip : BaseAlgorithm<TimedShortDipSettings>
+    internal class TimedShortDip : BaseAlgorithm<TimedShortDipConfiguration>
     {
          /// <inheritdoc />
-         protected override EntryState<TimedShortDipSettings> Initial => new WelcomeState();
+         protected override EntryState<TimedShortDipConfiguration> Initial => new WelcomeState();
 
          // Buy when the price dips more than X percent in Y minutes, and sell after Z% recovery or after A hours.
-         private class WelcomeState : EntryState<TimedShortDipSettings>
+         private class WelcomeState : EntryState<TimedShortDipConfiguration>
          {
-             public override State<TimedShortDipSettings> OnTimerElapsed()
+             public override State<TimedShortDipConfiguration> OnTimerElapsed()
              {
                  return new EntryState();
              }
@@ -34,19 +31,19 @@ namespace SpreadShare.Algorithms.Implementations
              }
          }
 
-         private class EntryState : EntryState<TimedShortDipSettings>
+         private class EntryState : EntryState<TimedShortDipConfiguration>
          {
-             public override State<TimedShortDipSettings> OnMarketCondition(DataProvider data)
+             public override State<TimedShortDipConfiguration> OnMarketCondition(DataProvider data)
              {
                  bool performance = data.GetPerformancePastHours(
-                                        AlgorithmSettings.ActiveTradingPairs.First(),
-                                        AlgorithmSettings.DipTime) < (1 - AlgorithmSettings.DipPercent);
+                                        AlgorithmConfiguration.TradingPairs.First(),
+                                        AlgorithmConfiguration.DipTime) < (1 - AlgorithmConfiguration.DipPercent);
                  if (performance)
                  {
                      return new BuyState();
                  }
 
-                 return new NothingState<TimedShortDipSettings>();
+                 return new NothingState<TimedShortDipConfiguration>();
              }
 
              protected override void Run(TradingProvider trading, DataProvider data)
@@ -54,39 +51,39 @@ namespace SpreadShare.Algorithms.Implementations
              }
          }
 
-         private class BuyState : State<TimedShortDipSettings>
+         private class BuyState : State<TimedShortDipConfiguration>
          {
-             private OrderUpdate buyorder;
+             private OrderUpdate _buyorder;
 
-             public override State<TimedShortDipSettings> OnTimerElapsed()
+             public override State<TimedShortDipConfiguration> OnTimerElapsed()
              {
-                 return new ExitState(buyorder);
+                 return new ExitState(_buyorder);
              }
 
              protected override void Run(TradingProvider trading, DataProvider data)
              {
-                 buyorder = trading.ExecuteFullMarketOrderBuy(AlgorithmSettings.ActiveTradingPairs.First());
-                 SetTimer(TimeSpan.FromHours(AlgorithmSettings.ExitTime));
+                 _buyorder = trading.ExecuteFullMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First());
+                 SetTimer(TimeSpan.FromHours(AlgorithmConfiguration.ExitTime));
              }
          }
 
-         private class ExitState : State<TimedShortDipSettings>
+         private class ExitState : State<TimedShortDipConfiguration>
          {
-             private OrderUpdate oldbuy;
+             private readonly OrderUpdate _oldbuy;
 
              public ExitState(OrderUpdate buyorder)
              {
-                 oldbuy = buyorder;
+                 _oldbuy = buyorder;
              }
 
-             public override State<TimedShortDipSettings> OnTimerElapsed()
+             public override State<TimedShortDipConfiguration> OnTimerElapsed()
              {
                  return new EntryState();
              }
 
              protected override void Run(TradingProvider trading, DataProvider data)
              {
-                 trading.ExecuteFullMarketOrderSell(oldbuy.Pair);
+                 trading.ExecuteFullMarketOrderSell(_oldbuy.Pair);
                  SetTimer(TimeSpan.Zero);
              }
          }
@@ -95,7 +92,7 @@ namespace SpreadShare.Algorithms.Implementations
     /// <summary>
     /// The TimedShortDip settings.
     /// </summary>
-    internal class TimedShortDipSettings : AlgorithmSettings
+    internal class TimedShortDipConfiguration : AlgorithmConfiguration
     {
         /// <summary>
         /// Gets or sets the percentage price needs to fall to start an entry, a 3% dip is written as 0.03.

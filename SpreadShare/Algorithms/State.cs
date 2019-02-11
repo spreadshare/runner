@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.Algorithms
 {
@@ -13,7 +13,7 @@ namespace SpreadShare.Algorithms
     /// </summary>
     /// <typeparam name="T">The type of the parent algorithm.</typeparam>
     internal abstract class State<T>
-        where T : AlgorithmSettings
+        where T : AlgorithmConfiguration
     {
         /// <summary>
         /// Whether or not the timer has been triggered.
@@ -35,7 +35,7 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Gets a link to the parent algorithm settings.
         /// </summary>
-        protected T AlgorithmSettings { get; private set; }
+        protected T AlgorithmConfiguration { get; private set; }
 
         /// <summary>
         /// Initialise the state.
@@ -46,7 +46,7 @@ namespace SpreadShare.Algorithms
         public void Activate(T settings, ExchangeProvidersContainer container, ILoggerFactory loggerFactory)
         {
             Logger = loggerFactory.CreateLogger(GetType());
-            AlgorithmSettings = settings;
+            AlgorithmConfiguration = settings;
             _timerProvider = container.TimerProvider;
             Run(container.TradingProvider, container.DataProvider);
         }

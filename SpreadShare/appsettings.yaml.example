@@ -1,0 +1,21 @@
+ConnectionStrings:
+  LocalConnection: Server=db;Database=spreadshare;User ID=postgres;Password=password;Integrated Security=true;Pooling=true;
+
+LoggingSettings:
+  SentryDSN: null # Format: https://XX@sentry.io/XX
+
+EnabledAlgorithms:
+  - TemplateAlgorithm
+
+BinanceClientSettings:
+  ReceiveWindow: 5000
+  Credentials:
+    Key: api_key
+    Secret: api_secret
+
+BacktestSettings:
+  Portfolio:
+    ETH: 10
+  BeginTimeStamp: 10
+  EndTimeStamp: 10
+  OutputFolder: ./backtesting_output

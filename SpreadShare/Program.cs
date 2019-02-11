@@ -1,14 +1,15 @@
 using System;
-using System.Linq;
 using System.Threading;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Sentry;
 using SpreadShare.Algorithms;
-using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
+using SpreadShare.SupportServices.BacktestDaemon;
+using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.ErrorServices;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.Utilities;
 
 namespace SpreadShare
 {
@@ -17,13 +18,12 @@ namespace SpreadShare
     /// </summary>
     internal static class Program
     {
-        private static CommandLineArgs _commandLineArgs = new CommandLineArgs();
         private static ILoggerFactory _loggerFactory;
 
         /// <summary>
         /// Gets the instance of the CommandLineArgs.
         /// </summary>
-        public static CommandLineArgs CommandLineArgs => _commandLineArgs;
+        public static CommandLineArgs CommandLineArgs { get; private set; }
 
         /// <summary>
         /// Entrypoint of the application.
@@ -34,12 +34,13 @@ namespace SpreadShare
         {
             // Start command line args to local variable.
             Parser.Default.ParseArguments<CommandLineArgs>(args)
-                .WithParsed(o => _commandLineArgs = o);
+                .WithNotParsed(_ => ExitProgramWithCode(ExitCode.InvalidCommandLineArguments))
+                .WithParsed(o => CommandLineArgs = o);
 
             // Create service collection
             IServiceCollection services = new ServiceCollection();
 
-            // Configure services - Provide depencies for services
+            // Configure services - Provide dependencies for services
             Startup startup = new Startup(CommandLineArgs.ConfigurationPath);
             startup.ConfigureServices(services);
             Startup.ConfigureBusinessServices(services);
@@ -53,10 +54,20 @@ namespace SpreadShare
 
             // --------------------------------------------------
             // Setup finished --> Execute business logic services
-            bool successfulStart = ExecuteBusinessLogic(serviceProvider, _loggerFactory);
-            if (!successfulStart)
+            SentryLogger.GetDsn(out var dsn);
+            using (SentrySdk.Init(dsn))
             {
-                return 1;
+                bool successfulStart = ExecuteBusinessLogic(serviceProvider, _loggerFactory);
+                if (!successfulStart)
+                {
+                    return 1;
+                }
+
+                if (CommandLineArgs.Backtesting)
+                {
+                    var daemonService = serviceProvider.GetService<BacktestDaemonService>();
+                    return (int)daemonService.Run();
+                }
             }
 
             return KeepRunningForever();
@@ -69,7 +80,12 @@ namespace SpreadShare
         public static void ExitProgramWithCode(ExitCode exitCode)
         {
             // Flush the logs by disposing the factory
-            _loggerFactory.Dispose();
+            _loggerFactory?.Dispose();
+            if (exitCode != ExitCode.Success)
+            {
+                Console.WriteLine($"Exiting program with code {exitCode}");
+            }
+
             Environment.Exit((int)exitCode);
         }
 
@@ -82,51 +98,29 @@ namespace SpreadShare
         private static bool ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
-            SettingsService settings = serviceProvider.GetService<SettingsService>();
+            serviceProvider.GetService<DatabaseUtilities>().Bind();
+            serviceProvider.GetService<BacktestDaemonService>().Bind();
+
             if (CommandLineArgs.Trading)
             {
-                serviceProvider.GetService<ErrorService>().Bind();
-            }
-
-            // Check if allocation either completely set as backtesting, or the --trading flag was used
-            if (!CommandLineArgs.Trading)
-            {
-                decimal sum = 0.0M;
-
-                // Iterate over all exchange types
-                foreach (var exchange in settings.AllocationSettings.Keys)
+                // Bind allocated services
+                var algorithmService = serviceProvider.GetService<IAlgorithmService>();
+                foreach (var algo in Configuration.Instance.EnabledAlgorithms)
                 {
-                    // Skip backtesting
-                    if (exchange == Exchange.Backtesting)
+                    var algorithmConfigurationType = Reflections.GetMatchingConfigurationsType(algo);
+                    var algorithmConfiguration = ConfigurationLoader.LoadConfiguration(algorithmConfigurationType);
+                    Console.WriteLine("Loading: " + algorithmConfiguration.GetType());
+
+                    var algorithmResponse = algorithmService.StartAlgorithm(algo, algorithmConfiguration);
+
+                    if (!algorithmResponse.Success)
                     {
-                        continue;
+                        logger.LogError($"Algorithm failed to start:\n\t {algorithmResponse}");
+                        return false;
                     }
 
-                    // Aggregate all allocation
-                    var allocation = settings.AllocationSettings[exchange];
-                    sum += allocation.Keys.Select(x => allocation[x]).Aggregate((a, b) => a + b);
+                    logger.LogInformation($"Started algorithm '{algo}' successfully");
                 }
-
-                if (sum > 0)
-                {
-                    logger.LogError("Algorithms where configured with a non-backtesting allocation, " +
-                                    "but the --trading flag was off, did you mean to go live?");
-                    return false;
-                }
-            }
-
-            // Bind allocated services
-            var algorithmService = serviceProvider.GetService<IAlgorithmService>();
-            foreach (var algo in settings.EnabledAlgorithms)
-            {
-                var algorithmResponse = algorithmService.StartAlgorithm(algo);
-                if (!algorithmResponse.Success)
-                {
-                    logger.LogError($"Algorithm failed to start:\n\t {algorithmResponse}");
-                    return false;
-                }
-
-                logger.LogInformation($"Started algorithm '{algo}' successfully");
             }
 
             return true;

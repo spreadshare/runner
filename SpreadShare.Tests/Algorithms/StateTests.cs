@@ -16,7 +16,7 @@ namespace SpreadShare.Tests.Algorithms
             : base(outputHelper)
         {
             _container = ExchangeFactoryService
-                .BuildContainer(typeof(TemplateAlgorithm));
+                .BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace SpreadShare.Tests.Algorithms
         public void RunHappyFlow()
         {
             var state = new TestState();
-            state.Activate(new TemplateAlgorithmSettings(), _container, LoggerFactory);
+            state.Activate(AlgorithmConfiguration, _container, LoggerFactory);
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace SpreadShare.Tests.Algorithms
         {
             var state = new TestState();
             var next = state.OnMarketCondition(_container.DataProvider);
-            Assert.IsType<NothingState<TemplateAlgorithmSettings>>(next);
+            Assert.IsType<NothingState<TemplateAlgorithmConfiguration>>(next);
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace SpreadShare.Tests.Algorithms
         {
             var state = new TestState();
             var next = state.OnOrderUpdate(null);
-            Assert.IsType<NothingState<TemplateAlgorithmSettings>>(next);
+            Assert.IsType<NothingState<TemplateAlgorithmConfiguration>>(next);
         }
     }
 }

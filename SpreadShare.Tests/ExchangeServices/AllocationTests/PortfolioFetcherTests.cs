@@ -54,11 +54,16 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             // Connection the communications
             _serviceProvider.GetService<BacktestCommunicationService>().Connect();
             var query = _fetcher.GetPortfolio(Exchange.Backtesting);
-            Assert.True(query.Success);
             if (query.Success)
             {
                 Logger.LogInformation(query.Data.ToJson());
             }
+            else
+            {
+                Logger.LogError(query.Message);
+            }
+
+            Assert.True(query.Success);
         }
     }
 }

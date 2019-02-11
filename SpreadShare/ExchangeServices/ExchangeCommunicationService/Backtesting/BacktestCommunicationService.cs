@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models.Trading;
-using SpreadShare.SupportServices.SettingsServices;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting
 {
@@ -15,12 +15,12 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestCommunicationService"/> class.
         /// </summary>
-        /// <param name="settings">Injected settings service.</param>
         /// <param name="factory">Injected loggin service.</param>
-        public BacktestCommunicationService(SettingsService settings, ILoggerFactory factory)
+        public BacktestCommunicationService(ILoggerFactory factory)
         {
             _logger = factory.CreateLogger(GetType());
-            RemotePortfolio = settings.BackTestSettings.InitialPortfolio;
+
+            RemotePortfolio = Configuration.Instance.BacktestSettings.Portfolio;
         }
 
         /// <summary>

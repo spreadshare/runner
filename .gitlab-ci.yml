@@ -1,0 +1,24 @@
+image: microsoft/dotnet:2.2-sdk
+
+stages:
+    - build
+    - test
+
+before_script:
+    # Set configuration
+    -  cp SpreadShare/appsettings.yaml.example SpreadShare/appsettings.yaml
+    -  sed -i "s/api_key/${API_READ_KEY2}/g" SpreadShare/appsettings.yaml
+    -  sed -i "s/api_secret/${API_READ_SECRET2}/g" SpreadShare/appsettings.yaml
+
+build:
+    stage: build
+    script:
+        - dotnet restore SpreadShare/SpreadShare.csproj
+        - dotnet build SpreadShare/SpreadShare.csproj -p:Configuration=Release /warnaserror
+
+test:
+    stage: test
+    script:
+        - dotnet restore SpreadShare.Tests/SpreadShare.Tests.csproj
+        - dotnet build SpreadShare.Tests/SpreadShare.Tests.csproj -p:Configuration=Release /warnaserror
+        - dotnet test SpreadShare.Tests/SpreadShare.Tests.csproj

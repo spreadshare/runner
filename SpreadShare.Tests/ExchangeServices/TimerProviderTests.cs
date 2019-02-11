@@ -18,7 +18,7 @@ namespace SpreadShare.Tests.ExchangeServices
             : base(outputHelper)
         {
             var container =
-                ExchangeFactoryService.BuildContainer(typeof(TemplateAlgorithm));
+                ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
             _time = container.TimerProvider;
         }
 
