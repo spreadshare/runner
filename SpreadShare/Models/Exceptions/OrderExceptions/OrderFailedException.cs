@@ -1,6 +1,6 @@
 using System;
 
-namespace SpreadShare.Models.Exceptions
+namespace SpreadShare.Models.Exceptions.OrderExceptions
 {
     /// <summary>
     /// Exception thrown when an order is not accepted by the exchange.
