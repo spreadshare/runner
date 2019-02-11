@@ -12,14 +12,14 @@ namespace SpreadShare.Algorithms.Implementations
     /// The first Turtle inspired algorithm.
     /// Enters when longterm trends are broken, sells when the opposite shortterm trend is broken.
     /// </summary>
-    internal class MidTermTurtle : BaseAlgorithm<MidTermTurtleSettings>
+    internal class MidTermTurtle : BaseAlgorithm<MidTermTurtleConfiguration>
     {
         /// <inheritdoc />
-        protected override EntryState<MidTermTurtleSettings> Initial => new WelcomeState();
+        protected override EntryState<MidTermTurtleConfiguration> Initial => new WelcomeState();
 
-        private class WelcomeState : EntryState<MidTermTurtleSettings>
+        private class WelcomeState : EntryState<MidTermTurtleConfiguration>
         {
-            public override State<MidTermTurtleSettings> OnTimerElapsed()
+            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
             {
                 return new EntryState();
             }
@@ -31,12 +31,13 @@ namespace SpreadShare.Algorithms.Implementations
         }
 
         // Buy when the long term top gets broken.
-        private class EntryState : EntryState<MidTermTurtleSettings>
+        private class EntryState : EntryState<MidTermTurtleConfiguration>
         {
-            public override State<MidTermTurtleSettings> OnMarketCondition(DataProvider data)
+            public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Get the highest high from the last X hours
-                decimal topLongTermPrice = data.GetFiveMinuteCandles(AlgorithmConfiguration.TradingPairs.First(), 
+                decimal topLongTermPrice = data.GetFiveMinuteCandles(
+                    AlgorithmConfiguration.TradingPairs.First(),
                     AlgorithmConfiguration.LongTermTime * 12).Max(x => x.High);
 
                 // If the topLongTermPrice gets broken, we buy into the expected trend
@@ -45,7 +46,7 @@ namespace SpreadShare.Algorithms.Implementations
                     return new BuyState();
                 }
 
-                return new NothingState<MidTermTurtleSettings>();
+                return new NothingState<MidTermTurtleConfiguration>();
             }
 
             protected override void Run(TradingProvider trading, DataProvider data)
@@ -53,18 +54,18 @@ namespace SpreadShare.Algorithms.Implementations
             }
         }
 
-        private class BuyState : State<MidTermTurtleSettings>
+        private class BuyState : State<MidTermTurtleConfiguration>
         {
             private OrderUpdate buyorder;
 
-            public override State<MidTermTurtleSettings> OnOrderUpdate(OrderUpdate order)
+            public override State<MidTermTurtleConfiguration> OnOrderUpdate(OrderUpdate order)
             {
                 if (order.OrderId == buyorder.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return new InTradeState();
                 }
 
-                return new NothingState<MidTermTurtleSettings>();
+                return new NothingState<MidTermTurtleConfiguration>();
             }
 
             protected override void Run(TradingProvider trading, DataProvider data)
@@ -74,12 +75,13 @@ namespace SpreadShare.Algorithms.Implementations
             }
         }
 
-        private class InTradeState : State<MidTermTurtleSettings>
+        private class InTradeState : State<MidTermTurtleConfiguration>
         {
-            public override State<MidTermTurtleSettings> OnMarketCondition(DataProvider data)
+            public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Get the lowest low from the last y hours
-                decimal botShortTermPrice = data.GetFiveMinuteCandles(AlgorithmConfiguration.TradingPairs.First(), 
+                decimal botShortTermPrice = data.GetFiveMinuteCandles(
+                    AlgorithmConfiguration.TradingPairs.First(),
                     AlgorithmConfiguration.ShortTermTime * 12).Min(x => x.Low);
 
                 // If the shortLongTermPrice gets broken, we sell into the expected trend change
@@ -88,7 +90,7 @@ namespace SpreadShare.Algorithms.Implementations
                     return new SellState();
                 }
 
-                return new NothingState<MidTermTurtleSettings>();
+                return new NothingState<MidTermTurtleConfiguration>();
             }
 
             protected override void Run(TradingProvider trading, DataProvider data)
@@ -96,18 +98,18 @@ namespace SpreadShare.Algorithms.Implementations
             }
         }
 
-        private class SellState : State<MidTermTurtleSettings>
+        private class SellState : State<MidTermTurtleConfiguration>
         {
             private OrderUpdate sellorder;
 
-            public override State<MidTermTurtleSettings> OnOrderUpdate(OrderUpdate order)
+            public override State<MidTermTurtleConfiguration> OnOrderUpdate(OrderUpdate order)
             {
                 if (order.OrderId == sellorder.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return new EntryState();
                 }
 
-                return new NothingState<MidTermTurtleSettings>();
+                return new NothingState<MidTermTurtleConfiguration>();
             }
 
             protected override void Run(TradingProvider trading, DataProvider data)
@@ -120,7 +122,7 @@ namespace SpreadShare.Algorithms.Implementations
     /// <summary>
     /// The MidTermTurtle settings.
     /// </summary>
-    internal class MidTermTurtleSettings : AlgorithmConfiguration
+    internal class MidTermTurtleConfiguration : AlgorithmConfiguration
     {
         /// <summary>
         /// Gets or sets the long term breakout line time in hours.
