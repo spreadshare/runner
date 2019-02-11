@@ -1,7 +1,10 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.SupportServices.Configuration;
 using Xunit.Abstractions;
 using YamlDotNet.Serialization;
@@ -36,6 +39,18 @@ namespace SpreadShare.Tests.ExchangeServices
             ExchangeFactoryService = serviceProvider.GetService<ExchangeFactoryService>();
             AlgorithmConfiguration = new DeserializerBuilder().Build()
                     .Deserialize<TemplateAlgorithmConfiguration>(new StringReader(AlgorithmSettingsSource));
+
+            var alloc = serviceProvider.GetService<AllocationManager>();
+            alloc.SetInitialConfiguration(
+                new Dictionary<Exchange, Dictionary<Type, decimal>>
+            {
+                {
+                    Exchange.Binance, new Dictionary<Type, decimal>
+                    {
+                        { typeof(TemplateAlgorithm), 1M },
+                    }
+                },
+            });
             ConfigurationValidator.ValidateConstraintsRecursively(AlgorithmConfiguration);
         }
 
