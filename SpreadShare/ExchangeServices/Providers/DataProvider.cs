@@ -187,6 +187,36 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
+        /// Gets the Standard Moving Average (SMA) of a given pair, using a certain number of intervals, lasting a certain
+        /// number of minutes.
+        /// </summary>
+        /// <param name="pair">The pair to calculate the SMA over.</param>
+        /// <param name="candlesPerInterval">The number of minutes one interval should last.</param>
+        /// <param name="numberOfIntervals">The number of intervals to consider.</param>
+        /// <returns>The Standard Moving Average.</returns>
+        public decimal GetStandardMovingAverage(TradingPair pair, int candlesPerInterval, int numberOfIntervals)
+        {
+            Guard.Argument(pair).NotNull();
+            Guard.Argument(candlesPerInterval)
+                .NotNegative()
+                .NotZero();
+
+            Guard.Argument(numberOfIntervals)
+                .NotNegative()
+                .NotZero();
+
+            // Calculate the total number of five minute candles required.
+            int numberOfCandles = candlesPerInterval * numberOfIntervals;
+
+            // Get all candles and compress them {candlesPerInterval} times resulting in {numberOfIntervals} compressed candles.
+            var allCandles = GetFiveMinuteCandles(pair, numberOfCandles);
+            var candles = DataProviderUtilities.CompressCandles(allCandles, candlesPerInterval);
+
+            // Return the average of all closes.
+            return candles.Average(x => x.Close);
+        }
+
+        /// <summary>
         /// Gets a value estimation of a portfolio.
         /// </summary>
         /// <param name="portfolio">Portfolio.</param>
