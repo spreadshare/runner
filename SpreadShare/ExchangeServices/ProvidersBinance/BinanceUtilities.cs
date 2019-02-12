@@ -140,7 +140,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             {
                 case CandleWidth.OneMinute:
                     return KlineInterval.OneMinute;
+                case CandleWidth.ThreeMinutes:
+                    return KlineInterval.ThreeMinutes;
                 case CandleWidth.FiveMinutes:
+                    return KlineInterval.FiveMinutes;
+                case CandleWidth.FifteenMinutes:
                     return KlineInterval.FiveMinutes;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(width), width, null);

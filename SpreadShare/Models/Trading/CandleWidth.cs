@@ -12,8 +12,18 @@ namespace SpreadShare.Models.Trading
         OneMinute = 1,
 
         /// <summary>
+        /// Three minute wide candles.
+        /// </summary>
+        ThreeMinutes = 3,
+
+        /// <summary>
         /// Five minute wide candles.
         /// </summary>
         FiveMinutes = 5,
+
+        /// <summary>
+        /// Fifteen minute wide candles.
+        /// </summary>
+        FifteenMinutes = 15,
     }
 }
