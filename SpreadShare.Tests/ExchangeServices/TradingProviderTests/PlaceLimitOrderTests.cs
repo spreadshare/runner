@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
 using Xunit;
@@ -12,11 +11,49 @@ using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
 {
-    public class PlaceLimitOrderTests : BaseProviderTests
+    public class PlaceLimitOrderTests : TradingProviderTestUtils
     {
         public PlaceLimitOrderTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
+        }
+
+        [Fact]
+        public void PlaceLimitOrderBuyPairNull()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentNullException>(() => trading.PlaceLimitOrderBuy(null, 10, 1));
+        }
+
+        [Fact]
+        public void PlaceLimitOrderSellPairNull()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentNullException>(() => trading.PlaceLimitOrderSell(null, 10, 1));
+        }
+
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(-1, 1)]
+        [InlineData(10, 0)]
+        [InlineData(10, -1)]
+        public void PlaceLimitOrderBuyQuantityPriceZeroOrNegative(decimal quantity, decimal price)
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.PlaceLimitOrderBuy(TradingPair.Parse("EOSETH"), quantity, price));
+        }
+
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(-1, 1)]
+        [InlineData(10, 0)]
+        [InlineData(10, -1)]
+        public void PlaceLimitOrderSellQuantityPriceZeroOrNegative(decimal quantity, decimal price)
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.PlaceLimitOrderSell(TradingPair.Parse("EOSETH"), quantity, price));
         }
 
         [Fact]
@@ -63,19 +100,16 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             trading.PlaceFullLimitOrderSell(TradingPair.Parse("BNBBTC"), 5);
         }
 
-        private TradingProvider GetTradingProvider<T>()
-            where T : TradingProviderTestImplementation
+        [Fact]
+        public void PlaceLimitOrderNeverConfirmed()
         {
-            var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
-            var trading = container.TradingProvider;
-            var property = trading.GetType().GetProperty("Implementation", BindingFlags.NonPublic | BindingFlags.Instance)
-                           ?? throw new Exception($"Expected property 'Implementation' on {nameof(TradingProvider)}");
-
-            // Inject test implementation
-            var implementation = Activator.CreateInstance(typeof(T), LoggerFactory, container.TimerProvider);
-            property.SetValue(trading, implementation);
-            return trading;
+            var trading = GetTradingProvider<PlaceLimitOrderNeverConfirmedImplementation>();
+            Assert.Throws<ExchangeTimeoutException>(
+                () => trading.PlaceLimitOrderBuy(TradingPair.Parse("EOSETH"), 10, 1));
         }
+
+        // Classes are instantiated via the Activator
+        #pragma warning disable CA1812
 
         private class PlaceLimitOrderHappyFlowImplementation : TradingProviderTestImplementation
         {
@@ -83,6 +117,8 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
                 : base(loggerFactory, timer)
             {
             }
+
+            protected override List<OrderUpdate> Cache { get; set; }
 
             public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
             {
@@ -108,10 +144,11 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             {
             }
 
+            protected override List<OrderUpdate> Cache { get; set; }
+
             public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
             {
                 var wrongSide = side == OrderSide.Buy ? OrderSide.Sell : OrderSide.Buy;
-
                 var order = new OrderUpdate(
                     0,
                     tradeId,
@@ -133,6 +170,8 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
                 : base(loggerFactory, timer)
             {
             }
+
+            protected override List<OrderUpdate> Cache { get; set; }
 
             public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
             {
@@ -163,6 +202,8 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             {
             }
 
+            protected override List<OrderUpdate> Cache { get; set; }
+
             public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
             {
                 var order = new OrderUpdate(
@@ -180,44 +221,33 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             }
         }
 
-        private abstract class TradingProviderTestImplementation : AbstractTradingProvider
+        private class PlaceLimitOrderNeverConfirmedImplementation : TradingProviderTestImplementation
         {
-            protected TradingProviderTestImplementation(ILoggerFactory loggerFactory, TimerProvider timer)
+            public PlaceLimitOrderNeverConfirmedImplementation(ILoggerFactory loggerFactory, TimerProvider timer)
                 : base(loggerFactory, timer)
             {
-                Cache = new List<OrderUpdate>();
             }
 
-            protected List<OrderUpdate> Cache { get; }
+            protected override List<OrderUpdate> Cache { get; set; }
 
-            public abstract override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId);
-
-            public override ResponseObject<OrderUpdate> ExecuteMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId) => throw new NotImplementedException();
-
-            public override ResponseObject<OrderUpdate> PlaceStoplossOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId) => throw new NotImplementedException();
-
-            public override ResponseObject CancelOrder(TradingPair pair, long orderId) => throw new NotImplementedException();
-
-            public override ResponseObject<OrderUpdate> WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
+            public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
             {
-                foreach (var order in Cache)
-                {
-                    if (order.OrderId == orderId && order.Status == status)
-                    {
-                        return new ResponseObject<OrderUpdate>(order);
-                    }
-                }
+                var order = new OrderUpdate(
+                    0,
+                    tradeId,
+                    OrderUpdate.OrderStatus.New,
+                    OrderUpdate.OrderTypes.Market,
+                    0,
+                    price,
+                    side,
+                    pair,
+                    quantity);
 
-                return new ResponseObject<OrderUpdate>(ResponseCode.Error);
+                // Do not add to cache -> cause timeout.
+                return new ResponseObject<OrderUpdate>(order);
             }
-
-            public override ResponseObject<OrderUpdate> GetOrderInfo(long orderId) => throw new NotImplementedException();
-
-            public override void OnCompleted() => throw new NotImplementedException();
-
-            public override void OnError(Exception error) => throw new NotImplementedException();
-
-            public override void OnNext(long value) => throw new NotImplementedException();
         }
+
+        #pragma warning restore CA1812
     }
 }

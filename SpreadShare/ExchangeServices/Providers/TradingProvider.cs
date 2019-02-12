@@ -103,8 +103,8 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate ExecuteMarketOrderBuy(TradingPair pair, decimal quantity)
         {
-            Guard.Argument(quantity).NotNegative();
             Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(quantity).NotZero().NotNegative();
             var currency = pair.Right;
             var priceEstimate = _dataProvider.GetCurrentPriceTopAsk(pair);
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * priceEstimate, 0));
@@ -135,7 +135,10 @@ namespace SpreadShare.ExchangeServices.Providers
                 throw new OrderRefusedException(result.Message);
             }
 
-            return result.Data;
+            return result.Data
+                .IsBuy()
+                .IsMarket()
+                .IsFilled();
         }
 
         /// <summary>
@@ -147,7 +150,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate ExecuteMarketOrderSell(TradingPair pair, decimal quantity)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
-            Guard.Argument(quantity).NotNegative();
+            Guard.Argument(quantity).NotZero().NotNegative();
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
@@ -166,7 +169,10 @@ namespace SpreadShare.ExchangeServices.Providers
                 throw new OrderRefusedException(result.Message);
             }
 
-            return result.Data;
+            return result.Data
+                .IsSell()
+                .IsMarket()
+                .IsFilled();
         }
 
         /// <summary>
@@ -179,8 +185,8 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
-            Guard.Argument(quantity).NotNegative();
-            Guard.Argument(price).NotNegative();
+            Guard.Argument(quantity).NotZero().NotNegative();
+            Guard.Argument(price).NotZero().NotNegative();
             var currency = pair.Right;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
@@ -198,10 +204,9 @@ namespace SpreadShare.ExchangeServices.Providers
             if (result.Success)
             {
                 var order = WaitForOrderStatus(result.Data.OrderId, OrderUpdate.OrderStatus.New);
-                order.Verify()
-                    .IsLimit()
-                    .IsBuy()
-                    .IsNew();
+                order.IsLimit()
+                     .IsBuy()
+                     .IsNew();
                 _openOrders[result.Data.OrderId] = order;
                 return order;
             }
@@ -219,8 +224,8 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
-            Guard.Argument(quantity).NotNegative();
-            Guard.Argument(price).NotNegative();
+            Guard.Argument(quantity).NotZero().NotNegative();
+            Guard.Argument(price).NotZero().NotNegative();
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
@@ -238,10 +243,9 @@ namespace SpreadShare.ExchangeServices.Providers
             if (result.Success)
             {
                 var order = WaitForOrderStatus(result.Data.OrderId, OrderUpdate.OrderStatus.New);
-                order.Verify()
+                order.IsLimit()
                     .IsSell()
-                    .IsNew()
-                    .IsLimit();
+                    .IsNew();
                 _openOrders[result.Data.OrderId] = order;
                 return order;
             }

@@ -6,6 +6,9 @@ using SpreadShare.Models.Trading;
 
 namespace SpreadShare.Tests.Stubs
 {
+    // Class is instantiated via the Activator
+    #pragma warning disable CA1812
+
     internal class TestPortfolioFetcher : IPortfolioFetcherService
     {
         public ResponseObject<Portfolio> GetPortfolio(Exchange exchange)
@@ -20,4 +23,6 @@ namespace SpreadShare.Tests.Stubs
                 }));
         }
     }
+
+    #pragma warning disable CA1812
 }
