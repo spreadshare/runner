@@ -127,5 +127,24 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
+
+        /// <summary>
+        /// Convert CandleWidth to Binance.Net.KlineInterval enum.
+        /// </summary>
+        /// <param name="width">The width of a candle.</param>
+        /// <returns>Binance.Net.KlineInterval.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Only OneMinute and FiveMinutes are currently available.</exception>
+        public static KlineInterval ToExternal(CandleWidth width)
+        {
+            switch (width)
+            {
+                case CandleWidth.OneMinute:
+                    return KlineInterval.OneMinute;
+                case CandleWidth.FiveMinutes:
+                    return KlineInterval.FiveMinutes;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(width), width, null);
+            }
+        }
     }
 }

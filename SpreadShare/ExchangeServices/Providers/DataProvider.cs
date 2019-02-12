@@ -117,11 +117,12 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">TradingPair.</param>
         /// <param name="numberOfCandles">Number of minute candles to request (>0).</param>
         /// <returns>Array of candles.</returns>
-        public BacktestingCandle[] GetFiveMinuteCandles(TradingPair pair, int numberOfCandles)
+        public BacktestingCandle[] GetCandles(TradingPair pair, int numberOfCandles)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(numberOfCandles).NotZero().NotNegative();
-            var query = HelperMethods.RetryMethod(() => Implementation.GetFiveMinuteCandles(pair, numberOfCandles), _logger);
+            var query = HelperMethods.RetryMethod(
+                () => Implementation.GetCandles(pair, numberOfCandles, Configuration.Instance.CandleWidth), _logger);
             return query.Success
                 ? query.Data.Length == numberOfCandles
                   ? query.Data
@@ -153,7 +154,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     _ => $"{nameof(candlesBack)} has value {candlesBack} which is not a multiple of {nameof(chunks)} ({chunks})");
 
             // Retrieve one extra candle to gain the close.
-            var rawCandles = GetFiveMinuteCandles(pair, candlesBack + 1);
+            var rawCandles = GetCandles(pair, candlesBack + 1);
             var originalCandles = rawCandles.SkipLast(1).ToArray();
 
             // Save oldest candle, whose 'close' value provides the node for the last edge
@@ -215,7 +216,8 @@ namespace SpreadShare.ExchangeServices.Providers
             // Get all candles and compress them {candlesPerInterval} times resulting in {numberOfIntervals} compressed candles.
 
             // Remove the offset
-            var allCandles = GetFiveMinuteCandles(pair, numberOfCandles).Skip(candlesOffset).ToArray();
+            var allCandles = GetCandles(pair, numberOfCandles).Skip(candlesOffset).ToArray();
+
             var candles = DataProviderUtilities.CompressCandles(allCandles, candlesPerInterval);
 
             // Return the average of all closes.
