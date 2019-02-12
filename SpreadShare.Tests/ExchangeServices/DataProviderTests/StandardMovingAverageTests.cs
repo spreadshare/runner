@@ -16,11 +16,11 @@ using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 {
-    public class AverageTrueRangeTests : BaseProviderTests
+    public class StandardMovingAverageTests : BaseProviderTests
     {
-        private readonly DataProvider _data;
+        private DataProvider _data;
 
-        public AverageTrueRangeTests(ITestOutputHelper outputHelper)
+        public StandardMovingAverageTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
             var comms = ServiceProviderSingleton.Instance.ServiceProvider.GetService<BinanceCommunicationsService>();
@@ -31,43 +31,67 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
                            ?? throw new Exception($"Expected property 'Implementation' on {nameof(SpreadShare.ExchangeServices.Providers.DataProvider)}");
 
             // Inject test implementation
-            property.SetValue(_data, new DataProviderElevenCandlesImplementation(LoggerFactory, comms));
+            property.SetValue(_data, new DataProviderTenCandlesImplementation(LoggerFactory, comms));
+        }
+
+        [Theory]
+        [InlineData(0, 5, 2)]
+        [InlineData(1, 2, 5)]
+        public void GetStandardMovingAverageHappyFlow(int id, int candlesPerInterval, int intervals)
+        {
+            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), candlesPerInterval, intervals);
+            var answers = new Dictionary<int, decimal>
+            {
+                { 0, 5.6M },
+                { 1, 6.722M },
+            };
+
+            Assert.Equal(sma, answers[id]);
         }
 
         [Fact]
-        public void AverageTrueRangeHappyFlow()
+        public void GetStandardMovingAverageSingularSegment()
         {
-            var atr = _data.GetAverageTrueRange(TradingPair.Parse("EOSETH"), 10, 2);
-            Assert.Equal(2.75M, atr);
+            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 10, 1);
+            Assert.Equal(5.6M, sma);
         }
 
         [Fact]
-        public void AverageTrueRangeZeroOrNegative()
+        public void GetStandardMovingAverageSingularCandleSegment()
         {
-            var pair = TradingPair.Parse("EOSETH");
-            Assert.Throws<ArgumentOutOfRangeException>(() => _data.GetAverageTrueRange(pair, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => _data.GetAverageTrueRange(pair, -1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => _data.GetAverageTrueRange(pair, 5, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => _data.GetAverageTrueRange(pair, 5, -1));
+            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 1, 1);
+            Assert.Equal(5.6M, sma);
         }
 
         [Fact]
-        public void AverageTrueRangeNull()
+        public void GetStandardMovingAverageOneCandleSegments()
         {
-            Assert.Throws<ArgumentNullException>(() => _data.GetAverageTrueRange(null, 5));
+            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 1, 10);
+            Assert.Equal(6.7482M, sma);
         }
 
         [Fact]
-        public void AverageTrueRangeNotMultiple()
+        public void GetStandardMovingAverageNull()
         {
-            var pair = TradingPair.Parse("EOSETH");
-            Assert.Throws<ArgumentException>(() => _data.GetAverageTrueRange(pair, 10, 6));
-            Assert.Throws<ArgumentException>(() => _data.GetAverageTrueRange(pair, 10, 20));
+            Assert.Throws<ArgumentNullException>(() => _data.GetStandardMovingAverage(null, 2, 10));
         }
 
-        internal class DataProviderElevenCandlesImplementation : AbstractDataProvider
+        [Theory]
+        [InlineData(2, 0)]
+        [InlineData(2, -1)]
+        [InlineData(0, 2)]
+        [InlineData(-1, 2)]
+        public void GetStandardMovingAverageZeroOrNegative(int candlesPerInterval, int intervals)
         {
-            public DataProviderElevenCandlesImplementation(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
+            Assert.Throws<ArgumentOutOfRangeException>(() => _data.GetStandardMovingAverage(
+                TradingPair.Parse("EOSETH"),
+                candlesPerInterval,
+                intervals));
+        }
+
+        private class DataProviderTenCandlesImplementation : AbstractDataProvider
+        {
+            public DataProviderTenCandlesImplementation(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
                 : base(loggerFactory, exchangeCommunications)
             {
             }
@@ -187,17 +211,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
                             low: 5.5M,
                             volume: 4053,
                             tradingPair: "EOSETH"),
-
-                        // #11
-                        new BacktestingCandle(
-                            timestamp: 33000000L,
-                            open: 5.6M,
-                            close: 5.7M,
-                            high: 5.8M,
-                            low: 5.5M,
-                            volume: 24053,
-                            tradingPair: "EOSETH"),
-                    }.Reverse().ToArray());
+                    }.Reverse().Take(limit).ToArray());
             }
         }
     }
