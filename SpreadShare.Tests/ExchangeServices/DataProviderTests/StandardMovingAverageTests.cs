@@ -38,6 +38,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         [InlineData(0, 5, 2, 0)]
         [InlineData(1, 2, 5, 0)]
         [InlineData(2, 1, 5, 5)]
+        [InlineData(3, 2, 3, 3)]
         public void GetStandardMovingAverageHappyFlow(int id, int candlesPerInterval, int intervals, int offset)
         {
             var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), candlesPerInterval, intervals, offset);
@@ -46,6 +47,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
                 { 0, 5.6M },
                 { 1, 6.722M },
                 { 2, 7.1764M },
+                { 3, 7.024M },
             };
 
             Assert.Equal(answers[id], sma);
@@ -57,14 +59,14 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 10, 1);
             Assert.Equal(5.6M, sma);
         }
-        
+
         [Fact]
         public void GetStandardMovingAverageSingularSegmentOffset()
         {
             var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 9, 1, 1);
             Assert.Equal(6.2M, sma);
         }
-        
+
         [Fact]
         public void GetStandardMovingAverageSingularCandleSegment()
         {
