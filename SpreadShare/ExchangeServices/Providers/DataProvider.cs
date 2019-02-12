@@ -32,6 +32,7 @@ namespace SpreadShare.ExchangeServices.Providers
             _logger = factory.CreateLogger(GetType());
         }
 
+        // Setter is used with reflection in the tests.
         private AbstractDataProvider Implementation { get; set; }
 
         /// <summary>
@@ -116,11 +117,12 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">TradingPair.</param>
         /// <param name="numberOfCandles">Number of minute candles to request (>0).</param>
         /// <returns>Array of candles.</returns>
-        public BacktestingCandle[] GetFiveMinuteCandles(TradingPair pair, int numberOfCandles)
+        public BacktestingCandle[] GetCandles(TradingPair pair, int numberOfCandles)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(numberOfCandles).NotZero().NotNegative();
-            var query = HelperMethods.RetryMethod(() => Implementation.GetFiveMinuteCandles(pair, numberOfCandles), _logger);
+            var query = HelperMethods.RetryMethod(
+                () => Implementation.GetCandles(pair, numberOfCandles, Configuration.Instance.CandleWidth), _logger);
             return query.Success
                 ? query.Data.Length == numberOfCandles
                   ? query.Data
@@ -152,7 +154,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     _ => $"{nameof(candlesBack)} has value {candlesBack} which is not a multiple of {nameof(chunks)} ({chunks})");
 
             // Retrieve one extra candle to gain the close.
-            var rawCandles = GetFiveMinuteCandles(pair, candlesBack + 1);
+            var rawCandles = GetCandles(pair, candlesBack + 1);
             var originalCandles = rawCandles.SkipLast(1).ToArray();
 
             // Save oldest candle, whose 'close' value provides the node for the last edge
@@ -193,8 +195,9 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">The pair to calculate the SMA over.</param>
         /// <param name="candlesPerInterval">The number of minutes one interval should last.</param>
         /// <param name="numberOfIntervals">The number of intervals to consider.</param>
+        /// <param name="candlesOffset">How any candles offset should incorporated (into the past).</param>
         /// <returns>The Standard Moving Average.</returns>
-        public decimal GetStandardMovingAverage(TradingPair pair, int candlesPerInterval, int numberOfIntervals)
+        public decimal GetStandardMovingAverage(TradingPair pair, int candlesPerInterval, int numberOfIntervals, int candlesOffset = 0)
         {
             Guard.Argument(pair).NotNull();
             Guard.Argument(candlesPerInterval)
@@ -205,11 +208,16 @@ namespace SpreadShare.ExchangeServices.Providers
                 .NotNegative()
                 .NotZero();
 
+            Guard.Argument(candlesOffset).NotNegative();
+
             // Calculate the total number of five minute candles required.
-            int numberOfCandles = candlesPerInterval * numberOfIntervals;
+            int numberOfCandles = (candlesPerInterval * numberOfIntervals) + candlesOffset;
 
             // Get all candles and compress them {candlesPerInterval} times resulting in {numberOfIntervals} compressed candles.
-            var allCandles = GetFiveMinuteCandles(pair, numberOfCandles);
+
+            // Remove the offset
+            var allCandles = GetCandles(pair, numberOfCandles).Skip(candlesOffset).ToArray();
+
             var candles = DataProviderUtilities.CompressCandles(allCandles, candlesPerInterval);
 
             // Return the average of all closes.

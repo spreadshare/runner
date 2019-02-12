@@ -17,8 +17,11 @@ namespace SpreadShare.SupportServices.Configuration
     internal class Configuration
     {
         public static Configuration Instance;
-        private LazyCache<List<string>, List<Type>> _enabledAlgorithmsConstructor =
+        private readonly LazyCache<List<string>, List<Type>> _enabledAlgorithmsConstructor =
             new LazyCache<List<string>, List<Type>>(z => z.Select(x => Reflections.AllAlgorithms.First(a => a.Name == x)).ToList());
+
+        private readonly LazyCache<string, CandleWidth> _candleWidthConstructor =
+            new LazyCache<string, CandleWidth>(Enum.Parse<CandleWidth>);
 
         [Required]
         public ConnectionStrings ConnectionStrings { get; private set; }
@@ -36,7 +39,14 @@ namespace SpreadShare.SupportServices.Configuration
         [ForAll(typeof(IsImplementation), typeof(IBaseAlgorithm))]
         public List<string> __enabledAlgorithms { get; private set; }
 
+        [YamlMember(Alias = "CandleWidth")]
+        [Required]
+        [ParsesToEnum(typeof(CandleWidth))]
+        public string __candleWidth { get; private set; }
+
         public List<Type> EnabledAlgorithms => _enabledAlgorithmsConstructor.Value(__enabledAlgorithms);
+
+        public CandleWidth CandleWidth => _candleWidthConstructor.Value(__candleWidth);
 
         /// <summary>
         /// Lift the current instance to the static instance.

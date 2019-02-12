@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace SpreadShare.Models.Database
 {
     /// <summary>
@@ -16,7 +14,7 @@ namespace SpreadShare.Models.Database
         /// <param name="high">Highest price during time period.</param>
         /// <param name="low">Lowest price during time period.</param>
         /// <param name="volume">Volume in the time period.</param>
-        /// <param name="tradingPair">Tradingpair of the candle.</param>
+        /// <param name="tradingPair">Trading pair of the candle.</param>
         public BacktestingCandle(long timestamp, decimal open, decimal close, decimal high, decimal low, decimal volume, string tradingPair)
         {
             Timestamp = timestamp;
@@ -31,7 +29,6 @@ namespace SpreadShare.Models.Database
         /// <summary>
         /// Gets or sets the timestamp of the candle.
         /// </summary>
-        [Key]
         public long Timestamp { get; set; }
 
         /// <summary>
@@ -60,7 +57,7 @@ namespace SpreadShare.Models.Database
         public decimal Volume { get; set; }
 
         /// <summary>
-        /// Gets or sets the tradingpair.
+        /// Gets or sets the trading pair.
         /// </summary>
         public string TradingPair { get; set; }
 

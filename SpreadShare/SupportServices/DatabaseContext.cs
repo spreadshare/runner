@@ -33,5 +33,15 @@ namespace SpreadShare.SupportServices
         /// Gets or sets the state switch events.
         /// </summary>
         public DbSet<StateSwitchEvent> StateSwitchEvents { get; set; }
+
+        /// <summary>
+        /// Callback that sets a composite key on <see cref="BacktestingCandle"/>.
+        /// </summary>
+        /// <param name="modelBuilder">Provided model builder.</param>
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<BacktestingCandle>()
+                .HasKey(c => new { c.Timestamp, c.TradingPair });
+        }
     }
 }

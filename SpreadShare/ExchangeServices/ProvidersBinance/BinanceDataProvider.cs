@@ -102,12 +102,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<BacktestingCandle[]> GetFiveMinuteCandles(TradingPair pair, int limit)
+        public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width)
         {
             var client = _communications.Client;
             var response = client.GetKlines(
                 pair.ToString(),
-                KlineInterval.OneMinute,
+                BinanceUtilities.ToExternal(width),
                 DateTime.UtcNow - TimeSpan.FromMinutes(limit),
                 DateTime.UtcNow,
                 limit);
