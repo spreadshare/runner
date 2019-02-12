@@ -1,5 +1,6 @@
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
+using static SpreadShare.Models.Trading.OrderUpdate;
 using OrderSide = SpreadShare.Models.OrderSide;
 
 namespace SpreadShare.Utilities
@@ -10,108 +11,84 @@ namespace SpreadShare.Utilities
     internal static class OrderVerifierExtension
     {
         /// <summary>
-        /// Get an order verifier instance.
+        /// Imposes that an order is buy order.
         /// </summary>
-        /// <param name="order">The order to verify.</param>
-        /// <returns>an order verifier.</returns>
-        public static OrderVerifier Verify(this OrderUpdate order)
-        {
-            return new OrderVerifier(order);
-        }
+        /// <param name="o">The OrderUpdate instance.</param>
+        /// <returns>OrderVerifier.</returns>
+        public static OrderUpdate IsBuy(this OrderUpdate o) => IsSide(o, OrderSide.Buy);
 
         /// <summary>
-        /// Exposes a chain of predicates to impose on an order.
+        /// Impose that an order is a sell order.
         /// </summary>
-        internal class OrderVerifier
-        {
-            private OrderUpdate _order;
+        /// <returns>OrderVerifier.</returns>
+        /// <param name="o">The OrderUpdate instance.</param>
+        public static OrderUpdate IsSell(this OrderUpdate o) => IsSide(o, OrderSide.Sell);
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="OrderVerifier"/> class.
-            /// </summary>
-            /// <param name="order">The order to verify.</param>
-            public OrderVerifier(OrderUpdate order)
-            {
-                _order = order;
-            }
+        /// <summary>
+        /// Impose that an order has status new.
+        /// </summary>
+        /// <returns>OrderVerifier.</returns>
+        /// <param name="o">The OrderUpdate instance.</param>
+        public static OrderUpdate IsNew(this OrderUpdate o) => HasStatus(o, OrderStatus.New);
 
-            /// <summary>
-            /// Imposes that an order is buy order.
-            /// </summary>
-            /// <returns>OrderVerifier.</returns>
-            public OrderVerifier IsBuy() => IsSide(OrderSide.Buy);
+        /// <summary>
+        /// Impose that an order has status filled.
+        /// </summary>
+        /// <param name="o">The OrderUpdate instance.</param>
+        /// <returns>OrderVerifier.</returns>
+        public static OrderUpdate IsFilled(this OrderUpdate o) => HasStatus(o, OrderStatus.Filled);
 
-            /// <summary>
-            /// Impose that an order is a sell order.
-            /// </summary>
-            /// <returns>OrderVerifier.</returns>
-            public OrderVerifier IsSell() => IsSide(OrderSide.Sell);
+        /// <summary>
+        /// Impose that an order has status cancelled.
+        /// </summary>
+        /// <param name="o">The OrderUpdate instance.</param>
+        /// <returns>OrderVerifier.</returns>
+        public static OrderUpdate IsCancelled(this OrderUpdate o) => HasStatus(o, OrderStatus.Cancelled);
 
-            /// <summary>
-            /// Impose that an order has status new.
-            /// </summary>
-            /// <returns>OrderVerifier.</returns>
-            public OrderVerifier IsNew() => HasStatus(OrderUpdate.OrderStatus.New);
+        /// <summary>
+        /// Imposes that an order has type limit.
+        /// </summary>
+        /// <param name="o">The OrderUpdate instance.</param>
+        /// <returns>OrderVerifier.</returns>
+        public static OrderUpdate IsMarket(this OrderUpdate o) => IsType(o, OrderTypes.Market);
 
-            /// <summary>
-            /// Impose that an order has status filled.
-            /// </summary>
-            /// <returns>OrderVerifier.</returns>
-            public OrderVerifier IsFilled() => HasStatus(OrderUpdate.OrderStatus.Filled);
+        /// <summary>
+        /// Imposes that an order has type limit.
+        /// </summary>
+        /// <param name="o">The OrderUpdate instance.</param>
+        /// <returns>OrderVerifier.</returns>
+        public static OrderUpdate IsStopLoss(this OrderUpdate o) => IsType(o, OrderTypes.StopLoss);
 
-            /// <summary>
-            /// Impose that an order has status cancelled.
-            /// </summary>
-            /// <returns>OrderVerifier.</returns>
-            public OrderVerifier IsCancelled() => HasStatus(OrderUpdate.OrderStatus.Cancelled);
+        /// <summary>
+        /// Imposes that an order has type limit.
+        /// </summary>
+        /// <param name="o">The OrderUpdate instance.</param>
+        /// <returns>OrderVerifier.</returns>
+        public static OrderUpdate IsStopLossLimit(this OrderUpdate o) => IsType(o, OrderTypes.StopLossLimit);
 
-            /// <summary>
-            /// Imposes that an order has type limit.
-            /// </summary>
-            /// <returns>OrderVerifier.</returns>
-            public OrderVerifier IsMarket() => IsType(OrderUpdate.OrderTypes.Market);
+        /// <summary>
+        /// Imposes that an order has type limit.
+        /// </summary>
+        /// <param name="o">The OrderUpdate instance.</param>
+        /// <returns>OrderVerifier.</returns>
+        public static OrderUpdate IsLimit(this OrderUpdate o) => IsType(o, OrderTypes.Limit);
 
-            /// <summary>
-            /// Imposes that an order has type limit.
-            /// </summary>
-            /// <returns>OrderVerifier.</returns>
-            public OrderVerifier IsStopLoss() => IsType(OrderUpdate.OrderTypes.StopLoss);
+        private static OrderUpdate IsSide(this OrderUpdate order, OrderSide side)
+            => order.Side == side
+                ? order
+                : throw new UnexpectedOrderSideException(
+                    $"Order {order.OrderId} has unexpected side, expected {side}, got {order.Side}");
 
-            /// <summary>
-            /// Imposes that an order has type limit.
-            /// </summary>
-            /// <returns>OrderVerifier.</returns>
-            public OrderVerifier IsStopLossLimit() => IsType(OrderUpdate.OrderTypes.StopLossLimit);
+        private static OrderUpdate IsType(this OrderUpdate order, OrderTypes orderType)
+            => order.OrderType == orderType
+                ? order
+                : throw new UnexpectedOrderTypeException(
+                    $"Order {order.OrderId} has unexpect order type, expected {orderType} got {order.OrderType}");
 
-            /// <summary>
-            /// Imposes that an order has type limit.
-            /// </summary>
-            /// <returns>OrderVerifier.</returns>
-            public OrderVerifier IsLimit() => IsType(OrderUpdate.OrderTypes.Limit);
-
-            private OrderVerifier IsType(OrderUpdate.OrderTypes orderType)
-            {
-                return _order.OrderType == orderType
-                    ? this
-                    : throw new UnexpectedOrderTypeException(
-                        $"Order {_order.OrderId} has unexpect order type, expected {orderType} got {_order.OrderType}");
-            }
-
-            private OrderVerifier HasStatus(OrderUpdate.OrderStatus status)
-            {
-                return _order.Status == status
-                    ? this
-                    : throw new UnexpectedOrderStatusException(
-                        $"Order {_order.OrderId} has unexpected status, expected {status} got {_order.Status}");
-            }
-
-            private OrderVerifier IsSide(OrderSide side)
-            {
-                return _order.Side == side
-                    ? this
-                    : throw new UnexpectedOrderSideException(
-                        $"Order {_order.OrderId} has unexpected side, expected {side}, got {_order.Side}");
-            }
-        }
+        private static OrderUpdate HasStatus(this OrderUpdate order, OrderStatus status)
+            => order.Status == status
+                ? order
+                : throw new UnexpectedOrderStatusException(
+                    $"Order {order.OrderId} has unexpected status, expected {status} got {order.Status}");
     }
 }
