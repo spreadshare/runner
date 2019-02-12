@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms.Implementations;
@@ -17,6 +16,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
 {
     public class AllocationManagerTests : BaseTest
     {
+        private const string ObscureCoin = "SNGLS";
         private readonly IPortfolioFetcherService _fetcher;
         private readonly BacktestCommunicationService _comms;
 
@@ -27,9 +27,6 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             _fetcher = serviceProvider.GetService<IPortfolioFetcherService>();
             _comms = serviceProvider.GetService<BacktestCommunicationService>();
         }
-
-        private static IEnumerable<Balance> SortedSettingsBalances =>
-            Configuration.Instance.BacktestSettings.Portfolio.AllBalances().OrderByDescending(x => x.Free);
 
         [Fact]
         public void ConstructorHappyFlow()
@@ -86,7 +83,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                 },
             });
 
-            Currency c = new Currency("ETH");
+            Currency c = new Currency(ObscureCoin);
             var local = Configuration.Instance.BacktestSettings.Portfolio.GetAllocation(c);
             var amount = alloc.GetAvailableFunds(Exchange.Backtesting, typeof(TemplateAlgorithm), c);
             Assert.Equal(local.Free * factor, amount.Free);
@@ -218,7 +215,6 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
             var funds = alloc.GetAllFunds();
             Assert.NotNull(funds);
-            Assert.Equal(SortedSettingsBalances.Count(), funds.AllBalances().Count());
         }
 
         [Fact]
@@ -250,13 +246,13 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                 },
             });
 
-            // Free up at least 10 ETH
+            // Free up at least 10 SNGLS (ObscureCoin)
             alloc.UpdateAllocation(
                 Exchange.Backtesting,
                 typeof(TemplateAlgorithm),
                 new TradeExecution(
-                    Balance.Empty(new Currency("ETH")),
-                    new Balance(new Currency("ETH"), 10, 0)));
+                    Balance.Empty(new Currency(ObscureCoin)),
+                    new Balance(new Currency(ObscureCoin), 10, 0)));
             return alloc;
         }
     }

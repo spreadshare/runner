@@ -32,6 +32,7 @@ namespace SpreadShare.ExchangeServices.Providers
             _logger = factory.CreateLogger(GetType());
         }
 
+        // Setter is used with reflection in the tests.
         private AbstractDataProvider Implementation { get; set; }
 
         /// <summary>

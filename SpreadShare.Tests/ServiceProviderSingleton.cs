@@ -1,7 +1,10 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
+using SpreadShare.Tests.Stubs;
 
 namespace SpreadShare.Tests
 {
@@ -29,6 +32,11 @@ namespace SpreadShare.Tests
             Startup startup = new Startup("appsettings.yaml");
             startup.ConfigureServices(services);
             Startup.ConfigureBusinessServices(services);
+
+            services.Replace(new ServiceDescriptor(
+                typeof(IPortfolioFetcherService),
+                typeof(TestPortfolioFetcher),
+                ServiceLifetime.Transient));
 
             // Create service provider
             ServiceProvider = services.BuildServiceProvider();
