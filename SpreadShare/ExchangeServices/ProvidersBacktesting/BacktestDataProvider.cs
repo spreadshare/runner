@@ -70,7 +70,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject<BacktestingCandle[]> GetFiveMinuteCandles(TradingPair pair, int limit)
         {
-            throw new NotImplementedException();
+            var time = _timer.CurrentTime;
+            var result = new BacktestingCandle[limit];
+            for (int i = 0; i < limit; i++)
+            {
+                result[i] = FindCandle(pair, time.ToUnixTimeMilliseconds());
+                time -= TimeSpan.FromMinutes(5);
+            }
+
+            return new ResponseObject<BacktestingCandle[]>(result);
         }
 
         /// <inheritdoc />
@@ -143,7 +151,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 Logger.LogCritical($"Done building the buffer for {pair}");
             }
 
-            long index = (timestamp - _buffers[pair.ToString()][0].Timestamp) / 60000L;
+            // Minus one to prevent reading candles whose close is in the future.
+            long index = ((timestamp - _buffers[pair.ToString()][0].Timestamp) / 60000L) - 1;
             if (index < 0)
             {
                 Logger.LogError("Got request for a candle that exists before the scope of available data," +
