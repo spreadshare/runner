@@ -14,6 +14,7 @@ using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.BacktestDaemon;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.ErrorServices;
+using SpreadShare.Utilities;
 using YamlDotNet.Serialization;
 
 namespace SpreadShare

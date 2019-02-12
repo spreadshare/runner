@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CSharpx;
 using Dawn;
+using Microsoft.EntityFrameworkCore;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices;
 
-namespace SpreadShare.SupportServices.Configuration
+namespace SpreadShare.Utilities
 {
     /// <summary>
-    /// Utilities service for database metaqueries.
+    /// Utilities service for database meta-queries.
     /// </summary>
     internal class DatabaseUtilities
     {
@@ -87,6 +90,29 @@ namespace SpreadShare.SupportServices.Configuration
             }
 
             return (minBeginVal, minEndVal);
+        }
+
+        /// <summary>
+        /// Check if the database candles for a certain pair match an interval.
+        /// </summary>
+        /// <param name="pair">TradingPair.</param>
+        /// <param name="check">The expected width of a candle.</param>
+        /// <returns>Whether the database candles intervals matched the given CandleWidth.</returns>
+        public bool ValidateCandleWidth(TradingPair pair, CandleWidth check)
+        {
+            Guard.Argument(pair).NotNull();
+
+            int width = TimeSpan.FromMinutes((int)check).Milliseconds;
+
+            // Take a small sample of candles.
+            var sample = _databaseContext.Candles.AsNoTracking()
+                .Where(x => x.TradingPair == pair.ToString())
+                .OrderBy(x => x.Timestamp).Take(10);
+
+            // Check if the the difference in timestamps matches the given check.
+            return sample.AsEnumerable()
+                .Pairwise((a, b) => b.Timestamp - a.Timestamp == width)
+                .All(x => x);
         }
     }
 }
