@@ -111,7 +111,7 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Get a certain number of minute candles.
+        /// Get a certain number of minute candles ordered from present -> past.
         /// </summary>
         /// <param name="pair">TradingPair.</param>
         /// <param name="numberOfCandles">Number of minute candles to request (>0).</param>
@@ -155,8 +155,8 @@ namespace SpreadShare.ExchangeServices.Providers
             var rawCandles = GetFiveMinuteCandles(pair, candlesBack + 1);
             var originalCandles = rawCandles.SkipLast(1).ToArray();
 
-            // Save close candles
-            var closeCandle = rawCandles.Last();
+            // Save oldest candle, whose 'close' value provides the node for the last edge
+            var edgeCandle = rawCandles.Last();
 
             int compressionRatio = candlesBack / chunks;
 
@@ -165,19 +165,19 @@ namespace SpreadShare.ExchangeServices.Providers
 
             var trueRanges = new decimal[candles.Length];
 
-            // Calculate maximum of edges over the series (closeCandle -> chunk[0] -> chunk[1] ... -> chunk[n])
-            for (int i = candles.Length - 1; i >= 0; i--)
+            // Calculate maximum of three edge features over the series (chunk[0] -> chunk[1] ... -> chunk[n] -> edgeCandle)
+            for (int i = 0; i < candles.Length; i++)
             {
                 decimal highLow = Math.Abs(candles[i].High - candles[i].Low);
 
-                // Edge case for first iteration
+                // Edge case for last iteration
                 decimal highPreviousClose = i == candles.Length - 1
-                    ? Math.Abs(candles[i].High - closeCandle.Close)
+                    ? Math.Abs(candles[i].High - edgeCandle.Close)
                     : Math.Abs(candles[i].High - candles[i + 1].Close);
 
-                // Edge case for the first iteration
+                // Edge case for the last iteration
                 decimal lowPreviousClose = i == candles.Length - 1
-                    ? Math.Abs(candles[i].Low - closeCandle.Close)
+                    ? Math.Abs(candles[i].Low - edgeCandle.Close)
                     : Math.Abs(candles[i].Low - candles[i + 1].Close);
 
                 trueRanges[i] = new[] { highLow, highPreviousClose, lowPreviousClose }.Max();
