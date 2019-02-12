@@ -37,7 +37,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _timer = timerProvider;
 
             // Calculate once.
-            _millisecondsCandleWidth = TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth).Milliseconds;
+            _millisecondsCandleWidth = (int)TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth).TotalMilliseconds;
             if (_buffers == null)
             {
                 _buffers = new Dictionary<string, BacktestingCandle[]>();

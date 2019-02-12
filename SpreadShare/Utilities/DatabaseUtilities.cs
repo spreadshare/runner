@@ -102,7 +102,7 @@ namespace SpreadShare.Utilities
         {
             Guard.Argument(pair).NotNull();
 
-            int width = TimeSpan.FromMinutes((int)check).Milliseconds;
+            int width = (int)TimeSpan.FromMinutes((int)check).TotalMilliseconds;
 
             // Take a small sample of candles.
             var sample = _databaseContext.Candles.AsNoTracking()
