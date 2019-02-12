@@ -35,18 +35,20 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         }
 
         [Theory]
-        [InlineData(0, 5, 2)]
-        [InlineData(1, 2, 5)]
-        public void GetStandardMovingAverageHappyFlow(int id, int candlesPerInterval, int intervals)
+        [InlineData(0, 5, 2, 0)]
+        [InlineData(1, 2, 5, 0)]
+        [InlineData(2, 1, 5, 5)]
+        public void GetStandardMovingAverageHappyFlow(int id, int candlesPerInterval, int intervals, int offset)
         {
-            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), candlesPerInterval, intervals);
+            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), candlesPerInterval, intervals, offset);
             var answers = new Dictionary<int, decimal>
             {
                 { 0, 5.6M },
                 { 1, 6.722M },
+                { 2, 7.1764M },
             };
 
-            Assert.Equal(sma, answers[id]);
+            Assert.Equal(answers[id], sma);
         }
 
         [Fact]
@@ -55,12 +57,26 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 10, 1);
             Assert.Equal(5.6M, sma);
         }
-
+        
+        [Fact]
+        public void GetStandardMovingAverageSingularSegmentOffset()
+        {
+            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 9, 1, 1);
+            Assert.Equal(6.2M, sma);
+        }
+        
         [Fact]
         public void GetStandardMovingAverageSingularCandleSegment()
         {
             var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 1, 1);
             Assert.Equal(5.6M, sma);
+        }
+
+        [Fact]
+        public void GetStandardMovingAverageSingularCandleSegmentOffset()
+        {
+            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 1, 1, 2);
+            Assert.Equal(6.9M, sma);
         }
 
         [Fact]
@@ -77,16 +93,18 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         }
 
         [Theory]
-        [InlineData(2, 0)]
-        [InlineData(2, -1)]
-        [InlineData(0, 2)]
-        [InlineData(-1, 2)]
-        public void GetStandardMovingAverageZeroOrNegative(int candlesPerInterval, int intervals)
+        [InlineData(2, 0, 0)]
+        [InlineData(2, -1, 0)]
+        [InlineData(0, 2, 0)]
+        [InlineData(-1, 2, 0)]
+        [InlineData(1, 10, -1)]
+        public void GetStandardMovingAverageZeroOrNegative(int candlesPerInterval, int intervals, int offset)
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => _data.GetStandardMovingAverage(
                 TradingPair.Parse("EOSETH"),
                 candlesPerInterval,
-                intervals));
+                intervals,
+                offset));
         }
 
         private class DataProviderTenCandlesImplementation : AbstractDataProvider
