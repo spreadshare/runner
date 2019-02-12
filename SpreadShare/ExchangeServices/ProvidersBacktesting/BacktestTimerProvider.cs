@@ -71,7 +71,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             DateTimeOffset start = DateTimeOffset.Now;
             while (CurrentTime < EndTime)
             {
-                _currentTime += TimeSpan.FromMinutes(1);
+                _currentTime += TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth);
                 UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
             }
 

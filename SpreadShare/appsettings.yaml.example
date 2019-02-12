@@ -19,3 +19,5 @@ BacktestSettings:
   BeginTimeStamp: 10
   EndTimeStamp: 10
   OutputFolder: ./backtesting_output
+  
+CandleWidth: FiveMinutes
