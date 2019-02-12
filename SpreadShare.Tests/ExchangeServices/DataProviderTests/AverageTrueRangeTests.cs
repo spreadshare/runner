@@ -82,7 +82,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
             public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack) => throw new NotImplementedException();
 
-            public override ResponseObject<BacktestingCandle[]> GetFiveMinuteCandles(TradingPair pair, int limit)
+            public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width)
             {
                 // This array is reversed before it is returned.
                 return new ResponseObject<BacktestingCandle[]>(

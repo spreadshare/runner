@@ -55,6 +55,17 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
 
             if (_configuration.Exchange == Exchange.Backtesting)
             {
+                foreach (var pair in _configuration.TradingPairs)
+                {
+                    if (!DatabaseUtilities.Instance.ValidateCandleWidth(
+                        pair,
+                        Configuration.Configuration.Instance.CandleWidth))
+                    {
+                        throw new InvalidConfigurationException(
+                            $"Database candle interval for {pair} is not compatible with {Configuration.Configuration.Instance.CandleWidth}");
+                    }
+                }
+
                 var (begin, end) = DatabaseUtilities.Instance.GetTimeStampEdges(_configuration.TradingPairs);
                 Configuration.Configuration.Instance.BacktestSettings.BeginTimeStamp = begin;
                 Configuration.Configuration.Instance.BacktestSettings.EndTimeStamp = end;
