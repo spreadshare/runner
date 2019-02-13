@@ -36,7 +36,7 @@ namespace SpreadShare.Algorithms.Implementations
             public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Get the highest high from the last X hours
-                decimal topLongTermPrice = data.GetFiveMinuteCandles(
+                decimal topLongTermPrice = data.GetCandles(
                     AlgorithmConfiguration.TradingPairs.First(),
                     AlgorithmConfiguration.LongTermTime * 12).Max(x => x.High);
 
@@ -80,7 +80,7 @@ namespace SpreadShare.Algorithms.Implementations
             public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Get the lowest low from the last y hours
-                decimal botShortTermPrice = data.GetFiveMinuteCandles(
+                decimal botShortTermPrice = data.GetCandles(
                     AlgorithmConfiguration.TradingPairs.First(),
                     AlgorithmConfiguration.ShortTermTime * 12).Min(x => x.Low);
 
