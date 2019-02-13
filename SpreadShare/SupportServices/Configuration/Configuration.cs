@@ -102,12 +102,6 @@ namespace SpreadShare.SupportServices.Configuration
                         new Balance(new Currency(kv.Key), kv.Value, 0M))) // decimal -> balance
                     .ToDictionary(k => k.Item1, k => k.Item2)));
 
-        [Range(1, long.MaxValue)]
-        public long BeginTimeStamp { get; set; }
-
-        [Range(1, long.MaxValue)]
-        public long EndTimeStamp { get; set; }
-
         [Required]
         public string OutputFolder { get; private set; }
 

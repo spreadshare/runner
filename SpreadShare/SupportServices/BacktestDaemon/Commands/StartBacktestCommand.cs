@@ -67,8 +67,8 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                 }
 
                 var (begin, end) = DatabaseUtilities.Instance.GetTimeStampEdges(_configuration.TradingPairs);
-                Configuration.Configuration.Instance.BacktestSettings.BeginTimeStamp = begin;
-                Configuration.Configuration.Instance.BacktestSettings.EndTimeStamp = end;
+                BacktestDaemonService.Instance.State.BeginTimeStamp = begin;
+                BacktestDaemonService.Instance.State.BeginTimeStamp = end;
                 Program.CommandLineArgs.BacktestOutputPath = _args.OutputPath;
             }
         }
@@ -77,10 +77,10 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
         public override void Execute(BacktestDaemonState state)
         {
             var startStr = DateTimeOffset
-                .FromUnixTimeMilliseconds(Configuration.Configuration.Instance.BacktestSettings.BeginTimeStamp)
+                .FromUnixTimeMilliseconds(BacktestDaemonService.Instance.State.BeginTimeStamp)
                 .ToString(CultureInfo.InvariantCulture);
             var endStr = DateTimeOffset
-                .FromUnixTimeMilliseconds(Configuration.Configuration.Instance.BacktestSettings.EndTimeStamp)
+                .FromUnixTimeMilliseconds(BacktestDaemonService.Instance.State.EndTimeStamp)
                 .ToString(CultureInfo.InvariantCulture);
 
             Console.WriteLine($"Starting backtest for {_algo.Name} from {startStr} to {endStr}");

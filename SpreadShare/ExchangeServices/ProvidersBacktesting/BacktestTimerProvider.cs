@@ -29,9 +29,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _database = database;
-            BeginTime = DateTimeOffset.FromUnixTimeMilliseconds(settings.BeginTimeStamp) + TimeSpan.FromHours(48);
+
+            // Hardcoded 2 week offset
+            BeginTime = DateTimeOffset.FromUnixTimeMilliseconds(
+                BacktestDaemonService.Instance.State.BeginTimeStamp) + TimeSpan.FromDays(14);
             _currentTime = BeginTime;
-            EndTime = DateTimeOffset.FromUnixTimeMilliseconds(settings.EndTimeStamp);
+            EndTime = DateTimeOffset.FromUnixTimeMilliseconds(
+                BacktestDaemonService.Instance.State.EndTimeStamp);
             _outputFolder = settings.OutputFolder;
         }
 
