@@ -1,7 +1,7 @@
 using System;
 using SpreadShare.Utilities;
 
-namespace SpreadShare.Models.Exceptions
+namespace SpreadShare.Models.Exceptions.OrderExceptions
 {
     /// <summary>
     /// Exception thrown when a trade is refused the allocation manager.

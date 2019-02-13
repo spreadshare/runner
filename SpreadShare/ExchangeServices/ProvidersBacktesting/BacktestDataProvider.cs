@@ -9,6 +9,7 @@ using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
@@ -20,6 +21,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private static Dictionary<string, BacktestingCandle[]> _buffers;
         private readonly BacktestTimerProvider _timer;
         private readonly DatabaseContext _database;
+        private readonly int _millisecondsCandleWidth;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestDataProvider"/> class.
@@ -33,6 +35,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             _database = database;
             _timer = timerProvider;
+
+            // Calculate once.
+            _millisecondsCandleWidth = (int)TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth).TotalMilliseconds;
             if (_buffers == null)
             {
                 _buffers = new Dictionary<string, BacktestingCandle[]>();
@@ -68,7 +73,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<BacktestingCandle[]> GetFiveMinuteCandles(TradingPair pair, int limit)
+        public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width)
         {
             var time = _timer.CurrentTime;
             var result = new BacktestingCandle[limit];
@@ -152,7 +157,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             }
 
             // Minus one to prevent reading candles whose close is in the future.
-            long index = ((timestamp - _buffers[pair.ToString()][0].Timestamp) / 60000L) - 1;
+            long index = ((timestamp - _buffers[pair.ToString()][0].Timestamp) / _millisecondsCandleWidth) - 1;
             if (index < 0)
             {
                 Logger.LogError("Got request for a candle that exists before the scope of available data," +

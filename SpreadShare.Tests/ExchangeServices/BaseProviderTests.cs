@@ -1,7 +1,10 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
+using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.SupportServices.Configuration;
 using Xunit.Abstractions;
 using YamlDotNet.Serialization;
@@ -20,10 +23,13 @@ namespace SpreadShare.Tests.ExchangeServices
 
         private const string AlgorithmSettingsSource =
         @"
-           Exchange: Binance   
+           Exchange: Binance
            TradingPairs: [ EOSETH ]
            BaseCurrency: ETH
         ";
+
+        private static bool _configured;
+        private static object _lock = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseProviderTests"/> class.
@@ -37,6 +43,27 @@ namespace SpreadShare.Tests.ExchangeServices
             AlgorithmConfiguration = new DeserializerBuilder().Build()
                     .Deserialize<TemplateAlgorithmConfiguration>(new StringReader(AlgorithmSettingsSource));
             ConfigurationValidator.ValidateConstraintsRecursively(AlgorithmConfiguration);
+
+            // Ensure that the allocation manager is only configured once,
+            // Tests are run concurrently so the lock is required.
+            lock (_lock)
+            {
+                if (!_configured)
+                {
+                    var alloc = serviceProvider.GetService<AllocationManager>();
+                    alloc.SetInitialConfiguration(
+                        new Dictionary<Exchange, Dictionary<Type, decimal>>
+                        {
+                            {
+                                Exchange.Binance, new Dictionary<Type, decimal>
+                                {
+                                    { typeof(TemplateAlgorithm), 1M },
+                                }
+                            },
+                        });
+                    _configured = true;
+                }
+            }
         }
 
         internal TemplateAlgorithmConfiguration AlgorithmConfiguration { get; }
