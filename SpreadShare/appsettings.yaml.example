@@ -24,10 +24,10 @@ BacktestSettings:
     ETH: 10
 
   # Indicates the start period of a backtest
-  BeginTimeStamp: 0
+  BeginTimeStamp: 1
 
   # Indicates the end period of a backtest
-  EndTimeStamp: 0
+  EndTimeStamp: 1
 
   # Standard folder to place results in
   OutputFolder: ./backtesting_output
