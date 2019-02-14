@@ -68,8 +68,12 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
 
                 var (begin, end) = DatabaseUtilities.Instance.GetTimeStampEdges(_configuration.TradingPairs);
                 BacktestDaemonService.Instance.State.BeginTimeStamp = begin;
-                BacktestDaemonService.Instance.State.BeginTimeStamp = end;
+                BacktestDaemonService.Instance.State.EndTimeStamp = end;
                 Program.CommandLineArgs.BacktestOutputPath = _args.OutputPath;
+            }
+            else
+            {
+                throw new InvalidCommandException("Non backtesting algorithms are currently not deployable from the CLI");
             }
         }
 
@@ -103,11 +107,18 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                 },
             });
 
+            // Backtests are run synchronously by design.
             var result = state.AlgorithmService.StartAlgorithm(_algo, _configuration);
 
-            if (!result.Success)
+            if (result.Success)
             {
-                Console.WriteLine($"Cannot start algorithm -> {result.Message}");
+                // Notify third party applications that the backtest with their id has finished.
+                Console.WriteLine($"BACKTEST_FINISHED={BacktestDaemonService.Instance.State.CurrentBacktestID}");
+            }
+            else
+            {
+                Console.WriteLine($"Algorithm Execution failed -> {result.Message}");
+                Console.WriteLine($"BACKTEST_FAILED={BacktestDaemonService.Instance.State.CurrentBacktestID}");
             }
         }
     }

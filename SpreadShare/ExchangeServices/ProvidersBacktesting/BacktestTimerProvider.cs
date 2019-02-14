@@ -59,6 +59,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         public bool Finished { get; private set; }
 
+        /// <summary>
+        /// Gets or set a tuple indicating that there was an error and a message.
+        /// </summary>
+        public (bool, Exception) ErrorRegister { get; private set; }
+
         /// <inheritdoc />
         public override async void RunPeriodicTimer()
         {
@@ -75,8 +80,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             DateTimeOffset start = DateTimeOffset.Now;
             while (CurrentTime < EndTime)
             {
-                _currentTime += TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth);
-                UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
+                try
+                {
+                    _currentTime += TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth);
+                    UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
+                }
+                catch (Exception e)
+                {
+                    ErrorRegister = (true, e);
+                    Finished = true;
+                    return;
+                }
             }
 
             _logger.LogCritical($"STOP THE TIMERS! Backtest took {(DateTimeOffset.Now - start).TotalMilliseconds}ms");
@@ -87,9 +101,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Output to database
             var outputLogger = new BacktestOutputLogger(_database, this, _outputFolder);
             outputLogger.Output();
-
-            // Notify third party applications that the backtest with their id has finished.
-            _logger.LogCritical($"BACKTEST_FINISHED={BacktestDaemonService.Instance.State.CurrentBacktestID}");
 
             // Declare completion (hands over control back to CLI)
             Finished = true;
