@@ -102,7 +102,7 @@ namespace SpreadShare.Algorithms.Implementations
                     AlgorithmConfiguration.ShortTermTime * 12).Min(x => x.Low);
 
                 // If the shortLongTermPrice gets broken, we sell into the expected trend change
-                if (data.GetCurrentPriceLastTrade(AlgorithmConfiguration.TradingPairs.First()) <= botShortTermPrice)
+                if (_stoploss.SetPrice < botShortTermPrice)
                 {
                     return new ReplaceStoplossState(_stoploss, botShortTermPrice);
                 }
