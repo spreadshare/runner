@@ -1,23 +1,30 @@
+# Defines connection strings to the database
 ConnectionStrings:
   LocalConnection: Server=db;Database=spreadshare;User ID=postgres;Password=password;Integrated Security=true;Pooling=true;
 
 LoggingSettings:
-  SentryDSN: null # Format: https://XX@sentry.io/XX
+  # Report errors to Sentry (https://XX@sentry.io/XX)
+  SentryDSN: null
 
+# Trading: Which algorithms should be ran
 EnabledAlgorithms:
   - TemplateAlgorithm
 
+# Trading: Settings for communication with Binance
 BinanceClientSettings:
+  # Specify the number of milliseconds the request is valid for after sending
   ReceiveWindow: 5000
   Credentials:
     Key: api_key
     Secret: api_secret
 
 BacktestSettings:
+  # Defines what currencies are present in the portfolio. Format: 'ETH: 10'
   Portfolio:
     ETH: 10
-  BeginTimeStamp: 10
-  EndTimeStamp: 10
+
+  # Standard folder to place results in
   OutputFolder: ./backtesting_output
-  
+
+# Indicate the timespan of a candle used. In backtesting this should be equal to the candle timespan in the database
 CandleWidth: FiveMinutes

@@ -56,55 +56,37 @@ namespace SpreadShare.Algorithms.Implementations
 
         private class BuyState : State<MidTermTurtleConfiguration>
         {
-            private OrderUpdate buyorder;
+            private OrderUpdate _stoploss;
 
-            public override State<MidTermTurtleConfiguration> OnOrderUpdate(OrderUpdate order)
-            {
-                if (order.OrderId == buyorder.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
-                {
-                    return new InTradeState();
-                }
-
-                return new NothingState<MidTermTurtleConfiguration>();
-            }
+            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
+                => new InTradeState(_stoploss);
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 // If the long term top is broken, we buy at market, and move into the waiting state
-                buyorder = trading.ExecuteFullMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First());
+                trading.ExecuteFullMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First());
+
+                // Get the lowest low from the last y hours
+                decimal botShortTermPrice = data.GetCandles(
+                    AlgorithmConfiguration.TradingPairs.First(),
+                    AlgorithmConfiguration.ShortTermTime * 12).Min(x => x.Low);
+                _stoploss = trading.PlaceFullStoplossSell(AlgorithmConfiguration.TradingPairs.First(), botShortTermPrice);
+                SetTimer(TimeSpan.Zero);
             }
         }
 
         private class InTradeState : State<MidTermTurtleConfiguration>
         {
-            public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
+            private OrderUpdate _stoploss;
+
+            public InTradeState(OrderUpdate stoploss)
             {
-                // Get the lowest low from the last y hours
-                decimal botShortTermPrice = data.GetCandles(
-                    AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.ShortTermTime * 12).Min(x => x.Low);
-
-                // If the shortLongTermPrice gets broken, we sell into the expected trend change
-                if (data.GetCurrentPriceLastTrade(AlgorithmConfiguration.TradingPairs.First()) <= botShortTermPrice)
-                {
-                    return new SellState();
-                }
-
-                return new NothingState<MidTermTurtleConfiguration>();
+                _stoploss = stoploss;
             }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-            }
-        }
-
-        private class SellState : State<MidTermTurtleConfiguration>
-        {
-            private OrderUpdate sellorder;
 
             public override State<MidTermTurtleConfiguration> OnOrderUpdate(OrderUpdate order)
             {
-                if (order.OrderId == sellorder.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                if (order.OrderId == _stoploss.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return new EntryState();
                 }
@@ -112,9 +94,46 @@ namespace SpreadShare.Algorithms.Implementations
                 return new NothingState<MidTermTurtleConfiguration>();
             }
 
+            public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
+            {
+                decimal botShortTermPrice = data.GetCandles(
+                    AlgorithmConfiguration.TradingPairs.First(),
+                    AlgorithmConfiguration.ShortTermTime * 12).Min(x => x.Low);
+
+                // If the shortLongTermPrice gets broken, we sell into the expected trend change
+                if (_stoploss.SetPrice < botShortTermPrice)
+                {
+                    return new ReplaceStoplossState(_stoploss, botShortTermPrice);
+                }
+
+                return new NothingState<MidTermTurtleConfiguration>();
+            }
+
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                sellorder = trading.ExecuteFullMarketOrderSell(AlgorithmConfiguration.TradingPairs.First());
+            }
+        }
+
+        private class ReplaceStoplossState : State<MidTermTurtleConfiguration>
+        {
+            private OrderUpdate _stoploss;
+            private OrderUpdate _newStoploss;
+            private decimal _price;
+
+            public ReplaceStoplossState(OrderUpdate stoploss, decimal newPrice)
+            {
+                _stoploss = stoploss;
+                _price = newPrice;
+            }
+
+            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
+                => new InTradeState(_newStoploss);
+
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
+                trading.CancelOrder(_stoploss);
+                _newStoploss = trading.PlaceFullStoplossSell(_stoploss.Pair, _price);
+                SetTimer(TimeSpan.Zero);
             }
         }
     }
