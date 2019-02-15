@@ -37,6 +37,16 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
         public int CurrentBacktestID { get; set; }
 
         /// <summary>
+        /// Gets or sets the begin timestamp of backtest.
+        /// </summary>
+        public long BeginTimeStamp { get; set; }
+
+        /// <summary>
+        /// Gets or sets the end timestamp of the backtest.
+        /// </summary>
+        public long EndTimeStamp { get; set; }
+
+        /// <summary>
         /// Gets or sets the configuration path of the current backtest.
         /// </summary>
         public string CurrentBacktestConfigurationPath { get; set; }
