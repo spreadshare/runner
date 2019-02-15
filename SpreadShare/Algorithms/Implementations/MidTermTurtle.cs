@@ -58,21 +58,20 @@ namespace SpreadShare.Algorithms.Implementations
         {
             private OrderUpdate _stoploss;
 
+            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
+                => new InTradeState(_stoploss);
+
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 // If the long term top is broken, we buy at market, and move into the waiting state
                 trading.ExecuteFullMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First());
+
                 // Get the lowest low from the last y hours
                 decimal botShortTermPrice = data.GetCandles(
                     AlgorithmConfiguration.TradingPairs.First(),
                     AlgorithmConfiguration.ShortTermTime * 12).Min(x => x.Low);
                 _stoploss = trading.PlaceFullStoplossSell(AlgorithmConfiguration.TradingPairs.First(), botShortTermPrice);
                 SetTimer(TimeSpan.Zero);
-            }
-
-            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
-            {
-                return new InTradeState(_stoploss);
             }
         }
 
@@ -91,7 +90,7 @@ namespace SpreadShare.Algorithms.Implementations
                 {
                     return new EntryState();
                 }
-                
+
                 return new NothingState<MidTermTurtleConfiguration>();
             }
 
@@ -127,16 +126,14 @@ namespace SpreadShare.Algorithms.Implementations
                 _price = newPrice;
             }
 
+            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
+                => new InTradeState(_newStoploss);
+
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 trading.CancelOrder(_stoploss);
                 _newStoploss = trading.PlaceFullStoplossSell(_stoploss.Pair, _price);
                 SetTimer(TimeSpan.Zero);
-            }
-
-            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
-            {
-                return new InTradeState(_newStoploss);
             }
         }
     }
