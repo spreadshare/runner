@@ -41,7 +41,8 @@ namespace SpreadShare.Algorithms.Implementations
                     AlgorithmConfiguration.LongTermTime * 12).Max(x => x.High);
 
                 // If the topLongTermPrice gets broken, we buy into the expected trend
-                if (data.GetCurrentPriceLastTrade(AlgorithmConfiguration.TradingPairs.First()) >= topLongTermPrice)
+                if (data.GetCandles(
+                        AlgorithmConfiguration.TradingPairs.First(), 1).Max(x => x.High) >= topLongTermPrice)
                 {
                     return new BuyState();
                 }
@@ -56,21 +57,13 @@ namespace SpreadShare.Algorithms.Implementations
 
         private class BuyState : State<MidTermTurtleConfiguration>
         {
-            private OrderUpdate _stoploss;
-
             public override State<MidTermTurtleConfiguration> OnTimerElapsed()
-                => new InTradeState(_stoploss);
+                => new InTradeState();
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 // If the long term top is broken, we buy at market, and move into the waiting state
                 trading.ExecuteFullMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First());
-
-                // Get the lowest low from the last y hours
-                decimal botShortTermPrice = data.GetCandles(
-                    AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.ShortTermTime * 12).Min(x => x.Low);
-                _stoploss = trading.PlaceFullStoplossSell(AlgorithmConfiguration.TradingPairs.First(), botShortTermPrice);
                 SetTimer(TimeSpan.Zero);
             }
         }
@@ -78,11 +71,6 @@ namespace SpreadShare.Algorithms.Implementations
         private class InTradeState : State<MidTermTurtleConfiguration>
         {
             private OrderUpdate _stoploss;
-
-            public InTradeState(OrderUpdate stoploss)
-            {
-                _stoploss = stoploss;
-            }
 
             public override State<MidTermTurtleConfiguration> OnOrderUpdate(OrderUpdate order)
             {
@@ -94,30 +82,49 @@ namespace SpreadShare.Algorithms.Implementations
                 return new NothingState<MidTermTurtleConfiguration>();
             }
 
+            public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
+            {
+                bool trail = data.GetCandles(
+                        AlgorithmConfiguration.TradingPairs.First(),
+                        AlgorithmConfiguration.ShortTermTime * 12).Min(x => x.Low)
+                             >
+                             _stoploss.SetPrice;
+
+                if (trail)
+                {
+                    return new CancelState(_stoploss);
+                }
+
+                return new NothingState<MidTermTurtleConfiguration>();
+            }
+
             protected override void Run(TradingProvider trading, DataProvider data)
             {
+                // Get the lowest low from the last y hours
+                decimal botShortTermPrice = data.GetCandles(
+                    AlgorithmConfiguration.TradingPairs.First(),
+                    AlgorithmConfiguration.ShortTermTime * 12).Min(x => x.Low);
+                _stoploss = trading.PlaceFullStoplossSell(AlgorithmConfiguration.TradingPairs.First(), botShortTermPrice);
             }
         }
 
-        private class ReplaceStoplossState : State<MidTermTurtleConfiguration>
+        private class CancelState : State<MidTermTurtleConfiguration>
         {
-            private OrderUpdate _stoploss;
-            private OrderUpdate _newStoploss;
-            private decimal _price;
+            private OrderUpdate oldstop;
 
-            public ReplaceStoplossState(OrderUpdate stoploss, decimal newPrice)
+            public CancelState(OrderUpdate stoploss)
             {
-                _stoploss = stoploss;
-                _price = newPrice;
+                oldstop = stoploss;
             }
 
             public override State<MidTermTurtleConfiguration> OnTimerElapsed()
-                => new InTradeState(_newStoploss);
+            {
+                return new InTradeState();
+            }
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                trading.CancelOrder(_stoploss);
-                _newStoploss = trading.PlaceFullStoplossSell(_stoploss.Pair, _price);
+                trading.CancelOrder(oldstop);
                 SetTimer(TimeSpan.Zero);
             }
         }
