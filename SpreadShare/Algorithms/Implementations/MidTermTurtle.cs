@@ -94,21 +94,6 @@ namespace SpreadShare.Algorithms.Implementations
                 return new NothingState<MidTermTurtleConfiguration>();
             }
 
-            public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
-            {
-                decimal botShortTermPrice = data.GetCandles(
-                    AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.ShortTermTime * 12).Min(x => x.Low);
-
-                // If the shortLongTermPrice gets broken, we sell into the expected trend change
-                if (_stoploss.SetPrice < botShortTermPrice)
-                {
-                    return new ReplaceStoplossState(_stoploss, botShortTermPrice);
-                }
-
-                return new NothingState<MidTermTurtleConfiguration>();
-            }
-
             protected override void Run(TradingProvider trading, DataProvider data)
             {
             }
