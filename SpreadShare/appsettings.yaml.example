@@ -13,7 +13,7 @@ EnabledAlgorithms:
 # Trading: Settings for communication with Binance
 BinanceClientSettings:
   # Specify the number of milliseconds the request is valid for after sending
-  ReceiveWindow: 5000
+  ReceiveWindow: 20000
   Credentials:
     Key: api_key
     Secret: api_secret
