@@ -136,7 +136,55 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> PlaceStoplossOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
         {
-            throw new NotImplementedException();
+            var client = _communications.Client;
+            decimal limitPrice;
+            if (side == OrderSide.Sell)
+            {
+                limitPrice = 0M;
+            }
+            else
+            {
+                limitPrice = price * 1.02M;
+                quantity /= 1.02M;
+            }
+
+            var realQuantity = pair.RoundToTradable(quantity);
+            var realLimitPrice = pair.RoundToTradable(limitPrice);
+            var realStopPrice = pair.RoundToTradable(price);
+
+            var query = client.PlaceOrder(
+                symbol: pair.ToString(),
+                side: BinanceUtilities.ToExternal(side),
+                type: OrderType.StopLossLimit,
+                quantity: realQuantity,
+                newClientOrderId: null,
+                price: realLimitPrice,
+                timeInForce: null,
+                stopPrice: realStopPrice,
+                icebergQty: null,
+                orderResponseType: null,
+                receiveWindow: (int)_communications.ReceiveWindow);
+
+            // Allow nested argument chopping
+            #pragma warning disable SA1118
+            return query.Success
+                ? new ResponseObject<OrderUpdate>(
+                    ResponseCode.Success,
+                    new OrderUpdate(
+                        query.Data.OrderId,
+                        tradeId,
+                        OrderUpdate.OrderStatus.New,
+                        OrderUpdate.OrderTypes.StopLoss,
+                        DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                        realLimitPrice,
+                        side,
+                        pair,
+                        realQuantity)
+                    {
+                        StopPrice = realStopPrice,
+                    })
+                : ResponseCommon.OrderPlacementFailed(query.Error.Message);
+            #pragma warning disable SA1118
         }
 
         /// <inheritdoc />
