@@ -75,7 +75,7 @@ namespace SpreadShare.SupportServices.Configuration
 
     internal class BinanceClientSettings
     {
-        [Range(0, 5000)]
+        [Range(5000, 20000)]
         public long ReceiveWindow { get; private set; }
 
         [Required]
