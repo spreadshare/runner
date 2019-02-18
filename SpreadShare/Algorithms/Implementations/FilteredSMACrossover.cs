@@ -1,11 +1,8 @@
 using System;
 using System.Linq;
-using CommandLine;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
-using SpreadShare.ZeroMQ.Commands;
-using WebSocket4Net.Command;
 
 #pragma warning disable SA1402
 

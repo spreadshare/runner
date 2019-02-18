@@ -49,14 +49,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         public override ResponseObject<OrderUpdate> ExecuteMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
         {
             var client = _communications.Client;
-            var rounded = pair.RoundToTradable(quantity);
+            var realQuantity = pair.RoundToTradable(quantity);
 
             // Attempt to place the order on Binance
             var query = client.PlaceOrder(
                 symbol: pair.ToString(),
                 side: BinanceUtilities.ToExternal(side),
                 type: OrderType.Market,
-                quantity: rounded,
+                quantity: realQuantity,
                 newClientOrderId: null,
                 price: null,
                 timeInForce: null,
@@ -68,7 +68,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             // Report failure of placing market order
             if (!query.Success)
             {
-                Logger.LogError($"Placing market order {side} {rounded} {pair.Left} failed! --> {query.Error.Message}");
+                Logger.LogError($"Placing market order {side} {realQuantity} {pair.Left} failed! --> {query.Error.Message}");
                 return new ResponseObject<OrderUpdate>(ResponseCode.Error, query.Error.Message);
             }
 
@@ -84,7 +84,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 setPrice: 0, // This information is unknown for market orders
                 side: side,
                 pair: pair,
-                setQuantity: quantity)
+                setQuantity: realQuantity)
             {
                 FilledQuantity = order.ExecutedQuantity,
                 FilledTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
@@ -98,14 +98,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
         {
             var client = _communications.Client;
+            var realQuantity = pair.RoundToTradable(quantity);
+            var realPrice = pair.RoundToPriceable(price);
 
             var query = client.PlaceOrder(
                 symbol: pair.ToString(),
                 side: BinanceUtilities.ToExternal(side),
                 type: OrderType.Limit,
-                quantity: quantity,
+                quantity: realQuantity,
                 newClientOrderId: null,
-                price: price,
+                price: realPrice,
                 timeInForce: TimeInForce.GoodTillCancel,
                 stopPrice: null,
                 icebergQty: null,
@@ -123,10 +125,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                         OrderUpdate.OrderStatus.New,
                         OrderUpdate.OrderTypes.Limit,
                         DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                        price,
+                        realPrice,
                         side,
                         pair,
-                        quantity))
+                        realQuantity))
                 : ResponseCommon.OrderPlacementFailed(query.Error.Message);
             #pragma warning disable SA1118
         }
