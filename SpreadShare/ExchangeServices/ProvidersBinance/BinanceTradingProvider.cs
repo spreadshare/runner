@@ -140,17 +140,21 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             decimal limitPrice;
             if (side == OrderSide.Sell)
             {
-                limitPrice = 0M;
+                // Set the limit price extremely low -> sell immediately for the best price.
+                limitPrice = price * 0.95M;
             }
             else
             {
+                // Skew the quantity and the price -> buy immediately for the best price.
+                // Quantity must scale inverse because (quantity * price) is the amount that needs to
+                // be locked. You cannot lock more assets than you have.
                 limitPrice = price * 1.02M;
                 quantity /= 1.02M;
             }
 
             var realQuantity = pair.RoundToTradable(quantity);
-            var realLimitPrice = pair.RoundToTradable(limitPrice);
-            var realStopPrice = pair.RoundToTradable(price);
+            var realLimitPrice = pair.RoundToPriceable(limitPrice);
+            var realStopPrice = pair.RoundToPriceable(price);
 
             var query = client.PlaceOrder(
                 symbol: pair.ToString(),
@@ -159,7 +163,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 quantity: realQuantity,
                 newClientOrderId: null,
                 price: realLimitPrice,
-                timeInForce: null,
+                timeInForce: TimeInForce.GoodTillCancel,
                 stopPrice: realStopPrice,
                 icebergQty: null,
                 orderResponseType: null,
