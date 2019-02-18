@@ -108,6 +108,20 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
                 () => trading.PlaceLimitOrderBuy(TradingPair.Parse("EOSETH"), 10, 1));
         }
 
+        [Fact]
+        public void PlaceLimitOrderUnroundedBuy()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderUnroundedImplementation>();
+            trading.PlaceLimitOrderBuy(TradingPair.Parse("EOSETH"), 3.2384932482723M, 1M);
+        }
+
+        [Fact]
+        public void PlaceLimitOrderUnroundedSell()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderUnroundedImplementation>();
+            trading.PlaceLimitOrderSell(TradingPair.Parse("EOSETH"), 3.2384932482723M, 1M);
+        }
+
         // Classes are instantiated via the Activator
         #pragma warning disable CA1812
 
@@ -175,9 +189,10 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
 
             public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
             {
-                if (quantity != 337.69M)
+                var target = 337.69M;
+                if (quantity != target)
                 {
-                    throw new Exception($"Full limit order did not fetch the correct quantity, expected 337.69M, got {quantity}");
+                    throw new Exception($"Full limit order did not fetch the correct quantity, expected {target}, got {quantity}");
                 }
 
                 var order = new OrderUpdate(
@@ -244,6 +259,37 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
                     quantity);
 
                 // Do not add to cache -> cause timeout.
+                return new ResponseObject<OrderUpdate>(order);
+            }
+        }
+
+        private class PlaceLimitOrderUnroundedImplementation : TradingProviderTestImplementation
+        {
+            public PlaceLimitOrderUnroundedImplementation(ILoggerFactory loggerFactory, TimerProvider timer)
+                : base(loggerFactory, timer)
+            {
+            }
+
+            protected override List<OrderUpdate> Cache { get; set; }
+
+            public override ResponseObject<OrderUpdate> PlaceLimitOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
+            {
+                if (quantity != 3.2384932482723M)
+                {
+                    throw new Exception($"The TradingProvider should not round quantities");
+                }
+
+                var order = new OrderUpdate(
+                    0,
+                    tradeId,
+                    OrderUpdate.OrderStatus.New,
+                    OrderUpdate.OrderTypes.Limit,
+                    0,
+                    price,
+                    side,
+                    pair,
+                    quantity);
+                Cache.Add(order);
                 return new ResponseObject<OrderUpdate>(order);
             }
         }

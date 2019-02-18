@@ -18,8 +18,9 @@ namespace SpreadShare.Tests.Stubs
                 new Dictionary<Currency, Balance>
                 {
                     { new Currency("ETH"), new Balance(new Currency("ETH"), 100M, 0) },
-                    { new Currency("EOS"), new Balance(new Currency("EOS"), 1200M, 0) },
+                    { new Currency("EOS"), new Balance(new Currency("EOS"), 120000M, 0) },
                     { new Currency("BNB"), new Balance(new Currency("BNB"), 337.69M, 0) },
+                    { new Currency("BTC"), new Balance(new Currency("BTC"), 5M, 0) },
                 }));
         }
     }

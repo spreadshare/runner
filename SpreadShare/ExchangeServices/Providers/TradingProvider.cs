@@ -157,7 +157,7 @@ namespace SpreadShare.ExchangeServices.Providers
             var result = _allocationManager.QueueTrade(proposal, () =>
             {
                 var orderQuery = HelperMethods.RetryMethod(
-                    () => Implementation.ExecuteMarketOrder(pair, OrderSide.Sell, proposal.From.Free, TradeId), _logger);
+                    () => Implementation.ExecuteMarketOrder(pair, OrderSide.Sell, quantity, TradeId), _logger);
 
                 return orderQuery.Success
                     ? WaitForOrderStatus(orderQuery.Data.OrderId, OrderUpdate.OrderStatus.Filled)
@@ -196,8 +196,8 @@ namespace SpreadShare.ExchangeServices.Providers
                     () => Implementation.PlaceLimitOrder(
                         pair,
                         OrderSide.Buy,
-                        pair.RoundToTradable(quantity),
-                        pair.RoundToPriceable(price),
+                        quantity,
+                        price,
                         TradeId), _logger).Data;
             });
 
@@ -235,8 +235,8 @@ namespace SpreadShare.ExchangeServices.Providers
                     () => Implementation.PlaceLimitOrder(
                         pair,
                         OrderSide.Sell,
-                        pair.RoundToTradable(quantity),
-                        pair.RoundToPriceable(price),
+                        quantity,
+                        price,
                         TradeId), _logger).Data;
             });
 
@@ -262,7 +262,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceFullLimitOrderSell(TradingPair pair, decimal price)
         {
             Guard.Argument(pair).NotNull();
-            Guard.Argument(price).NotNegative();
+            Guard.Argument(price).NotNegative().NotZero();
             var currency = pair.Left;
             var quantity = _allocationManager.GetAvailableFunds(currency).Free;
             return PlaceLimitOrderSell(pair, quantity, price);
@@ -277,7 +277,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceFullLimitOrderBuy(TradingPair pair, decimal price)
         {
             Guard.Argument(pair).NotNull();
-            Guard.Argument(price).NotNegative();
+            Guard.Argument(price).NotNegative().NotZero();
             var currency = pair.Right;
             var quantity = _allocationManager.GetAvailableFunds(currency).Free;
             decimal estimation = quantity / price;
@@ -294,8 +294,8 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceStoplossSell(TradingPair pair, decimal quantity, decimal price)
         {
             Guard.Argument(pair).NotNull();
-            Guard.Argument(quantity).NotNegative();
-            Guard.Argument(price).NotNegative();
+            Guard.Argument(quantity).NotNegative().NotZero();
+            Guard.Argument(price).NotNegative().NotZero();
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
@@ -308,7 +308,11 @@ namespace SpreadShare.ExchangeServices.Providers
 
             if (result.Success)
             {
-                _openOrders[result.Data.OrderId] = result.Data;
+                var order = WaitForOrderStatus(result.Data.OrderId, OrderUpdate.OrderStatus.New);
+                order.IsStopLoss()
+                     .IsSell()
+                     .IsNew();
+                _openOrders[result.Data.OrderId] = order;
                 return result.Data;
             }
 
@@ -325,7 +329,8 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceStoplossBuy(TradingPair pair, decimal quantity, decimal price)
         {
             Guard.Argument(pair).NotNull();
-            Guard.Argument(price).NotNegative();
+            Guard.Argument(quantity).NotNegative().NotZero();
+            Guard.Argument(price).NotNegative().NotZero();
             var currency = pair.Right;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
@@ -338,7 +343,11 @@ namespace SpreadShare.ExchangeServices.Providers
 
             if (result.Success)
             {
-                _openOrders[result.Data.OrderId] = result.Data;
+                var order = WaitForOrderStatus(result.Data.OrderId, OrderUpdate.OrderStatus.New);
+                order.IsStopLoss()
+                     .IsBuy()
+                     .IsNew();
+                _openOrders[result.Data.OrderId] = order;
                 return result.Data;
             }
 
@@ -354,7 +363,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceFullStoplossSell(TradingPair pair, decimal price)
         {
             Guard.Argument(pair).NotNull();
-            Guard.Argument(price).NotNegative();
+            Guard.Argument(price).NotNegative().NotZero();
             var currency = pair.Left;
             decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
             return PlaceStoplossSell(pair, quantity, price);
@@ -369,7 +378,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceFullStoplossBuy(TradingPair pair, decimal price)
         {
             Guard.Argument(pair).NotNull();
-            Guard.Argument(price).NotNegative();
+            Guard.Argument(price).NotNegative().NotZero();
             var currency = pair.Right;
             decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
             return PlaceStoplossBuy(pair, quantity, price);

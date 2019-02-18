@@ -97,6 +97,13 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             trading.ExecuteFullMarketOrderSell(TradingPair.Parse("BNBBTC"));
         }
 
+        [Fact]
+        public void ExecuteMarketOrderQuantityUnrounded()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderQuantityUnroundedImplementation>();
+            trading.ExecuteMarketOrderSell(TradingPair.Parse("EOSETH"), 2832.5223452932M);
+        }
+
         // Classes are instantiated via the Activator
         #pragma warning disable CA1812
 
@@ -238,6 +245,37 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             }
         }
 
+        private class ExecuteMarketOrderQuantityUnroundedImplementation : TradingProviderTestImplementation
+        {
+            public ExecuteMarketOrderQuantityUnroundedImplementation(ILoggerFactory loggerFactory, TimerProvider timer)
+                : base(loggerFactory, timer)
+            {
+            }
+
+            protected override List<OrderUpdate> Cache { get; set; }
+
+            public override ResponseObject<OrderUpdate> ExecuteMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
+            {
+                if (quantity != 2832.5223452932M)
+                {
+                    throw new Exception("The TradingProvider should not round quantities");
+                }
+
+                var order = new OrderUpdate(
+                    createdTimeStamp: 0,
+                    orderId: 0,
+                    tradeId: 0,
+                    orderStatus: OrderUpdate.OrderStatus.Filled,
+                    orderType: OrderUpdate.OrderTypes.Market,
+                    setPrice: 0,
+                    side: side,
+                    pair: pair,
+                    setQuantity: quantity);
+
+                Cache.Add(order);
+                return new ResponseObject<OrderUpdate>(order);
+            }
+        }
         #pragma warning restore CA1812
     }
 }
