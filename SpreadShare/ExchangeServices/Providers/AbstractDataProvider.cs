@@ -75,6 +75,15 @@ namespace SpreadShare.ExchangeServices.Providers
         public abstract ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width);
 
         /// <summary>
+        /// Get the highest high of a certain number of recent candles.
+        /// </summary>
+        /// <param name="pair">TradingPair.</param>
+        /// <param name="width">The width of a candle (e.g. FiveMinutes.</param>
+        /// <param name="numberOfCandles">The number of candles to utilize.</param>
+        /// <returns>The highest high.</returns>
+        public abstract ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles);
+
+        /// <summary>
         /// Gets the top performing trading pair.
         /// </summary>
         /// <param name="pairs">A list of trading pairs to evaluate.</param>

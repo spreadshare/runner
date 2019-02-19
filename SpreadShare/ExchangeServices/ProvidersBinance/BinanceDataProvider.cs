@@ -130,6 +130,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             return new ResponseObject<BacktestingCandle[]>(ResponseCode.Success, candles);
         }
 
+        /// <inheritdoc/>
+        public override ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles)
+        {
+            var query = GetCandles(pair, numberOfCandles, width);
+            return query.Success
+                ? new ResponseObject<decimal>(query.Data.Max(x => x.High))
+                : new ResponseObject<decimal>(ResponseCode.Error, query.Message);
+        }
+
         /// <inheritdoc />
         public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
         {

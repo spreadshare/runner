@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
@@ -16,22 +12,14 @@ using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 {
-    public class AverageTrueRangeTests : BaseProviderTests
+    public class AverageTrueRangeTests : DataProviderTestUtils
     {
         private readonly DataProvider _data;
 
         public AverageTrueRangeTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            var comms = ServiceProviderSingleton.Instance.ServiceProvider.GetService<BinanceCommunicationsService>();
-            comms.Connect();
-            var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
-            _data = container.DataProvider;
-            var property = _data.GetType().GetProperty("Implementation", BindingFlags.NonPublic | BindingFlags.Instance)
-                           ?? throw new Exception($"Expected property 'Implementation' on {nameof(SpreadShare.ExchangeServices.Providers.DataProvider)}");
-
-            // Inject test implementation
-            property.SetValue(_data, new DataProviderElevenCandlesImplementation(LoggerFactory, comms));
+            _data = GetDataProvider<DataProviderElevenCandlesImplementation>();
         }
 
         [Fact]
@@ -65,7 +53,9 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             Assert.Throws<ArgumentException>(() => _data.GetAverageTrueRange(pair, 10, 20));
         }
 
-        internal class DataProviderElevenCandlesImplementation : AbstractDataProvider
+        #pragma warning disable CA1812
+
+        internal class DataProviderElevenCandlesImplementation : DataProviderTestImplementation
         {
             public DataProviderElevenCandlesImplementation(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
                 : base(loggerFactory, exchangeCommunications)
@@ -79,6 +69,8 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             public override ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair) => throw new NotImplementedException();
 
             public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack) => throw new NotImplementedException();
+
+            public override ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles) => throw new NotImplementedException();
 
             public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack) => throw new NotImplementedException();
 
@@ -200,5 +192,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
                     }.Reverse().ToArray());
             }
         }
+
+        #pragma warning restore CA1812
     }
 }
