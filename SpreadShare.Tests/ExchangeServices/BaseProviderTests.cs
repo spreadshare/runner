@@ -28,7 +28,6 @@ namespace SpreadShare.Tests.ExchangeServices
            BaseCurrency: ETH
         ";
 
-        private static bool _configured;
         private static object _lock = new object();
 
         /// <summary>
@@ -44,25 +43,21 @@ namespace SpreadShare.Tests.ExchangeServices
                     .Deserialize<TemplateAlgorithmConfiguration>(new StringReader(AlgorithmSettingsSource));
             ConfigurationValidator.ValidateConstraintsRecursively(AlgorithmConfiguration);
 
-            // Ensure that the allocation manager is only configured once,
+            // Ensure that the allocation manager is configured atomically.
             // Tests are run concurrently so the lock is required.
             lock (_lock)
             {
-                if (!_configured)
-                {
-                    var alloc = serviceProvider.GetService<AllocationManager>();
-                    alloc.SetInitialConfiguration(
-                        new Dictionary<Exchange, Dictionary<Type, decimal>>
+                var alloc = serviceProvider.GetService<AllocationManager>();
+                alloc.SetInitialConfiguration(
+                    new Dictionary<Exchange, Dictionary<Type, decimal>>
+                    {
                         {
+                            Exchange.Binance, new Dictionary<Type, decimal>
                             {
-                                Exchange.Binance, new Dictionary<Type, decimal>
-                                {
-                                    { typeof(TemplateAlgorithm), 1M },
-                                }
-                            },
-                        });
-                    _configured = true;
-                }
+                                { typeof(TemplateAlgorithm), 1M },
+                            }
+                        },
+                    });
             }
         }
 

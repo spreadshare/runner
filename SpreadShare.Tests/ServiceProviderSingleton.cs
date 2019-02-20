@@ -38,6 +38,11 @@ namespace SpreadShare.Tests
                 typeof(TestPortfolioFetcher),
                 ServiceLifetime.Transient));
 
+            services.Replace(new ServiceDescriptor(
+                typeof(AllocationManager),
+                typeof(TestAllocationManager),
+                ServiceLifetime.Singleton));
+
             // Create service provider
             ServiceProvider = services.BuildServiceProvider();
 

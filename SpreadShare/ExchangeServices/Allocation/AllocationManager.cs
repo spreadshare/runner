@@ -124,7 +124,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="exchange">The exchange to represent.</param>
         /// <param name="algo">The algorithm to represent.</param>
         /// <param name="exec">The trade execution to process.</param>
-        public void UpdateAllocation(Exchange exchange, Type algo, TradeExecution exec)
+        public virtual void UpdateAllocation(Exchange exchange, Type algo, TradeExecution exec)
         {
             _logger.LogInformation($"Allocation Update: {JsonConvert.SerializeObject(exec)}");
             _allocations[exchange].ApplyTradeExecution(algo, exec);
