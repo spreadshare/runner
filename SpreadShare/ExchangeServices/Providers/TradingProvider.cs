@@ -351,7 +351,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 return result.Data;
             }
 
-            throw new OrderRefusedException();
+            throw new OrderRefusedException(result.Message);
         }
 
         /// <summary>
@@ -381,7 +381,8 @@ namespace SpreadShare.ExchangeServices.Providers
             Guard.Argument(price).NotNegative().NotZero();
             var currency = pair.Right;
             decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
-            return PlaceStoplossBuy(pair, quantity, price);
+            var estimation = quantity / price;
+            return PlaceStoplossBuy(pair, estimation, price);
         }
 
         /// <summary>

@@ -68,7 +68,7 @@ namespace SpreadShare.Algorithms
             }
 
             // Prevent starting real deployment without flag.
-            if (configuration.Exchange != Exchange.Backtesting && Program.CommandLineArgs.Trading)
+            if (configuration.Exchange != Exchange.Backtesting && !Program.CommandLineArgs.Trading)
             {
                 throw new PermissionDeniedException($"Cannot deploy {typeof(T).Name} on non trading mode.");
             }

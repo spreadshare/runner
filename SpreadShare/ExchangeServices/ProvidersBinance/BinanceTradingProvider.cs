@@ -136,7 +136,62 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> PlaceStoplossOrder(TradingPair pair, OrderSide side, decimal quantity, decimal price, long tradeId)
         {
-            throw new NotImplementedException();
+            var client = _communications.Client;
+            decimal limitPrice;
+            if (side == OrderSide.Sell)
+            {
+                // Set the limit price extremely low -> sell immediately for the best price.
+                // 5% is an arbitrary number that is probably more than the spread, but is not
+                // rejected by Binance for deviating too much from the current price.
+                limitPrice = price * 0.95M;
+            }
+            else
+            {
+                // Skew the quantity and the price -> buy immediately for the best price.
+                // Quantity must scale inverse because (quantity * price) is the amount that needs to
+                // be locked. You cannot lock more assets than you have.
+                // 2% is hardcoded on purpose because it is unlikely to change.
+                limitPrice = price * 1.02M;
+                quantity /= 1.02M;
+            }
+
+            var realQuantity = pair.RoundToTradable(quantity);
+            var realLimitPrice = pair.RoundToPriceable(limitPrice);
+            var realStopPrice = pair.RoundToPriceable(price);
+
+            var query = client.PlaceOrder(
+                symbol: pair.ToString(),
+                side: BinanceUtilities.ToExternal(side),
+                type: OrderType.StopLossLimit,
+                quantity: realQuantity,
+                newClientOrderId: null,
+                price: realLimitPrice,
+                timeInForce: TimeInForce.GoodTillCancel,
+                stopPrice: realStopPrice,
+                icebergQty: null,
+                orderResponseType: null,
+                receiveWindow: (int)_communications.ReceiveWindow);
+
+            // Allow nested argument chopping
+            #pragma warning disable SA1118
+            return query.Success
+                ? new ResponseObject<OrderUpdate>(
+                    ResponseCode.Success,
+                    new OrderUpdate(
+                        query.Data.OrderId,
+                        tradeId,
+                        OrderUpdate.OrderStatus.New,
+                        OrderUpdate.OrderTypes.StopLoss,
+                        DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                        realLimitPrice,
+                        side,
+                        pair,
+                        realQuantity)
+                    {
+                        StopPrice = realStopPrice,
+                    })
+                : ResponseCommon.OrderPlacementFailed(query.Error.Message);
+            #pragma warning disable SA1118
         }
 
         /// <inheritdoc />

@@ -156,6 +156,11 @@ namespace SpreadShare.Models.Trading
         public decimal SetPrice { get; }
 
         /// <summary>
+        /// Gets or sets the price at which the stoploss order was set.
+        /// </summary>
+        public decimal StopPrice { get; set; }
+
+        /// <summary>
         /// Gets or sets the average price of the order.
         /// </summary>
         public decimal AverageFilledPrice { get; set; }
