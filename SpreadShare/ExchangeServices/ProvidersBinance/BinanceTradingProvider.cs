@@ -141,6 +141,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             if (side == OrderSide.Sell)
             {
                 // Set the limit price extremely low -> sell immediately for the best price.
+                // 5% is an arbitrary number that is probability more than the spread, but is not
+                // rejected by Binance for deviating to much from the current price.
                 limitPrice = price * 0.95M;
             }
             else
@@ -148,6 +150,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 // Skew the quantity and the price -> buy immediately for the best price.
                 // Quantity must scale inverse because (quantity * price) is the amount that needs to
                 // be locked. You cannot lock more assets than you have.
+                // 2% is hardcoded on purpose because it is unlikely to change.
                 limitPrice = price * 1.02M;
                 quantity /= 1.02M;
             }
