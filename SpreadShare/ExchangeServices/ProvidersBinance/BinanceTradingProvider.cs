@@ -141,8 +141,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             if (side == OrderSide.Sell)
             {
                 // Set the limit price extremely low -> sell immediately for the best price.
-                // 5% is an arbitrary number that is probability more than the spread, but is not
-                // rejected by Binance for deviating to much from the current price.
+                // 5% is an arbitrary number that is probably more than the spread, but is not
+                // rejected by Binance for deviating too much from the current price.
                 limitPrice = price * 0.95M;
             }
             else

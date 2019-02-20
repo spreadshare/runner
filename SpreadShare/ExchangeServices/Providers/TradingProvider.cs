@@ -351,7 +351,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 return result.Data;
             }
 
-            throw new OrderRefusedException();
+            throw new OrderRefusedException(result.Message);
         }
 
         /// <summary>
