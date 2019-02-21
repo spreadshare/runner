@@ -36,9 +36,9 @@ namespace SpreadShare.Algorithms.Implementations
             public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Get the highest high from the last X hours
-                decimal topLongTermPrice = data.GetCandles(
+                decimal topLongTermPrice = data.GetHighestHigh(
                     AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.LongTermTime * 12).Max(x => x.High);
+                    AlgorithmConfiguration.LongTermTime * 12);
 
                 // If the topLongTermPrice gets broken, we buy into the expected trend
                 if (data.GetCandles(

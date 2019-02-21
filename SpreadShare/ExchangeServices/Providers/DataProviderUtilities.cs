@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dawn;
 using SpreadShare.Models.Database;
 
@@ -33,26 +33,24 @@ namespace SpreadShare.ExchangeServices.Providers
                     x => $"{nameof(x)} has length {x.Length} which is not divisible by {nameof(compressionRatio)}, namely {compressionRatio}");
 
             // number of candles used to create new candles
-            int offset = 0;
-            var result = new List<BacktestingCandle>();
+            var result = new BacktestingCandle[input.Length / compressionRatio];
 
-            while (offset + compressionRatio <= input.Length)
+            Parallel.For(0, result.Length, index =>
             {
-                var subset = input.Skip(offset).Take(compressionRatio).ToList();
+                var subset = input.Skip(index * compressionRatio).Take(compressionRatio).ToList();
                 var first = subset[subset.Count - 1];
                 var last = subset[0];
-                result.Add(new BacktestingCandle(
+                result[index] = new BacktestingCandle(
                     timestamp: last.Timestamp,
                     open: first.Open,
                     close: last.Close,
                     high: subset.Max(x => x.High),
                     low: subset.Min(x => x.Low),
                     volume: subset.Sum(x => x.Volume),
-                    tradingPair: first.TradingPair));
-                offset += compressionRatio;
-            }
+                    tradingPair: first.TradingPair);
+            });
 
-            return result.ToArray();
+            return result;
         }
     }
 }

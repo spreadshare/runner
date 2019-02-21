@@ -4,7 +4,7 @@ using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SpreadShare.Tests.ExchangeServices.BinanceTests
+namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
 {
     /// <summary>
     /// Tests for binance data provider.

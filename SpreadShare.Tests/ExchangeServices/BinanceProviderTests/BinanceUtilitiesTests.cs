@@ -3,7 +3,7 @@ using Xunit;
 using Xunit.Abstractions;
 using OrderSide = SpreadShare.Models.OrderSide;
 
-namespace SpreadShare.Tests.ExchangeServices.BinanceTests
+namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
 {
     /// <summary>
     /// Test collection for the Binance utilities.
