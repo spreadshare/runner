@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService;
 using SpreadShare.Models;
@@ -81,7 +82,13 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="width">The width of a candle (e.g. FiveMinutes.</param>
         /// <param name="numberOfCandles">The number of candles to utilize.</param>
         /// <returns>The highest high.</returns>
-        public abstract ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles);
+        public virtual ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles)
+        {
+            var candles = GetCandles(pair, numberOfCandles, width);
+            return candles.Success
+                ? new ResponseObject<decimal>(candles.Data.Max(x => x.High))
+                : new ResponseObject<decimal>(ResponseCode.Error, candles.Message);
+        }
 
         /// <summary>
         /// Gets the top performing trading pair.
