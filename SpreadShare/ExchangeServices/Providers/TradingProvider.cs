@@ -79,6 +79,11 @@ namespace SpreadShare.ExchangeServices.Providers
             var currency = pair.Right;
             var balance = _allocationManager.GetAvailableFunds(currency);
             var quantity = GetBuyQuantityEstimate(pair, balance.Free);
+            if (quantity == 0.0M)
+            {
+                throw new OutOfFundsException();
+            }
+
             return ExecuteMarketOrderBuy(pair, quantity);
         }
 
@@ -89,9 +94,14 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject with an OrderUpdate.</returns>
         public OrderUpdate ExecuteFullMarketOrderSell(TradingPair pair)
         {
-            Guard.Argument(pair).NotNull();
+            Guard.Argument(pair).NotNull(nameof(pair));
             var currency = pair.Left;
             var balance = _allocationManager.GetAvailableFunds(currency);
+            if (balance.Free == 0.0M)
+            {
+                throw new OutOfFundsException();
+            }
+
             return ExecuteMarketOrderSell(pair, balance.Free);
         }
 
@@ -104,7 +114,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate ExecuteMarketOrderBuy(TradingPair pair, decimal quantity)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
-            Guard.Argument(quantity).NotZero().NotNegative();
+            Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
             var currency = pair.Right;
             var priceEstimate = _dataProvider.GetCurrentPriceTopAsk(pair);
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * priceEstimate, 0));
@@ -150,7 +160,7 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate ExecuteMarketOrderSell(TradingPair pair, decimal quantity)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
-            Guard.Argument(quantity).NotZero().NotNegative();
+            Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
@@ -185,8 +195,8 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
-            Guard.Argument(quantity).NotZero().NotNegative();
-            Guard.Argument(price).NotZero().NotNegative();
+            Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
+            Guard.Argument(price).NotZero(nameof(quantity)).NotNegative();
             var currency = pair.Right;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
@@ -224,8 +234,8 @@ namespace SpreadShare.ExchangeServices.Providers
         public OrderUpdate PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
-            Guard.Argument(quantity).NotZero().NotNegative();
-            Guard.Argument(price).NotZero().NotNegative();
+            Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
+            Guard.Argument(price).NotZero(nameof(price)).NotNegative();
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
@@ -261,10 +271,15 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceFullLimitOrderSell(TradingPair pair, decimal price)
         {
-            Guard.Argument(pair).NotNull();
-            Guard.Argument(price).NotNegative().NotZero();
+            Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(price).NotZero(nameof(price)).NotNegative();
             var currency = pair.Left;
             var quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            if (quantity == 0.0M)
+            {
+                throw new OutOfFundsException();
+            }
+
             return PlaceLimitOrderSell(pair, quantity, price);
         }
 
@@ -276,10 +291,15 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing and OrderUpdate.</returns>
         public OrderUpdate PlaceFullLimitOrderBuy(TradingPair pair, decimal price)
         {
-            Guard.Argument(pair).NotNull();
-            Guard.Argument(price).NotNegative().NotZero();
+            Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(price).NotZero(nameof(price)).NotNegative();
             var currency = pair.Right;
             var quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            if (quantity == 0.0M)
+            {
+                throw new OutOfFundsException();
+            }
+
             decimal estimation = quantity / price;
             return PlaceLimitOrderBuy(pair, estimation, price);
         }
@@ -293,9 +313,9 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceStoplossSell(TradingPair pair, decimal quantity, decimal price)
         {
-            Guard.Argument(pair).NotNull();
-            Guard.Argument(quantity).NotNegative().NotZero();
-            Guard.Argument(price).NotNegative().NotZero();
+            Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
+            Guard.Argument(price).NotZero(nameof(price)).NotNegative();
             var currency = pair.Left;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity, 0));
 
@@ -328,9 +348,9 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceStoplossBuy(TradingPair pair, decimal quantity, decimal price)
         {
-            Guard.Argument(pair).NotNull();
-            Guard.Argument(quantity).NotNegative().NotZero();
-            Guard.Argument(price).NotNegative().NotZero();
+            Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
+            Guard.Argument(price).NotZero(nameof(price)).NotNegative();
             var currency = pair.Right;
             var proposal = new TradeProposal(pair, new Balance(currency, quantity * price, 0));
 
@@ -362,10 +382,15 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceFullStoplossSell(TradingPair pair, decimal price)
         {
-            Guard.Argument(pair).NotNull();
-            Guard.Argument(price).NotNegative().NotZero();
+            Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(price).NotZero(nameof(price)).NotNegative();
             var currency = pair.Left;
             decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            if (quantity == 0.0M)
+            {
+                throw new OutOfFundsException();
+            }
+
             return PlaceStoplossSell(pair, quantity, price);
         }
 
@@ -377,10 +402,15 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceFullStoplossBuy(TradingPair pair, decimal price)
         {
-            Guard.Argument(pair).NotNull();
-            Guard.Argument(price).NotNegative().NotZero();
+            Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(price).NotZero(nameof(price)).NotNegative();
             var currency = pair.Right;
             decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            if (quantity == 0.0M)
+            {
+                throw new OutOfFundsException();
+            }
+
             var estimation = quantity / price;
             return PlaceStoplossBuy(pair, estimation, price);
         }
@@ -484,6 +514,8 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private void UpdateAllocation(OrderUpdate order)
         {
+            Guard.Argument(order).NotNull(nameof(order));
+
             // Skip Market orders, there are filled at execution time.
             if (order.OrderType == OrderUpdate.OrderTypes.Market)
             {
@@ -502,6 +534,8 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private void UpdateOpenOrders(OrderUpdate order)
         {
+            Guard.Argument(order).NotNull(nameof(order));
+
             if (order.Finalized)
             {
                 _openOrders.Remove(order.OrderId);

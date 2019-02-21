@@ -122,10 +122,6 @@ namespace SpreadShare.Algorithms
                     var next = _activeState.OnMarketCondition(Container.DataProvider);
                     SwitchState(next);
                 }
-                catch (ProviderException e)
-                {
-                    _logger.LogError(e.Message);
-                }
                 catch (Exception e)
                 {
                     _logger.LogError(e.ToString());
@@ -146,10 +142,6 @@ namespace SpreadShare.Algorithms
                 {
                     var next = _activeState.OnOrderUpdate(order);
                     SwitchState(next);
-                }
-                catch (ProviderException e)
-                {
-                    _logger.LogError(e.Message);
                 }
                 catch (Exception e)
                 {
@@ -229,10 +221,6 @@ namespace SpreadShare.Algorithms
                         var next = _activeState.OnTimerElapsed();
                         SwitchState(next);
                     }
-                }
-                catch (ProviderException e)
-                {
-                    _logger.LogError(e.Message);
                 }
                 catch (Exception e)
                 {
