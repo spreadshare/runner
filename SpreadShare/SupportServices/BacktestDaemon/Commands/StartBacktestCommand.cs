@@ -101,10 +101,6 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                     Exchange.Backtesting,
                     new Dictionary<Type, decimal> { { _algo, 1 } }
                 },
-                {
-                    Exchange.Binance,
-                    new Dictionary<Type, decimal> { { _algo, 1 } }
-                },
             });
 
             // Backtests are run synchronously by design.
