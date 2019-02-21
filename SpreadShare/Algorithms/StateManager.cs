@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models.Database;
-using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.Configuration;

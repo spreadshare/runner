@@ -26,6 +26,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="database">The database context for flushing.</param>
         /// <param name="settings">Provides startDate, endDate and outputFolder.</param>
         public BacktestTimerProvider(ILoggerFactory loggerFactory, DatabaseContext database, BacktestSettings settings)
+            : base(loggerFactory)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _database = database;
