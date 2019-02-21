@@ -75,9 +75,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"StateSwitchEvents\"");
             _database.SaveChanges();
 
-            Console.WriteLine($"From {BeginTime} to {EndTime}");
-
-            DateTimeOffset start = DateTimeOffset.Now;
             while (CurrentTime < EndTime)
             {
                 try
@@ -93,10 +90,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 }
             }
 
-            _logger.LogCritical($"STOP THE TIMERS! Backtest took {(DateTimeOffset.Now - start).TotalMilliseconds}ms");
-            _logger.LogCritical("Flushing the trades to the database...");
+            LogOutput();
+        }
+
+        /// <summary>
+        /// Stop the timer and log the results.
+        /// </summary>
+        public void LogOutput()
+        {
+            _logger.LogInformation("Flushing the trades to the database...");
             _database.SaveChanges();
-            _logger.LogCritical("Writing output");
+            _logger.LogInformation("Writing output");
 
             // Output to database
             var outputLogger = new BacktestOutputLogger(_database, this, _outputFolder);

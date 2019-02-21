@@ -103,6 +103,7 @@ namespace SpreadShare.Algorithms
                     (bool hasErrored, var error) = backtestTimer.ErrorRegister;
                     if (hasErrored)
                     {
+                        backtestTimer.LogOutput();
                         _logger.LogError(error, "Exception during backtesting");
                         return new ResponseObject(ResponseCode.Error, error.Message);
                     }

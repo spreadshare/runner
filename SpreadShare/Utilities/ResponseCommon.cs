@@ -15,6 +15,12 @@ namespace SpreadShare.Utilities
             new ResponseObject<OrderUpdate>(ResponseCode.Error, "Order was refused by allocation manager");
 
         /// <summary>
+        /// Gets a response object indicating an out of funds exception.
+        /// </summary>
+        public static ResponseObject<OrderUpdate> OutOfFunds =>
+            new ResponseObject<OrderUpdate>(ResponseCode.Error, "Portfolio is out of funds");
+
+        /// <summary>
         /// Gets a response object indicating a failed order.
         /// </summary>
         /// <param name="reason">The reason for the failure.</param>

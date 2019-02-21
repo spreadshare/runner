@@ -101,16 +101,12 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                     Exchange.Backtesting,
                     new Dictionary<Type, decimal> { { _algo, 1 } }
                 },
-                {
-                    Exchange.Binance,
-                    new Dictionary<Type, decimal> { { _algo, 1 } }
-                },
             });
 
             // Backtests are run synchronously by design.
             var result = state.AlgorithmService.StartAlgorithm(_algo, _configuration);
 
-            if (result.Success)
+            if (result.Success || result.Message == ResponseCommon.OutOfFunds.Message)
             {
                 // Notify third party applications that the backtest with their id has finished.
                 Console.WriteLine($"BACKTEST_FINISHED={BacktestDaemonService.Instance.State.CurrentBacktestID}");
