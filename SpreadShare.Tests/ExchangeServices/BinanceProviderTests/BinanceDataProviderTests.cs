@@ -55,5 +55,12 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
 
             Assert.True(topAsk > topBid, $"Top bid is higher than lowest ask (bid: {topBid}, ask: {topAsk}");
         }
+
+        [Fact]
+        public void GetCandlesHappyFlow()
+        {
+            var candles = _container.DataProvider.GetCandles(TradingPair.Parse("EOSETH"), 5);
+            Assert.Equal(5, candles.Length);
+        }
     }
 }

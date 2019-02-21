@@ -108,7 +108,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             var response = client.GetKlines(
                 pair.ToString(),
                 BinanceUtilities.ToExternal(width),
-                DateTime.UtcNow - TimeSpan.FromMinutes(limit),
+                DateTime.UtcNow - (TimeSpan.FromMinutes(limit) * (int)width),
                 DateTime.UtcNow,
                 limit);
 
