@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpreadShare.ExchangeServices;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using SpreadShare.Utilities;
@@ -25,11 +26,6 @@ namespace SpreadShare.SupportServices.Configuration
         [ParsesToEnum(typeof(Exchange))]
         public string __exchange { get; protected set; }
 
-        [YamlMember(Alias = "BaseCurrency")]
-        [Required]
-        [CanBeConstructed(typeof(Currency))]
-        public string __baseCurrency { get; protected set; }
-
         [YamlMember(Alias = "TradingPairs")]
         [Required]
         [NotEmpty]
@@ -38,8 +34,17 @@ namespace SpreadShare.SupportServices.Configuration
 
         // ###    PRIVATE PARSERS    ###
         private readonly LazyCache<string, Exchange> _exchangeConstructor = new LazyCache<string, Exchange>(Enum.Parse<Exchange>);
-        private readonly LazyCache<string, Currency> _baseCurrencyConstructor = new LazyCache<string, Currency>(x => new Currency(x));
         private readonly LazyCache<List<string>, List<TradingPair>> _activeTradingPairsConstructor = new LazyCache<List<string>, List<TradingPair>>(x => x.Select(TradingPair.Parse).ToList());
+        private readonly LazyCache<List<TradingPair>, Currency> _baseCurrencyConstructor = new LazyCache<List<TradingPair>, Currency>(
+            x =>
+            {
+                if (x.TrueForAll(y => y.Right == x[0].Right))
+                {
+                    return x[0].Right;
+                }
+
+                throw new InvalidConfigurationException("Not all TradingPairs have the same base currency.");
+            });
 
         // ###    PUBLIC PARSED PROPERTIES ###
 
@@ -51,7 +56,8 @@ namespace SpreadShare.SupportServices.Configuration
         /// <summary>
         /// Gets th base currency of the algorithm.
         /// </summary>
-        public Currency BaseCurrency => _baseCurrencyConstructor.Value(__baseCurrency);
+        [Required]
+        public Currency BaseCurrency => _baseCurrencyConstructor.Value(TradingPairs);
 
         /// <summary>
         /// Gets the trading pairs of the algorithm.

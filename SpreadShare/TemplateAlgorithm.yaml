@@ -1,3 +1,4 @@
 Exchange: Backtesting
-TradingPairs: [EOSETH]
-BaseCurrency: ETH
+TradingPairs: 
+  - EOSETH
+

@@ -25,7 +25,6 @@ namespace SpreadShare.Tests.ExchangeServices
         @"
            Exchange: Binance
            TradingPairs: [ EOSETH ]
-           BaseCurrency: ETH
         ";
 
         private static object _lock = new object();
