@@ -3,19 +3,19 @@ using System;
 namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
 {
     /// <summary>
-    /// Imposes that a certain value is within the inclusive range of two numbers.
+    /// Imposes that a certain long is within the inclusive range of two numbers.
     /// </summary>
-    internal class Range : Constraint
+    internal class RangeLong : Constraint
     {
         private long _min;
         private long _max;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Range"/> class.
+        /// Initializes a new instance of the <see cref="RangeLong"/> class.
         /// </summary>
         /// <param name="min">The minimum value.</param>
         /// <param name="max">The maximum value.</param>
-        public Range(long min, long max)
+        public RangeLong(long min, long max)
         {
             _min = min;
             _max = max;
