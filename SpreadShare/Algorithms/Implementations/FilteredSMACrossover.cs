@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
@@ -33,12 +34,8 @@ namespace SpreadShare.Algorithms.Implementations
         // Check for the filter SMA to be positive and the crossover to happen.
         private class EntryState : EntryState<FilteredSMACrossoverConfiguration>
         {
-            private int _pyramid;
-
             public override State<FilteredSMACrossoverConfiguration> OnMarketCondition(DataProvider data)
             {
-                _pyramid = 0;
-
                 // Check whether the filter SMA is hit or not.
                 bool filterSma = data.GetStandardMovingAverage(
                                      AlgorithmConfiguration.TradingPairs.First(),
@@ -50,12 +47,17 @@ namespace SpreadShare.Algorithms.Implementations
                                      AlgorithmConfiguration.CandleSize,
                                      5);
 
+                int shortatrtime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.ShortATR;
+                int longatrtime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.LongATR;
+
                 // Check whether the ATR is higher than average
                 bool filterAtr = data.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
+                                     shortatrtime,
                                      AlgorithmConfiguration.ShortATR)
                                  > data.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
+                                     longatrtime,
                                      AlgorithmConfiguration.LongATR);
 
                 // Check for the crossover to happen.
@@ -69,7 +71,7 @@ namespace SpreadShare.Algorithms.Implementations
                                         AlgorithmConfiguration.CandleSize);
                 if (filterSma && crossoverSma && filterAtr)
                 {
-                    return new BuyState(null, _pyramid);
+                    return new BuyState(null, 0);
                 }
 
                 return new NothingState<FilteredSMACrossoverConfiguration>();
@@ -106,8 +108,10 @@ namespace SpreadShare.Algorithms.Implementations
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
+                decimal allocation = trading.GetPortfolio().GetAllocation(AlgorithmConfiguration.BaseCurrency).Free * 0.2M / data.GetCurrentPriceLastTrade(AlgorithmConfiguration.TradingPairs.First());
+
                 // If the Filter and CrossoverSMA signal the trade, we buy at market.
-                trading.ExecuteMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First(), trading.GetPortfolio().GetAllocation(AlgorithmConfiguration.BaseCurrency).Free * Convert.ToDecimal(0.2));
+                trading.ExecuteMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First(), allocation);
                 SetTimer(TimeSpan.Zero);
             }
         }
@@ -211,12 +215,17 @@ namespace SpreadShare.Algorithms.Implementations
                                      AlgorithmConfiguration.CandleSize,
                                      5);
 
+                int shortatrtime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.ShortATR;
+                int longatrtime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.LongATR;
+
                 // Check whether the ATR is higher than average
                 bool filterAtr = data.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
+                                     shortatrtime,
                                      AlgorithmConfiguration.ShortATR)
                                  > data.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
+                                     longatrtime,
                                      AlgorithmConfiguration.LongATR);
 
                 // Check for the crossover to happen.
