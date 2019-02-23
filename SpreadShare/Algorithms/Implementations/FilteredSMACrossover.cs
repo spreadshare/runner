@@ -47,17 +47,17 @@ namespace SpreadShare.Algorithms.Implementations
                                      AlgorithmConfiguration.CandleSize,
                                      5);
 
-                int shortatrtime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.ShortATR;
-                int longatrtime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.LongATR;
+                int shortAtrTime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.ShortATR;
+                int longAtrTime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.LongATR;
 
                 // Check whether the ATR is higher than average
                 bool filterAtr = data.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
-                                     shortatrtime,
+                                     shortAtrTime,
                                      AlgorithmConfiguration.ShortATR)
                                  > data.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
-                                     longatrtime,
+                                     longAtrTime,
                                      AlgorithmConfiguration.LongATR);
 
                 // Check for the crossover to happen.
@@ -108,7 +108,12 @@ namespace SpreadShare.Algorithms.Implementations
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-                decimal allocation = trading.GetPortfolio().GetAllocation(AlgorithmConfiguration.BaseCurrency).Free * 0.2M / data.GetCurrentPriceLastTrade(AlgorithmConfiguration.TradingPairs.First());
+                decimal allocation = trading.GetPortfolio().GetAllocation(
+                                     AlgorithmConfiguration.BaseCurrency).Free
+                                     *
+                                     0.2M
+                                     /
+                                     data.GetCurrentPriceLastTrade(AlgorithmConfiguration.TradingPairs.First());
 
                 // If the Filter and CrossoverSMA signal the trade, we buy at market.
                 trading.ExecuteMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First(), allocation);
@@ -160,10 +165,10 @@ namespace SpreadShare.Algorithms.Implementations
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 // Get the lowest low from the last y hours.
-                int candleamount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
+                int candleAmount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
                 decimal donchianMinPrice = data.GetCandles(
                     AlgorithmConfiguration.TradingPairs.First(),
-                    candleamount).Min(x => x.Low);
+                    candleAmount).Min(x => x.Low);
 
                 // Set first stop loss order at DCMin.
                 _stoploss = trading.PlaceFullStoplossSell(AlgorithmConfiguration.TradingPairs.First(), donchianMinPrice);
@@ -171,7 +176,7 @@ namespace SpreadShare.Algorithms.Implementations
             }
         }
 
-        // This state checks whether to enter a pyramid order, trail the current stoploss or return to entry after closing
+         // This state checks whether to enter a pyramid order, trail the current stoploss or return to entry after closing
         private class CheckState : State<FilteredSMACrossoverConfiguration>
         {
             private OrderUpdate _stoploss;
@@ -193,14 +198,68 @@ namespace SpreadShare.Algorithms.Implementations
                 return new NothingState<FilteredSMACrossoverConfiguration>();
             }
 
+            public override State<FilteredSMACrossoverConfiguration> OnTimerElapsed()
+            {
+                return new CheckPyramidState(_stoploss, _pyramid);
+            }
+
             public override State<FilteredSMACrossoverConfiguration> OnMarketCondition(DataProvider data)
             {
-                int candleamount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
+                int candleAmount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
 
                 // Check whether we need to trail the stoploss higher
                 bool trail = data.GetCandles(
                                  AlgorithmConfiguration.TradingPairs.First(),
-                                 candleamount).Min(x => x.Low)
+                                 candleAmount).Min(x => x.Low)
+                             >
+                             _stoploss.SetPrice;
+
+                // If the trailing requirements are hit, we trail into a higher stoploss
+                if (trail)
+                {
+                    return new CancelStopState(_stoploss, _pyramid);
+                }
+
+                SetTimer(TimeSpan.FromMinutes(AlgorithmConfiguration.CandleSize * 5));
+
+                return new NothingState<FilteredSMACrossoverConfiguration>();
+            }
+
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
+            }
+        }
+
+        // This state checks whether to enter a pyramid order, trail the current stoploss or return to entry after closing
+        private class CheckPyramidState : State<FilteredSMACrossoverConfiguration>
+        {
+            private OrderUpdate _stoploss;
+            private int _pyramid;
+
+            public CheckPyramidState(OrderUpdate stoploss, int pyramid)
+            {
+                _stoploss = stoploss;
+                _pyramid = pyramid;
+            }
+
+            public override State<FilteredSMACrossoverConfiguration> OnOrderUpdate(OrderUpdate order)
+            {
+                if (order.OrderId == _stoploss.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                {
+                    return new EntryState();
+                }
+
+                return new NothingState<FilteredSMACrossoverConfiguration>();
+            }
+
+            public override State<FilteredSMACrossoverConfiguration> OnMarketCondition(DataProvider data)
+            {
+                int candleAmount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
+
+                // Check whether we need to trail the stoploss higher
+                bool trail = data.GetCandles(
+                                 AlgorithmConfiguration.TradingPairs.First(),
+                                 candleAmount).Min(x => x.Low)
                              >
                              _stoploss.SetPrice;
 
@@ -215,17 +274,17 @@ namespace SpreadShare.Algorithms.Implementations
                                      AlgorithmConfiguration.CandleSize,
                                      5);
 
-                int shortatrtime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.ShortATR;
-                int longatrtime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.LongATR;
+                int shortAtrTime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.ShortATR;
+                int longAtrTime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.LongATR;
 
                 // Check whether the ATR is higher than average
                 bool filterAtr = data.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
-                                     shortatrtime,
+                                     shortAtrTime,
                                      AlgorithmConfiguration.ShortATR)
                                  > data.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
-                                     longatrtime,
+                                     longAtrTime,
                                      AlgorithmConfiguration.LongATR);
 
                 // Check for the crossover to happen.
