@@ -25,8 +25,9 @@ namespace SpreadShare.SupportServices.Configuration
                 return;
             }
 
+            // Check write-able properties
             Type objType = obj.GetType();
-            foreach (var p in objType.GetProperties().Where(x => x.CanWrite))
+            foreach (var p in objType.GetProperties())
             {
                 // Always validate the value.
                 var value = p.GetValue(obj, null);
@@ -37,13 +38,13 @@ namespace SpreadShare.SupportServices.Configuration
                     // The value is a list, recurse if it is not a simple type.
                     foreach (var child in enumerable)
                     {
-                        if (!IsSimpleType(child.GetType()))
+                        if (!IsSimpleType(child.GetType()) && p.CanWrite)
                         {
                             ValidateConstraintsRecursively(child);
                         }
                     }
                 }
-                else if (!IsSimpleType(p.PropertyType))
+                else if (!IsSimpleType(p.PropertyType) && p.CanWrite)
                 {
                     ValidateConstraintsRecursively(value);
                 }
