@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Binance.Net.Objects;
+using CryptoExchange.Net.Objects;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
@@ -9,6 +11,7 @@ using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
@@ -105,29 +108,63 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width)
         {
             var client = _communications.Client;
-            var response = client.GetKlines(
-                pair.ToString(),
-                BinanceUtilities.ToExternal(width),
-                DateTime.UtcNow - (TimeSpan.FromMinutes(limit) * (int)width),
-                DateTime.UtcNow,
-                limit);
+            var result = new BacktestingCandle[limit];
+            int chunkSize = Configuration.Instance.BinanceClientSettings.CandleRequestSize;
+            var tasks = new (int, Task<CallResult<BinanceKline[]>>)[(limit / chunkSize) + 1];
 
-            if (!response.Success)
+            // Start the offset all the way back.
+            TimeSpan offset = TimeSpan.FromMinutes(limit * (int)width);
+
+            // Create tasks for retrieving the candles in reverse.
+            for (int i = tasks.Length - 1; i >= 0; i--)
             {
-                return new ResponseObject<BacktestingCandle[]>(ResponseCode.Error, response.Error.Message);
+                // Last task only needs to gather the remaining candles.
+                int amount = i == 0
+                    ? limit % chunkSize
+                    : chunkSize;
+
+                // Decrement the offset with the current job.
+                offset -= TimeSpan.FromMinutes(amount * (int)width);
+
+                tasks[i] =
+                    (amount, client.GetKlinesAsync(
+                                symbol: pair.ToString(),
+                                interval: BinanceUtilities.ToExternal(width),
+                                startTime: DateTime.UtcNow - offset - TimeSpan.FromMinutes((amount + 1) * (int)width), // Request one extra candle, sometimes binance comes one short.
+                                endTime: DateTime.UtcNow - offset,
+                                limit: amount + 10));
             }
 
-            var candles = response.Data.Select(x =>
-                new BacktestingCandle(
-                    new DateTimeOffset(x.OpenTime).ToUnixTimeMilliseconds(),
-                    x.Open,
-                    x.Close,
-                    x.High,
-                    x.Low,
-                    x.Volume,
-                    pair.ToString())).ToArray();
+            // Insert all the task results into the resulting array.
+            // i = task.id
+            // q = result_candle.id
+            // p = task_candle.id
+            for (int i = 0, q = 0; i < tasks.Length; i++)
+            {
+                var (size, response) = (tasks[i].Item1, tasks[i].Item2.Result);
+                if (!response.Success)
+                {
+                    return new ResponseObject<BacktestingCandle[]>(ResponseCode.Error, response.Error.Message);
+                }
 
-            return new ResponseObject<BacktestingCandle[]>(ResponseCode.Success, candles);
+                // If needed, strip the extra requested candle, then reverse the array to match present -> past.
+                var candles = response.Data.Skip(response.Data.Length - size).Reverse().ToArray();
+                for (int p = 0; p < size; p++, q++)
+                {
+                    // Parse to the right data structure, and insert in the resulting array.
+                    var x = candles[p];
+                    result[q] = new BacktestingCandle(
+                        new DateTimeOffset(x.OpenTime).ToUnixTimeMilliseconds(),
+                        x.Open,
+                        x.Close,
+                        x.High,
+                        x.Low,
+                        x.Volume,
+                        pair.ToString());
+                }
+            }
+
+            return new ResponseObject<BacktestingCandle[]>(ResponseCode.Success, result.ToArray());
         }
 
         /// <inheritdoc />

@@ -75,8 +75,14 @@ namespace SpreadShare.SupportServices.Configuration
 
     internal class BinanceClientSettings
     {
-        [Range(5000, 20000)]
+        [RangeLong(5000, 20000)]
         public long ReceiveWindow { get; private set; }
+
+        /// <summary>
+        /// Gets the maximum number of candles fetched per request.
+        /// </summary>
+        [RangeInt(100, 900)]
+        public int CandleRequestSize { get; private set; }
 
         [Required]
         public CredentialsWrapper Credentials { get; private set; }

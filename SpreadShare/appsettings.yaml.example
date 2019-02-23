@@ -14,6 +14,10 @@ EnabledAlgorithms:
 BinanceClientSettings:
   # Specify the number of milliseconds the request is valid for after sending
   ReceiveWindow: 20000
+
+  # Specify the maximum number of candles fetched in a single request.
+  CandleRequestSize: 500 
+  
   Credentials:
     Key: api_key
     Secret: api_secret
