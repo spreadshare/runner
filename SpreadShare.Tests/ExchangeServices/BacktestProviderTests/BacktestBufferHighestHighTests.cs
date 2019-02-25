@@ -8,12 +8,11 @@ using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 {
-    public class BacktestBufferTests : BaseTest
+    public class BacktestBufferHighestHighTests : BaseTest
     {
         private Func<BacktestingCandle[], int, decimal[]> _buildHighestHighBuffer;
 
         private BacktestingCandle[] _candles =
-            new[]
             {
                 // #1
                 new BacktestingCandle(
@@ -126,7 +125,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                     tradingPair: "EOSETH"),
             };
 
-        public BacktestBufferTests(ITestOutputHelper output)
+        public BacktestBufferHighestHighTests(ITestOutputHelper output)
             : base(output)
         {
             var method = typeof(BacktestBuffers)
