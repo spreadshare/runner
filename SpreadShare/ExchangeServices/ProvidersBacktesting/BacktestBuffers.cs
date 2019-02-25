@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -87,10 +88,29 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             return _highestHighBuffer[(pair.ToString(), numberOfCandles)];
         }
 
-        private static decimal[] BuildHighestHighBuffer(BacktestingCandle[] candles, int channelWidth)
+        /// <summary>
+        /// Gets the pre-calculated buffer with the lowest low of a certain number of candles.
+        /// </summary>
+        /// <param name="pair">the TradingPair to consider.</param>
+        /// <param name="numberOfCandles">The number of candles to aggregate.</param>
+        /// <returns>Complete lowest low buffer.</returns>
+        public decimal[] GetLowestLow(TradingPair pair, int numberOfCandles)
+        {
+            if (!_highestHighBuffer.ContainsKey((pair.ToString(), numberOfCandles)))
+            {
+                _logger.LogCritical($"Building lowest low buffer for {pair} with size {numberOfCandles}");
+                var candles = GetCandles(pair);
+                _highestHighBuffer[(pair.ToString(), numberOfCandles)] =
+                    BuildLowestLowBuffer(candles, numberOfCandles);
+            }
+
+            return _lowestLowBuffer[(pair.ToString(), numberOfCandles)];
+        }
+
+        private static decimal[] BuildBuffer(BacktestingCandle[] candles, int channelWidth, IComparer<decimal> comparer, Func<BacktestingCandle, decimal> selector)
         {
             var result = new decimal[candles.Length];
-            var temp = new SortedDictionary<decimal, int>(new DescendingComparer());
+            var temp = new SortedDictionary<decimal, int>(comparer);
 
             // Logically equivalent to:
             // candles.Skip(i - channelWidth).Take(channelWidth).Max(x => x.High)
@@ -103,7 +123,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     temp.Remove(temp.First().Key);
                 }
 
-                var high = candles[i].High;
+                var high = selector(candles[i]);
                 if (temp.ContainsKey(high))
                 {
                     // Extend time to life of the price entry. ~O(log(channelWidth))
@@ -121,41 +141,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             return result;
         }
+
+        private static decimal[] BuildHighestHighBuffer(BacktestingCandle[] candles, int channelWidth)
+            => BuildBuffer(candles, channelWidth, new DescendingComparer(), x => x.High);
 
         private static decimal[] BuildLowestLowBuffer(BacktestingCandle[] candles, int channelWidth)
-        {
-            var result = new decimal[candles.Length];
-            var temp = new SortedDictionary<decimal, int>(new AscendingComparer());
-
-            // Logically equivalent to:
-            // candles.Skip(i - channelWidth).Take(channelWidth).Max(x => x.High)
-            // but in O(n * log(channelWidth)) as opposed to O(n * channelWidth)
-            for (int i = 0; i < candles.Length; i++)
-            {
-                // Remove all outdated candles from the temp collection. ~O(log(channelWidth))
-                while (temp.Any() && temp.First().Value <= i - channelWidth)
-                {
-                    temp.Remove(temp.First().Key);
-                }
-
-                var high = candles[i].Low;
-                if (temp.ContainsKey(high))
-                {
-                    // Extend time to life of the price entry. ~O(log(channelWidth))
-                    temp[high] = i;
-                }
-                else
-                {
-                    // Add price entry.
-                    temp.Add(high, i);
-                }
-
-                // Add the highest entry in the temp collection. O(1)
-                result[i] = temp.First().Key;
-            }
-
-            return result;
-        }
+            => BuildBuffer(candles, channelWidth, new AscendingComparer(), x => x.Low);
 
         /// <summary>
         /// An inverse comparer to maintain a descending ordered dictionary.
