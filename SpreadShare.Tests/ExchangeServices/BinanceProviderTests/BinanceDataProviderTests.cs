@@ -98,7 +98,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
             var recent = candles[0].Timestamp;
             var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             Assert.True(
-                now - recent <= (int)Configuration.Instance.CandleWidth * 60 * 1000,
+                now - recent <= ((int)Configuration.Instance.CandleWidth * 60 * 1000) + 5000,
                 $"Most recent candle was not within the scope of {Configuration.Instance.CandleWidth} (expected: {now}, got {recent}), diff {TimeSpan.FromMilliseconds(now - recent)}");
         }
     }
