@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -15,7 +14,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     internal class BacktestBuffers
     {
         private static Dictionary<string, BacktestingCandle[]> _buffers;
-        private static Dictionary<(string, int), decimal[]> _highestHighbuffer;
+        private static Dictionary<(string, int), decimal[]> _highestHighBuffer;
+        private static Dictionary<(string, int), decimal[]> _lowestLowBuffer;
 
         private DatabaseContext _db;
         private ILogger _logger;
@@ -35,9 +35,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 _buffers = new Dictionary<string, BacktestingCandle[]>();
             }
 
-            if (_highestHighbuffer == null)
+            if (_highestHighBuffer == null)
             {
-                _highestHighbuffer = new Dictionary<(string, int), decimal[]>();
+                _highestHighBuffer = new Dictionary<(string, int), decimal[]>();
+            }
+
+            if (_lowestLowBuffer == null)
+            {
+                _lowestLowBuffer = new Dictionary<(string, int), decimal[]>();
             }
         }
 
@@ -71,22 +76,21 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <returns>Complete highest high buffer.</returns>
         public decimal[] GetHighestHighs(TradingPair pair, int numberOfCandles)
         {
-            if (!_highestHighbuffer.ContainsKey((pair.ToString(), numberOfCandles)))
+            if (!_highestHighBuffer.ContainsKey((pair.ToString(), numberOfCandles)))
             {
                 _logger.LogCritical($"Building highest high buffer for {pair} with size {numberOfCandles}");
                 var candles = GetCandles(pair);
-                _highestHighbuffer[(pair.ToString(), numberOfCandles)] =
+                _highestHighBuffer[(pair.ToString(), numberOfCandles)] =
                     BuildHighestHighBuffer(candles, numberOfCandles);
             }
 
-            return _highestHighbuffer[(pair.ToString(), numberOfCandles)];
+            return _highestHighBuffer[(pair.ToString(), numberOfCandles)];
         }
 
         private static decimal[] BuildHighestHighBuffer(BacktestingCandle[] candles, int channelWidth)
         {
             var result = new decimal[candles.Length];
-            var temp = new SortedDictionary<decimal, int>(new Comparer());
-            var file = new StreamWriter("blegh.txt");
+            var temp = new SortedDictionary<decimal, int>(new DescendingComparer());
 
             // Logically equivalent to:
             // candles.Skip(i - channelWidth).Take(channelWidth).Max(x => x.High)
@@ -115,16 +119,58 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 result[i] = temp.First().Key;
             }
 
-            file.Close();
+            return result;
+        }
+
+        private static decimal[] BuildLowestLowBuffer(BacktestingCandle[] candles, int channelWidth)
+        {
+            var result = new decimal[candles.Length];
+            var temp = new SortedDictionary<decimal, int>(new AscendingComparer());
+
+            // Logically equivalent to:
+            // candles.Skip(i - channelWidth).Take(channelWidth).Max(x => x.High)
+            // but in O(n * log(channelWidth)) as opposed to O(n * channelWidth)
+            for (int i = 0; i < candles.Length; i++)
+            {
+                // Remove all outdated candles from the temp collection. ~O(log(channelWidth))
+                while (temp.Any() && temp.First().Value <= i - channelWidth)
+                {
+                    temp.Remove(temp.First().Key);
+                }
+
+                var high = candles[i].Low;
+                if (temp.ContainsKey(high))
+                {
+                    // Extend time to life of the price entry. ~O(log(channelWidth))
+                    temp[high] = i;
+                }
+                else
+                {
+                    // Add price entry.
+                    temp.Add(high, i);
+                }
+
+                // Add the highest entry in the temp collection. O(1)
+                result[i] = temp.First().Key;
+            }
+
             return result;
         }
 
         /// <summary>
         /// An inverse comparer to maintain a descending ordered dictionary.
         /// </summary>
-        private class Comparer : IComparer<decimal>
+        private class DescendingComparer : IComparer<decimal>
         {
             public int Compare(decimal x, decimal y) => y.CompareTo(x);
+        }
+
+        /// <summary>
+        /// An inverse comparer to maintain a descending ordered dictionary.
+        /// </summary>
+        private class AscendingComparer : IComparer<decimal>
+        {
+            public int Compare(decimal x, decimal y) => x.CompareTo(y);
         }
     }
 }
