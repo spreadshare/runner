@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
@@ -46,11 +47,17 @@ namespace SpreadShare.Algorithms.Implementations
                                      AlgorithmConfiguration.CandleSize,
                                      5);
 
+                int shortAtrTime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.ShortATR;
+                int longAtrTime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.LongATR;
+
+                // Check whether the ATR is higher than average
                 bool filterAtr = data.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
+                                     shortAtrTime,
                                      AlgorithmConfiguration.ShortATR)
                                  > data.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
+                                     longAtrTime,
                                      AlgorithmConfiguration.LongATR);
 
                 // Check for the crossover to happen.
@@ -64,7 +71,7 @@ namespace SpreadShare.Algorithms.Implementations
                                         AlgorithmConfiguration.CandleSize);
                 if (filterSma && crossoverSma && filterAtr)
                 {
-                    return new BuyState();
+                    return new BuyState(null, 0);
                 }
 
                 return new NothingState<FilteredSMACrossoverConfiguration>();
@@ -75,56 +82,169 @@ namespace SpreadShare.Algorithms.Implementations
             }
         }
 
+         // This Class buys the asset, and then either moves to set a new stop loss, or cancel the current one and reset
         private class BuyState : State<FilteredSMACrossoverConfiguration>
         {
+            private OrderUpdate _stoploss;
+            private int _pyramid;
+
+            public BuyState(OrderUpdate stoploss, int pyramid)
+            {
+                _stoploss = stoploss;
+                _pyramid = pyramid;
+            }
+
             public override State<FilteredSMACrossoverConfiguration> OnTimerElapsed()
             {
-                return new InTradeState();
+                if (_stoploss != null)
+                {
+                    return new CancelStopState(_stoploss, _pyramid);
+                }
+                else
+                {
+                    return new SetStopState(_pyramid);
+                }
             }
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
+                decimal allocation = trading.GetPortfolio().GetAllocation(
+                                     AlgorithmConfiguration.BaseCurrency).Free
+                                     *
+                                     0.2M
+                                     /
+                                     data.GetCurrentPriceLastTrade(AlgorithmConfiguration.TradingPairs.First());
+
                 // If the Filter and CrossoverSMA signal the trade, we buy at market.
-                trading.ExecuteFullMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First());
+                trading.ExecuteMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First(), allocation);
                 SetTimer(TimeSpan.Zero);
             }
         }
 
-        private class InTradeState : State<FilteredSMACrossoverConfiguration>
+        // This class cancels the current stop loss, and sets a new one.
+        // At EVERY moment in a trade, this system should have a stoploss in place
+        private class CancelStopState : State<FilteredSMACrossoverConfiguration>
         {
-            private OrderUpdate stoploss;
+            private OrderUpdate _stoploss;
+            private int _pyramid;
+
+            public CancelStopState(OrderUpdate stoploss, int pyramid)
+            {
+                _stoploss = stoploss;
+                _pyramid = pyramid;
+            }
 
             public override State<FilteredSMACrossoverConfiguration> OnTimerElapsed()
             {
-                return new TrailingState(stoploss);
+                return new SetStopState(_pyramid);
+            }
+
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
+                trading.CancelOrder(_stoploss);
+                SetTimer(TimeSpan.Zero);
+            }
+        }
+
+        // This state sets a stoploss
+        private class SetStopState : State<FilteredSMACrossoverConfiguration>
+        {
+            private OrderUpdate _stoploss;
+            private int _pyramid;
+
+            public SetStopState(int pyramid)
+            {
+                _pyramid = pyramid;
+            }
+
+            public override State<FilteredSMACrossoverConfiguration> OnTimerElapsed()
+            {
+                return new CheckState(_stoploss, _pyramid);
             }
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 // Get the lowest low from the last y hours.
-                int candleamount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
+                int candleAmount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
                 decimal donchianMinPrice = data.GetCandles(
                     AlgorithmConfiguration.TradingPairs.First(),
-                    candleamount).Min(x => x.Low);
+                    candleAmount).Min(x => x.Low);
 
                 // Set first stop loss order at DCMin.
-                stoploss = trading.PlaceFullStoplossSell(AlgorithmConfiguration.TradingPairs.First(), donchianMinPrice);
+                _stoploss = trading.PlaceFullStoplossSell(AlgorithmConfiguration.TradingPairs.First(), donchianMinPrice);
                 SetTimer(TimeSpan.Zero);
             }
         }
 
-        private class TrailingState : State<FilteredSMACrossoverConfiguration>
+         // This state checks whether to enter a pyramid order, trail the current stoploss or return to entry after closing
+        private class CheckState : State<FilteredSMACrossoverConfiguration>
         {
-            private OrderUpdate oldstop;
+            private OrderUpdate _stoploss;
+            private int _pyramid;
 
-            public TrailingState(OrderUpdate stoploss)
+            public CheckState(OrderUpdate stoploss, int pyramid)
             {
-                oldstop = stoploss;
+                _stoploss = stoploss;
+                _pyramid = pyramid;
             }
 
             public override State<FilteredSMACrossoverConfiguration> OnOrderUpdate(OrderUpdate order)
             {
-                if (order.OrderId == oldstop.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                if (order.OrderId == _stoploss.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                {
+                    return new EntryState();
+                }
+
+                return new NothingState<FilteredSMACrossoverConfiguration>();
+            }
+
+            public override State<FilteredSMACrossoverConfiguration> OnTimerElapsed()
+            {
+                return new CheckPyramidState(_stoploss, _pyramid);
+            }
+
+            public override State<FilteredSMACrossoverConfiguration> OnMarketCondition(DataProvider data)
+            {
+                int candleAmount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
+
+                // Check whether we need to trail the stoploss higher
+                bool trail = data.GetCandles(
+                                 AlgorithmConfiguration.TradingPairs.First(),
+                                 candleAmount).Min(x => x.Low)
+                             >
+                             _stoploss.SetPrice;
+
+                // If the trailing requirements are hit, we trail into a higher stoploss
+                if (trail)
+                {
+                    return new CancelStopState(_stoploss, _pyramid);
+                }
+
+                SetTimer(TimeSpan.FromMinutes(AlgorithmConfiguration.CandleSize * 5));
+
+                return new NothingState<FilteredSMACrossoverConfiguration>();
+            }
+
+            protected override void Run(TradingProvider trading, DataProvider data)
+            {
+            }
+        }
+
+        // This state checks whether to enter a pyramid order, trail the current stoploss or return to entry after closing
+        private class CheckPyramidState : State<FilteredSMACrossoverConfiguration>
+        {
+            private OrderUpdate _stoploss;
+            private int _pyramid;
+
+            public CheckPyramidState(OrderUpdate stoploss, int pyramid)
+            {
+                _stoploss = stoploss;
+                _pyramid = pyramid;
+            }
+
+            public override State<FilteredSMACrossoverConfiguration> OnOrderUpdate(OrderUpdate order)
+            {
+                if (order.OrderId == _stoploss.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return new EntryState();
                 }
@@ -134,16 +254,60 @@ namespace SpreadShare.Algorithms.Implementations
 
             public override State<FilteredSMACrossoverConfiguration> OnMarketCondition(DataProvider data)
             {
-                int candleamount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
+                int candleAmount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
+
+                // Check whether we need to trail the stoploss higher
                 bool trail = data.GetCandles(
                                  AlgorithmConfiguration.TradingPairs.First(),
-                                 candleamount).Min(x => x.Low)
+                                 candleAmount).Min(x => x.Low)
                              >
-                                 oldstop.SetPrice;
+                             _stoploss.SetPrice;
 
+                // Check whether the filter SMA is hit or not.
+                bool filterSma = data.GetStandardMovingAverage(
+                                     AlgorithmConfiguration.TradingPairs.First(),
+                                     AlgorithmConfiguration.FilterSMA,
+                                     AlgorithmConfiguration.CandleSize)
+                                 > data.GetStandardMovingAverage(
+                                     AlgorithmConfiguration.TradingPairs.First(),
+                                     AlgorithmConfiguration.FilterSMA,
+                                     AlgorithmConfiguration.CandleSize,
+                                     5);
+
+                int shortAtrTime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.ShortATR;
+                int longAtrTime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.LongATR;
+
+                // Check whether the ATR is higher than average
+                bool filterAtr = data.GetAverageTrueRange(
+                                     AlgorithmConfiguration.TradingPairs.First(),
+                                     shortAtrTime,
+                                     AlgorithmConfiguration.ShortATR)
+                                 > data.GetAverageTrueRange(
+                                     AlgorithmConfiguration.TradingPairs.First(),
+                                     longAtrTime,
+                                     AlgorithmConfiguration.LongATR);
+
+                // Check for the crossover to happen.
+                bool crossoverSma = data.GetStandardMovingAverage(
+                                        AlgorithmConfiguration.TradingPairs.First(),
+                                        AlgorithmConfiguration.ShortSMA,
+                                        AlgorithmConfiguration.CandleSize)
+                                    > data.GetStandardMovingAverage(
+                                        AlgorithmConfiguration.TradingPairs.First(),
+                                        AlgorithmConfiguration.LongSMA,
+                                        AlgorithmConfiguration.CandleSize);
+
+                // If the entry requirements are hit, we pyramid into a bigger position
+                if (filterSma && crossoverSma && filterAtr && _pyramid < 5)
+                {
+                    _pyramid++;
+                    return new BuyState(_stoploss, _pyramid);
+                }
+
+                // If the trailing requirements are hit, we trail into a higher stoploss
                 if (trail)
                 {
-                    return new CancelState(oldstop);
+                    return new CancelStopState(_stoploss, _pyramid);
                 }
 
                 return new NothingState<FilteredSMACrossoverConfiguration>();
@@ -151,27 +315,6 @@ namespace SpreadShare.Algorithms.Implementations
 
             protected override void Run(TradingProvider trading, DataProvider data)
             {
-            }
-        }
-
-        private class CancelState : State<FilteredSMACrossoverConfiguration>
-        {
-            private OrderUpdate oldstop;
-
-            public CancelState(OrderUpdate stoploss)
-            {
-                oldstop = stoploss;
-            }
-
-            public override State<FilteredSMACrossoverConfiguration> OnTimerElapsed()
-            {
-                return new InTradeState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-                trading.CancelOrder(oldstop);
-                SetTimer(TimeSpan.Zero);
             }
         }
     }
