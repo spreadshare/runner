@@ -113,6 +113,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate ExecuteMarketOrderBuy(TradingPair pair, decimal quantity)
         {
+            _logger.LogDebug($"Executing buy market order with pair {pair}, quantity {quantity}");
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
             var currency = pair.Right;
@@ -159,6 +160,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate ExecuteMarketOrderSell(TradingPair pair, decimal quantity)
         {
+            _logger.LogDebug($"Executing sell market order with pair {pair}, quantity {quantity}");
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
             var currency = pair.Left;
@@ -194,6 +196,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceLimitOrderBuy(TradingPair pair, decimal quantity, decimal price)
         {
+            _logger.LogDebug($"Placing limit buy order with pair {pair}, quantity {quantity}, price {price}");
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
             Guard.Argument(price).NotZero(nameof(quantity)).NotNegative();
@@ -233,6 +236,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceLimitOrderSell(TradingPair pair, decimal quantity, decimal price)
         {
+            _logger.LogDebug($"Placing limit sell order with pair {pair}, quantity {quantity}, price {price}");
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
             Guard.Argument(price).NotZero(nameof(price)).NotNegative();
@@ -313,6 +317,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceStoplossSell(TradingPair pair, decimal quantity, decimal price)
         {
+            _logger.LogDebug($"Placing stoploss sell order for pair {pair}, quantity {quantity}, price {price}");
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
             Guard.Argument(price).NotZero(nameof(price)).NotNegative();
@@ -348,6 +353,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceStoplossBuy(TradingPair pair, decimal quantity, decimal price)
         {
+            _logger.LogDebug($"Placing stoploss buy order for pair {pair}, quantity {quantity}, price {price}");
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(quantity).NotZero(nameof(quantity)).NotNegative();
             Guard.Argument(price).NotZero(nameof(price)).NotNegative();
@@ -422,6 +428,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>boolean indicating success.</returns>
         public bool CancelOrder(OrderUpdate order)
         {
+            _logger.LogDebug($"Cancelling order {order.OrderId}");
             Guard.Argument(order).NotNull(nameof(order));
             var query = HelperMethods.RetryMethod(
                 () => Implementation.CancelOrder(order.Pair, order.OrderId),
@@ -544,13 +551,14 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private OrderUpdate WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
         {
+            _logger.LogDebug($"Waiting order {orderId} to reach status {status}");
             var start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             while (true)
             {
                 var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 if (now - start > 10000)
                 {
-                    throw new ExchangeTimeoutException($"Order {orderId} was not filled within 10 seconds.");
+                    throw new ExchangeTimeoutException($"Order {orderId} was not reported as {status} within 10 seconds.");
                 }
 
                 var query = Implementation.WaitForOrderStatus(orderId, status);

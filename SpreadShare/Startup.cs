@@ -111,7 +111,7 @@ namespace SpreadShare
             services.AddLogging(loggingBuilder => loggingBuilder
                 .AddConsole(opt => opt.DisableColors = false)
                 .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
-                .AddFilter("SpreadShare", Program.CommandLineArgs.VerboseLogging ? LogLevel.Information : LogLevel.Critical)
+                .AddFilter("SpreadShare", Program.CommandLineArgs.VerboseLogging ? LogLevel.Debug : LogLevel.Critical)
                 .SetMinimumLevel(LogLevel.Information));
 
             // Add MyService dependency
