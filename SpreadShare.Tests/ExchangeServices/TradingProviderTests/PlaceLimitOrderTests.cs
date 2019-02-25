@@ -6,6 +6,7 @@ using SpreadShare.Models;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
+using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -120,6 +121,16 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
         {
             var trading = GetTradingProvider<PlaceLimitOrderUnroundedImplementation>();
             trading.PlaceLimitOrderSell(TradingPair.Parse("EOSETH"), 3.2384932482723M, 1M);
+        }
+
+        [Fact]
+        public void PlaceLimitOrderRefused()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            var c1 = new Currency(TestAllocationManager.RefuseCoin);
+            var c2 = new Currency("ETH");
+            Assert.Throws<OrderRefusedException>(() =>
+                trading.PlaceLimitOrderSell(TradingPair.Parse(c1, c2), 10, 1));
         }
 
         // Classes are instantiated via the Activator
