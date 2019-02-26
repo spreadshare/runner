@@ -5,9 +5,7 @@ using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ProvidersBinance;
-using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
-using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 {
@@ -120,39 +118,8 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                     // ##########################################################################
                     try
                     {
-                        _logger.LogInformation(JsonConvert.SerializeObject(orderInfoUpdate));
-                        var order = new OrderUpdate(
-                            orderId: orderInfoUpdate.OrderId,
-                            tradeId: 0,
-                            orderType: BinanceUtilities.ToInternal(orderInfoUpdate.Type),
-                            orderStatus: BinanceUtilities.ToInternal(orderInfoUpdate.Status),
-                            createdTimeStamp: DateTimeOffset
-                                .FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime())
-                                .ToUnixTimeMilliseconds(),
-                            setPrice: orderInfoUpdate.Price,
-                            side: BinanceUtilities.ToInternal(orderInfoUpdate.Side),
-                            pair: TradingPair.Parse(orderInfoUpdate.Symbol),
-                            setQuantity: orderInfoUpdate.Quantity)
-                        {
-                            LastFillIncrement = orderInfoUpdate.QuantityOfLastFilledTrade,
-                            LastFillPrice = orderInfoUpdate.PriceLastFilledTrade,
-                            AverageFilledPrice = HelperMethods.SafeDiv(
-                                orderInfoUpdate.CummulativeQuoteQuantity,
-                                orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
-                            FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
-                        };
-
-                        try
-                        {
-                            order.Commission = orderInfoUpdate.Commission;
-                            order.CommissionAsset = new Currency(orderInfoUpdate.CommissionAsset);
-                        }
-                        catch
-                        {
-                            // ignored
-                        }
-
-                        UpdateObservers(order);
+                        _logger.LogDebug(JsonConvert.SerializeObject(orderInfoUpdate));
+                        UpdateObservers(BinanceUtilities.ToInternal(orderInfoUpdate));
                     }
                     catch (Exception e)
                     {
