@@ -1,5 +1,6 @@
 using System;
 using Binance.Net;
+using Binance.Net.Interfaces;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
@@ -39,7 +40,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         /// <summary>
         /// Gets the instance of the binance client.
         /// </summary>
-        public BinanceClient Client { get; private set; }
+        public virtual IBinanceClient Client { get; private set; }
 
         /// <summary>
         /// Gets the instance of the binance user socket.

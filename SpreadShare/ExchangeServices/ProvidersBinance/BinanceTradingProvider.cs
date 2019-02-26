@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Binance.Net.Objects;
@@ -22,6 +23,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         private readonly BinanceCommunicationsService _communications;
 
         /// <summary>
+        /// Used to register additional idempotent transformations for certain orders.
+        /// </summary>
+        private readonly Dictionary<long, Action<OrderUpdate>> _transformMiddleWare;
+
+        /// <summary>
         /// This queue is used to cache orders until the next clock tick. It is also used to confirm order placements.
         /// </summary>
         private readonly ConcurrentQueue<OrderUpdate> _orderCache;
@@ -37,6 +43,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         {
             _communications = communications;
             _orderCache = new ConcurrentQueue<OrderUpdate>();
+            _transformMiddleWare = new Dictionary<long, Action<OrderUpdate>>();
 
             // Push order updates from the websocket in a concurrent queue
             communications.Subscribe(new ConfigurableObserver<OrderUpdate>(
@@ -172,26 +179,30 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 orderResponseType: null,
                 receiveWindow: (int)_communications.ReceiveWindow);
 
-            // Allow nested argument chopping
-            #pragma warning disable SA1118
-            return query.Success
-                ? new ResponseObject<OrderUpdate>(
-                    ResponseCode.Success,
-                    new OrderUpdate(
-                        query.Data.OrderId,
-                        tradeId,
-                        OrderUpdate.OrderStatus.New,
-                        OrderUpdate.OrderTypes.StopLoss,
-                        DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                        realLimitPrice,
-                        side,
-                        pair,
-                        realQuantity)
+            if (query.Success)
+            {
+                var order = new OrderUpdate(
+                    query.Data.OrderId,
+                    tradeId,
+                    OrderUpdate.OrderStatus.New,
+                    OrderUpdate.OrderTypes.StopLoss,
+                    DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                    realLimitPrice,
+                    side,
+                    pair,
+                    realQuantity)
                     {
                         StopPrice = realStopPrice,
-                    })
-                : ResponseCommon.OrderPlacementFailed(query.Error.Message);
-            #pragma warning disable SA1118
+                    };
+
+                // Enter middleware instance to make sure this order is
+                // also converted to a stoploss order when the exchange reports updates.
+                _transformMiddleWare.Add(order.OrderId, x => x.OrderType = OrderUpdate.OrderTypes.StopLoss);
+
+                return new ResponseObject<OrderUpdate>(order);
+            }
+
+            return ResponseCommon.OrderPlacementFailed(query.Error.Message);
         }
 
         /// <inheritdoc />
@@ -222,6 +233,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             {
                 if (order.OrderId == orderId && order.Status == status)
                 {
+                    if (_transformMiddleWare.TryGetValue(order.OrderId, out var transform))
+                    {
+                        transform(order);
+                    }
+
                     return new ResponseObject<OrderUpdate>(order);
                 }
             }
@@ -247,6 +263,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             // Flush the queue of pending order updates
             while (_orderCache.TryDequeue(out var order))
             {
+                if (_transformMiddleWare.TryGetValue(order.OrderId, out var transform))
+                {
+                    transform(order);
+                }
+
                 UpdateObservers(order);
             }
         }
