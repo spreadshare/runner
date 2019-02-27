@@ -6,6 +6,7 @@ using SpreadShare.Models;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
+using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -95,6 +96,16 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
         {
             var trading = GetTradingProvider<ExecuteFullMarketOrderHappyFlowImplementation>();
             trading.ExecuteFullMarketOrderSell(TradingPair.Parse("BNBBTC"));
+        }
+
+        [Fact]
+        public void ExecuteMarketOrderRefused()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderHappyFlowImplementation>();
+            var c1 = new Currency(TestAllocationManager.RefuseCoin);
+            var c2 = new Currency("ETH");
+            Assert.Throws<OrderRefusedException>(() =>
+                trading.ExecuteMarketOrderSell(TradingPair.Parse(c1, c2), 10));
         }
 
         [Fact]

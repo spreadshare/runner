@@ -148,7 +148,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="exchange">The exchange in question.</param>
         /// <param name="tradeCallback">Trade callback to be executed if verification was successful.</param>
         /// <returns>Boolean indicating successful execution of the callback.</returns>
-        public ResponseObject<OrderUpdate> QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<OrderUpdate> tradeCallback)
+        public virtual ResponseObject<OrderUpdate> QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<OrderUpdate> tradeCallback)
         {
             Guard.Argument(_allocations).NotNull("Initialise allocations first");
             Guard.Argument(p).NotNull();
