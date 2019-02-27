@@ -136,9 +136,9 @@ namespace SpreadShare.Models.Trading
         public long TradeId { get; }
 
         /// <summary>
-        /// Gets the type fo the order.
+        /// Gets or sets the type fo the order.
         /// </summary>
-        public OrderTypes OrderType { get; }
+        public OrderTypes OrderType { get; set; }
 
         /// <summary>
         /// Gets the timestamp at which the order was created.

@@ -1,6 +1,6 @@
 using System;
 using System.Threading;
-using Binance.Net;
+using Binance.Net.Interfaces;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
@@ -11,7 +11,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
     /// </summary>
     internal class ListenKeyManager : IDisposable
     {
-        private readonly BinanceClient _client;
+        private readonly IBinanceClient _client;
         private readonly ILogger _logger;
         private readonly int _interval;
 
@@ -26,7 +26,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         /// <param name="loggerFactory">Creates logger.</param>
         /// <param name="client">Creates BinanceClient.</param>
         /// <param name="interval">Renewal interval (default: 30min).</param>
-        public ListenKeyManager(ILoggerFactory loggerFactory, BinanceClient client, int interval = 30 * 60 * 1000)
+        public ListenKeyManager(ILoggerFactory loggerFactory, IBinanceClient client, int interval = 30 * 60 * 1000)
         {
             _logger = loggerFactory.CreateLogger("ListenKeyManager");
             _client = client;

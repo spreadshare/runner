@@ -83,7 +83,7 @@ namespace SpreadShare.Utilities
             => order.OrderType == orderType
                 ? order
                 : throw new UnexpectedOrderTypeException(
-                    $"Order {order.OrderId} has unexpect order type, expected {orderType} got {order.OrderType}");
+                    $"Order {order.OrderId} has unexpected order type, expected {orderType} got {order.OrderType}");
 
         private static OrderUpdate HasStatus(this OrderUpdate order, OrderStatus status)
             => order.Status == status

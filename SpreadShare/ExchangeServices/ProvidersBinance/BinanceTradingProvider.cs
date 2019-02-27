@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Binance.Net.Objects;
@@ -22,6 +23,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         private readonly BinanceCommunicationsService _communications;
 
         /// <summary>
+        /// Used to register additional transformations for certain orders.
+        /// </summary>
+        private readonly Dictionary<long, Action<OrderUpdate>> _transformMiddleWare;
+
+        /// <summary>
         /// This queue is used to cache orders until the next clock tick. It is also used to confirm order placements.
         /// </summary>
         private readonly ConcurrentQueue<OrderUpdate> _orderCache;
@@ -37,12 +43,24 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         {
             _communications = communications;
             _orderCache = new ConcurrentQueue<OrderUpdate>();
+            _transformMiddleWare = new Dictionary<long, Action<OrderUpdate>>();
 
             // Push order updates from the websocket in a concurrent queue
             communications.Subscribe(new ConfigurableObserver<OrderUpdate>(
-                order => _orderCache.Enqueue(order),
-                () => { },
-                e => { }));
+                    order =>
+                    {
+                        lock (_orderCache)
+                        {
+                            if (_transformMiddleWare.TryGetValue(order.OrderId, out var transform))
+                            {
+                                transform(order);
+                            }
+                        }
+
+                        _orderCache.Enqueue(order);
+                    },
+                    () => { },
+                    e => { }));
         }
 
         /// <inheritdoc />
@@ -159,25 +177,24 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             var realLimitPrice = pair.RoundToPriceable(limitPrice);
             var realStopPrice = pair.RoundToPriceable(price);
 
-            var query = client.PlaceOrder(
-                symbol: pair.ToString(),
-                side: BinanceUtilities.ToExternal(side),
-                type: OrderType.StopLossLimit,
-                quantity: realQuantity,
-                newClientOrderId: null,
-                price: realLimitPrice,
-                timeInForce: TimeInForce.GoodTillCancel,
-                stopPrice: realStopPrice,
-                icebergQty: null,
-                orderResponseType: null,
-                receiveWindow: (int)_communications.ReceiveWindow);
+            lock (_orderCache)
+            {
+                var query = client.PlaceOrder(
+                    symbol: pair.ToString(),
+                    side: BinanceUtilities.ToExternal(side),
+                    type: OrderType.StopLossLimit,
+                    quantity: realQuantity,
+                    newClientOrderId: null,
+                    price: realLimitPrice,
+                    timeInForce: TimeInForce.GoodTillCancel,
+                    stopPrice: realStopPrice,
+                    icebergQty: null,
+                    orderResponseType: null,
+                    receiveWindow: (int)_communications.ReceiveWindow);
 
-            // Allow nested argument chopping
-            #pragma warning disable SA1118
-            return query.Success
-                ? new ResponseObject<OrderUpdate>(
-                    ResponseCode.Success,
-                    new OrderUpdate(
+                if (query.Success)
+                {
+                    var order = new OrderUpdate(
                         query.Data.OrderId,
                         tradeId,
                         OrderUpdate.OrderStatus.New,
@@ -189,9 +206,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                         realQuantity)
                     {
                         StopPrice = realStopPrice,
-                    })
-                : ResponseCommon.OrderPlacementFailed(query.Error.Message);
-            #pragma warning disable SA1118
+                    };
+
+                    // Enter middleware instance to make sure this order is
+                    // also converted to a stoploss order when the exchange reports updates.
+                    _transformMiddleWare.Add(order.OrderId, x => x.OrderType = OrderUpdate.OrderTypes.StopLoss);
+
+                    return new ResponseObject<OrderUpdate>(order);
+                }
+
+                return ResponseCommon.OrderPlacementFailed(query.Error.Message);
+            }
         }
 
         /// <inheritdoc />

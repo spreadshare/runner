@@ -49,7 +49,7 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
 
             public override ResponseObject CancelOrder(TradingPair pair, long orderId) => throw new NotImplementedException();
 
-            public override ResponseObject<OrderUpdate> WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
+            public sealed override ResponseObject<OrderUpdate> WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
             {
                 foreach (var order in Cache)
                 {
