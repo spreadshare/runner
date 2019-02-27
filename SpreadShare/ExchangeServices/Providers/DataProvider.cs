@@ -148,6 +148,23 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
+        /// Gets the lowest low of a certain number of candles.
+        /// </summary>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="numberOfCandles">number of candles to consider.</param>
+        /// <returns>The minimum value of the lows of all the candles.</returns>
+        public decimal GetLowestLow(TradingPair pair, int numberOfCandles)
+        {
+            Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(numberOfCandles).NotZero().NotNegative();
+            var query = HelperMethods.RetryMethod(
+                () => Implementation.GetLowestLow(pair, Configuration.Instance.CandleWidth, numberOfCandles), _logger);
+            return query.Success
+                ? query.Data
+                : throw new ExchangeConnectionException(query.Message);
+        }
+
+        /// <summary>
         /// Calculate the Average True Range (ATR) of certain pair given a number of candles, and a number
         /// of chunks they ought to be split in.
         /// </summary>
