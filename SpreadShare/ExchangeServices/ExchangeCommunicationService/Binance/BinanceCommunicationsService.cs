@@ -38,9 +38,9 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         public long ReceiveWindow { get; }
 
         /// <summary>
-        /// Gets the instance of the binance client.
+        /// Gets or sets the instance of the binance client.
         /// </summary>
-        public virtual IBinanceClient Client { get; private set; }
+        public virtual IBinanceClient Client { get; protected set; }
 
         /// <summary>
         /// Gets the instance of the binance user socket.

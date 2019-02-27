@@ -49,9 +49,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             communications.Subscribe(new ConfigurableObserver<OrderUpdate>(
                     order =>
                     {
-                        if (_transformMiddleWare.TryGetValue(order.OrderId, out var transform))
+                        lock (_orderCache)
                         {
-                            transform(order);
+                            if (_transformMiddleWare.TryGetValue(order.OrderId, out var transform))
+                            {
+                                transform(order);
+                            }
                         }
 
                         _orderCache.Enqueue(order);
@@ -174,43 +177,46 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             var realLimitPrice = pair.RoundToPriceable(limitPrice);
             var realStopPrice = pair.RoundToPriceable(price);
 
-            var query = client.PlaceOrder(
-                symbol: pair.ToString(),
-                side: BinanceUtilities.ToExternal(side),
-                type: OrderType.StopLossLimit,
-                quantity: realQuantity,
-                newClientOrderId: null,
-                price: realLimitPrice,
-                timeInForce: TimeInForce.GoodTillCancel,
-                stopPrice: realStopPrice,
-                icebergQty: null,
-                orderResponseType: null,
-                receiveWindow: (int)_communications.ReceiveWindow);
-
-            if (query.Success)
+            lock (_orderCache)
             {
-                var order = new OrderUpdate(
-                    query.Data.OrderId,
-                    tradeId,
-                    OrderUpdate.OrderStatus.New,
-                    OrderUpdate.OrderTypes.StopLoss,
-                    DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                    realLimitPrice,
-                    side,
-                    pair,
-                    realQuantity)
+                var query = client.PlaceOrder(
+                    symbol: pair.ToString(),
+                    side: BinanceUtilities.ToExternal(side),
+                    type: OrderType.StopLossLimit,
+                    quantity: realQuantity,
+                    newClientOrderId: null,
+                    price: realLimitPrice,
+                    timeInForce: TimeInForce.GoodTillCancel,
+                    stopPrice: realStopPrice,
+                    icebergQty: null,
+                    orderResponseType: null,
+                    receiveWindow: (int)_communications.ReceiveWindow);
+
+                if (query.Success)
+                {
+                    var order = new OrderUpdate(
+                        query.Data.OrderId,
+                        tradeId,
+                        OrderUpdate.OrderStatus.New,
+                        OrderUpdate.OrderTypes.StopLoss,
+                        DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                        realLimitPrice,
+                        side,
+                        pair,
+                        realQuantity)
                     {
                         StopPrice = realStopPrice,
                     };
 
-                // Enter middleware instance to make sure this order is
-                // also converted to a stoploss order when the exchange reports updates.
-                _transformMiddleWare.Add(order.OrderId, x => x.OrderType = OrderUpdate.OrderTypes.StopLoss);
+                    // Enter middleware instance to make sure this order is
+                    // also converted to a stoploss order when the exchange reports updates.
+                    _transformMiddleWare.Add(order.OrderId, x => x.OrderType = OrderUpdate.OrderTypes.StopLoss);
 
-                return new ResponseObject<OrderUpdate>(order);
+                    return new ResponseObject<OrderUpdate>(order);
+                }
+
+                return ResponseCommon.OrderPlacementFailed(query.Error.Message);
             }
-
-            return ResponseCommon.OrderPlacementFailed(query.Error.Message);
         }
 
         /// <inheritdoc />
