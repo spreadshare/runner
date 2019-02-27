@@ -150,5 +150,47 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     throw new ArgumentOutOfRangeException(nameof(width), width, null);
             }
         }
+
+        /// <summary>
+        /// Convert a Binance.Net.Binance.StreamOrderUpdate to a SpreadShare.OrderUpdate.
+        /// </summary>
+        /// <param name="orderInfoUpdate">Binance.Net.StreamOrderUpdate.</param>
+        /// <returns>OrderUpdate.</returns>
+        public static OrderUpdate ToInternal(BinanceStreamOrderUpdate orderInfoUpdate)
+        {
+            // TODO: Trade Id is wrong.
+            var order = new OrderUpdate(
+                orderId: orderInfoUpdate.OrderId,
+                tradeId: 0,
+                orderType: ToInternal(orderInfoUpdate.Type),
+                orderStatus: ToInternal(orderInfoUpdate.Status),
+                createdTimeStamp: DateTimeOffset
+                    .FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime())
+                    .ToUnixTimeMilliseconds(),
+                setPrice: orderInfoUpdate.Price,
+                side: ToInternal(orderInfoUpdate.Side),
+                pair: TradingPair.Parse(orderInfoUpdate.Symbol),
+                setQuantity: orderInfoUpdate.Quantity)
+            {
+                LastFillIncrement = orderInfoUpdate.QuantityOfLastFilledTrade,
+                LastFillPrice = orderInfoUpdate.PriceLastFilledTrade,
+                AverageFilledPrice = HelperMethods.SafeDiv(
+                    orderInfoUpdate.CummulativeQuoteQuantity,
+                    orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
+                FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
+            };
+
+            try
+            {
+                order.Commission = orderInfoUpdate.Commission;
+                order.CommissionAsset = new Currency(orderInfoUpdate.CommissionAsset);
+            }
+            catch (ArgumentException)
+            {
+                // ignored
+            }
+
+            return order;
+        }
     }
 }
