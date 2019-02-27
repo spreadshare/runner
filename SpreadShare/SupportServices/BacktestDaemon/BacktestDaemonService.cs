@@ -66,11 +66,11 @@ namespace SpreadShare.SupportServices.BacktestDaemon
                  }
                  catch (InvalidCommandException e)
                  {
-                     Console.WriteLine(e.Message);
+                     Console.WriteLine($"COMMAND_ERROR: {e.Message}");
                  }
                  catch (Exception e)
                  {
-                     Console.WriteLine($"Command caused error: {e}");
+                     Console.WriteLine($"COMMAND_ERROR: Command caused error: {e}");
                  }
              }
         }
