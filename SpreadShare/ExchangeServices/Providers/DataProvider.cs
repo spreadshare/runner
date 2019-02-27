@@ -177,11 +177,11 @@ namespace SpreadShare.ExchangeServices.Providers
             Guard.Argument(pair).NotNull(nameof(pair));
 
             Guard.Argument(chunks)
-                .NotZero()
+                .NotZero(nameof(chunks))
                 .NotNegative();
 
             Guard.Argument(candlesBack)
-                .NotZero()
+                .NotZero(nameof(candlesBack))
                 .NotNegative()
                 .Require<ArgumentException>(
                     x => x % chunks == 0,
