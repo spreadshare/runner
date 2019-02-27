@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
