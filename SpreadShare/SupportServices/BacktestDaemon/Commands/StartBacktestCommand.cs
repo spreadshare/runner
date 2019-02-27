@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using CommandLine;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
@@ -51,7 +52,15 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
 
             // Optionally load with custom path.
             _args.ConfigurationPath = _args.ConfigurationPath ?? _args.AlgorithmName + ".yaml";
-            _configuration = ConfigurationLoader.LoadConfiguration(settingsType, _args.ConfigurationPath);
+            try
+            {
+                _configuration = ConfigurationLoader.LoadConfiguration(settingsType, _args.ConfigurationPath);
+            }
+            catch (TargetInvocationException e)
+            {
+                throw new InvalidCommandException("Provided configuration is invalid.\n"
+                                                  + $"  > {e.InnerException.InnerException.Message}");
+            }
 
             if (_configuration.Exchange == Exchange.Backtesting)
             {
