@@ -79,7 +79,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Get the highest high of a certain number of recent candles.
         /// </summary>
         /// <param name="pair">TradingPair.</param>
-        /// <param name="width">The width of a candle (e.g. FiveMinutes.</param>
+        /// <param name="width">The width of a candle (e.g. FiveMinutes).</param>
         /// <param name="numberOfCandles">The number of candles to utilize.</param>
         /// <returns>The highest high.</returns>
         public virtual ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles)
@@ -87,6 +87,21 @@ namespace SpreadShare.ExchangeServices.Providers
             var candles = GetCandles(pair, numberOfCandles, width);
             return candles.Success
                 ? new ResponseObject<decimal>(candles.Data.Max(x => x.High))
+                : new ResponseObject<decimal>(ResponseCode.Error, candles.Message);
+        }
+
+        /// <summary>
+        /// Get the lowest low of certain number of recent candles.
+        /// </summary>
+        /// <param name="pair">TradingPair.</param>
+        /// <param name="width">The width of a candle (e.g. FiveMinutes).</param>
+        /// <param name="numberOfCandles">The number of candles to utilize.</param>
+        /// <returns>The lowest low.</returns>
+        public virtual ResponseObject<decimal> GetLowestLow(TradingPair pair, CandleWidth width, int numberOfCandles)
+        {
+            var candles = GetCandles(pair, numberOfCandles, width);
+            return candles.Success
+                ? new ResponseObject<decimal>(candles.Data.Min(x => x.Low))
                 : new ResponseObject<decimal>(ResponseCode.Error, candles.Message);
         }
 
