@@ -23,7 +23,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         private readonly BinanceCommunicationsService _communications;
 
         /// <summary>
-        /// Used to register additional idempotent transformations for certain orders.
+        /// Used to register additional transformations for certain orders.
         /// </summary>
         private readonly Dictionary<long, Action<OrderUpdate>> _transformMiddleWare;
 
@@ -47,9 +47,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
 
             // Push order updates from the websocket in a concurrent queue
             communications.Subscribe(new ConfigurableObserver<OrderUpdate>(
-                order => _orderCache.Enqueue(order),
-                () => { },
-                e => { }));
+                    order =>
+                    {
+                        if (_transformMiddleWare.TryGetValue(order.OrderId, out var transform))
+                        {
+                            transform(order);
+                        }
+
+                        _orderCache.Enqueue(order);
+                    },
+                    () => { },
+                    e => { }));
         }
 
         /// <inheritdoc />
@@ -233,11 +241,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             {
                 if (order.OrderId == orderId && order.Status == status)
                 {
-                    if (_transformMiddleWare.TryGetValue(order.OrderId, out var transform))
-                    {
-                        transform(order);
-                    }
-
                     return new ResponseObject<OrderUpdate>(order);
                 }
             }
@@ -263,11 +266,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             // Flush the queue of pending order updates
             while (_orderCache.TryDequeue(out var order))
             {
-                if (_transformMiddleWare.TryGetValue(order.OrderId, out var transform))
-                {
-                    transform(order);
-                }
-
                 UpdateObservers(order);
             }
         }

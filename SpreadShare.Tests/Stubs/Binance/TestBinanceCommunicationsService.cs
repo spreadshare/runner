@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Binance.Net.Interfaces;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
@@ -14,8 +15,11 @@ namespace SpreadShare.Tests.Stubs.Binance
 
         public override IBinanceClient Client => new TestBinanceClient(this);
 
-        public void ScheduleObserverEvent(OrderUpdate order)
+        public async void ScheduleObserverEvent(OrderUpdate order)
         {
+            // Wait a small amount of time to ensure that the BinanceTradingProvider has
+            // been able to add it's middleware transformation.
+            await Task.Delay(2000).ConfigureAwait(false);
             UpdateObservers(order);
         }
     }
