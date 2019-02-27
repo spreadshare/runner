@@ -86,6 +86,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             return new ResponseObject<decimal>(_buffers.GetHighestHighs(pair, numberOfCandles)[index]);
         }
 
+        /// <inheritdoc/>
+        public override ResponseObject<decimal> GetLowestLow(TradingPair pair, CandleWidth width, int numberOfCandles)
+        {
+            var (_, index) = FindCandle(pair, _timer.CurrentTime.ToUnixTimeMilliseconds());
+            return new ResponseObject<decimal>(_buffers.GetLowestLow(pair, numberOfCandles)[index]);
+        }
+
         /// <inheritdoc />
         public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
         {
