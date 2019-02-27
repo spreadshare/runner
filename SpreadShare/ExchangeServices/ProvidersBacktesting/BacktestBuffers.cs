@@ -96,11 +96,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <returns>Complete lowest low buffer.</returns>
         public decimal[] GetLowestLow(TradingPair pair, int numberOfCandles)
         {
-            if (!_highestHighBuffer.ContainsKey((pair.ToString(), numberOfCandles)))
+            if (!_lowestLowBuffer.ContainsKey((pair.ToString(), numberOfCandles)))
             {
                 _logger.LogCritical($"Building lowest low buffer for {pair} with size {numberOfCandles}");
                 var candles = GetCandles(pair);
-                _highestHighBuffer[(pair.ToString(), numberOfCandles)] =
+                _lowestLowBuffer[(pair.ToString(), numberOfCandles)] =
                     BuildLowestLowBuffer(candles, numberOfCandles);
             }
 
