@@ -47,10 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.yaml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TemplateAlgorithm.yaml">
+    <None Update="*.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
