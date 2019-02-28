@@ -105,7 +105,7 @@ namespace SpreadShare.Algorithms
                     {
                         backtestTimer.LogOutput();
                         _logger.LogError(error, "Exception during backtesting");
-                        return new ResponseObject(ResponseCode.Error, error.Message);
+                        return new ResponseObject(ResponseCode.Error, error.ToString());
                     }
                 }
                 else
