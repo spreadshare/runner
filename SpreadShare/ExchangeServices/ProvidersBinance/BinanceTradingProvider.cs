@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
@@ -242,9 +241,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
         {
-            var values = _orderCache.ToList();
-            foreach (var order in values)
+            while (_orderCache.TryDequeue(out var order))
             {
+                UpdateObservers(order);
                 if (order.OrderId == orderId && order.Status == status)
                 {
                     return new ResponseObject<OrderUpdate>(order);

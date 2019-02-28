@@ -117,15 +117,18 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             // Add the order to the watchlist
             OrderUpdate order = new OrderUpdate(
-                _mockOrderCounter++,
-                tradeId,
-                OrderUpdate.OrderStatus.New,
-                OrderUpdate.OrderTypes.StopLoss,
-                Timer.CurrentTime.ToUnixTimeMilliseconds(),
-                price,
-                side,
-                pair,
-                quantity);
+                orderId: _mockOrderCounter++,
+                tradeId: tradeId,
+                orderStatus: OrderUpdate.OrderStatus.New,
+                orderType: OrderUpdate.OrderTypes.StopLoss,
+                createdTimeStamp: Timer.CurrentTime.ToUnixTimeMilliseconds(),
+                setPrice: 0,
+                side: side,
+                pair: pair,
+                setQuantity: quantity)
+            {
+                StopPrice = price,
+            };
 
             // Add to order cache to confirm placement.
             _orderCache.Enqueue(order);
@@ -170,8 +173,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject<OrderUpdate> WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status)
         {
-            foreach (var order in _orderCache)
+            while (_orderCache.TryDequeue(out var order))
             {
+                UpdateObservers(order);
                 if (order.OrderId == orderId && order.Status == status)
                 {
                     return new ResponseObject<OrderUpdate>(order);
@@ -224,10 +228,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 order.Status = OrderUpdate.OrderStatus.Filled;
 
                 // Set the actual price for the order
-                order.AverageFilledPrice = order.SetPrice;
+                order.AverageFilledPrice =
+                    order.OrderType == OrderUpdate.OrderTypes.StopLoss
+                        ? order.StopPrice
+                        : order.SetPrice;
                 order.FilledQuantity = order.SetQuantity;
                 order.LastFillIncrement = order.SetQuantity;
-                order.LastFillPrice = order.SetPrice;
+                order.LastFillPrice =
+                    order.OrderType == OrderUpdate.OrderTypes.StopLoss
+                        ? order.StopPrice
+                        : order.SetPrice;
                 order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
 
                 // Write the filled trade to the database
@@ -256,8 +266,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private static bool FilledStoplossOrder(OrderUpdate order, decimal price)
         {
             return order.Side == OrderSide.Buy
-                ? price >= order.SetPrice
-                : price <= order.SetPrice;
+                ? price >= order.StopPrice
+                : price <= order.StopPrice;
         }
     }
 }
