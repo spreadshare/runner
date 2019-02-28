@@ -19,14 +19,9 @@ namespace SpreadShare.Algorithms.Implementations
          // Buys the highest performer of the last number of hours
          private class WelcomeState : EntryState<SimpleBandwagonConfiguration>
          {
-             public override State<SimpleBandwagonConfiguration> OnTimerElapsed()
+             protected override State<SimpleBandwagonConfiguration> Run(TradingProvider trading, DataProvider data)
              {
                  return new EntryState();
-             }
-
-             protected override void Run(TradingProvider trading, DataProvider data)
-             {
-                 SetTimer(TimeSpan.Zero);
              }
          }
 
@@ -46,10 +41,6 @@ namespace SpreadShare.Algorithms.Implementations
 
                  return new NothingState<SimpleBandwagonConfiguration>();
              }
-
-             protected override void Run(TradingProvider trading, DataProvider data)
-             {
-             }
          }
 
         // Buys the highest performer, and moves into checkstate after HoldTime amount of hours
@@ -68,10 +59,11 @@ namespace SpreadShare.Algorithms.Implementations
                 return new CheckState(_buyorder);
             }
 
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<SimpleBandwagonConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 _buyorder = trading.ExecuteFullMarketOrderBuy(_pair);
                 SetTimer(TimeSpan.FromHours(AlgorithmConfiguration.HoldTime));
+                return new NothingState<SimpleBandwagonConfiguration>();
             }
          }
 
@@ -108,10 +100,6 @@ namespace SpreadShare.Algorithms.Implementations
 
                 return new IdleState(_oldbuy);
             }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-            }
          }
 
         // If there are no winners, sell the current asset and moves back to scan for entries
@@ -124,15 +112,10 @@ namespace SpreadShare.Algorithms.Implementations
                 _oldbuy = buyorder;
             }
 
-            public override State<SimpleBandwagonConfiguration> OnTimerElapsed()
-            {
-                return new EntryState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<SimpleBandwagonConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 trading.ExecuteFullMarketOrderSell(_oldbuy.Pair);
-                SetTimer(TimeSpan.Zero);
+                return new EntryState();
             }
          }
 
@@ -151,9 +134,10 @@ namespace SpreadShare.Algorithms.Implementations
                 return new CheckState(_oldbuy);
             }
 
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<SimpleBandwagonConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 SetTimer(TimeSpan.FromHours(1));
+                return new NothingState<SimpleBandwagonConfiguration>();
             }
          }
 
@@ -167,15 +151,10 @@ namespace SpreadShare.Algorithms.Implementations
                 _oldbuy = buyorder;
             }
 
-            public override State<SimpleBandwagonConfiguration> OnTimerElapsed()
-            {
-                return new EntryState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<SimpleBandwagonConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 trading.ExecuteFullMarketOrderSell(_oldbuy.Pair);
-                SetTimer(TimeSpan.Zero);
+                return new EntryState();
             }
          }
     }

@@ -75,7 +75,7 @@ namespace SpreadShare.Algorithms
 
                 // Setup initial state
                 _activeState = initial;
-                _activeState.Activate(algorithmConfiguration, container, _loggerFactory);
+                SwitchState(_activeState.Activate(algorithmConfiguration, container, _loggerFactory));
             }
         }
 
@@ -201,7 +201,8 @@ namespace SpreadShare.Algorithms
 
                 _activeState = child;
 
-                _activeState.Activate(AlgorithmConfiguration, Container, _loggerFactory);
+                // Keep switching if the run method yields a new state.
+                SwitchState(_activeState.Activate(AlgorithmConfiguration, Container, _loggerFactory));
             }
         }
 

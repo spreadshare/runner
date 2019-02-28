@@ -20,14 +20,9 @@ namespace SpreadShare.Algorithms.Implementations
         // Buy when the price dips more than X percent in Y minutes, and sell after Z% recovery or after A hours
         private class WelcomeState : EntryState<SimplePumpFollowConfiguration>
         {
-            public override State<SimplePumpFollowConfiguration> OnTimerElapsed()
+            protected override State<SimplePumpFollowConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 return new EntryState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-                SetTimer(TimeSpan.Zero);
             }
         }
 
@@ -47,10 +42,6 @@ namespace SpreadShare.Algorithms.Implementations
                 }
 
                 return new NothingState<SimplePumpFollowConfiguration>();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
             }
         }
 
@@ -84,7 +75,7 @@ namespace SpreadShare.Algorithms.Implementations
                 return new NothingState<SimplePumpFollowConfiguration>();
             }
 
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<SimplePumpFollowConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 var buyorder = trading.ExecuteFullMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First());
                 _limitsell = trading.PlaceFullLimitOrderSell(
@@ -96,6 +87,7 @@ namespace SpreadShare.Algorithms.Implementations
                 var sellPrice = buyorder.AverageFilledPrice * AlgorithmConfiguration.StopPrice;
 
                 _stophit = currentPrice < sellPrice;
+                return new NothingState<SimplePumpFollowConfiguration>();
             }
         }
 
@@ -108,16 +100,11 @@ namespace SpreadShare.Algorithms.Implementations
                 oldlimit = limitsell;
             }
 
-            public override State<SimplePumpFollowConfiguration> OnTimerElapsed()
-            {
-                return new EntryState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<SimplePumpFollowConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 trading.CancelOrder(oldlimit);
                 trading.ExecuteFullMarketOrderSell(AlgorithmConfiguration.TradingPairs.First());
-                SetTimer(TimeSpan.Zero);
+                return new EntryState();
             }
         }
     }

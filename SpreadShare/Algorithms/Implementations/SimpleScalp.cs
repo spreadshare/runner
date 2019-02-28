@@ -21,14 +21,9 @@ namespace SpreadShare.Algorithms.Implementations
         // Buy at market, set a limit sell immediately, and a 2 hour stop. if the stop is hit, sell at market, and wait
         private class WelcomeState : EntryState<SimpleScalpConfiguration>
         {
-            public override State<SimpleScalpConfiguration> OnTimerElapsed()
+            protected override State<SimpleScalpConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 return new EntryState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-                SetTimer(TimeSpan.Zero);
             }
         }
 
@@ -51,7 +46,7 @@ namespace SpreadShare.Algorithms.Implementations
                 return new NothingState<SimpleScalpConfiguration>();
             }
 
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<SimpleScalpConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 OrderUpdate buyorder =
                     trading.ExecuteFullMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First());
@@ -61,6 +56,7 @@ namespace SpreadShare.Algorithms.Implementations
                     portfolio.GetAllocation(AlgorithmConfiguration.TradingPairs.First().Left).Free,
                     buyorder.AverageFilledPrice * AlgorithmConfiguration.TakeProfit);
                 SetTimer(TimeSpan.FromHours(AlgorithmConfiguration.StopTime));
+                return new NothingState<SimpleScalpConfiguration>();
             }
         }
 
@@ -72,10 +68,11 @@ namespace SpreadShare.Algorithms.Implementations
                 return new EntryState();
             }
 
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<SimpleScalpConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 Logger.LogInformation($"Total btc {trading.GetPortfolio().GetAllocation(new Currency("BTC"))}");
                 SetTimer(TimeSpan.FromMinutes(AlgorithmConfiguration.WaitTime));
+                return new NothingState<SimpleScalpConfiguration>();
             }
         }
 
@@ -88,16 +85,11 @@ namespace SpreadShare.Algorithms.Implementations
                 oldlimit = limitsell;
             }
 
-            public override State<SimpleScalpConfiguration> OnTimerElapsed()
-            {
-                return new WaitState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<SimpleScalpConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 trading.CancelOrder(oldlimit);
                 trading.ExecuteFullMarketOrderSell(AlgorithmConfiguration.TradingPairs.First());
-                SetTimer(TimeSpan.Zero);
+                return new WaitState();
             }
         }
     }

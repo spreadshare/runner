@@ -44,6 +44,7 @@ namespace SpreadShare.Tests.Algorithms
         public void OrderPredicateDefaultNothing()
         {
             var state = new TestState();
+            state.Activate(AlgorithmConfiguration, _container, LoggerFactory);
             var next = state.OnOrderUpdate(null);
             Assert.IsType<NothingState<TemplateAlgorithmConfiguration>>(next);
         }
