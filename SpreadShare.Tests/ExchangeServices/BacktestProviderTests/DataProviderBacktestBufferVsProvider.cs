@@ -30,6 +30,16 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
             Assert.Equal(candles.Max(x => x.High), highestHigh);
         }
 
+        [Fact]
+        public void LowestLowIsMaximumOfCandleLows()
+        {
+            var data = GetDataProvider<DataProviderGetCandlesImplementation>();
+            var pair = TradingPair.Parse("EOSETH");
+            var candles = data.GetCandles(pair, 1300);
+            var lowestLow = data.GetLowestLow(pair, 1300);
+            Assert.Equal(candles.Min(x => x.Low), lowestLow);
+        }
+
         // Class is instantiated via the Activator
         #pragma warning disable CA1812
 
@@ -73,6 +83,15 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                     .GetMethod("BuildHighestHighBuffer", BindingFlags.NonPublic | BindingFlags.Static);
                 var highestHighBuffer = (decimal[])method.Invoke(null, new object[] { candles, numberOfCandles });
                 return new ResponseObject<decimal>(highestHighBuffer.Last());
+            }
+
+            public override ResponseObject<decimal> GetLowestLow(TradingPair pair, CandleWidth width, int numberOfCandles)
+            {
+                var candles = GetCandles(pair, numberOfCandles, width).Data;
+                var method = typeof(BacktestBuffers)
+                    .GetMethod("BuildLowestLowBuffer", BindingFlags.NonPublic | BindingFlags.Static);
+                var lowestLowBuffer = (decimal[])method.Invoke(null, new object[] { candles, numberOfCandles });
+                return new ResponseObject<decimal>(lowestLowBuffer.Last());
             }
         }
 
