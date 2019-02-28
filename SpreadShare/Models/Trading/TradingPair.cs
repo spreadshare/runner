@@ -127,7 +127,7 @@ namespace SpreadShare.Models.Trading
             {
                 // Disect by extracting the known base pairs.
                 Regex rx = new Regex(
-                    "(.*)(BTC|ETH|USDT|BNB|PAX)",
+                    "(.*)(BNB|BTC|ETH|XRP|USD|USDT|TUSD|PAX|USDC|USDS)",
                     RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
                 var listQuery = client.GetExchangeInfo();

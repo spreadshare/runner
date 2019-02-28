@@ -1,11 +1,14 @@
 using System;
+using System.Reflection;
 using System.Threading;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry;
 using SpreadShare.Algorithms;
+using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices.BacktestDaemon;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.ErrorServices;
@@ -14,7 +17,7 @@ using SpreadShare.Utilities;
 namespace SpreadShare
 {
     /// <summary>
-    /// Entrypoint of the application.
+    /// Entry point of the application.
     /// </summary>
     internal static class Program
     {
@@ -26,7 +29,7 @@ namespace SpreadShare
         public static CommandLineArgs CommandLineArgs { get; private set; }
 
         /// <summary>
-        /// Entrypoint of the application.
+        /// Entry point of the application.
         /// </summary>
         /// <param name="args">The command line arguments.</param>
         /// <returns>Status code.</returns>
@@ -41,7 +44,21 @@ namespace SpreadShare
             IServiceCollection services = new ServiceCollection();
 
             // Configure services - Provide dependencies for services
-            Startup startup = new Startup(CommandLineArgs.ConfigurationPath);
+            Startup startup;
+            try
+            {
+                startup = new Startup(CommandLineArgs.ConfigurationPath);
+            }
+            catch (InvalidConfigurationException e)
+            {
+                Console.ForegroundColor = ConsoleColor.Red; // Logger.logError is not available yet
+                Console.WriteLine("fail: Invalid configuration encountered:");
+                Console.ForegroundColor = ConsoleColor.Red; // Logger.logError is not available yet
+                Console.WriteLine($" > {e.Message}");
+                Console.ResetColor();
+                return 1;
+            }
+
             startup.ConfigureServices(services);
             Startup.ConfigureBusinessServices(services);
 
@@ -52,22 +69,18 @@ namespace SpreadShare
             _loggerFactory = (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory));
             Startup.Configure(serviceProvider, _loggerFactory);
 
-            // --------------------------------------------------
             // Setup finished --> Execute business logic services
-            SentryLogger.GetDsn(out var dsn);
-            using (SentrySdk.Init(dsn))
+            if (CommandLineArgs.Trading)
             {
-                bool successfulStart = ExecuteBusinessLogic(serviceProvider, _loggerFactory);
-                if (!successfulStart)
+                SentryLogger.GetDsn(out var dsn);
+                using (SentrySdk.Init(dsn))
                 {
-                    return 1;
+                    ExecuteTradingLogic(serviceProvider);
                 }
-
-                if (CommandLineArgs.Backtesting)
-                {
-                    var daemonService = serviceProvider.GetService<BacktestDaemonService>();
-                    return (int)daemonService.Run();
-                }
+            }
+            else if (CommandLineArgs.Backtesting)
+            {
+                ExecuteBacktestingLogic(serviceProvider);
             }
 
             return KeepRunningForever();
@@ -83,47 +96,82 @@ namespace SpreadShare
             _loggerFactory?.Dispose();
             if (exitCode != ExitCode.Success)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"----------------------------------");
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"Exiting program with code {exitCode}");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"----------------------------------");
             }
 
             Environment.Exit((int)exitCode);
         }
 
         /// <summary>
-        /// Bind business services.
+        /// Setup and run trading algorithms.
         /// </summary>
-        /// <param name="serviceProvider">Service provider.</param>
-        /// <param name="loggerFactory">LoggerFactory for creating a logger.</param>
-        /// <returns>Boolean indicating success.</returns>
-        private static bool ExecuteBusinessLogic(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+        /// <param name="serviceProvider">Provides access to services.</param>
+        private static void ExecuteTradingLogic(IServiceProvider serviceProvider)
         {
-            ILogger logger = loggerFactory.CreateLogger("Program.cs:ExecuteBusinessLogic");
+            ILogger logger = _loggerFactory.CreateLogger("Program.cs:ExecuteTradingLogic");
+
+            var algorithmService = serviceProvider.GetService<IAlgorithmService>();
+            foreach (var algorithm in Configuration.Instance.EnabledAlgorithms)
+            {
+                // Link algorithm in configuration to implementation in C#
+                Type algorithmConfigurationType = Reflections.GetMatchingConfigurationsType(algorithm);
+                AlgorithmConfiguration algorithmConfiguration;
+                try
+                {
+                    algorithmConfiguration = ConfigurationLoader.LoadConfiguration(algorithmConfigurationType);
+                }
+                catch (TargetInvocationException e)
+                {
+                    logger.LogError("Invalid algorithm configuration encountered:\n  > " +
+                                    $"{e.InnerException.InnerException.Message}");
+                    ExitProgramWithCode(ExitCode.InvalidConfiguration);
+                    return;
+                }
+
+                // Cancel backtesting configurations when trading
+                if (algorithmConfiguration.Exchange == Exchange.Backtesting)
+                {
+                    logger.LogError($"Algorithm {algorithm.Name} has exchange Backtesting configured, " +
+                                    "but --trading is used");
+                    ExitProgramWithCode(ExitCode.InvalidConfiguration);
+                    return;
+                }
+
+                logger.LogInformation($"Starting algorithm '{algorithm.Name}'");
+                logger.LogInformation("Using configuration: " + algorithmConfiguration.GetType().Name);
+
+                // Start algorithm
+                var algorithmResponse = algorithmService.StartAlgorithm(algorithm, algorithmConfiguration);
+
+                if (!algorithmResponse.Success)
+                {
+                    logger.LogError($"Algorithm failed to start:\n\t {algorithmResponse}");
+                    ExitProgramWithCode(ExitCode.AlgorithmStartupFailure);
+                }
+
+                logger.LogInformation($"Started algorithm '{algorithm.Name}' successfully");
+            }
+        }
+
+        /// <summary>
+        /// Setup backtesting and related database services.
+        /// </summary>
+        /// <param name="serviceProvider">Provides access to services.</param>
+        private static void ExecuteBacktestingLogic(IServiceProvider serviceProvider)
+        {
+            // Init database verification checks (checks per backtesting configuration)
             serviceProvider.GetService<DatabaseUtilities>().Bind();
+
+            // Init backtest execution engine
             serviceProvider.GetService<BacktestDaemonService>().Bind();
 
-            if (CommandLineArgs.Trading)
-            {
-                // Bind allocated services
-                var algorithmService = serviceProvider.GetService<IAlgorithmService>();
-                foreach (var algo in Configuration.Instance.EnabledAlgorithms)
-                {
-                    var algorithmConfigurationType = Reflections.GetMatchingConfigurationsType(algo);
-                    var algorithmConfiguration = ConfigurationLoader.LoadConfiguration(algorithmConfigurationType);
-                    Console.WriteLine("Loading: " + algorithmConfiguration.GetType());
-
-                    var algorithmResponse = algorithmService.StartAlgorithm(algo, algorithmConfiguration);
-
-                    if (!algorithmResponse.Success)
-                    {
-                        logger.LogError($"Algorithm failed to start:\n\t {algorithmResponse}");
-                        return false;
-                    }
-
-                    logger.LogInformation($"Started algorithm '{algo}' successfully");
-                }
-            }
-
-            return true;
+            // Accept TTY input
+            serviceProvider.GetService<BacktestDaemonService>().Run();
         }
 
         /// <summary>
