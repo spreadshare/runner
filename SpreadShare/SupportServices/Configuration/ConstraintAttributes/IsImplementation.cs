@@ -27,7 +27,7 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
 
         /// <inheritdoc/>
         public override string OnError(string name, object value)
-            => $"{name} has the value '{value}' which is a type whose interfaces do not contain {_parent.Name}";
+            => $"{name} has the value '{value}', which does not implement the interface {_parent.Name}";
 
         /// <inheritdoc/>
         protected override bool Predicate(object value)

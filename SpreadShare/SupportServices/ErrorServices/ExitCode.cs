@@ -46,5 +46,10 @@ namespace SpreadShare.SupportServices.ErrorServices
         /// An algorithm failed to be stopped, the program terminated to prevent further risk.
         /// </summary>
         AlgorithmNotStopping = 7,
+
+        /// <summary>
+        /// An algorithm could not be started, the program terminated to prevent further risk.
+        /// </summary>
+        AlgorithmStartupFailure = 8,
     }
 }

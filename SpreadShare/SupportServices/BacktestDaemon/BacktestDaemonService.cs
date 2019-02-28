@@ -47,8 +47,7 @@ namespace SpreadShare.SupportServices.BacktestDaemon
         /// <summary>
         /// Start the daemon.
         /// </summary>
-        /// <returns>ExitCode.</returns>
-        public ExitCode Run()
+        public void Run()
         {
              Console.WriteLine(FormatTitle("Welcome to the backtest CLI"));
              while (true)

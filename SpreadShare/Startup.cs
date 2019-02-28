@@ -26,7 +26,7 @@ namespace SpreadShare
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Startup"/> class.
-        /// Empty constructor, visited by EF core cli tools.
+        /// Empty constructor, used by EF core cli tools.
         /// </summary>
         public Startup()
             : this("appsettings.yaml")
