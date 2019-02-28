@@ -134,5 +134,37 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
             var order = BinanceUtilities.ToInternal(input);
             Assert.Equal(0M, order.AverageFilledPrice);
         }
+
+        [Fact]
+        public void ToInternalOrderUpdatePricePropagates()
+        {
+            var input = new BinanceStreamOrderUpdate
+            {
+                Symbol = "TRXETH",
+                OrderCreationTime = DateTime.UtcNow,
+                Side = Binance.Net.Objects.OrderSide.Buy,
+                Price = 12M,
+            };
+
+            var order = BinanceUtilities.ToInternal(input);
+            Assert.Equal(12M, order.SetPrice);
+            Assert.Equal(0M, order.StopPrice);
+        }
+
+        [Fact]
+        public void ToInternalOrderUpdateStopPricePropagates()
+        {
+            var input = new BinanceStreamOrderUpdate
+            {
+                Symbol = "TRXETH",
+                OrderCreationTime = DateTime.UtcNow,
+                Side = Binance.Net.Objects.OrderSide.Buy,
+                StopPrice = 15M,
+            };
+
+            var order = BinanceUtilities.ToInternal(input);
+            Assert.Equal(15M, order.StopPrice);
+            Assert.Equal(0M, order.SetPrice);
+        }
     }
 }

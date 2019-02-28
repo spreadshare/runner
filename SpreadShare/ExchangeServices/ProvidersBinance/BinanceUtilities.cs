@@ -178,6 +178,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     orderInfoUpdate.CummulativeQuoteQuantity,
                     orderInfoUpdate.AccumulatedQuantityOfFilledTrades),
                 FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
+                StopPrice = orderInfoUpdate.StopPrice,
             };
 
             try
