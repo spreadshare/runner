@@ -139,7 +139,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
-            var order = GetOrderInfo(orderId).Data;
+            var orderQuery = GetOrderInfo(orderId);
+            if (!orderQuery.Success)
+            {
+                _logger.LogWarning($"Cannot cancel order {orderId} because it doesn't exist");
+                return new ResponseObject(ResponseCode.Success);
+            }
+
+            var order = orderQuery.Data;
             order.Status = OrderUpdate.OrderStatus.Cancelled;
             order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
 
