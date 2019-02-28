@@ -19,14 +19,9 @@ namespace SpreadShare.Algorithms.Implementations
 
         private class WelcomeState : EntryState<MidTermTurtleConfiguration>
         {
-            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
+            protected override State<MidTermTurtleConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 return new EntryState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-                SetTimer(TimeSpan.Zero);
             }
         }
 
@@ -49,10 +44,6 @@ namespace SpreadShare.Algorithms.Implementations
 
                 return new NothingState<MidTermTurtleConfiguration>();
             }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-            }
         }
 
         private class BuyState : State<MidTermTurtleConfiguration>
@@ -66,19 +57,7 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
-            {
-                if (_stoploss != null)
-                {
-                    return new CancelStopState(_stoploss, _pyramid);
-                }
-                else
-                {
-                    return new SetStopState(_pyramid);
-                }
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<MidTermTurtleConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 decimal allocation = trading.GetPortfolio().GetAllocation(
                                          AlgorithmConfiguration.BaseCurrency).Free
@@ -89,7 +68,14 @@ namespace SpreadShare.Algorithms.Implementations
 
                 // If the Filter and CrossoverSMA signal the trade, we buy at market.
                 trading.ExecuteMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First(), allocation);
-                SetTimer(TimeSpan.Zero);
+                if (_stoploss != null)
+                {
+                    return new CancelStopState(_stoploss, _pyramid);
+                }
+                else
+                {
+                    return new SetStopState(_pyramid);
+                }
             }
         }
 
@@ -106,15 +92,10 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
-            {
-                return new SetStopState(_pyramid);
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<MidTermTurtleConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 trading.CancelOrder(_stoploss);
-                SetTimer(TimeSpan.Zero);
+                return new SetStopState(_pyramid);
             }
         }
 
@@ -129,12 +110,7 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
-            {
-                return new CheckState(_stoploss, _pyramid);
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<MidTermTurtleConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 // Get the lowest low from the last y hours.
                 int candleAmount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.ShortTermTime;
@@ -144,7 +120,7 @@ namespace SpreadShare.Algorithms.Implementations
 
                 // Set first stop loss order at DCMin.
                 _stoploss = trading.PlaceFullStoplossSell(AlgorithmConfiguration.TradingPairs.First(), shortTermTimePrice);
-                SetTimer(TimeSpan.Zero);
+                return new CheckState(_stoploss, _pyramid);
             }
         }
 
@@ -195,10 +171,6 @@ namespace SpreadShare.Algorithms.Implementations
                 SetTimer(TimeSpan.FromMinutes(AlgorithmConfiguration.CandleSize * 5));
 
                 return new NothingState<MidTermTurtleConfiguration>();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
             }
         }
 
@@ -254,10 +226,6 @@ namespace SpreadShare.Algorithms.Implementations
                 }
 
                 return new NothingState<MidTermTurtleConfiguration>();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
             }
         }
     }

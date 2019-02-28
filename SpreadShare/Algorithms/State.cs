@@ -43,12 +43,13 @@ namespace SpreadShare.Algorithms
         /// <param name="settings">Algorithm settings object.</param>
         /// <param name="container">Exchange service container.</param>
         /// <param name="loggerFactory">LoggerFactory for creating a logger.</param>
-        public void Activate(T settings, ExchangeProvidersContainer container, ILoggerFactory loggerFactory)
+        /// <returns>The state that the Run method yields.</returns>
+        public State<T> Activate(T settings, ExchangeProvidersContainer container, ILoggerFactory loggerFactory)
         {
             Logger = loggerFactory.CreateLogger(GetType());
             AlgorithmConfiguration = settings;
             _timerProvider = container.TimerProvider;
-            Run(container.TradingProvider, container.DataProvider);
+            return Run(container.TradingProvider, container.DataProvider);
         }
 
         /// <summary>
@@ -87,6 +88,10 @@ namespace SpreadShare.Algorithms
         /// </summary>
         /// <param name="trading">Trading Provider.</param>
         /// <param name="data">Data provider.</param>
-        protected abstract void Run(TradingProvider trading, DataProvider data);
+        /// <returns>State to switch to.</returns>
+        protected virtual State<T> Run(TradingProvider trading, DataProvider data)
+        {
+            return new NothingState<T>();
+        }
     }
 }

@@ -20,14 +20,9 @@ namespace SpreadShare.Algorithms.Implementations
         // Buy when the price dips more than X percent in Y minutes, and sell after Z% recovery or after A hours
         private class WelcomeState : EntryState<ShortDipConfiguration>
         {
-            public override State<ShortDipConfiguration> OnTimerElapsed()
+            protected override State<ShortDipConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 return new EntryState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
-                SetTimer(TimeSpan.Zero);
             }
         }
 
@@ -44,10 +39,6 @@ namespace SpreadShare.Algorithms.Implementations
                 }
 
                 return new NothingState<ShortDipConfiguration>();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
-            {
             }
         }
 
@@ -70,13 +61,14 @@ namespace SpreadShare.Algorithms.Implementations
                 return new NothingState<ShortDipConfiguration>();
             }
 
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<ShortDipConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 var buyorder = trading.ExecuteFullMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First());
                 _limitsell = trading.PlaceFullLimitOrderSell(
                     AlgorithmConfiguration.TradingPairs.First(),
                     buyorder.AverageFilledPrice * AlgorithmConfiguration.Recovery);
                 SetTimer(TimeSpan.FromHours(AlgorithmConfiguration.StopTime));
+                return new NothingState<ShortDipConfiguration>();
             }
         }
 
@@ -89,16 +81,11 @@ namespace SpreadShare.Algorithms.Implementations
                 oldlimit = limitsell;
             }
 
-            public override State<ShortDipConfiguration> OnTimerElapsed()
-            {
-                return new EntryState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<ShortDipConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 trading.CancelOrder(oldlimit);
                 trading.ExecuteFullMarketOrderSell(AlgorithmConfiguration.TradingPairs.First());
-                SetTimer(TimeSpan.Zero);
+                return new EntryState();
             }
         }
     }

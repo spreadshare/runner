@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
@@ -18,24 +17,20 @@ namespace SpreadShare.Algorithms.Implementations
 
         private class WelcomeState : EntryState<TemplateAlgorithmConfiguration>
         {
-            public override State<TemplateAlgorithmConfiguration> OnTimerElapsed()
-            {
-                return new TemplateState();
-            }
-
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<TemplateAlgorithmConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 Logger.LogInformation("Welcome to the TemplateAlgorithm");
-                SetTimer(TimeSpan.Zero);
+                return new TemplateState();
             }
         }
 
         private class TemplateState : EntryState<TemplateAlgorithmConfiguration>
         {
-            protected override void Run(TradingProvider trading, DataProvider data)
+            protected override State<TemplateAlgorithmConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 Logger.LogInformation("I wonder if Miss Bitcoin thinks I should buy...");
                 Logger.LogInformation(ShowAlloc(trading));
+                return new NothingState<TemplateAlgorithmConfiguration>();
             }
 
             private string ShowAlloc(TradingProvider trading)
