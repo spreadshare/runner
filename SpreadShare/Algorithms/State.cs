@@ -68,6 +68,11 @@ namespace SpreadShare.Algorithms
         /// <returns>State to switch to.</returns>
         public virtual State<T> OnOrderUpdate(OrderUpdate order)
         {
+            if (order == null || order.OrderType == OrderUpdate.OrderTypes.Market)
+            {
+                return new NothingState<T>();
+            }
+
             if (Program.CommandLineArgs.Backtesting)
             {
                 throw new AlgorithmLogicException($"Got order update in state {GetType().Name}, but the method was not implemented.");

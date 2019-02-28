@@ -6,7 +6,6 @@ using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices.BacktestDaemon.CommandAttributes;
 using SpreadShare.SupportServices.BacktestDaemon.Commands;
-using SpreadShare.SupportServices.ErrorServices;
 using SpreadShare.Utilities;
 
 namespace SpreadShare.SupportServices.BacktestDaemon

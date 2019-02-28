@@ -7,6 +7,7 @@ using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Exceptions;
+using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
 using OrderSide = SpreadShare.Models.OrderSide;
@@ -214,60 +215,91 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             {
                 decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
 
-                if (order.OrderType == OrderUpdate.OrderTypes.Limit && !FilledLimitOrder(order, price))
+                if (GetFilledOrder(order, price, Timer.CurrentTime.ToUnixTimeMilliseconds()))
                 {
-                    continue;
+                    Logger.LogInformation($"Order {order.OrderId} confirmed at {Timer.CurrentTime}");
+
+                    // Write the filled trade to the database
+                    _database.Trades.Add(new DatabaseTrade(
+                        order,
+                        ParentImplementation.GetPortfolio().ToJson(),
+                        _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
+
+                    UpdateObservers(order);
                 }
-
-                if (order.OrderType == OrderUpdate.OrderTypes.StopLoss && !FilledStoplossOrder(order, price))
-                {
-                    continue;
-                }
-
-                Logger.LogInformation($"Order {order.OrderId} confirmed at {Timer.CurrentTime}");
-                order.Status = OrderUpdate.OrderStatus.Filled;
-
-                // Set the actual price for the order
-                order.AverageFilledPrice =
-                    order.OrderType == OrderUpdate.OrderTypes.StopLoss
-                        ? order.StopPrice
-                        : order.SetPrice;
-                order.FilledQuantity = order.SetQuantity;
-                order.LastFillIncrement = order.SetQuantity;
-                order.LastFillPrice =
-                    order.OrderType == OrderUpdate.OrderTypes.StopLoss
-                        ? order.StopPrice
-                        : order.SetPrice;
-                order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
-
-                // Write the filled trade to the database
-                _database.Trades.Add(new DatabaseTrade(
-                    order,
-                    ParentImplementation.GetPortfolio().ToJson(),
-                    _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
-
-                UpdateObservers(order);
             }
 
             // Clean up filled orders
-            WatchList = WatchList.Where(keyPair =>
-                       keyPair.Value.Status != OrderUpdate.OrderStatus.Filled
-                    && keyPair.Value.Status != OrderUpdate.OrderStatus.Cancelled)
+            WatchList = WatchList
+                .Where(keyPair => !keyPair.Value.Finalized)
                 .ToDictionary(p => p.Key, p => p.Value);
         }
 
-        private static bool FilledLimitOrder(OrderUpdate order, decimal price)
+        /// <summary>
+        /// Returns a bool indicating whether or not the order was filled, and transforms the order into a filled state if so.
+        /// </summary>
+        /// <param name="order">The order to check as filled.</param>
+        /// <param name="currentPrice">The price to check the order against.</param>
+        /// <param name="currentTime">The current time (will be used as time of fill).</param>
+        /// <returns>Whether the order was filled.</returns>
+        /// <exception cref="UnexpectedOrderTypeException">The order type is not supported by the method.</exception>
+        private static bool GetFilledOrder(OrderUpdate order, decimal currentPrice, long currentTime)
         {
-            return order.Side == OrderSide.Buy
-                ? price <= order.SetPrice
-                : price >= order.SetPrice;
+            if (order == null)
+            {
+                return false;
+            }
+
+            switch (order.OrderType)
+            {
+                case OrderUpdate.OrderTypes.Limit:
+                    return GetFilledLimitOrder(order, currentPrice, currentTime);
+                case OrderUpdate.OrderTypes.StopLoss:
+                    return GetFilledStoplossOrder(order, currentPrice, currentTime);
+                default:
+                    throw new UnexpectedOrderTypeException(
+                        $"Backtest watchlist should not contain order of type {order.OrderType}");
+            }
         }
 
-        private static bool FilledStoplossOrder(OrderUpdate order, decimal price)
+        private static bool GetFilledStoplossOrder(OrderUpdate order, decimal currentPrice, long currentTime)
         {
-            return order.Side == OrderSide.Buy
-                ? price >= order.StopPrice
-                : price <= order.StopPrice;
+            bool filled = order.Side == OrderSide.Buy
+                ? currentPrice >= order.StopPrice
+                : currentPrice <= order.StopPrice;
+            if (filled)
+            {
+                order.StopPrice = order.StopPrice;
+                order.FilledQuantity = order.SetQuantity;
+                order.AverageFilledPrice = order.StopPrice;
+                order.LastFillIncrement = order.SetQuantity;
+                order.LastFillPrice = order.StopPrice;
+                order.Status = OrderUpdate.OrderStatus.Filled;
+                order.FilledTimeStamp = currentTime;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool GetFilledLimitOrder(OrderUpdate order, decimal currentPrice, long currentTime)
+        {
+            bool filled = order.Side == OrderSide.Buy
+                ? currentPrice <= order.SetPrice
+                : currentPrice >= order.SetPrice;
+            if (filled)
+            {
+                order.StopPrice = order.StopPrice;
+                order.FilledQuantity = order.SetQuantity;
+                order.AverageFilledPrice = order.SetPrice;
+                order.LastFillIncrement = order.SetQuantity;
+                order.LastFillPrice = order.SetPrice;
+                order.Status = OrderUpdate.OrderStatus.Filled;
+                order.FilledTimeStamp = currentTime;
+                return true;
+            }
+
+            return false;
         }
     }
 }
