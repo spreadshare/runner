@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
@@ -161,6 +162,16 @@ namespace SpreadShare.Algorithms.Implementations
                 return new CheckState(_stoploss, _pyramid);
             }
 
+            public override State<FilteredSMACrossoverConfiguration> OnOrderUpdate(OrderUpdate order)
+            {
+                if (_stoploss != null && order.OrderId == _stoploss.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                {
+                    return new EntryState();
+                }
+
+                return new NothingState<FilteredSMACrossoverConfiguration>();
+            }
+
             protected override void Run(TradingProvider trading, DataProvider data)
             {
                 // Get the lowest low from the last y hours.
@@ -207,15 +218,13 @@ namespace SpreadShare.Algorithms.Implementations
                 int candleAmount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
 
                 // Check whether we need to trail the stoploss higher
-                bool trail = data.GetCandles(
-                                 AlgorithmConfiguration.TradingPairs.First(),
-                                 candleAmount).Min(x => x.Low)
-                             >
-                             _stoploss.SetPrice;
+                var minPrice = data.GetCandles(AlgorithmConfiguration.TradingPairs.First(), candleAmount).Min(x => x.Low);
+                bool trail = minPrice > _stoploss.StopPrice;
 
                 // If the trailing requirements are hit, we trail into a higher stoploss
                 if (trail)
                 {
+                    Logger.LogInformation($"minPrice was {minPrice} which is more than stopPrice {_stoploss.StopPrice}");
                     return new CancelStopState(_stoploss, _pyramid);
                 }
 

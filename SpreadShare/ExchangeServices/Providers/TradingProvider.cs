@@ -216,11 +216,11 @@ namespace SpreadShare.ExchangeServices.Providers
 
             if (result.Success)
             {
+                _openOrders[result.Data.OrderId] = result.Data;
                 var order = WaitForOrderStatus(result.Data.OrderId, OrderUpdate.OrderStatus.New);
                 order.IsLimit()
                      .IsBuy()
                      .IsNew();
-                _openOrders[result.Data.OrderId] = order;
                 return order;
             }
 
@@ -256,11 +256,11 @@ namespace SpreadShare.ExchangeServices.Providers
 
             if (result.Success)
             {
+                _openOrders[result.Data.OrderId] = result.Data;
                 var order = WaitForOrderStatus(result.Data.OrderId, OrderUpdate.OrderStatus.New);
                 order.IsLimit()
                     .IsSell()
                     .IsNew();
-                _openOrders[result.Data.OrderId] = order;
                 return order;
             }
 
@@ -333,11 +333,11 @@ namespace SpreadShare.ExchangeServices.Providers
 
             if (result.Success)
             {
+                _openOrders[result.Data.OrderId] = result.Data;
                 var order = WaitForOrderStatus(result.Data.OrderId, OrderUpdate.OrderStatus.New);
                 order.IsStopLoss()
                      .IsSell()
                      .IsNew();
-                _openOrders[result.Data.OrderId] = order;
                 return result.Data;
             }
 
@@ -369,11 +369,11 @@ namespace SpreadShare.ExchangeServices.Providers
 
             if (result.Success)
             {
+                _openOrders[result.Data.OrderId] = result.Data;
                 var order = WaitForOrderStatus(result.Data.OrderId, OrderUpdate.OrderStatus.New);
                 order.IsStopLoss()
                      .IsBuy()
                      .IsNew();
-                _openOrders[result.Data.OrderId] = order;
                 return result.Data;
             }
 
@@ -442,7 +442,6 @@ namespace SpreadShare.ExchangeServices.Providers
             try
             {
                 var confirmation = WaitForOrderStatus(order.OrderId, OrderUpdate.OrderStatus.Cancelled);
-                UpdateAllocation(confirmation);
                 _openOrders.Remove(confirmation.OrderId);
             }
             catch
