@@ -1,8 +1,10 @@
 using System;
 using Dawn;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 
@@ -64,7 +66,16 @@ namespace SpreadShare.Algorithms
         /// </summary>
         /// <param name="order">The order update.</param>
         /// <returns>State to switch to.</returns>
-        public virtual State<T> OnOrderUpdate(OrderUpdate order) => new NothingState<T>();
+        public virtual State<T> OnOrderUpdate(OrderUpdate order)
+        {
+            if (Program.CommandLineArgs.Backtesting)
+            {
+                throw new AlgorithmLogicException($"Got order update in state {GetType().Name}, but the method was not implemented.");
+            }
+
+            Logger.LogError($"Got order update in state {GetType().Name}, but the method was not implemented.\n{JsonConvert.SerializeObject(order)}");
+            return new NothingState<T>();
+        }
 
         /// <summary>
         /// Evaluates when (if) a timer elapses.

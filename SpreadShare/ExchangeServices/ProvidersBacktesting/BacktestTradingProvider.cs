@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
 using OrderSide = SpreadShare.Models.OrderSide;
@@ -145,8 +146,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var orderQuery = GetOrderInfo(orderId);
             if (!orderQuery.Success)
             {
-                _logger.LogWarning($"Cannot cancel order {orderId} because it doesn't exist");
-                return new ResponseObject(ResponseCode.Success);
+                throw new InvalidStateException($"Cannot cancel order {orderId} because it doesn't exist.");
             }
 
             var order = orderQuery.Data;
