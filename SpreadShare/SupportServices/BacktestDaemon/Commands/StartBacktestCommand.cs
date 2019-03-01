@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using CommandLine;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
@@ -48,18 +47,18 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
             var settingsType = Reflections.GetAllSubtypes(typeof(AlgorithmConfiguration))
                             .FirstOrDefault(s => Reflections.AlgorithmMatchesConfiguration(_algo, s))
                         ?? throw new InvalidCommandException(
-                            $"{_args.AlgorithmName} does not have a settings object and cannot be started.");
+                            $"{_args.AlgorithmName} does not have a configuration object and cannot be started.");
 
             // Optionally load with custom path.
             _args.ConfigurationPath = _args.ConfigurationPath ?? _args.AlgorithmName + ".yaml";
+
             try
             {
                 _configuration = ConfigurationLoader.LoadConfiguration(settingsType, _args.ConfigurationPath);
             }
-            catch (TargetInvocationException e)
+            catch (Exception e)
             {
-                throw new InvalidCommandException("Provided configuration is invalid.\n"
-                                                  + $"  > {e.InnerException.InnerException.Message}");
+                throw new InvalidCommandException(e.Message);
             }
 
             if (_configuration.Exchange == Exchange.Backtesting)
@@ -82,7 +81,7 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
             }
             else
             {
-                throw new InvalidCommandException("Non backtesting algorithms are currently not deployable from the CLI");
+                throw new PermissionDeniedException("Non backtesting algorithms are currently not deployable from the CLI");
             }
         }
 

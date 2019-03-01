@@ -49,6 +49,13 @@ namespace SpreadShare.ExchangeServices
             _binanceCommunications = binanceComm;
             _backtestCommunicationService = backtestCom;
 
+            _allocationManager = alloc;
+
+            if (!Program.CommandLineArgs.Trading)
+            {
+                return;
+            }
+
             foreach (var item in (Exchange[])Enum.GetValues(typeof(Exchange)))
             {
                 switch (item)
@@ -64,8 +71,6 @@ namespace SpreadShare.ExchangeServices
                             $"No communications instance for {item} in ExchangeFactory");
                 }
             }
-
-            _allocationManager = alloc;
         }
 
         /// <summary>
