@@ -51,5 +51,10 @@ namespace SpreadShare.SupportServices.ErrorServices
         /// An algorithm could not be started, the program terminated to prevent further risk.
         /// </summary>
         AlgorithmStartupFailure = 8,
+
+        /// <summary>
+        /// Communication with binance could not be established.
+        /// </summary>
+        BinanceCommunicationStartupFailure = 9,
     }
 }

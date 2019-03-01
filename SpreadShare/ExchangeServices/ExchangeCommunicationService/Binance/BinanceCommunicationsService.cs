@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.SupportServices.ErrorServices;
 
 namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 {
@@ -127,6 +128,12 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                         _logger.LogError($"Error parsing a BinanceOrderInfoUpdate: {e.Message} \n {JsonConvert.SerializeObject(orderInfoUpdate)}");
                     }
                 });
+
+            if (!succesOrderBook.Success)
+            {
+                _logger.LogError(succesOrderBook.Error.Message);
+                Program.ExitProgramWithCode(ExitCode.BinanceCommunicationStartupFailure);
+            }
 
             // Set error handler
             succesOrderBook.Data.ConnectionLost += () =>

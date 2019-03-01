@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using Dawn;
 using SpreadShare.Utilities;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 
 namespace SpreadShare.SupportServices.Configuration
@@ -23,10 +24,28 @@ namespace SpreadShare.SupportServices.Configuration
                 Reflections.IsAlgorithmConfiguration,
                 x => $"{x} is not an algorithm configuration.");
 
-            return typeof(ConfigurationLoader)
-                .GetMethod(nameof(LoadConfiguration), BindingFlags.Static | BindingFlags.NonPublic, null, Array.Empty<Type>(), Array.Empty<ParameterModifier>())
-                .MakeGenericMethod(type)
-                .Invoke(null, null) as AlgorithmConfiguration;
+            try
+            {
+                return typeof(ConfigurationLoader)
+                    .GetMethod(
+                        name: nameof(LoadConfiguration),
+                        bindingAttr: BindingFlags.Static | BindingFlags.NonPublic,
+                        binder: null,
+                        types: Array.Empty<Type>(),
+                        modifiers: Array.Empty<ParameterModifier>())
+                    .MakeGenericMethod(type)
+                    .Invoke(null, null) as AlgorithmConfiguration;
+            }
+            catch (TargetInvocationException e)
+            {
+                var inner = e.InnerException;
+                if (inner is YamlException)
+                {
+                    throw inner.InnerException;
+                }
+
+                throw inner;
+            }
         }
 
         /// <summary>
@@ -41,10 +60,28 @@ namespace SpreadShare.SupportServices.Configuration
                 Reflections.IsAlgorithmConfiguration,
                 x => $"{x} is not an algorithm configuration.");
 
-            return typeof(ConfigurationLoader)
-                .GetMethod(nameof(LoadConfiguration), BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(string) }, Array.Empty<ParameterModifier>())
-                .MakeGenericMethod(type)
-                .Invoke(null, new object[] { filename }) as AlgorithmConfiguration;
+            try
+            {
+                return typeof(ConfigurationLoader)
+                    .GetMethod(
+                        name: nameof(LoadConfiguration),
+                        bindingAttr: BindingFlags.Static | BindingFlags.NonPublic,
+                        binder: null,
+                        types: new[] { typeof(string) },
+                        modifiers: Array.Empty<ParameterModifier>())
+                    .MakeGenericMethod(type)
+                    .Invoke(null, new object[] { filename }) as AlgorithmConfiguration;
+            }
+            catch (TargetInvocationException e)
+            {
+                var inner = e.InnerException;
+                if (inner is YamlException)
+                {
+                    throw inner.InnerException;
+                }
+
+                throw inner;
+            }
         }
 
         /// <summary>
@@ -66,6 +103,7 @@ namespace SpreadShare.SupportServices.Configuration
         /// <typeparam name="T">The implementation of Algorithm Configuration.</typeparam>
         /// <returns>Loaded algorithm configuration.</returns>
         private static T LoadConfiguration<T>(string filename)
+            where T : AlgorithmConfiguration
         {
             using (var file = new StreamReader(filename))
             {
