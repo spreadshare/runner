@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
-using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.Tests.Stubs;
@@ -87,7 +86,7 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
         public void ExecuteMarketOrderNeverFilled()
         {
             var trading = GetTradingProvider<ExecuteMarketOrderNeverFilledImplementation>();
-            Assert.Throws<ExchangeTimeoutException>(
+            Assert.Throws<OrderFailedException>(
                 () => trading.ExecuteMarketOrderBuy(TradingPair.Parse("EOSETH"), 10));
         }
 

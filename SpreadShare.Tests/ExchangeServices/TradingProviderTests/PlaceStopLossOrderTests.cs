@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
-using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.Tests.Stubs;
@@ -128,7 +127,7 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
         public void PlaceStoplossOrderNeverConfirmed()
         {
             var trading = GetTradingProvider<PlaceStoplossOrderNeverConfirmedImplementation>();
-            Assert.Throws<ExchangeTimeoutException>(() => trading.PlaceStoplossBuy(TradingPair.Parse("EOSETH"), 10, 1M));
+            Assert.Throws<OrderFailedException>(() => trading.PlaceStoplossBuy(TradingPair.Parse("EOSETH"), 10, 1M));
         }
 
         [Fact]
