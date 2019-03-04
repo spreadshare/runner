@@ -86,7 +86,16 @@ namespace SpreadShare.Algorithms
         /// Evaluates when (if) a timer elapses.
         /// </summary>
         /// <returns>State to switch to.</returns>
-        public virtual State<T> OnTimerElapsed() => new NothingState<T>();
+        public virtual State<T> OnTimerElapsed()
+        {
+            if (Program.CommandLineArgs.Backtesting)
+            {
+                throw new AlgorithmLogicException($"Timer was triggered in state {GetType().Name}, but the method was not implemented.");
+            }
+
+            Logger.LogError($"Timer was triggered in state {GetType().Name}, but the method was not implemented.");
+            return new NothingState<T>();
+        }
 
         /// <summary>
         /// Set the timer for a certain timespan.
