@@ -122,7 +122,7 @@ namespace SpreadShare.ExchangeServices.Providers
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(numberOfCandles).NotZero().NotNegative();
             var query = HelperMethods.RetryMethod(
-                () => Implementation.GetCandles(pair, numberOfCandles, Configuration.Instance.CandleWidth), _logger);
+                () => Implementation.GetCandles(pair, numberOfCandles, Configuration.Instance.CandleWidth), _logger, 5, 1000);
             return query.Success
                 ? query.Data.Length == numberOfCandles
                   ? query.Data
