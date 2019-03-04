@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dawn;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
@@ -146,6 +147,8 @@ namespace SpreadShare.ExchangeServices.Providers
                 throw new OrderRefusedException(result.Message);
             }
 
+            _logger.LogError($"Executed Market Buy: {JsonConvert.SerializeObject(result)}");
+
             return result.Data
                 .IsBuy()
                 .IsMarket()
@@ -180,6 +183,8 @@ namespace SpreadShare.ExchangeServices.Providers
             {
                 throw new OrderRefusedException(result.Message);
             }
+
+            _logger.LogError($"Executed Market Sell: {JsonConvert.SerializeObject(result)}");
 
             return result.Data
                 .IsSell()
@@ -221,6 +226,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 order.IsLimit()
                      .IsBuy()
                      .IsNew();
+                _logger.LogError($"Placed Limit Buy: {JsonConvert.SerializeObject(result)}");
                 return order;
             }
 
@@ -261,6 +267,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 order.IsLimit()
                     .IsSell()
                     .IsNew();
+                _logger.LogError($"Placed Limit Sell: {JsonConvert.SerializeObject(result)}");
                 return order;
             }
 
@@ -338,6 +345,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 order.IsStopLoss()
                      .IsSell()
                      .IsNew();
+                _logger.LogError($"Placed Stoploss Sell: {JsonConvert.SerializeObject(result)}");
                 return result.Data;
             }
 
@@ -374,6 +382,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 order.IsStopLoss()
                      .IsBuy()
                      .IsNew();
+                _logger.LogError($"Placed Stoploss Buy: {JsonConvert.SerializeObject(result)}");
                 return result.Data;
             }
 
@@ -443,6 +452,7 @@ namespace SpreadShare.ExchangeServices.Providers
             {
                 var confirmation = WaitForOrderStatus(order.OrderId, OrderUpdate.OrderStatus.Cancelled);
                 _openOrders.Remove(confirmation.OrderId);
+                _logger.LogError($"Cancelled Order: {JsonConvert.SerializeObject(confirmation)}");
             }
             catch
             {
