@@ -93,7 +93,7 @@ namespace SpreadShare.Tests.Algorithms
 
             state.Activate(AlgorithmConfiguration, _container, LoggerFactory);
             _setTimer(state, span);
-            Assert.Equal((now + span).DateTime, state.EndTime.DateTime, TimeSpan.FromMilliseconds(10));
+            Assert.Equal((now + span).DateTime, state.EndTime.DateTime, TimeSpan.FromMilliseconds(1000));
         }
 
         [Fact]
