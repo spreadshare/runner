@@ -557,7 +557,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 if (now - start > 10000)
                 {
-                    throw new ExchangeTimeoutException($"Order {orderId} was not reported as {status} within 10 seconds.");
+                    throw new OrderFailedException($"Order {orderId} was not reported as {status} within 10 seconds.");
                 }
 
                 var query = Implementation.WaitForOrderStatus(orderId, status);

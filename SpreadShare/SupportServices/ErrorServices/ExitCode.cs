@@ -56,5 +56,20 @@ namespace SpreadShare.SupportServices.ErrorServices
         /// Communication with binance could not be established.
         /// </summary>
         BinanceCommunicationStartupFailure = 9,
+
+        /// <summary>
+        /// Unexpected values were encountered, likely due to a Guard constraint failing.
+        /// </summary>
+        UnexpectedValue = 10,
+
+        /// <summary>
+        /// Something went wrong with an order.
+        /// </summary>
+        OrderFailure = 11,
+
+        /// <summary>
+        /// Exceptions kept being generated, even after retrying.
+        /// </summary>
+        ConsecutiveExceptionFailure = 12,
     }
 }
