@@ -38,7 +38,7 @@ namespace SpreadShare.ExchangeServices.Providers
                     break;
                 }
 
-                await Task.Delay(2000).ConfigureAwait(false);
+                await Task.Delay(5000).ConfigureAwait(false);
             }
 
             // ReSharper disable once FunctionNeverReturns
