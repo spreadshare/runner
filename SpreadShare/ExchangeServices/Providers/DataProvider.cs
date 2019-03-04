@@ -229,9 +229,9 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">The pair to calculate the SMA over.</param>
         /// <param name="candlesPerInterval">The number of minutes one interval should last.</param>
         /// <param name="numberOfIntervals">The number of intervals to consider.</param>
-        /// <param name="candlesOffset">How any candles offset should incorporated (into the past).</param>
+        /// <param name="intervalOffset">how many intervals offset (into the past).</param>
         /// <returns>The Standard Moving Average.</returns>
-        public decimal GetStandardMovingAverage(TradingPair pair, int candlesPerInterval, int numberOfIntervals, int candlesOffset = 0)
+        public decimal GetStandardMovingAverage(TradingPair pair, int candlesPerInterval, int numberOfIntervals, int intervalOffset = 0)
         {
             Guard.Argument(pair).NotNull();
             Guard.Argument(candlesPerInterval)
@@ -242,15 +242,15 @@ namespace SpreadShare.ExchangeServices.Providers
                 .NotNegative()
                 .NotZero();
 
-            Guard.Argument(candlesOffset).NotNegative();
+            Guard.Argument(intervalOffset).NotNegative();
 
             // Calculate the total number of five minute candles required.
-            int numberOfCandles = (candlesPerInterval * numberOfIntervals) + candlesOffset;
+            int numberOfCandles = candlesPerInterval * (numberOfIntervals + intervalOffset);
 
             // Get all candles and compress them {candlesPerInterval} times resulting in {numberOfIntervals} compressed candles.
 
             // Remove the offset
-            var allCandles = GetCandles(pair, numberOfCandles).Skip(candlesOffset).ToArray();
+            var allCandles = GetCandles(pair, numberOfCandles).Skip(intervalOffset * candlesPerInterval).ToArray();
 
             var candles = DataProviderUtilities.CompressCandles(allCandles, candlesPerInterval);
 
