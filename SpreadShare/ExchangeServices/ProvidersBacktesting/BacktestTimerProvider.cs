@@ -72,7 +72,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             await Task.Delay(1000).ConfigureAwait(false);
 
             // Clear the trades and state switch event table
-            _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"Orders\"");
+            _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"BacktestOrders\"");
             _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"StateSwitchEvents\"");
             _database.SaveChanges();
 

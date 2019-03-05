@@ -25,9 +25,14 @@ namespace SpreadShare.SupportServices
         public DbSet<BacktestingCandle> Candles { get; set; }
 
         /// <summary>
-        /// Gets or sets the trades.
+        /// Gets or sets the backtest orders..
         /// </summary>
-        public DbSet<DatabaseOrder> Orders { get; set; }
+        public DbSet<BacktestOrder> BacktestOrders { get; set; }
+
+        /// <summary>
+        /// Gets or sets the order events.
+        /// </summary>
+        public DbSet<OrderEvent> OrderEvents { get; set; }
 
         /// <summary>
         /// Gets or sets the state switch events.

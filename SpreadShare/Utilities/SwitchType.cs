@@ -5,7 +5,7 @@ namespace SpreadShare.Utilities
     /// <summary>
     /// Extension method to allow for switching on the type of the object.
     /// </summary>
-    public static class SwitchType
+    internal static class SwitchType
     {
         /// <summary>
         /// Switch on the current object using a number of cases.
@@ -16,8 +16,9 @@ namespace SpreadShare.Utilities
         {
             foreach (var switchCase in switchCases)
             {
-                if (switchCase.Eval(item))
+                if (switchCase.IsDefault || switchCase.Eval(item))
                 {
+                    switchCase.Action();
                     return;
                 }
             }
@@ -38,14 +39,13 @@ namespace SpreadShare.Utilities
         /// <param name="action">The action to execute.</param>
         /// <returns>A switch case instance.</returns>
         public static SwitchCase Default(Action action)
-            => new SwitchCase(action, typeof(object));
+            => new SwitchCase(action);
 
         /// <summary>
         /// Defines a switch case for a typed switch.
         /// </summary>
-        public class SwitchCase
+        internal class SwitchCase
         {
-            private readonly Action _action;
             private readonly Type _target;
 
             /// <summary>
@@ -55,25 +55,36 @@ namespace SpreadShare.Utilities
             /// <param name="target">The type to target.</param>
             public SwitchCase(Action action, Type target)
             {
-                _action = action;
+                Action = action;
                 _target = target;
             }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="SwitchCase"/> class.
+            /// </summary>
+            /// <param name="action">The action to execute.</param>
+            public SwitchCase(Action action)
+            {
+                Action = action;
+                IsDefault = true;
+            }
+
+            /// <summary>
+            /// Gets a value indicating whether this case is a default case.
+            /// </summary>
+            public bool IsDefault { get; }
+
+            /// <summary>
+            /// Gets the action set for this case.
+            /// </summary>
+            public Action Action { get; }
 
             /// <summary>
             /// The evaluation function to check if the item matches the target type.
             /// </summary>
             /// <param name="item">Item to check.</param>
             /// <returns>Whether the action was executed.</returns>
-            public bool Eval(object item)
-            {
-                if (item.GetType() == _target)
-                {
-                    _action();
-                    return true;
-                }
-
-                return false;
-            }
+            public bool Eval(object item) => item.GetType() == _target || item.GetType().IsSubclassOf(_target);
         }
     }
 }

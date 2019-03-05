@@ -6,10 +6,10 @@ namespace SpreadShare.Models.Database
     /// <summary>
     /// Models a trade as found in the database.
     /// </summary>
-    internal class DatabaseOrder : ICsvSerializable
+    internal class BacktestOrder : ICsvSerializable
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseOrder"/> class.
+        /// Initializes a new instance of the <see cref="BacktestOrder"/> class.
         /// </summary>
         /// <param name="orderId">The orderId of the trade, must be unique.</param>
         /// <param name="tradeId">The tradeId of the trade.</param>
@@ -25,7 +25,7 @@ namespace SpreadShare.Models.Database
         /// <param name="side">Buy or sell order.</param>
         /// <param name="assets">The portfolio after the trade.</param>
         /// <param name="value">The value of the portfolio before the trade.</param>
-        public DatabaseOrder(
+        public BacktestOrder(
             long orderId,
             long tradeId,
             string orderType,
@@ -58,12 +58,12 @@ namespace SpreadShare.Models.Database
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseOrder"/> class.
+        /// Initializes a new instance of the <see cref="BacktestOrder"/> class.
         /// </summary>
         /// <param name="order">The order containing the information.</param>
         /// <param name="assets">JSON string of the assets after the trade.</param>
         /// <param name="value">Total value of the portfolio after the trade.</param>
-        public DatabaseOrder(
+        public BacktestOrder(
             OrderUpdate order,
             string assets,
             decimal value)

@@ -11,8 +11,8 @@ using SpreadShare.SupportServices;
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190305111354_CreateOrders")]
-    partial class CreateOrders
+    [Migration("20190305151644_CreateBacktestOrders")]
+    partial class CreateBacktestOrders
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -22,28 +22,7 @@ namespace SpreadShare.Migrations
                 .HasAnnotation("ProductVersion", "2.2.0-rtm-35687")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("SpreadShare.Models.Database.BacktestingCandle", b =>
-                {
-                    b.Property<long>("Timestamp");
-
-                    b.Property<string>("TradingPair");
-
-                    b.Property<decimal>("Close");
-
-                    b.Property<decimal>("High");
-
-                    b.Property<decimal>("Low");
-
-                    b.Property<decimal>("Open");
-
-                    b.Property<decimal>("Volume");
-
-                    b.HasKey("Timestamp", "TradingPair");
-
-                    b.ToTable("Candles");
-                });
-
-            modelBuilder.Entity("SpreadShare.Models.Database.DatabaseOrder", b =>
+            modelBuilder.Entity("SpreadShare.Models.Database.BacktestOrder", b =>
                 {
                     b.Property<long>("OrderId")
                         .ValueGeneratedOnAdd();
@@ -78,7 +57,28 @@ namespace SpreadShare.Migrations
 
                     b.HasKey("OrderId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("BacktestOrders");
+                });
+
+            modelBuilder.Entity("SpreadShare.Models.Database.BacktestingCandle", b =>
+                {
+                    b.Property<long>("Timestamp");
+
+                    b.Property<string>("TradingPair");
+
+                    b.Property<decimal>("Close");
+
+                    b.Property<decimal>("High");
+
+                    b.Property<decimal>("Low");
+
+                    b.Property<decimal>("Open");
+
+                    b.Property<decimal>("Volume");
+
+                    b.HasKey("Timestamp", "TradingPair");
+
+                    b.ToTable("Candles");
                 });
 
             modelBuilder.Entity("SpreadShare.Models.Database.StateSwitchEvent", b =>

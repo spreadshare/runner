@@ -90,17 +90,23 @@ namespace SpreadShare.ExchangeServices
 
             var allocationManager = _allocationManager.GetWeakAllocationManager(typeof(T), algorithmConfiguration.Exchange);
 
+            ExchangeProvidersContainer container = null;
             switch (algorithmConfiguration.Exchange)
             {
                 case Exchange.Binance:
-                    return BuildBinanceContainer<T>(algorithmConfiguration, allocationManager);
+                    container = BuildBinanceContainer<T>(algorithmConfiguration, allocationManager);
+                    break;
 
                 case Exchange.Backtesting:
+                    // Skip the Database Event Listener injection phase
                     return BuildBacktestingContainer<T>(algorithmConfiguration, allocationManager);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(algorithmConfiguration));
             }
+
+            DatabaseEventListenerService.Instance?.AddDataSource(container.TradingProvider);
+            return container;
         }
 
         private ExchangeProvidersContainer BuildBinanceContainer<T>(AlgorithmConfiguration settings, WeakAllocationManager allocationManager)

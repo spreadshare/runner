@@ -80,7 +80,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _orderCache.Enqueue(order);
 
             // Write the trade to the database
-            _database.Orders.Add(new DatabaseOrder(
+            _database.BacktestOrders.Add(new BacktestOrder(
                 order,
                 ParentImplementation.GetPortfolio().ToJson(),
                 _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
@@ -163,7 +163,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _orderCache.Enqueue(order);
 
             // Add cancelled order to the database
-            _database.Orders.Add(new DatabaseOrder(
+            _database.BacktestOrders.Add(new BacktestOrder(
                 order,
                 ParentImplementation.GetPortfolio().ToJson(),
                 _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
@@ -220,7 +220,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     Logger.LogInformation($"Order {order.OrderId} confirmed at {Timer.CurrentTime}");
 
                     // Write the filled trade to the database
-                    _database.Orders.Add(new DatabaseOrder(
+                    _database.BacktestOrders.Add(new BacktestOrder(
                         order,
                         ParentImplementation.GetPortfolio().ToJson(),
                         _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));

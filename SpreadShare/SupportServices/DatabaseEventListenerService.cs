@@ -7,6 +7,9 @@ using SpreadShare.Models.Trading;
 
 namespace SpreadShare.SupportServices
 {
+    /// <summary>
+    /// Service that logs OrderUpdates as events to the database.
+    /// </summary>
     internal class DatabaseEventListenerService : IDisposable
     {
         private readonly List<IDisposable> _sources;
@@ -25,10 +28,21 @@ namespace SpreadShare.SupportServices
             _database = database;
         }
 
+        /// <summary>
+        /// Gets the instance of the <see cref="DatabaseEventListenerService"/> class.
+        /// This property is not set if the database was not available.
+        /// </summary>
         public static DatabaseEventListenerService Instance { get; private set; }
 
+        /// <summary>
+        /// Lift the current instance to the static instance.
+        /// </summary>
         public void Bind() => Instance = this;
 
+        /// <summary>
+        /// Add a whose broadcasted order updates should be recorded as events.
+        /// </summary>
+        /// <param name="source">The broadcaster of order updates.</param>
         public void AddDataSource(Observable<OrderUpdate> source)
         {
             _sources.Add(source.Subscribe(new ConfigurableObserver<OrderUpdate>(
@@ -46,12 +60,8 @@ namespace SpreadShare.SupportServices
 
         private void OnNext(OrderUpdate order)
         {
-            var item = new DatabaseOrder(
-                order,
-                string.Empty,
-                0);
-
-            _database.Orders.Add(item);
+            var item = new OrderEvent(order);
+            _database.OrderEvents.Add(item);
             _database.SaveChanges();
         }
 
