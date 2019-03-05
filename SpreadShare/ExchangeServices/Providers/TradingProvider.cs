@@ -75,11 +75,21 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">TradingPair to consider.</param>
         /// <returns>ResponseObject with an OrderUpdate.</returns>
         public OrderUpdate ExecuteFullMarketOrderBuy(TradingPair pair)
+            => ExecutePartialMarketOrderBuy(pair, 1M);
+
+        /// <summary>
+        /// Place a buy market order using the full allocation.
+        /// </summary>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="portion">The portion of funds to use, (0 ... 1).</param>
+        /// <returns>ResponseObject with an OrderUpdate.</returns>
+        public OrderUpdate ExecutePartialMarketOrderBuy(TradingPair pair, decimal portion)
         {
             Guard.Argument(pair).NotNull();
+            Guard.Argument(portion).NotZero().NotNegative().InRange(0, 1);
             var currency = pair.Right;
             var balance = _allocationManager.GetAvailableFunds(currency);
-            var quantity = GetBuyQuantityEstimate(pair, balance.Free);
+            var quantity = GetBuyQuantityEstimate(pair, balance.Free) * portion;
             if (quantity == 0.0M)
             {
                 throw new OutOfFundsException();
@@ -94,16 +104,26 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="pair">TradingPair to consider.</param>
         /// <returns>ResponseObject with an OrderUpdate.</returns>
         public OrderUpdate ExecuteFullMarketOrderSell(TradingPair pair)
+            => ExecutePartialMarketOrderSell(pair, 1M);
+
+        /// <summary>
+        /// Place a sell market order using the full allocation.
+        /// </summary>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="portion">The portion of funds to use (0 ... 1).</param>
+        /// <returns>ResponseObject with an OrderUpdate.</returns>
+        public OrderUpdate ExecutePartialMarketOrderSell(TradingPair pair, decimal portion)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
+            Guard.Argument(portion).NotZero(nameof(portion)).NotNegative().InRange(0M, 1M);
             var currency = pair.Left;
-            var balance = _allocationManager.GetAvailableFunds(currency);
-            if (balance.Free == 0.0M)
+            var balance = _allocationManager.GetAvailableFunds(currency).Free * portion;
+            if (balance == 0.0M)
             {
                 throw new OutOfFundsException();
             }
 
-            return ExecuteMarketOrderSell(pair, balance.Free);
+            return ExecuteMarketOrderSell(pair, balance);
         }
 
         /// <summary>
@@ -281,11 +301,22 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="price">Price to set order at.</param>
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceFullLimitOrderSell(TradingPair pair, decimal price)
+            => PlacePartialLimitOrderSell(pair, price, 1M);
+
+        /// <summary>
+        /// Place a sell limit order with the full allocation.
+        /// </summary>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="price">Price to set order at.</param>
+        /// <param name="portion">The portion of funds to use.</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
+        public OrderUpdate PlacePartialLimitOrderSell(TradingPair pair, decimal price, decimal portion)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(price).NotZero(nameof(price)).NotNegative();
+            Guard.Argument(portion).NotZero(nameof(portion)).NotNegative().InRange(0M, 1M);
             var currency = pair.Left;
-            var quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            var quantity = _allocationManager.GetAvailableFunds(currency).Free * portion;
             if (quantity == 0.0M)
             {
                 throw new OutOfFundsException();
@@ -301,11 +332,22 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="price">Price to set the order at.</param>
         /// <returns>ResponseObject containing and OrderUpdate.</returns>
         public OrderUpdate PlaceFullLimitOrderBuy(TradingPair pair, decimal price)
+            => PlacePartialLimitOrderBuy(pair, price, 1M);
+
+        /// <summary>
+        /// Place a buy limit order with the full allocation.
+        /// </summary>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="price">Price to set the order at.</param>
+        /// <param name="portion">The portion of funds to use.</param>
+        /// <returns>ResponseObject containing and OrderUpdate.</returns>
+        public OrderUpdate PlacePartialLimitOrderBuy(TradingPair pair, decimal price, decimal portion)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(price).NotZero(nameof(price)).NotNegative();
+            Guard.Argument(portion).NotZero(nameof(price)).NotNegative().InRange(0M, 1M);
             var currency = pair.Right;
-            var quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            var quantity = _allocationManager.GetAvailableFunds(currency).Free * portion;
             if (quantity == 0.0M)
             {
                 throw new OutOfFundsException();
@@ -396,11 +438,22 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="price">Price to set the order at.</param>
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceFullStoplossSell(TradingPair pair, decimal price)
+            => PlacePartialStoplossSell(pair, price, 1M);
+
+        /// <summary>
+        /// Place a sell stoploss order with the full allocation.
+        /// </summary>
+        /// <param name="pair">Trading pair.</param>
+        /// <param name="price">Price to set the order at.</param>
+        /// <param name="portion">The portion of funds to use.</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
+        public OrderUpdate PlacePartialStoplossSell(TradingPair pair, decimal price, decimal portion)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(price).NotZero(nameof(price)).NotNegative();
+            Guard.Argument(portion).NotZero(nameof(portion)).NotNegative().InRange(0M, 1M);
             var currency = pair.Left;
-            decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            decimal quantity = _allocationManager.GetAvailableFunds(currency).Free * portion;
             if (quantity == 0.0M)
             {
                 throw new OutOfFundsException();
@@ -416,11 +469,22 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="price">Price to set the order at.</param>
         /// <returns>ResponseObject containing an OrderUpdate.</returns>
         public OrderUpdate PlaceFullStoplossBuy(TradingPair pair, decimal price)
+            => PlacePartialStoplossBuy(pair, price, 1M);
+
+        /// <summary>
+        /// Place a buy stoploss order with the full allocation.
+        /// </summary>
+        /// <param name="pair">Trading pair.</param>
+        /// <param name="price">Price to set the order at.</param>
+        /// <param name="portion">The portion of funds to use (0 ... 1).</param>
+        /// <returns>ResponseObject containing an OrderUpdate.</returns>
+        public OrderUpdate PlacePartialStoplossBuy(TradingPair pair, decimal price, decimal portion)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(price).NotZero(nameof(price)).NotNegative();
+            Guard.Argument(portion).NotZero().NotNegative().InRange(0M, 1M);
             var currency = pair.Right;
-            decimal quantity = _allocationManager.GetAvailableFunds(currency).Free;
+            decimal quantity = _allocationManager.GetAvailableFunds(currency).Free * portion;
             if (quantity == 0.0M)
             {
                 throw new OutOfFundsException();
