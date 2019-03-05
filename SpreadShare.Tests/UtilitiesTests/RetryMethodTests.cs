@@ -138,7 +138,7 @@ namespace SpreadShare.Tests.UtilitiesTests
             public bool Equals(TimeSpan x, TimeSpan y)
             {
                 var diff = Math.Abs((x - y).TotalMilliseconds);
-                if (diff < 10)
+                if (diff < 50)
                 {
                     return true;
                 }

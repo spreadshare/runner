@@ -132,6 +132,82 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
                 trading.PlaceLimitOrderSell(TradingPair.Parse(c1, c2), 10, 1));
         }
 
+        [Fact]
+        public void PlaceLimitPartialBuyHappyFlow()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            trading.PlacePartialLimitOrderBuy(TradingPair.Parse("EOSETH"), 10M, 0.5M);
+        }
+
+        [Fact]
+        public void PlaceLimitPartialSellHappyFlow()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            trading.PlacePartialLimitOrderSell(TradingPair.Parse("EOSETH"), 10M, 0.5M);
+        }
+
+        [Fact]
+        public void PlaceLimitPartialBuyNotZero()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.PlacePartialLimitOrderBuy(TradingPair.Parse("EOSETH"), 10M, 0M));
+        }
+
+        [Fact]
+        public void PlaceLimitPartialSellNotZero()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.PlacePartialLimitOrderSell(TradingPair.Parse("EOSETH"), 10M, 0M));
+        }
+
+        [Fact]
+        public void PlaceLimitPartialBuyNotNegative()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.PlacePartialLimitOrderBuy(TradingPair.Parse("EOSETH"), 10M, -1M));
+        }
+
+        [Fact]
+        public void PlaceLimitPartialSellNotNegative()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.PlacePartialLimitOrderSell(TradingPair.Parse("EOSETH"), 10M, -1M));
+        }
+
+        [Fact]
+        public void PlaceLimitOrderPartialBuyExactlyOne()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            trading.PlacePartialLimitOrderBuy(TradingPair.Parse("EOSETH"), 10M, 1M);
+        }
+
+        [Fact]
+        public void PlaceLimitOrderPartialSellExactlyOne()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            trading.PlacePartialLimitOrderSell(TradingPair.Parse("EOSETH"), 10M, 1M);
+        }
+
+        [Fact]
+        public void PlaceLimitOrderPartialBuyMoreThanOne()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.PlacePartialLimitOrderBuy(TradingPair.Parse("EOSETH"), 10M, 1.00000001M));
+        }
+
+        [Fact]
+        public void PlaceLimitOrderPartialSellMoreThanOne()
+        {
+            var trading = GetTradingProvider<PlaceLimitOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.PlacePartialLimitOrderSell(TradingPair.Parse("EOSETH"), 10M, 1.00000001M));
+        }
+
         // Classes are instantiated via the Activator
         #pragma warning disable CA1812
 

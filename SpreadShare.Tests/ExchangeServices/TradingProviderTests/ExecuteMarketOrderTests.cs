@@ -114,6 +114,82 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             trading.ExecuteMarketOrderSell(TradingPair.Parse("EOSETH"), 2832.5223452932M);
         }
 
+        [Fact]
+        public void ExecuteMarketOrderPartialBuyHappyFlow()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderHappyFlowImplementation>();
+            trading.ExecutePartialMarketOrderBuy(TradingPair.Parse("EOSETH"), 0.5M);
+        }
+
+        [Fact]
+        public void ExecuteMarketOrderPartialSellHappyFlow()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderHappyFlowImplementation>();
+            trading.ExecutePartialMarketOrderSell(TradingPair.Parse("EOSETH"), 0.5M);
+        }
+
+        [Fact]
+        public void ExecuteMarketOrderPartialBuyNotZero()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.ExecutePartialMarketOrderBuy(TradingPair.Parse("EOSETH"), 0M));
+        }
+
+        [Fact]
+        public void ExecuteMarketOrderPartialSellNotZero()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.ExecutePartialMarketOrderSell(TradingPair.Parse("EOSETH"), 0M));
+        }
+
+        [Fact]
+        public void ExecuteMarketOrderPartialBuyNotNegative()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.ExecutePartialMarketOrderBuy(TradingPair.Parse("EOSETH"), -1M));
+        }
+
+        [Fact]
+        public void ExecuteMarketOrderPartialSellNotNegative()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.ExecutePartialMarketOrderSell(TradingPair.Parse("EOSETH"), -1M));
+        }
+
+        [Fact]
+        public void ExecuteMarketOrderPartialBuyExactlyOne()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderHappyFlowImplementation>();
+            trading.ExecutePartialMarketOrderBuy(TradingPair.Parse("EOSETH"), 1M);
+        }
+
+        [Fact]
+        public void ExecuteMarketOrderPartialSellExactlyOne()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderHappyFlowImplementation>();
+            trading.ExecutePartialMarketOrderSell(TradingPair.Parse("EOSETH"), 1M);
+        }
+
+        [Fact]
+        public void ExecuteMarketOrderPartialBuyMoreThanOne()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.ExecutePartialMarketOrderBuy(TradingPair.Parse("EOSETH"), 1.00000001M));
+        }
+
+        [Fact]
+        public void ExecuteMarketOrderPartialSellMoreThanOne()
+        {
+            var trading = GetTradingProvider<ExecuteMarketOrderHappyFlowImplementation>();
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => trading.ExecutePartialMarketOrderSell(TradingPair.Parse("EOSETH"), 1.00000001M));
+        }
+
         // Classes are instantiated via the Activator
         #pragma warning disable CA1812
 
