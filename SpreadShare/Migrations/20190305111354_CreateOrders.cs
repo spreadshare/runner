@@ -1,16 +1,16 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #pragma warning disable
 
 namespace SpreadShare.Migrations
 {
-    public partial class CreateTrades : Migration
+    public partial class CreateOrders : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Trades",
+                name: "Orders",
                 columns: table => new
                 {
                     OrderId = table.Column<long>(nullable: false)
@@ -24,6 +24,7 @@ namespace SpreadShare.Migrations
                     SetQuantity = table.Column<decimal>(nullable: false),
                     FilledQuantity = table.Column<decimal>(nullable: false),
                     SetPrice = table.Column<decimal>(nullable: false),
+                    StopPrice = table.Column<decimal>(nullable: false),
                     FilledPrice = table.Column<decimal>(nullable: false),
                     Side = table.Column<string>(nullable: true),
                     Assets = table.Column<string>(nullable: true),
@@ -31,14 +32,14 @@ namespace SpreadShare.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Trades", x => x.OrderId);
+                    table.PrimaryKey("PK_Orders", x => x.OrderId);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Trades");
+                name: "Orders");
         }
     }
 }

@@ -6,10 +6,10 @@ namespace SpreadShare.Models.Database
     /// <summary>
     /// Models a trade as found in the database.
     /// </summary>
-    internal class DatabaseTrade : ICsvSerializable
+    internal class DatabaseOrder : ICsvSerializable
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseTrade"/> class.
+        /// Initializes a new instance of the <see cref="DatabaseOrder"/> class.
         /// </summary>
         /// <param name="orderId">The orderId of the trade, must be unique.</param>
         /// <param name="tradeId">The tradeId of the trade.</param>
@@ -25,7 +25,7 @@ namespace SpreadShare.Models.Database
         /// <param name="side">Buy or sell order.</param>
         /// <param name="assets">The portfolio after the trade.</param>
         /// <param name="value">The value of the portfolio before the trade.</param>
-        public DatabaseTrade(
+        public DatabaseOrder(
             long orderId,
             long tradeId,
             string orderType,
@@ -58,12 +58,12 @@ namespace SpreadShare.Models.Database
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseTrade"/> class.
+        /// Initializes a new instance of the <see cref="DatabaseOrder"/> class.
         /// </summary>
         /// <param name="order">The order containing the information.</param>
         /// <param name="assets">JSON string of the assets after the trade.</param>
         /// <param name="value">Total value of the portfolio after the trade.</param>
-        public DatabaseTrade(
+        public DatabaseOrder(
             OrderUpdate order,
             string assets,
             decimal value)
@@ -75,6 +75,7 @@ namespace SpreadShare.Models.Database
             FilledTimestamp = order.FilledTimeStamp;
             Pair = order.Pair.ToString();
             SetPrice = order.SetPrice;
+            StopPrice = order.StopPrice;
             FilledPrice = order.AverageFilledPrice;
 
             SetQuantity = order.SetQuantity;
@@ -136,6 +137,11 @@ namespace SpreadShare.Models.Database
         public decimal SetPrice { get; set; }
 
         /// <summary>
+        /// Gets or sets the stopPrice of the trade.
+        /// </summary>
+        public decimal StopPrice { get; set; }
+
+        /// <summary>
         /// Gets or sets the filledPrice of the trade.
         /// </summary>
         public decimal FilledPrice { get; set; }
@@ -173,6 +179,7 @@ namespace SpreadShare.Models.Database
                    $"{nameof(SetQuantity)}{delimiter}" +
                    $"{nameof(FilledQuantity)}{delimiter}" +
                    $"{nameof(SetPrice)}{delimiter}" +
+                   $"{nameof(StopPrice)}{delimiter}" +
                    $"{nameof(FilledPrice)}{delimiter}" +
                    $"{nameof(Value)}{delimiter}" +
                    $"{nameof(Assets)}";
@@ -192,15 +199,13 @@ namespace SpreadShare.Models.Database
                    $"{SetQuantity}{delimiter}" +
                    $"{FilledQuantity}{delimiter}" +
                    $"{SetPrice}{delimiter}" +
+                   $"{StopPrice}{delimiter}" +
                    $"{FilledPrice}{delimiter}" +
                    $"{Value}{delimiter}" +
                    $"{Assets}";
         }
 
         /// <inheritdoc />
-        public string GetCsvHeader(char delimiter)
-        {
-            return GetStaticCsvHeader(delimiter);
-        }
+        public string GetCsvHeader(char delimiter) => GetStaticCsvHeader(delimiter);
     }
 }

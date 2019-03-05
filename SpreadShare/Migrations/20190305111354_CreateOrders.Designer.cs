@@ -11,21 +11,22 @@ using SpreadShare.SupportServices;
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20181210083402_CreateTrades")]
-    partial class CreateTrades
+    [Migration("20190305111354_CreateOrders")]
+    partial class CreateOrders
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
+                .HasAnnotation("ProductVersion", "2.2.0-rtm-35687")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             modelBuilder.Entity("SpreadShare.Models.Database.BacktestingCandle", b =>
                 {
-                    b.Property<long>("Timestamp")
-                        .ValueGeneratedOnAdd();
+                    b.Property<long>("Timestamp");
+
+                    b.Property<string>("TradingPair");
 
                     b.Property<decimal>("Close");
 
@@ -35,16 +36,14 @@ namespace SpreadShare.Migrations
 
                     b.Property<decimal>("Open");
 
-                    b.Property<string>("TradingPair");
-
                     b.Property<decimal>("Volume");
 
-                    b.HasKey("Timestamp");
+                    b.HasKey("Timestamp", "TradingPair");
 
                     b.ToTable("Candles");
                 });
 
-            modelBuilder.Entity("SpreadShare.Models.Database.DatabaseTrade", b =>
+            modelBuilder.Entity("SpreadShare.Models.Database.DatabaseOrder", b =>
                 {
                     b.Property<long>("OrderId")
                         .ValueGeneratedOnAdd();
@@ -71,13 +70,15 @@ namespace SpreadShare.Migrations
 
                     b.Property<string>("Side");
 
+                    b.Property<decimal>("StopPrice");
+
                     b.Property<long>("TradeId");
 
                     b.Property<decimal>("Value");
 
                     b.HasKey("OrderId");
 
-                    b.ToTable("Trades");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("SpreadShare.Models.Database.StateSwitchEvent", b =>

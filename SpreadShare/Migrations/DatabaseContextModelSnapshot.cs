@@ -40,7 +40,7 @@ namespace SpreadShare.Migrations
                     b.ToTable("Candles");
                 });
 
-            modelBuilder.Entity("SpreadShare.Models.Database.DatabaseTrade", b =>
+            modelBuilder.Entity("SpreadShare.Models.Database.DatabaseOrder", b =>
                 {
                     b.Property<long>("OrderId")
                         .ValueGeneratedOnAdd();
@@ -67,13 +67,15 @@ namespace SpreadShare.Migrations
 
                     b.Property<string>("Side");
 
+                    b.Property<decimal>("StopPrice");
+
                     b.Property<long>("TradeId");
 
                     b.Property<decimal>("Value");
 
                     b.HasKey("OrderId");
 
-                    b.ToTable("Trades");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("SpreadShare.Models.Database.StateSwitchEvent", b =>
@@ -95,3 +97,5 @@ namespace SpreadShare.Migrations
         }
     }
 }
+
+#pragma warning restore

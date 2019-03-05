@@ -27,7 +27,7 @@ namespace SpreadShare.SupportServices
         /// <summary>
         /// Gets or sets the trades.
         /// </summary>
-        public DbSet<DatabaseTrade> Trades { get; set; }
+        public DbSet<DatabaseOrder> Orders { get; set; }
 
         /// <summary>
         /// Gets or sets the state switch events.
