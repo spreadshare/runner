@@ -137,9 +137,13 @@ namespace SpreadShare.Tests.UtilitiesTests
         {
             public bool Equals(TimeSpan x, TimeSpan y)
             {
-                var a = Math.Floor(x.TotalMilliseconds / 10) * 10;
-                var b = Math.Floor(y.TotalMilliseconds / 10) * 10;
-                return a.Equals(b);
+                var diff = Math.Abs((x - y).TotalMilliseconds);
+                if (diff < 10)
+                {
+                    return true;
+                }
+
+                return false;
             }
 
             public int GetHashCode(TimeSpan obj) => obj.GetHashCode();
