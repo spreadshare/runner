@@ -27,6 +27,7 @@ namespace SpreadShare.Migrations
                     SetPrice = table.Column<decimal>(nullable: false),
                     StopPrice = table.Column<decimal>(nullable: false),
                     FilledPrice = table.Column<decimal>(nullable: false),
+                    EventTimestamp = table.Column<long>(nullable: false),
                     Side = table.Column<string>(nullable: true)
                 },
                 constraints: table =>

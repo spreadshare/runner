@@ -66,9 +66,9 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private void HandleException(Exception e)
         {
-            Logger.LogError(e.InnerException, e.InnerException.Message);
+            Logger.LogError(e, e.Message);
             e.Switch(
-                SwitchType.Case<TargetInvocationException>(() => HandleException(e)),
+                SwitchType.Case<TargetInvocationException>(() => HandleException(e.InnerException)),
                 SwitchType.Case<ArgumentException>(() => Program.ExitProgramWithCode(ExitCode.UnexpectedValue)),
                 SwitchType.Case<OrderRefusedException>(() => Program.ExitProgramWithCode(ExitCode.OrderFailure)),
                 SwitchType.Case<OrderFailedException>(() => Program.ExitProgramWithCode(ExitCode.OrderFailure)),

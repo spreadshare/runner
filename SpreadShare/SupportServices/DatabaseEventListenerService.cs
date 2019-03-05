@@ -60,7 +60,7 @@ namespace SpreadShare.SupportServices
 
         private void OnNext(OrderUpdate order)
         {
-            var item = new OrderEvent(order);
+            var item = new OrderEvent(order, DateTimeOffset.Now.ToUnixTimeMilliseconds());
             _database.OrderEvents.Add(item);
             _database.SaveChanges();
         }

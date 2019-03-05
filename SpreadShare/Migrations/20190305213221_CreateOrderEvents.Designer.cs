@@ -11,7 +11,7 @@ using SpreadShare.SupportServices;
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190305153342_CreateOrderEvents")]
+    [Migration("20190305213221_CreateOrderEvents")]
     partial class CreateOrderEvents
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -87,6 +87,8 @@ namespace SpreadShare.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<long>("CreatedTimestamp");
+
+                    b.Property<long>("EventTimestamp");
 
                     b.Property<decimal>("FilledPrice");
 

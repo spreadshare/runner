@@ -1,7 +1,6 @@
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 
 #pragma warning disable SA1402
@@ -31,7 +30,6 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 Logger.LogInformation("I wonder if Miss Bitcoin thinks I should buy...");
                 Logger.LogInformation(ShowAlloc(trading));
-                trading.ExecutePartialMarketOrderBuy(TradingPair.Parse("TRXETH"), 1M);
                 return new NothingState<TemplateAlgorithmConfiguration>();
             }
 

@@ -85,6 +85,8 @@ namespace SpreadShare.Migrations
 
                     b.Property<long>("CreatedTimestamp");
 
+                    b.Property<long>("EventTimestamp");
+
                     b.Property<decimal>("FilledPrice");
 
                     b.Property<decimal>("FilledQuantity");

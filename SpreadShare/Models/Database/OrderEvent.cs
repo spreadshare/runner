@@ -24,6 +24,7 @@ namespace SpreadShare.Models.Database
         /// <param name="stopPrice">stopPrice.</param>
         /// <param name="filledPrice">filledPrice.</param>
         /// <param name="side">side.</param>
+        /// <param name="eventTimestamp">eventTimestamp.</param>
         public OrderEvent(
             long orderId,
             long tradeId,
@@ -37,7 +38,8 @@ namespace SpreadShare.Models.Database
             decimal setPrice,
             decimal stopPrice,
             decimal filledPrice,
-            string side)
+            string side,
+            long eventTimestamp)
         {
             OrderId = orderId;
             TradeId = tradeId;
@@ -52,13 +54,15 @@ namespace SpreadShare.Models.Database
             StopPrice = stopPrice;
             FilledPrice = filledPrice;
             Side = side;
+            EventTimestamp = eventTimestamp;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OrderEvent"/> class.
         /// </summary>
         /// <param name="order">The order update to pull data from.</param>
-        public OrderEvent(OrderUpdate order)
+        /// <param name="timestamp">The timestamp of the event.</param>
+        public OrderEvent(OrderUpdate order, long timestamp)
         {
             OrderId = order.OrderId;
             TradeId = order.TradeId;
@@ -73,6 +77,7 @@ namespace SpreadShare.Models.Database
             StopPrice = order.StopPrice;
             FilledPrice = order.AverageFilledPrice;
             Side = order.Side.ToString();
+            EventTimestamp = timestamp;
         }
 
         /// <summary>
@@ -140,6 +145,11 @@ namespace SpreadShare.Models.Database
         /// Gets or sets the filledPrice of the trade.
         /// </summary>
         public decimal FilledPrice { get; set; }
+
+        /// <summary>
+        /// Gets or sets the filledPrice of the trade.
+        /// </summary>
+        public long EventTimestamp { get; set; }
 
         /// <summary>
         /// Gets or sets whether the order was a buy or sell order.
