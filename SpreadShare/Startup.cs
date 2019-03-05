@@ -90,7 +90,12 @@ namespace SpreadShare
             var service = serviceProvider.GetService<IDatabaseMigrationService>();
             if (!service.Migrate().Success)
             {
-                logger.LogWarning("Could not migrate database");
+                logger.LogWarning("Could not migrate database.");
+            }
+            else
+            {
+                // Setup event capture services
+                serviceProvider.GetService<DatabaseEventListenerService>().Bind();
             }
         }
 
@@ -119,6 +124,9 @@ namespace SpreadShare
 
             // Database utilities
             services.AddSingleton<DatabaseUtilities, DatabaseUtilities>();
+
+            // Database event logging
+            services.AddSingleton<DatabaseEventListenerService, DatabaseEventListenerService>();
 
             // Backtesting service.
             services.AddSingleton<BacktestDaemonService, BacktestDaemonService>();
