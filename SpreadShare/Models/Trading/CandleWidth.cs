@@ -24,6 +24,6 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Fifteen minute wide candles.
         /// </summary>
-        FifteenMinutes = 15,
+        FiveteenMinutes = 15,
     }
 }
