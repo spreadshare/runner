@@ -1,9 +1,11 @@
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.SupportServices.ErrorServices;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
@@ -12,6 +14,8 @@ namespace SpreadShare.ExchangeServices.Providers
     /// </summary>
     internal class ExchangeTimerProvider : TimerProvider
     {
+        private int _consecutiveExceptions = 0;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ExchangeTimerProvider"/> class.
         /// </summary>
@@ -29,54 +33,27 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         public override async void RunPeriodicTimer()
         {
-            int consecutiveExceptions = 0;
             while (true)
             {
                 try
                 {
                     UpdateObservers(DateTimeOffset.Now.ToUnixTimeMilliseconds());
-                    consecutiveExceptions = 0;
-                }
-                catch (ArgumentException e)
-                {
-                    Logger.LogError(e, e.Message);
-                    Program.ExitProgramWithCode(ExitCode.UnexpectedValue);
-                }
-                catch (OrderRefusedException e)
-                {
-                    Logger.LogError(e, e.Message);
-                    Program.ExitProgramWithCode(ExitCode.OrderFailure);
-                }
-                catch (OrderFailedException e)
-                {
-                    Logger.LogError(e, e.Message);
-                    Program.ExitProgramWithCode(ExitCode.OrderFailure);
-                }
-                catch (ExchangeConnectionException e)
-                {
-                    Logger.LogError(e, e.Message);
-                    consecutiveExceptions++;
-                }
-                catch (ProviderException e)
-                {
-                    Logger.LogError(e, e.Message);
-                    consecutiveExceptions++;
+                    _consecutiveExceptions = 0;
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError(e, e.Message);
-                    consecutiveExceptions++;
+                    HandleException(e);
                 }
 
-                if (consecutiveExceptions > 0)
+                if (_consecutiveExceptions > 0)
                 {
-                    if (consecutiveExceptions >= 5)
+                    if (_consecutiveExceptions >= 5)
                     {
-                        Logger.LogError($"Got {consecutiveExceptions} consecutive exceptions, shutting down.");
+                        Logger.LogError($"Got {_consecutiveExceptions} consecutive exceptions, shutting down.");
                         Program.ExitProgramWithCode(ExitCode.ConsecutiveExceptionFailure);
                     }
 
-                    var coolDown = TimeSpan.FromMilliseconds(10000 * Math.Pow(2, consecutiveExceptions));
+                    var coolDown = TimeSpan.FromMilliseconds(10000 * Math.Pow(2, _consecutiveExceptions));
                     Logger.LogWarning($"Continuing program after {coolDown}");
                     await Task.Delay((int)coolDown.TotalMilliseconds).ConfigureAwait(false);
                 }
@@ -85,6 +62,19 @@ namespace SpreadShare.ExchangeServices.Providers
             }
 
             // ReSharper disable once FunctionNeverReturns
+        }
+
+        private void HandleException(Exception e)
+        {
+            Logger.LogError(e, e.Message);
+            e.Switch(
+                SwitchType.Case<TargetInvocationException>(() => HandleException(e.InnerException)),
+                SwitchType.Case<ArgumentException>(() => Program.ExitProgramWithCode(ExitCode.UnexpectedValue)),
+                SwitchType.Case<OrderRefusedException>(() => Program.ExitProgramWithCode(ExitCode.OrderFailure)),
+                SwitchType.Case<OrderFailedException>(() => Program.ExitProgramWithCode(ExitCode.OrderFailure)),
+                SwitchType.Case<ExchangeConnectionException>(() => _consecutiveExceptions++),
+                SwitchType.Case<ProviderException>(() => _consecutiveExceptions++),
+                SwitchType.Default(() => _consecutiveExceptions++));
         }
     }
 }

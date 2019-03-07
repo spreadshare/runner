@@ -5,16 +5,17 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace SpreadShare.Migrations
 {
-    public partial class CreateTrades : Migration
+    public partial class CreateOrderEvents : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Trades",
+                name: "OrderEvents",
                 columns: table => new
                 {
-                    OrderId = table.Column<long>(nullable: false)
+                    Id = table.Column<long>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    OrderId = table.Column<long>(nullable: false),
                     TradeId = table.Column<long>(nullable: false),
                     OrderType = table.Column<string>(nullable: true),
                     OrderStatus = table.Column<string>(nullable: true),
@@ -24,21 +25,21 @@ namespace SpreadShare.Migrations
                     SetQuantity = table.Column<decimal>(nullable: false),
                     FilledQuantity = table.Column<decimal>(nullable: false),
                     SetPrice = table.Column<decimal>(nullable: false),
+                    StopPrice = table.Column<decimal>(nullable: false),
                     FilledPrice = table.Column<decimal>(nullable: false),
-                    Side = table.Column<string>(nullable: true),
-                    Assets = table.Column<string>(nullable: true),
-                    Value = table.Column<decimal>(nullable: false)
+                    EventTimestamp = table.Column<long>(nullable: false),
+                    Side = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Trades", x => x.OrderId);
+                    table.PrimaryKey("PK_OrderEvents", x => x.Id);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Trades");
+                name: "OrderEvents");
         }
     }
 }
