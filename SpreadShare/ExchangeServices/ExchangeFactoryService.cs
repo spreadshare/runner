@@ -118,7 +118,7 @@ namespace SpreadShare.ExchangeServices
             var dataImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
             var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications, timerProvider);
 
-            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
+            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, timerProvider, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
             return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider, typeof(T));
         }
@@ -132,7 +132,7 @@ namespace SpreadShare.ExchangeServices
             var dataImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, backtestTimer, _backtestCommunicationService);
             var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation, _databaseContext);
 
-            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
+            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, backtestTimer, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
 
             // Doubly linked inheritance for backtesting edge case

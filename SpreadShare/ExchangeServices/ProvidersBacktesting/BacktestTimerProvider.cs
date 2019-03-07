@@ -45,6 +45,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         public override DateTimeOffset CurrentTime => _currentTime;
 
+        /// <inheritdoc />
+        public override DateTimeOffset Pivot => BeginTime;
+
         /// <summary>
         /// Gets the date at which the backtest started.
         /// </summary>
