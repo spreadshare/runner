@@ -50,10 +50,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair) => GetCurrentPriceLastTrade(pair);
+        public override ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair)
+        {
+            // Ask for the open of one candle in the future
+            var timestamp = (_timer.CurrentTime + TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth)).ToUnixTimeMilliseconds();
+            var (candle, _) = FindCandle(pair, timestamp);
+            return new ResponseObject<decimal>(ResponseCode.Success, candle.Open);
+        }
 
         /// <inheritdoc />
-        public override ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair) => GetCurrentPriceLastTrade(pair);
+        public override ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair) => GetCurrentPriceTopBid(pair);
 
         /// <inheritdoc />
         public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack)
