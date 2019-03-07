@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dawn;
@@ -51,6 +52,51 @@ namespace SpreadShare.ExchangeServices.Providers
             });
 
             return result;
+        }
+
+        /// <summary>
+        /// Calculates the average true range over a set of candles.
+        /// </summary>
+        /// <param name="input">Set of candles.</param>
+        /// <returns>AverageTrueRange value.</returns>
+        /// <exception cref="InvalidOperationException">For an empty set.</exception>
+        public static decimal AverageTrueRange(this IEnumerable<BacktestingCandle> input)
+        {
+            var candles = (input ?? throw new ArgumentNullException(nameof(input))).ToArray();
+            if (candles.Length == 0)
+            {
+                throw new InvalidOperationException("Cannot calculate the AverageTrueRange of an empty set.");
+            }
+
+            var trueRanges = new decimal[candles.Length - 1];
+
+            // Calculate maximum of three edge features over the series (chunk[0] -> chunk[1] ... -> chunk[n] -> edgeCandle)
+            for (int i = 0; i < candles.Length - 1; i++)
+            {
+                decimal highLow = Math.Abs(candles[i].High - candles[i].Low);
+                decimal highPreviousClose = Math.Abs(candles[i].High - candles[i + 1].Close);
+                decimal lowPreviousClose = Math.Abs(candles[i].Low - candles[i + 1].Close);
+
+                trueRanges[i] = new[] { highLow, highPreviousClose, lowPreviousClose }.Max();
+            }
+
+            return trueRanges.Average();
+        }
+
+        /// <summary>
+        /// Calculates the standard moving average over a set of candles.
+        /// </summary>
+        /// <param name="input">Set of candles.</param>
+        /// <returns>StandardMovingAverage value.</returns>
+        public static decimal StandardMovingAverage(this IEnumerable<BacktestingCandle> input)
+        {
+            var candles = (input ?? throw new ArgumentNullException(nameof(input))).ToArray();
+            if (candles.Length == 0)
+            {
+                throw new InvalidOperationException($"Cannot calculate the StandardMovingAverage of an empty set.");
+            }
+
+            return candles.Average(x => x.Close);
         }
     }
 }

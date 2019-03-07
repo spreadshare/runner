@@ -37,7 +37,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             return data;
         }
 
-        internal DataProvider GetDataProviderWidthTimer<TD, TT>()
+        internal DataProvider GetDataProviderWithTimer<TD, TT>()
             where TD : DataProviderTestImplementation
             where TT : TimerProviderTestImplementation
         {

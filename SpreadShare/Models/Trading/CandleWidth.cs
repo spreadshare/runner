@@ -32,6 +32,16 @@ namespace SpreadShare.Models.Trading
         FiveteenMinutes = 15,
 
         /// <summary>
+        /// Twenty minute wide candles.
+        /// </summary>
+        TwentyMinutes = 20,
+
+        /// <summary>
+        /// Twentyfive minute wide candles.
+        /// </summary>
+        TwentyFiveMinutes = 25,
+
+        /// <summary>
         /// Thirty minute wide candles.
         /// </summary>
         ThirtyMinutes = 30,

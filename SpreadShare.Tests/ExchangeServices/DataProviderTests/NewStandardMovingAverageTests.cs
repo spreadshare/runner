@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService;
+using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
@@ -11,131 +12,48 @@ using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 {
-    public class GetCustomCandlesTest : DataProviderTestUtils
+    public class NewStandardMovingAverageTests : DataProviderTestUtils
     {
-        public GetCustomCandlesTest(ITestOutputHelper outputHelper)
+        public NewStandardMovingAverageTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
         }
 
         [Fact]
-        public void GetCustomCandlesNull()
+        public void StandardMovingAverageSingleCandle()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            Assert.Throws<ArgumentNullException>(
-                () => data.GetCustomCandles(null, 1, CandleWidth.FiveMinutes));
-        }
-
-        [Fact]
-        public void GetCustomCandlesSmaller()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => data.GetCustomCandles(TradingPair.Parse("EOSETH"), 1, CandleWidth.OneMinute));
-        }
-
-        [Fact]
-        public void GetCustomCandlesNotDivisble()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => data.GetCustomCandles(TradingPair.Parse("EOSETH"), 1, CandleWidth.DONOTUSETestEntry));
-        }
-
-        [Fact]
-        public void GetCustomCandlesCorrectAmountAllIdentity()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 12, CandleWidth.FiveMinutes);
-            Assert.Equal(12, candles.Length);
-        }
-
-        [Fact]
-        public void GetCustomCandlesCorrectAmountPartialIdentity()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 5, CandleWidth.FiveMinutes);
-            Assert.Equal(5, candles.Length);
-        }
-
-        [Fact]
-        public void GetCustomCandlesCorrectAmmountAll()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 4, CandleWidth.FiveteenMinutes);
-            Assert.Equal(4, candles.Length);
-        }
-
-        [Fact]
-        public void GetCustomCandlesCorrectAmmountPartial()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 3, CandleWidth.FiveteenMinutes);
-            Assert.Equal(3, candles.Length);
-        }
-
-        [Fact]
-        public void GetCustomCandlesNoPivotThirtyMinutes()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 2, CandleWidth.ThirtyMinutes);
-            Assert.Equal(5.7M, candles[0].Close);
-            Assert.Equal(5.6M, candles[1].Close);
-        }
-
-        [Fact]
-        public void GetCustomCandlesNoPivotFiveteenMinutes()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 4, CandleWidth.FiveteenMinutes);
-            Assert.Equal(5.7M, candles[0].Close);
-            Assert.Equal(6.9M, candles[1].Close);
-            Assert.Equal(5.6M, candles[2].Close);
-            Assert.Equal(8.01M, candles[3].Close);
-        }
-
-        [Fact]
-        public void GetCustomCandlesOne()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 1, CandleWidth.FiveteenMinutes);
-            Assert.Equal(6.2M, candles[0].Close);
-        }
-
-        [Fact]
-        public void GetCustomCandlesMultiple()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 3, CandleWidth.FiveteenMinutes);
-            Assert.Equal(6.2M, candles[0].Close);
-            Assert.Equal(6.3M, candles[1].Close);
-            Assert.Equal(8.872M, candles[2].Close);
-        }
-
-        [Fact]
-        public void GetCustomCandlesIdentity()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>();
             var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 1, CandleWidth.FiveMinutes);
-            Assert.Equal(5.7M, candles[0].Close);
+            var sma = candles.StandardMovingAverage();
+            Assert.Equal(5.7M, sma);
+        }
+
+        [Fact]
+        public void StandardMovingAverageFourCandles()
+        {
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
+            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 4, CandleWidth.FiveteenMinutes);
+            var sma = candles.StandardMovingAverage();
+            Assert.Equal(6.5525M, sma);
+        }
+
+        [Fact]
+        public void StandardMovingAverageNull()
+        {
+            BacktestingCandle[] lol = null;
+            Assert.Throws<ArgumentNullException>(() => lol.StandardMovingAverage());
+        }
+
+        [Fact]
+        public void StandardMovingAverageEmptySet()
+        {
+            var candles = Array.Empty<BacktestingCandle>();
+            Assert.Throws<InvalidOperationException>(
+                () => candles.StandardMovingAverage());
         }
 
         // Class is instantiated via activator
         #pragma warning disable CA1812
-
-        private class TimerProviderHappyFlowImplementation : TimerProviderTestImplementation
-        {
-            public TimerProviderHappyFlowImplementation(ILoggerFactory loggerFactory)
-                : base(loggerFactory)
-            {
-            }
-
-            public override DateTimeOffset CurrentTime => DateTimeOffset.FromUnixTimeMilliseconds(3600000L);
-
-            public override DateTimeOffset Pivot => DateTimeOffset.FromUnixTimeMilliseconds(300000);
-
-            public override void RunPeriodicTimer() => Expression.Empty();
-        }
 
         private class TimerProviderNoPivotImplementation : TimerProviderTestImplementation
         {
