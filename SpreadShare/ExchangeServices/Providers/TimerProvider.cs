@@ -25,6 +25,11 @@ namespace SpreadShare.ExchangeServices.Providers
         public abstract DateTimeOffset CurrentTime { get; }
 
         /// <summary>
+        /// Gets the pivot, i.e. the starting point of candle creation.
+        /// </summary>
+        public abstract DateTimeOffset Pivot { get; }
+
+        /// <summary>
         /// Gets a logger to log errors and trigger sentry events.
         /// </summary>
         protected ILogger Logger { get; }

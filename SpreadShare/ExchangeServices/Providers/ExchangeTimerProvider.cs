@@ -23,10 +23,16 @@ namespace SpreadShare.ExchangeServices.Providers
         public ExchangeTimerProvider(ILoggerFactory loggerFactory)
             : base(loggerFactory)
         {
+            // Set the pivot point to midnight.
+            // Pivot = new DateTimeOffset(2018, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
+            Pivot = DateTimeOffset.FromUnixTimeSeconds(0);
         }
 
         /// <inheritdoc />
         public override DateTimeOffset CurrentTime => DateTimeOffset.Now;
+
+        /// <inheritdoc />
+        public override DateTimeOffset Pivot { get; }
 
         /// <summary>
         /// Notifies the observer periodically.

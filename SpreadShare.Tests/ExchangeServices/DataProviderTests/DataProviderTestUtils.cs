@@ -37,6 +37,34 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             return data;
         }
 
+        internal DataProvider GetDataProviderWithTimer<TD, TT>()
+            where TD : DataProviderTestImplementation
+            where TT : TimerProviderTestImplementation
+        {
+            var data = GetDataProvider<TD>();
+            var property = data.GetType().GetProperty("TimerProvider", BindingFlags.NonPublic | BindingFlags.Instance)
+                           ?? throw new Exception($"Expected property 'TimerProvider' on {nameof(DataProvider)}");
+
+            // Inject test timer
+            var timer = Activator.CreateInstance(typeof(TT), LoggerFactory);
+            property.SetValue(data, timer);
+            return data;
+        }
+
+        internal abstract class TimerProviderTestImplementation : TimerProvider
+        {
+            protected TimerProviderTestImplementation(ILoggerFactory loggerFactory)
+                : base(loggerFactory)
+            {
+            }
+
+            public abstract override DateTimeOffset CurrentTime { get; }
+
+            public abstract override DateTimeOffset Pivot { get; }
+
+            public abstract override void RunPeriodicTimer();
+        }
+
         internal class DataProviderTestImplementation : AbstractDataProvider
         {
             public DataProviderTestImplementation(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)

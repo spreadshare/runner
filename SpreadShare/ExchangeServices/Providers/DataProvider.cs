@@ -24,16 +24,21 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="factory">for generating output.</param>
         /// <param name="implementation">Exchange implementation of data provider.</param>
+        /// <param name="timerProvider">Used to keep track of candle pivot points.</param>
         /// <param name="settings">The settings of the algorithm.</param>
-        public DataProvider(ILoggerFactory factory, AbstractDataProvider implementation, AlgorithmConfiguration settings)
+        public DataProvider(ILoggerFactory factory, AbstractDataProvider implementation, TimerProvider timerProvider, AlgorithmConfiguration settings)
         {
             Implementation = implementation;
             _algorithmConfiguration = settings;
             _logger = factory.CreateLogger(GetType());
+            TimerProvider = timerProvider;
         }
 
         // Setter is used with reflection in the tests.
         private AbstractDataProvider Implementation { get; set; }
+
+        // Setter is used with reflection int the tests.
+        private TimerProvider TimerProvider { get; set; }
 
         /// <summary>
         /// Gets the current price of a trading pair by checking the last trade.
@@ -128,6 +133,39 @@ namespace SpreadShare.ExchangeServices.Providers
                   ? query.Data
                   : throw new InvalidExchangeDataException($"Requested {numberOfCandles} but received {query.Data.Length}")
                 : throw new ExchangeConnectionException(query.Message);
+        }
+
+        /// <summary>
+        /// Get candles of a custom size.
+        /// </summary>
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="numberOfCandles">Number of custom candles.</param>
+        /// <param name="width">The width of the custom candle.</param>
+        /// <returns>Array of custom candles.</returns>
+        public BacktestingCandle[] GetCustomCandles(TradingPair pair, int numberOfCandles, CandleWidth width)
+        {
+            Guard.Argument(pair).NotNull(nameof(pair));
+            var localCandleSize = (int)Configuration.Instance.CandleWidth;
+            var targetCandleSize = (int)width;
+
+            Guard.Argument(targetCandleSize)
+                .Require<ArgumentOutOfRangeException>(
+                    x => x >= localCandleSize,
+                    x => $"Target candle size {x}min requires decompression given the configured candle size {localCandleSize}min")
+                .Require<ArgumentOutOfRangeException>(
+                    x => x % localCandleSize == 0,
+                    x => $"Cannot compress candles from {x}min to {localCandleSize}min because {x} is not divible by {localCandleSize}");
+
+            // Number of candles needed for the query
+            var targetCandleCount = (targetCandleSize / localCandleSize) * numberOfCandles;
+            var timespan = TimerProvider.CurrentTime - TimerProvider.Pivot;
+
+            // Number of candles that are left after dividing by the target size (uncompleted batch)
+            var padding = ((int)timespan.TotalMinutes % targetCandleSize) / localCandleSize;
+
+            // Request the correct number of candles but skip the padding
+            var candles = GetCandles(pair, targetCandleCount + padding).Skip(padding).ToArray();
+            return DataProviderUtilities.CompressCandles(candles, targetCandleSize / localCandleSize);
         }
 
         /// <summary>

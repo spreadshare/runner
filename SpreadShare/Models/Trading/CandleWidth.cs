@@ -7,6 +7,11 @@ namespace SpreadShare.Models.Trading
     public enum CandleWidth
     {
         /// <summary>
+        /// THIS CANDLE IS FOR TESTING ONLY, DO NOT USE IT.
+        /// </summary>
+        DONOTUSETestEntry = 7,
+
+        /// <summary>
         /// One minute wide candles.
         /// </summary>
         OneMinute = 1,
@@ -24,6 +29,26 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Fifteen minute wide candles.
         /// </summary>
-        FifteenMinutes = 15,
+        FiveteenMinutes = 15,
+
+        /// <summary>
+        /// Twenty minute wide candles.
+        /// </summary>
+        TwentyMinutes = 20,
+
+        /// <summary>
+        /// Twentyfive minute wide candles.
+        /// </summary>
+        TwentyFiveMinutes = 25,
+
+        /// <summary>
+        /// Thirty minute wide candles.
+        /// </summary>
+        ThirtyMinutes = 30,
+
+        /// <summary>
+        /// Fourtyfive minute wide candles.
+        /// </summary>
+        FourtyFiveMinutes = 45,
     }
 }
