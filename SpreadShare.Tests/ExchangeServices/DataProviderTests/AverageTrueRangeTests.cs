@@ -12,9 +12,9 @@ using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 {
-    public class NewAverageTrueRangeTests : DataProviderTestUtils
+    public class AverageTrueRangeTests : DataProviderTestUtils
     {
-        public NewAverageTrueRangeTests(ITestOutputHelper outputHelper)
+        public AverageTrueRangeTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
         }
