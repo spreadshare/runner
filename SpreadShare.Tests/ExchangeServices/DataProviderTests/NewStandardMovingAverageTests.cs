@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
@@ -23,7 +22,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void StandardMovingAverageSingleCandle()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 1, CandleWidth.FiveMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveMinutes, 1);
             var sma = candles.StandardMovingAverage();
             Assert.Equal(5.7M, sma);
         }
@@ -32,7 +31,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void StandardMovingAverageFourCandles()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 4, CandleWidth.FiveteenMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 4);
             var sma = candles.StandardMovingAverage();
             Assert.Equal(6.5525M, sma);
         }
@@ -71,12 +70,12 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
         private class DataProviderImplementation : DataProviderTestUtils.DataProviderTestImplementation
         {
-            public DataProviderImplementation(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
-                : base(loggerFactory, exchangeCommunications)
+            public DataProviderImplementation(ILoggerFactory loggerFactory, TimerProvider timerProvider)
+                : base(loggerFactory, timerProvider)
             {
             }
 
-            public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width)
+            protected override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit)
             {
                 // This array is reversed before it is returned.
                 return new ResponseObject<BacktestingCandle[]>(

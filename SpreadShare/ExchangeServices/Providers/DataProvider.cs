@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models.Database;
@@ -24,21 +23,16 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="factory">for generating output.</param>
         /// <param name="implementation">Exchange implementation of data provider.</param>
-        /// <param name="timerProvider">Used to keep track of candle pivot points.</param>
         /// <param name="settings">The settings of the algorithm.</param>
-        public DataProvider(ILoggerFactory factory, AbstractDataProvider implementation, TimerProvider timerProvider, AlgorithmConfiguration settings)
+        public DataProvider(ILoggerFactory factory, AbstractDataProvider implementation, AlgorithmConfiguration settings)
         {
             Implementation = implementation;
             _algorithmConfiguration = settings;
             _logger = factory.CreateLogger(GetType());
-            TimerProvider = timerProvider;
         }
 
         // Setter is used with reflection in the tests.
         private AbstractDataProvider Implementation { get; set; }
-
-        // Setter is used with reflection int the tests.
-        private TimerProvider TimerProvider { get; set; }
 
         /// <summary>
         /// Gets the current price of a trading pair by checking the last trade.
@@ -120,52 +114,26 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Get a certain number of minute candles ordered from present -> past.
         /// </summary>
         /// <param name="pair">TradingPair.</param>
+        /// <param name="candleWidth">The width of the requested candles.</param>
         /// <param name="numberOfCandles">Number of minute candles to request (>0).</param>
         /// <returns>Array of candles.</returns>
-        public BacktestingCandle[] GetCandles(TradingPair pair, int numberOfCandles)
+        public BacktestingCandle[] GetCandles(TradingPair pair, CandleWidth candleWidth, int numberOfCandles)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(numberOfCandles).NotZero().NotNegative();
+            if ((int)candleWidth < (int)Configuration.Instance.CandleWidth
+                || (int)candleWidth % (int)Configuration.Instance.CandleWidth != 0)
+            {
+                throw new ArgumentOutOfRangeException($"Request candle width {candleWidth} is not compatible with the configured {Configuration.Instance.__candleWidth}");
+            }
+
             var query = HelperMethods.RetryMethod(
-                () => Implementation.GetCandles(pair, numberOfCandles, Configuration.Instance.CandleWidth), _logger, 5, 1000);
+                () => Implementation.GetCustomCandles(pair, numberOfCandles, candleWidth), _logger, 5, 1000);
             return query.Success
                 ? query.Data.Length == numberOfCandles
                   ? query.Data
                   : throw new InvalidExchangeDataException($"Requested {numberOfCandles} but received {query.Data.Length}")
                 : throw new ExchangeConnectionException(query.Message);
-        }
-
-        /// <summary>
-        /// Get candles of a custom size.
-        /// </summary>
-        /// <param name="pair">TradingPair to consider.</param>
-        /// <param name="numberOfCandles">Number of custom candles.</param>
-        /// <param name="width">The width of the custom candle.</param>
-        /// <returns>Array of custom candles.</returns>
-        public BacktestingCandle[] GetCustomCandles(TradingPair pair, int numberOfCandles, CandleWidth width)
-        {
-            Guard.Argument(pair).NotNull(nameof(pair));
-            var localCandleSize = (int)Configuration.Instance.CandleWidth;
-            var targetCandleSize = (int)width;
-
-            Guard.Argument(targetCandleSize)
-                .Require<ArgumentOutOfRangeException>(
-                    x => x >= localCandleSize,
-                    x => $"Target candle size {x}min requires decompression given the configured candle size {localCandleSize}min")
-                .Require<ArgumentOutOfRangeException>(
-                    x => x % localCandleSize == 0,
-                    x => $"Cannot compress candles from {x}min to {localCandleSize}min because {x} is not divible by {localCandleSize}");
-
-            // Number of candles needed for the query
-            var targetCandleCount = (targetCandleSize / localCandleSize) * numberOfCandles;
-            var timespan = TimerProvider.CurrentTime - TimerProvider.Pivot;
-
-            // Number of candles that are left after dividing by the target size (uncompleted batch)
-            var padding = ((int)timespan.TotalMinutes % targetCandleSize) / localCandleSize;
-
-            // Request the correct number of candles but skip the padding
-            var candles = GetCandles(pair, targetCandleCount + padding).Skip(padding).ToArray();
-            return DataProviderUtilities.CompressCandles(candles, targetCandleSize / localCandleSize);
         }
 
         /// <summary>
@@ -202,6 +170,8 @@ namespace SpreadShare.ExchangeServices.Providers
                 : throw new ExchangeConnectionException(query.Message);
         }
 
+        // Will be removed soon
+        #pragma warning disable CA1822, CA1801, SA1204
         /// <summary>
         /// Calculate the Average True Range (ATR) of certain pair given a number of candles, and a number
         /// of chunks they ought to be split in.
@@ -210,54 +180,9 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="candlesBack">The number of candles to use (must be a multiple of <see param="chunks"/>.</param>
         /// <param name="chunks">The number of chunks to divide the candles in before calculating the ATR.</param>
         /// <returns>The ATR value.</returns>
-        public decimal GetAverageTrueRange(TradingPair pair, int candlesBack, int chunks = 5)
+        public static decimal GetAverageTrueRange(TradingPair pair, int candlesBack, int chunks = 5)
         {
-            Guard.Argument(pair).NotNull(nameof(pair));
-
-            Guard.Argument(chunks)
-                .NotZero(nameof(chunks))
-                .NotNegative();
-
-            Guard.Argument(candlesBack)
-                .NotZero(nameof(candlesBack))
-                .NotNegative()
-                .Require<ArgumentException>(
-                    x => x % chunks == 0,
-                    _ => $"{nameof(candlesBack)} has value {candlesBack} which is not a multiple of {nameof(chunks)} ({chunks})");
-
-            // Retrieve one extra candle to gain the close.
-            var rawCandles = GetCandles(pair, candlesBack + 1);
-            var originalCandles = rawCandles.SkipLast(1).ToArray();
-
-            // Save oldest candle, whose 'close' value provides the node for the last edge
-            var edgeCandle = rawCandles.Last();
-
-            int compressionRatio = candlesBack / chunks;
-
-            // Compress candles into {chunks} parts
-            var candles = DataProviderUtilities.CompressCandles(originalCandles, compressionRatio);
-
-            var trueRanges = new decimal[candles.Length];
-
-            // Calculate maximum of three edge features over the series (chunk[0] -> chunk[1] ... -> chunk[n] -> edgeCandle)
-            for (int i = 0; i < candles.Length; i++)
-            {
-                decimal highLow = Math.Abs(candles[i].High - candles[i].Low);
-
-                // Edge case for last iteration
-                decimal highPreviousClose = i == candles.Length - 1
-                    ? Math.Abs(candles[i].High - edgeCandle.Close)
-                    : Math.Abs(candles[i].High - candles[i + 1].Close);
-
-                // Edge case for the last iteration
-                decimal lowPreviousClose = i == candles.Length - 1
-                    ? Math.Abs(candles[i].Low - edgeCandle.Close)
-                    : Math.Abs(candles[i].Low - candles[i + 1].Close);
-
-                trueRanges[i] = new[] { highLow, highPreviousClose, lowPreviousClose }.Max();
-            }
-
-            return trueRanges.Average();
+            throw new Exception("Thanks I deprecated!");
         }
 
         /// <summary>
@@ -269,32 +194,11 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="numberOfIntervals">The number of intervals to consider.</param>
         /// <param name="intervalOffset">how many intervals offset (into the past).</param>
         /// <returns>The Standard Moving Average.</returns>
-        public decimal GetStandardMovingAverage(TradingPair pair, int candlesPerInterval, int numberOfIntervals, int intervalOffset = 0)
+        public static decimal GetStandardMovingAverage(TradingPair pair, int candlesPerInterval, int numberOfIntervals, int intervalOffset = 0)
         {
-            Guard.Argument(pair).NotNull();
-            Guard.Argument(candlesPerInterval)
-                .NotNegative()
-                .NotZero();
-
-            Guard.Argument(numberOfIntervals)
-                .NotNegative()
-                .NotZero();
-
-            Guard.Argument(intervalOffset).NotNegative();
-
-            // Calculate the total number of five minute candles required.
-            int numberOfCandles = candlesPerInterval * (numberOfIntervals + intervalOffset);
-
-            // Get all candles and compress them {candlesPerInterval} times resulting in {numberOfIntervals} compressed candles.
-
-            // Remove the offset
-            var allCandles = GetCandles(pair, numberOfCandles).Skip(intervalOffset * candlesPerInterval).ToArray();
-
-            var candles = DataProviderUtilities.CompressCandles(allCandles, candlesPerInterval);
-
-            // Return the average of all closes.
-            return candles.Average(x => x.Close);
+            throw new Exception("Thanks, I deprecated!");
         }
+        #pragma warning restore CA1822, CA1801, SA1204
 
         /// <summary>
         /// Gets a value estimation of a portfolio.

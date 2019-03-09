@@ -2,11 +2,12 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService;
+using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Tests.ExchangeServices.DataProviderTests;
 using Xunit;
 using Xunit.Abstractions;
@@ -25,7 +26,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         {
             var data = GetDataProvider<DataProviderGetCandlesImplementation>();
             var pair = TradingPair.Parse("EOSETH");
-            var candles = data.GetCandles(pair, 1300);
+            var candles = data.GetCandles(pair, Configuration.Instance.CandleWidth, 1300);
             var highestHigh = data.GetHighestHigh(pair, 1300);
             Assert.Equal(candles.Max(x => x.High), highestHigh);
         }
@@ -35,7 +36,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         {
             var data = GetDataProvider<DataProviderGetCandlesImplementation>();
             var pair = TradingPair.Parse("EOSETH");
-            var candles = data.GetCandles(pair, 1300);
+            var candles = data.GetCandles(pair, Configuration.Instance.CandleWidth, 1300);
             var lowestLow = data.GetLowestLow(pair, 1300);
             Assert.Equal(candles.Min(x => x.Low), lowestLow);
         }
@@ -45,12 +46,30 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
         private class DataProviderGetCandlesImplementation : DataProviderTestImplementation
         {
-            public DataProviderGetCandlesImplementation(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
-                : base(loggerFactory, exchangeCommunications)
+            public DataProviderGetCandlesImplementation(ILoggerFactory loggerFactory, TimerProvider timerProvider)
+                : base(loggerFactory, timerProvider)
             {
             }
 
-            public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width)
+            public override ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles)
+            {
+                var candles = GetCandles(pair, numberOfCandles).Data;
+                var method = typeof(BacktestBuffers)
+                    .GetMethod("BuildHighestHighBuffer", BindingFlags.NonPublic | BindingFlags.Static);
+                var highestHighBuffer = (decimal[])method.Invoke(null, new object[] { candles, numberOfCandles });
+                return new ResponseObject<decimal>(highestHighBuffer.Last());
+            }
+
+            public override ResponseObject<decimal> GetLowestLow(TradingPair pair, CandleWidth width, int numberOfCandles)
+            {
+                var candles = GetCandles(pair, numberOfCandles).Data;
+                var method = typeof(BacktestBuffers)
+                    .GetMethod("BuildLowestLowBuffer", BindingFlags.NonPublic | BindingFlags.Static);
+                var lowestLowBuffer = (decimal[])method.Invoke(null, new object[] { candles, numberOfCandles });
+                return new ResponseObject<decimal>(lowestLowBuffer.Last());
+            }
+
+            protected override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit)
             {
                 var random = new Random("$pread$hare".GetHashCode(StringComparison.InvariantCulture));
                 var result = new BacktestingCandle[limit];
@@ -74,24 +93,6 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 }
 
                 return new ResponseObject<BacktestingCandle[]>(result);
-            }
-
-            public override ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles)
-            {
-                var candles = GetCandles(pair, numberOfCandles, width).Data;
-                var method = typeof(BacktestBuffers)
-                    .GetMethod("BuildHighestHighBuffer", BindingFlags.NonPublic | BindingFlags.Static);
-                var highestHighBuffer = (decimal[])method.Invoke(null, new object[] { candles, numberOfCandles });
-                return new ResponseObject<decimal>(highestHighBuffer.Last());
-            }
-
-            public override ResponseObject<decimal> GetLowestLow(TradingPair pair, CandleWidth width, int numberOfCandles)
-            {
-                var candles = GetCandles(pair, numberOfCandles, width).Data;
-                var method = typeof(BacktestBuffers)
-                    .GetMethod("BuildLowestLowBuffer", BindingFlags.NonPublic | BindingFlags.Static);
-                var lowestLowBuffer = (decimal[])method.Invoke(null, new object[] { candles, numberOfCandles });
-                return new ResponseObject<decimal>(lowestLowBuffer.Last());
             }
         }
 

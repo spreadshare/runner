@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
@@ -17,9 +19,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private static Dictionary<string, BacktestingCandle[]> _buffers;
         private static Dictionary<(string, int), decimal[]> _highestHighBuffer;
         private static Dictionary<(string, int), decimal[]> _lowestLowBuffer;
+        private static Dictionary<(string, CandleWidth), BacktestingCandle[]> _candleBuffer;
 
-        private DatabaseContext _db;
-        private ILogger _logger;
+        private readonly DatabaseContext _db;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestBuffers"/> class.
@@ -45,28 +48,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             {
                 _lowestLowBuffer = new Dictionary<(string, int), decimal[]>();
             }
-        }
 
-        /// <summary>
-        /// Get all the candles from the buffer.
-        /// </summary>
-        /// <param name="pair">The trading pair to fetch the candles for.</param>
-        /// <returns>An array of candles.</returns>
-        public BacktestingCandle[] GetCandles(TradingPair pair)
-        {
-            if (!_buffers.ContainsKey(pair.ToString()))
+            if (_candleBuffer == null)
             {
-                _logger.LogCritical($"Building a new buffer for {pair}");
-                _buffers.Add(
-                    pair.ToString(),
-                    _db.Candles.AsNoTracking()
-                        .Where(x => x.TradingPair == pair.ToString())
-                        .OrderBy(x => x.Timestamp)
-                        .ToArray());
-                _logger.LogCritical($"Done building the buffer for {pair}");
+                _candleBuffer = new Dictionary<(string, CandleWidth), BacktestingCandle[]>();
             }
-
-            return _buffers[pair.ToString()];
         }
 
         /// <summary>
@@ -86,6 +72,25 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             }
 
             return _highestHighBuffer[(pair.ToString(), numberOfCandles)];
+        }
+
+        /// <summary>
+        /// Gets the pre-calculated buffer with the highest high of a certain number of past candles.
+        /// </summary>
+        /// <param name="pair">The TradingPair to consider.</param>
+        /// <param name="channelWidth">The width of the candles.</param>
+        /// <returns>Complete compressed candle buffer.</returns>
+        public BacktestingCandle[] GetCandles(TradingPair pair, CandleWidth channelWidth)
+        {
+            if (!_candleBuffer.ContainsKey((pair.ToString(), channelWidth)))
+            {
+                _logger.LogCritical($"Building compressed candle buffer for {pair} with size {channelWidth}");
+                var candles = GetCandles(pair);
+                _candleBuffer[(pair.ToString(), channelWidth)] =
+                    BuildCandleBuffer(candles, channelWidth);
+            }
+
+            return _candleBuffer[(pair.ToString(), channelWidth)];
         }
 
         /// <summary>
@@ -148,7 +153,44 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private static decimal[] BuildLowestLowBuffer(BacktestingCandle[] candles, int channelWidth)
             => BuildBuffer(candles, channelWidth, new AscendingComparer(), x => x.Low);
 
+        private static BacktestingCandle[] BuildCandleBuffer(BacktestingCandle[] candles, CandleWidth channelWidth)
+        {
+            var localSize = Configuration.Instance.CandleWidth;
+            if ((int)channelWidth < (int)localSize || (int)channelWidth % (int)localSize != 0)
+            {
+                throw new InvalidOperationException($"Cannot build a buffer with size {channelWidth} given the configured {localSize}");
+            }
+
+            int ratio = (int)channelWidth / (int)localSize;
+
+            // Skip the last few candles that cannot be compressed.
+            int excess = candles.Length % ratio;
+            return DataProviderUtilities.CompressCandles(candles.SkipLast(excess).ToArray(), ratio);
+        }
+
         /// <summary>
+        /// Get all the candles from the buffer.
+        /// </summary>
+        /// <param name="pair">The trading pair to fetch the candles for.</param>
+        /// <returns>An array of candles.</returns>
+        private BacktestingCandle[] GetCandles(TradingPair pair)
+        {
+            if (!_buffers.ContainsKey(pair.ToString()))
+            {
+                _logger.LogCritical($"Building a new buffer for {pair}");
+                _buffers.Add(
+                    pair.ToString(),
+                    _db.Candles.AsNoTracking()
+                        .Where(x => x.TradingPair == pair.ToString())
+                        .OrderBy(x => x.Timestamp)
+                        .ToArray());
+                _logger.LogCritical($"Done building the buffer for {pair}");
+            }
+
+            return _buffers[pair.ToString()];
+        }
+
+        /// <summary>toa
         /// An inverse comparer to maintain a descending ordered dictionary.
         /// </summary>
         private class DescendingComparer : IComparer<decimal>

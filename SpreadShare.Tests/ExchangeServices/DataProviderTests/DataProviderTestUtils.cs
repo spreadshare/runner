@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms.Implementations;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
@@ -24,15 +21,13 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         internal DataProvider GetDataProvider<T>()
             where T : DataProviderTestImplementation
         {
-            var comms = ServiceProviderSingleton.Instance.ServiceProvider.GetService<BinanceCommunicationsService>();
-            comms.Connect();
             var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
             var data = container.DataProvider;
             var property = data.GetType().GetProperty("Implementation", BindingFlags.NonPublic | BindingFlags.Instance)
                            ?? throw new Exception($"Expected property 'Implementation' on {nameof(DataProvider)}");
 
             // Inject test implementation
-            var implementation = Activator.CreateInstance(typeof(T), LoggerFactory, comms);
+            var implementation = Activator.CreateInstance(typeof(T), LoggerFactory, container.TimerProvider);
             property.SetValue(data, implementation);
             return data;
         }
@@ -41,13 +36,21 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             where TD : DataProviderTestImplementation
             where TT : TimerProviderTestImplementation
         {
-            var data = GetDataProvider<TD>();
-            var property = data.GetType().GetProperty("TimerProvider", BindingFlags.NonPublic | BindingFlags.Instance)
-                           ?? throw new Exception($"Expected property 'TimerProvider' on {nameof(DataProvider)}");
+            var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
+            var data = container.DataProvider;
+            var property = data.GetType().GetProperty("Implementation", BindingFlags.NonPublic | BindingFlags.Instance)
+                           ?? throw new Exception($"Expected property 'Implementation' on {nameof(DataProvider)}");
 
-            // Inject test timer
-            var timer = Activator.CreateInstance(typeof(TT), LoggerFactory);
-            property.SetValue(data, timer);
+            // Inject test implementation
+            var implementation = Activator.CreateInstance(typeof(TD), LoggerFactory, container.TimerProvider);
+            property.SetValue(data, implementation);
+
+            var timerProperty = implementation.GetType()
+                               .GetProperty("TimerProvider", BindingFlags.NonPublic | BindingFlags.Instance)
+                           ?? throw new Exception(
+                               $"Expected property 'TimerProvider' on {implementation.GetType().Name}");
+            var timerProvider = Activator.CreateInstance(typeof(TT), LoggerFactory);
+            timerProperty.SetValue(implementation, timerProvider);
             return data;
         }
 
@@ -67,8 +70,8 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
         internal class DataProviderTestImplementation : AbstractDataProvider
         {
-            public DataProviderTestImplementation(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
-                : base(loggerFactory, exchangeCommunications)
+            public DataProviderTestImplementation(ILoggerFactory loggerFactory, TimerProvider timerProvider)
+                : base(loggerFactory, timerProvider)
             {
             }
 
@@ -80,11 +83,11 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
             public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack) => throw new NotImplementedException();
 
-            public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width) => throw new NotImplementedException();
-
             public override ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles) => throw new NotImplementedException();
 
             public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack) => throw new NotImplementedException();
+
+            protected override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit) => throw new NotImplementedException();
         }
     }
 }

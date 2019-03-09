@@ -54,6 +54,12 @@ namespace SpreadShare.SupportServices.Configuration
         public Exchange Exchange => _exchangeConstructor.Value(__exchange);
 
         /// <summary>
+        /// Gets or sets the candle width this algorithm works with.
+        /// </summary>
+        [CompatibleCandleWidth]
+        public CandleWidth CandleWidth { get; protected set; }
+
+        /// <summary>
         /// Gets th base currency of the algorithm.
         /// </summary>
         [Required]

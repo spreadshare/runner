@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService;
+using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
@@ -23,7 +23,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
             Assert.Throws<ArgumentNullException>(
-                () => data.GetCustomCandles(null, 1, CandleWidth.FiveMinutes));
+                () => data.GetCandles(null, CandleWidth.FiveMinutes, 1));
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
             Assert.Throws<ArgumentOutOfRangeException>(
-                () => data.GetCustomCandles(TradingPair.Parse("EOSETH"), 1, CandleWidth.OneMinute));
+                () => data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.OneMinute, 1));
         }
 
         [Fact]
@@ -39,14 +39,14 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
             Assert.Throws<ArgumentOutOfRangeException>(
-                () => data.GetCustomCandles(TradingPair.Parse("EOSETH"), 1, CandleWidth.DONOTUSETestEntry));
+                () => data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.DONOTUSETestEntry, 1));
         }
 
         [Fact]
         public void GetCustomCandlesCorrectAmountAllIdentity()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 12, CandleWidth.FiveMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveMinutes, 12);
             Assert.Equal(12, candles.Length);
         }
 
@@ -54,23 +54,23 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesCorrectAmountPartialIdentity()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 5, CandleWidth.FiveMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveMinutes, 5);
             Assert.Equal(5, candles.Length);
         }
 
         [Fact]
-        public void GetCustomCandlesCorrectAmmountAll()
+        public void GetCustomCandlesCorrectAmountAll()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 4, CandleWidth.FiveteenMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 4);
             Assert.Equal(4, candles.Length);
         }
 
         [Fact]
-        public void GetCustomCandlesCorrectAmmountPartial()
+        public void GetCustomCandlesCorrectAmountPartial()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 3, CandleWidth.FiveteenMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 3);
             Assert.Equal(3, candles.Length);
         }
 
@@ -78,7 +78,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesNoPivotThirtyMinutes()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 2, CandleWidth.ThirtyMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.ThirtyMinutes, 2);
             Assert.Equal(5.7M, candles[0].Close);
             Assert.Equal(5.6M, candles[1].Close);
         }
@@ -87,7 +87,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesNoPivotFiveteenMinutes()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 4, CandleWidth.FiveteenMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 4);
             Assert.Equal(5.7M, candles[0].Close);
             Assert.Equal(6.9M, candles[1].Close);
             Assert.Equal(5.6M, candles[2].Close);
@@ -98,7 +98,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesOne()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 1, CandleWidth.FiveteenMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 1);
             Assert.Equal(6.2M, candles[0].Close);
         }
 
@@ -106,7 +106,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesMultiple()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 3, CandleWidth.FiveteenMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 3);
             Assert.Equal(6.2M, candles[0].Close);
             Assert.Equal(6.3M, candles[1].Close);
             Assert.Equal(8.872M, candles[2].Close);
@@ -116,7 +116,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesIdentity()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 1, CandleWidth.FiveMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveMinutes, 1);
             Assert.Equal(5.7M, candles[0].Close);
         }
 
@@ -153,12 +153,12 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
         private class DataProviderImplementation : DataProviderTestUtils.DataProviderTestImplementation
         {
-            public DataProviderImplementation(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
-                : base(loggerFactory, exchangeCommunications)
+            public DataProviderImplementation(ILoggerFactory loggerFactory, TimerProvider timerProvider)
+                : base(loggerFactory, timerProvider)
             {
             }
 
-            public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width)
+            protected override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit)
             {
                 // This array is reversed before it is returned.
                 return new ResponseObject<BacktestingCandle[]>(

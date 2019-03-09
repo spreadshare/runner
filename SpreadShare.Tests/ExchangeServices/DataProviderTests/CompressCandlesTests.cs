@@ -26,7 +26,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             Assert.Equal(inputClose, output[0].Close);
 
             // Assert that the interval has doubled.
-            long startTime = input[0].Timestamp;
+            long startTime = input[1].Timestamp;
             foreach (var candle in output)
             {
                 Assert.Equal(startTime, candle.Timestamp);
@@ -42,7 +42,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             decimal inputLow = input.Min(x => x.Low);
             decimal inputOpen = input[input.Length - 1].Open;
             decimal inputClose = input[0].Close;
-            long beginTimestamp = input[0].Timestamp;
+            long beginTimestamp = input[input.Length - 1].Timestamp;
 
             var output = DataProviderUtilities.CompressCandles(input, 2);
             Assert.Equal(2, input.Length);

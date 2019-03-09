@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -38,6 +39,16 @@ namespace SpreadShare.Algorithms
         /// Gets a link to the parent algorithm settings.
         /// </summary>
         protected T AlgorithmConfiguration { get; private set; }
+
+        /// <summary>
+        /// Gets a shorthand alias for the first trading pair in the algorithm configuration.
+        /// </summary>
+        protected TradingPair FirstPair => AlgorithmConfiguration.TradingPairs.First();
+
+        /// <summary>
+        /// Gets a shorthand version for the CandleWidth in the algorithm configuration.
+        /// </summary>
+        protected CandleWidth CandleWidth => AlgorithmConfiguration.CandleWidth;
 
         /// <summary>
         /// Initialise the state.
