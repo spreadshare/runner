@@ -25,6 +25,7 @@ namespace SpreadShare.Tests.ExchangeServices
         @"
            Exchange: Binance
            TradingPairs: [ EOSETH ]
+           CandleWidth: FiveMinutes
         ";
 
         private static object _lock = new object();

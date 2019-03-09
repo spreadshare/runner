@@ -3,7 +3,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
@@ -24,7 +23,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void AverageTrueRangeSingleEdge()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 2, CandleWidth.TwentyFiveMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.TwentyFiveMinutes, 2);
             var atr = candles.AverageTrueRange();
             Assert.Equal(2.6M, atr);
         }
@@ -33,7 +32,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void AverageTrueRangeMultipleEdges()
         {
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCustomCandles(TradingPair.Parse("EOSETH"), 4, CandleWidth.FiveteenMinutes);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 4);
             Logger.LogCritical(JsonConvert.SerializeObject(candles));
             var atr = candles.AverageTrueRange();
             Assert.Equal(2.2666666666666666666666666667M, atr);
@@ -73,12 +72,12 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
         private class DataProviderImplementation : DataProviderTestUtils.DataProviderTestImplementation
         {
-            public DataProviderImplementation(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
-                : base(loggerFactory, exchangeCommunications)
+            public DataProviderImplementation(ILoggerFactory loggerFactory, TimerProvider timerProvider)
+                : base(loggerFactory, timerProvider)
             {
             }
 
-            public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width)
+            protected override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit)
             {
                 // This array is reversed before it is returned.
                 return new ResponseObject<BacktestingCandle[]>(

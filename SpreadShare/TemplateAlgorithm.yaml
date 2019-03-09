@@ -1,4 +1,5 @@
 Exchange: Backtesting
+CandleWidth: FiveMinutes
 TradingPairs:
   - EOSETH
 

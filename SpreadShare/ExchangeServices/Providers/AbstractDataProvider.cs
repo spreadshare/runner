@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dawn;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
@@ -20,20 +21,20 @@ namespace SpreadShare.ExchangeServices.Providers
         protected readonly ILogger Logger;
 
         /// <summary>
-        /// Create identifiable output.
-        /// </summary>
-        protected readonly ExchangeCommunications ExchangeCommunications;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="AbstractDataProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output stream. </param>
-        /// <param name="exchangeCommunications">Communicates with the exchange.</param>
-        protected AbstractDataProvider(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
+        /// <param name="timerProvider">To keep track of the pivot for candle compressing.</param>
+        protected AbstractDataProvider(ILoggerFactory loggerFactory, TimerProvider timerProvider)
         {
-            ExchangeCommunications = exchangeCommunications;
             Logger = loggerFactory.CreateLogger(GetType());
+            TimerProvider = timerProvider;
         }
+
+        /// <summary>
+        /// Gets or sets the TimerProvider.
+        /// </summary>
+        protected TimerProvider TimerProvider { get; set; }
 
         /// <summary>
         /// Gets the current price of a trading pair by checking the last trade.
@@ -67,13 +68,44 @@ namespace SpreadShare.ExchangeServices.Providers
         public abstract ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack);
 
         /// <summary>
-        /// Gets a certain number of minute candles.
+        /// Get candles of a custom size.
         /// </summary>
-        /// <param name="pair">TradingPair.</param>
-        /// <param name="limit">Number of candles to fetch.</param>
-        /// <param name="width">The width of a candle (e.g. OneMinute).</param>
-        /// <returns>ResponseObject containing a candle array.</returns>
-        public abstract ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width);
+        /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="numberOfCandles">Number of custom candles.</param>
+        /// <param name="width">The width of the custom candle.</param>
+        /// <returns>Array of custom candles.</returns>
+        public virtual ResponseObject<BacktestingCandle[]> GetCustomCandles(TradingPair pair, int numberOfCandles, CandleWidth width)
+        {
+            Guard.Argument(pair).NotNull(nameof(pair));
+            var localCandleSize = (int)Configuration.Instance.CandleWidth;
+            var targetCandleSize = (int)width;
+
+            Guard.Argument(targetCandleSize)
+                .Require<ArgumentOutOfRangeException>(
+                    x => x >= localCandleSize,
+                    x => $"Target candle size {x}min requires decompression given the configured candle size {localCandleSize}min")
+                .Require<ArgumentOutOfRangeException>(
+                    x => x % localCandleSize == 0,
+                    x => $"Cannot compress candles from {x}min to {localCandleSize}min because {x} is not divible by {localCandleSize}");
+
+            // Number of candles needed for the query
+            var targetCandleCount = (targetCandleSize / localCandleSize) * numberOfCandles;
+            var timespan = TimerProvider.CurrentTime - TimerProvider.Pivot;
+
+            // Number of candles that are left after dividing by the target size (uncompleted batch)
+            var padding = ((int)timespan.TotalMinutes % targetCandleSize) / localCandleSize;
+
+            // Request the correct number of candles but skip the padding
+            var candlesQuery = GetCandles(pair, targetCandleCount + padding);
+            if (!candlesQuery.Success)
+            {
+                return candlesQuery;
+            }
+
+            var candles = candlesQuery.Data.Skip(padding).ToArray();
+            return new ResponseObject<BacktestingCandle[]>(
+                DataProviderUtilities.CompressCandles(candles, targetCandleSize / localCandleSize));
+        }
 
         /// <summary>
         /// Get the highest high of a certain number of recent candles.
@@ -84,7 +116,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>The highest high.</returns>
         public virtual ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles)
         {
-            var candles = GetCandles(pair, numberOfCandles, width);
+            var candles = GetCustomCandles(pair, numberOfCandles, width);
             return candles.Success
                 ? new ResponseObject<decimal>(candles.Data.Max(x => x.High))
                 : new ResponseObject<decimal>(ResponseCode.Error, candles.Message);
@@ -99,7 +131,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>The lowest low.</returns>
         public virtual ResponseObject<decimal> GetLowestLow(TradingPair pair, CandleWidth width, int numberOfCandles)
         {
-            var candles = GetCandles(pair, numberOfCandles, width);
+            var candles = GetCustomCandles(pair, numberOfCandles, width);
             return candles.Success
                 ? new ResponseObject<decimal>(candles.Data.Min(x => x.Low))
                 : new ResponseObject<decimal>(ResponseCode.Error, candles.Message);
@@ -112,5 +144,13 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="hoursBack">Number of hours to look back.</param>
         /// <returns>Top performing trading pair.</returns>
         public abstract ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack);
+
+        /// <summary>
+        /// Gets a certain number of candles with the configured size.
+        /// </summary>
+        /// <param name="pair">TradingPair.</param>
+        /// <param name="limit">Number of candles to fetch.</param>
+        /// <returns>ResponseObject containing a candle array.</returns>
+        protected abstract ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit);
     }
 }
