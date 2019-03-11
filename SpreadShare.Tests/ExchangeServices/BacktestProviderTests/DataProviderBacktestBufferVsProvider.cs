@@ -27,7 +27,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
             var data = GetDataProvider<DataProviderGetCandlesImplementation>();
             var pair = TradingPair.Parse("EOSETH");
             var candles = data.GetCandles(pair, Configuration.Instance.CandleWidth, 1300);
-            var highestHigh = data.GetHighestHigh(pair, 1300);
+            var highestHigh = data.GetHighestHigh(pair, Configuration.Instance.CandleWidth, 1300);
             Assert.Equal(candles.Max(x => x.High), highestHigh);
         }
 
