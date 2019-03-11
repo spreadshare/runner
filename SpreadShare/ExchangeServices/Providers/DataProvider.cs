@@ -140,14 +140,15 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Gets the highest high of a certain number of candles.
         /// </summary>
         /// <param name="pair">TradingPair to consider.</param>
+        /// <param name="width">The width of the candle.</param>
         /// <param name="numberOfCandles">number of candles to consider.</param>
         /// <returns>The maximum value of the highs of all the candles.</returns>
-        public decimal GetHighestHigh(TradingPair pair, int numberOfCandles)
+        public decimal GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(numberOfCandles).NotZero().NotNegative();
             var query = HelperMethods.RetryMethod(
-                () => Implementation.GetHighestHigh(pair, Configuration.Instance.CandleWidth, numberOfCandles), _logger);
+                () => Implementation.GetHighestHigh(pair, width, numberOfCandles), _logger);
             return query.Success
                 ? query.Data
                 : throw new ExchangeConnectionException(query.Message);
