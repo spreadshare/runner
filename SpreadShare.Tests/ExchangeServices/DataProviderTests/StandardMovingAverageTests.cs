@@ -11,9 +11,9 @@ using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 {
-    public class NewStandardMovingAverageTests : DataProviderTestUtils
+    public class StandardMovingAverageTests : DataProviderTestUtils
     {
-        public NewStandardMovingAverageTests(ITestOutputHelper outputHelper)
+        public StandardMovingAverageTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dawn;
 using SpreadShare.Models.Database;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.Providers
 {
@@ -97,6 +98,24 @@ namespace SpreadShare.ExchangeServices.Providers
             }
 
             return candles.Average(x => x.Close);
+        }
+
+        /// <summary>
+        /// Calculates the rate of change over a set of candles.
+        /// </summary>
+        /// <param name="input">Set of candles.</param>
+        /// <returns>RateOfChange value.</returns>
+        public static decimal RateOfChange(this IEnumerable<BacktestingCandle> input)
+        {
+            var candles = (input ?? throw new ArgumentNullException(nameof(input))).ToArray();
+            if (candles.Length == 0)
+            {
+                throw new InvalidOperationException("Cannot calculate the RateOfChange of an empty set.");
+            }
+
+            var current = candles.First();
+            var past = candles.Last();
+            return HelperMethods.SafeDiv(current.Close - past.Close, past.Close);
         }
     }
 }
