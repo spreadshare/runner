@@ -22,8 +22,8 @@ namespace SpreadShare.Algorithms.Implementations
         {
             public override State<KeiraNightlyConfiguration> OnMarketCondition(DataProvider data)
             {
-                var candles = data.GetCandles(FirstPair, CandleWidth, 10);
-                var candles2 = data.GetCandles(FirstPair, CandleWidth, 20);
+                var candles = data.GetCandles(FirstPair, 10);
+                var candles2 = data.GetCandles(FirstPair, 20);
                 if (candles.StandardMovingAverage() > candles2.StandardMovingAverage())
                 {
                     return new LimitSellState();

@@ -22,8 +22,14 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         [Fact]
         public void AverageTrueRangeSingleEdge()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.TwentyFiveMinutes, 2);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: TwentyFiveMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 2);
             var atr = candles.AverageTrueRange();
             Assert.Equal(2.6M, atr);
         }
@@ -31,8 +37,14 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         [Fact]
         public void AverageTrueRangeMultipleEdges()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 4);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveteenMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 4);
             Logger.LogCritical(JsonConvert.SerializeObject(candles));
             var atr = candles.AverageTrueRange();
             Assert.Equal(2.2666666666666666666666666667M, atr);

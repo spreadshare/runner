@@ -33,13 +33,11 @@ namespace SpreadShare.Algorithms.Implementations
                 // Get the highest high from the last X hours
                 decimal topLongTermPrice = data.GetHighestHigh(
                     FirstPair,
-                    CandleWidth,
                     AlgorithmConfiguration.LongTermTime);
 
                 // If the topLongTermPrice gets broken, we buy into the expected trend
                 if (data.GetCandles(
                         AlgorithmConfiguration.TradingPairs.First(),
-                        AlgorithmConfiguration.CandleWidth,
                         1).Max(x => x.High) >= topLongTermPrice)
                 {
                     return new BuyState(null, 0);
@@ -119,7 +117,6 @@ namespace SpreadShare.Algorithms.Implementations
                 int candleAmount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.ShortTermTime;
                 decimal shortTermTimePrice = data.GetCandles(
                     AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.CandleWidth,
                     candleAmount).Min(x => x.Low);
 
                 // Set first stop loss order at DCMin.
@@ -162,7 +159,6 @@ namespace SpreadShare.Algorithms.Implementations
                 // Check whether we need to trail the stoploss higher
                 bool trail = data.GetCandles(
                                  AlgorithmConfiguration.TradingPairs.First(),
-                                 AlgorithmConfiguration.CandleWidth,
                                  candleAmount).Min(x => x.Low)
                              >
                              _stoploss.SetPrice;
@@ -208,7 +204,6 @@ namespace SpreadShare.Algorithms.Implementations
                 // Check whether we need to trail the stoploss higher
                 bool trail = data.GetCandles(
                                  AlgorithmConfiguration.TradingPairs.First(),
-                                 AlgorithmConfiguration.CandleWidth,
                                  candleAmount).Min(x => x.Low)
                              >
                              _stoploss.SetPrice;
@@ -216,13 +211,11 @@ namespace SpreadShare.Algorithms.Implementations
                 // Get the highest high from the last X hours
                 decimal topLongTermPrice = data.GetHighestHigh(
                     FirstPair,
-                    CandleWidth,
                     AlgorithmConfiguration.LongTermTime);
 
                 // If the topLongTermPrice gets broken, we buy into the expected trend
                 if (data.GetCandles(
                         AlgorithmConfiguration.TradingPairs.First(),
-                        AlgorithmConfiguration.CandleWidth,
                         1).Max(x => x.High) >= topLongTermPrice)
                 {
                     return new BuyState(null, 0);

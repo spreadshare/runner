@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms.Implementations;
@@ -7,7 +8,9 @@ using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.Configuration;
 using Xunit.Abstractions;
+using YamlDotNet.Serialization;
 
 namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 {
@@ -18,10 +21,18 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
         }
 
-        internal DataProvider GetDataProvider<T>()
+        internal AlgorithmConfiguration ParseAlgorithmConfiguration(string source)
+        {
+            var config = new DeserializerBuilder().Build()
+                    .Deserialize<TemplateAlgorithmConfiguration>(new StringReader(source));
+            ConfigurationValidator.ValidateConstraintsRecursively(AlgorithmConfiguration);
+            return config;
+        }
+
+        internal DataProvider GetDataProvider<T>(AlgorithmConfiguration config)
             where T : DataProviderTestImplementation
         {
-            var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
+            var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(config);
             var data = container.DataProvider;
             var property = data.GetType().GetProperty("Implementation", BindingFlags.NonPublic | BindingFlags.Instance)
                            ?? throw new Exception($"Expected property 'Implementation' on {nameof(DataProvider)}");
@@ -32,11 +43,11 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             return data;
         }
 
-        internal DataProvider GetDataProviderWithTimer<TD, TT>()
+        internal DataProvider GetDataProviderWithTimer<TD, TT>(AlgorithmConfiguration config)
             where TD : DataProviderTestImplementation
             where TT : TimerProviderTestImplementation
         {
-            var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
+            var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(config);
             var data = container.DataProvider;
             var property = data.GetType().GetProperty("Implementation", BindingFlags.NonPublic | BindingFlags.Instance)
                            ?? throw new Exception($"Expected property 'Implementation' on {nameof(DataProvider)}");

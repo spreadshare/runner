@@ -21,64 +21,84 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         [Fact]
         public void GetCustomCandlesNull()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
             Assert.Throws<ArgumentNullException>(
-                () => data.GetCandles(null, CandleWidth.FiveMinutes, 1));
-        }
-
-        [Fact]
-        public void GetCustomCandlesSmaller()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.OneMinute, 1));
-        }
-
-        [Fact]
-        public void GetCustomCandlesNotDivisble()
-        {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.DONOTUSETestEntry, 1));
+                () => data.GetCandles(null, 1));
         }
 
         [Fact]
         public void GetCustomCandlesCorrectAmountAllIdentity()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveMinutes, 12);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 12);
             Assert.Equal(12, candles.Length);
         }
 
         [Fact]
         public void GetCustomCandlesCorrectAmountPartialIdentity()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveMinutes, 5);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 5);
             Assert.Equal(5, candles.Length);
         }
 
         [Fact]
         public void GetCustomCandlesCorrectAmountAll()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 4);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveteenMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 4);
             Assert.Equal(4, candles.Length);
         }
 
         [Fact]
         public void GetCustomCandlesCorrectAmountPartial()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 3);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveteenMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 3);
             Assert.Equal(3, candles.Length);
         }
 
         [Fact]
         public void GetCustomCandlesNoPivotThirtyMinutes()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.ThirtyMinutes, 2);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: ThirtyMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 2);
             Assert.Equal(5.7M, candles[0].Close);
             Assert.Equal(5.6M, candles[1].Close);
         }
@@ -86,8 +106,14 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         [Fact]
         public void GetCustomCandlesNoPivotFiveteenMinutes()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 4);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveteenMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 4);
             Assert.Equal(5.7M, candles[0].Close);
             Assert.Equal(6.9M, candles[1].Close);
             Assert.Equal(5.6M, candles[2].Close);
@@ -97,16 +123,28 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         [Fact]
         public void GetCustomCandlesOne()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 1);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveteenMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 1);
             Assert.Equal(6.2M, candles[0].Close);
         }
 
         [Fact]
         public void GetCustomCandlesMultiple()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 3);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveteenMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 3);
             Assert.Equal(6.2M, candles[0].Close);
             Assert.Equal(6.3M, candles[1].Close);
             Assert.Equal(8.872M, candles[2].Close);
@@ -115,8 +153,14 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         [Fact]
         public void GetCustomCandlesIdentity()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveMinutes, 1);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 1);
             Assert.Equal(5.7M, candles[0].Close);
         }
 
