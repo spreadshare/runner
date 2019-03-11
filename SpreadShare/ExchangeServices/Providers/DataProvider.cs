@@ -34,6 +34,8 @@ namespace SpreadShare.ExchangeServices.Providers
         // Setter is used with reflection in the tests.
         private AbstractDataProvider Implementation { get; set; }
 
+        private CandleWidth CandleWidth => _algorithmConfiguration.CandleWidth;
+
         /// <summary>
         /// Gets the current price of a trading pair by checking the last trade.
         /// </summary>
@@ -114,21 +116,15 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Get a certain number of minute candles ordered from present -> past.
         /// </summary>
         /// <param name="pair">TradingPair.</param>
-        /// <param name="candleWidth">The width of the requested candles.</param>
         /// <param name="numberOfCandles">Number of minute candles to request (>0).</param>
         /// <returns>Array of candles.</returns>
-        public BacktestingCandle[] GetCandles(TradingPair pair, CandleWidth candleWidth, int numberOfCandles)
+        public BacktestingCandle[] GetCandles(TradingPair pair, int numberOfCandles)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(numberOfCandles).NotZero().NotNegative();
-            if ((int)candleWidth < (int)Configuration.Instance.CandleWidth
-                || (int)candleWidth % (int)Configuration.Instance.CandleWidth != 0)
-            {
-                throw new ArgumentOutOfRangeException($"Request candle width {candleWidth} is not compatible with the configured {Configuration.Instance.__candleWidth}");
-            }
 
             var query = HelperMethods.RetryMethod(
-                () => Implementation.GetCustomCandles(pair, numberOfCandles, candleWidth), _logger, 5, 1000);
+                () => Implementation.GetCustomCandles(pair, numberOfCandles, CandleWidth), _logger, 5, 1000);
             return query.Success
                 ? query.Data.Length == numberOfCandles
                   ? query.Data
@@ -140,15 +136,14 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Gets the highest high of a certain number of candles.
         /// </summary>
         /// <param name="pair">TradingPair to consider.</param>
-        /// <param name="width">The width of the candle.</param>
         /// <param name="numberOfCandles">number of candles to consider.</param>
         /// <returns>The maximum value of the highs of all the candles.</returns>
-        public decimal GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles)
+        public decimal GetHighestHigh(TradingPair pair, int numberOfCandles)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(numberOfCandles).NotZero().NotNegative();
             var query = HelperMethods.RetryMethod(
-                () => Implementation.GetHighestHigh(pair, width, numberOfCandles), _logger);
+                () => Implementation.GetHighestHigh(pair, CandleWidth, numberOfCandles), _logger);
             return query.Success
                 ? query.Data
                 : throw new ExchangeConnectionException(query.Message);
@@ -158,15 +153,14 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Gets the lowest low of a certain number of candles.
         /// </summary>
         /// <param name="pair">TradingPair to consider.</param>
-        /// <param name="width">The width of the candles.</param>
         /// <param name="numberOfCandles">number of candles to consider.</param>
         /// <returns>The minimum value of the lows of all the candles.</returns>
-        public decimal GetLowestLow(TradingPair pair, CandleWidth width, int numberOfCandles)
+        public decimal GetLowestLow(TradingPair pair, int numberOfCandles)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
             Guard.Argument(numberOfCandles).NotZero().NotNegative();
             var query = HelperMethods.RetryMethod(
-                () => Implementation.GetLowestLow(pair, width, numberOfCandles), _logger);
+                () => Implementation.GetLowestLow(pair, CandleWidth, numberOfCandles), _logger);
             return query.Success
                 ? query.Data
                 : throw new ExchangeConnectionException(query.Message);

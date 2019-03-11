@@ -164,7 +164,6 @@ namespace SpreadShare.Algorithms.Implementations
                 int candleAmount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
                 decimal donchianMinPrice = data.GetCandles(
                     AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.CandleWidth,
                     candleAmount).Min(x => x.Low);
 
                 // Set first stop loss order at DCMin.
@@ -207,7 +206,6 @@ namespace SpreadShare.Algorithms.Implementations
                 // Check whether we need to trail the stoploss higher
                 var minPrice = data.GetCandles(
                     AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.CandleWidth,
                     candleAmount).Min(x => x.Low);
                 bool trail = minPrice > _stoploss.StopPrice;
 
@@ -253,7 +251,6 @@ namespace SpreadShare.Algorithms.Implementations
                 // Check whether we need to trail the stoploss higher
                 bool trail = data.GetCandles(
                                  AlgorithmConfiguration.TradingPairs.First(),
-                                 AlgorithmConfiguration.CandleWidth,
                                  candleAmount).Min(x => x.Low)
                              >
                              _stoploss.SetPrice;

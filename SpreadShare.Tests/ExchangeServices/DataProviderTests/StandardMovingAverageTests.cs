@@ -21,8 +21,14 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         [Fact]
         public void StandardMovingAverageSingleCandle()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveMinutes, 1);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 1);
             var sma = candles.StandardMovingAverage();
             Assert.Equal(5.7M, sma);
         }
@@ -30,8 +36,14 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         [Fact]
         public void StandardMovingAverageFourCandles()
         {
-            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>();
-            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), CandleWidth.FiveteenMinutes, 4);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveteenMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 4);
             var sma = candles.StandardMovingAverage();
             Assert.Equal(6.5525M, sma);
         }

@@ -7,7 +7,6 @@ using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
-using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Tests.ExchangeServices.DataProviderTests;
 using Xunit;
 using Xunit.Abstractions;
@@ -24,20 +23,32 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         [Fact]
         public void HighestHighIsMaximumOfCandleHighs()
         {
-            var data = GetDataProvider<DataProviderGetCandlesImplementation>();
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProvider<DataProviderGetCandlesImplementation>(config);
             var pair = TradingPair.Parse("EOSETH");
-            var candles = data.GetCandles(pair, Configuration.Instance.CandleWidth, 1300);
-            var highestHigh = data.GetHighestHigh(pair, Configuration.Instance.CandleWidth, 1300);
+            var candles = data.GetCandles(pair, 1300);
+            var highestHigh = data.GetHighestHigh(pair, 1300);
             Assert.Equal(candles.Max(x => x.High), highestHigh);
         }
 
         [Fact]
         public void LowestLowIsMaximumOfCandleLows()
         {
-            var data = GetDataProvider<DataProviderGetCandlesImplementation>();
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProvider<DataProviderGetCandlesImplementation>(config);
             var pair = TradingPair.Parse("EOSETH");
-            var candles = data.GetCandles(pair, Configuration.Instance.CandleWidth, 1300);
-            var lowestLow = data.GetLowestLow(pair, Configuration.Instance.CandleWidth, 1300);
+            var candles = data.GetCandles(pair, 1300);
+            var lowestLow = data.GetLowestLow(pair, 1300);
             Assert.Equal(candles.Min(x => x.Low), lowestLow);
         }
 
