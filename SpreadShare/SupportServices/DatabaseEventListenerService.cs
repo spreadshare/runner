@@ -26,7 +26,11 @@ namespace SpreadShare.SupportServices
             _sources = new List<IDisposable>();
             _logger = factory.CreateLogger(GetType());
             _database = database;
-            Session = new AlgorithmSession();
+            Session = new AlgorithmSession
+            {
+                Name = Configuration.Configuration.Instance.EnabledAlgorithm.Name,
+            };
+
             _database.Sessions.Add(Session);
             _database.SaveChanges();
         }
