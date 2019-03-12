@@ -6,7 +6,7 @@ namespace SpreadShare.Models.Database
     /// <summary>
     /// Class to contains the state of an order update at a certain time.
     /// </summary>
-    internal class OrderEvent
+    internal class OrderEvent : DatabaseEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="OrderEvent"/> class.

@@ -5,7 +5,7 @@ namespace SpreadShare.Models.Database
     /// <summary>
     /// Models a state switch event in the database.
     /// </summary>
-    internal class StateSwitchEvent : ICsvSerializable
+    internal class StateSwitchEvent : DatabaseEvent, ICsvSerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
