@@ -21,6 +21,21 @@ namespace SpreadShare.Models.Database
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
+        /// </summary>
+        /// <param name="timestamp">Timestamp.</param>
+        /// <param name="from">Origin state.</param>
+        /// <param name="to">Goal state.</param>
+        /// <param name="session">The current session.</param>
+        public StateSwitchEvent(long timestamp, string from, string to, AlgorithmSession session)
+        {
+            Timestamp = timestamp;
+            From = from;
+            To = to;
+            Session = session;
+        }
+
+        /// <summary>
         /// Gets or sets the unique ID of the event.
         /// </summary>
         [Key]

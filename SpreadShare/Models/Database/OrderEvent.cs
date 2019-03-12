@@ -62,7 +62,8 @@ namespace SpreadShare.Models.Database
         /// </summary>
         /// <param name="order">The order update to pull data from.</param>
         /// <param name="timestamp">The timestamp of the event.</param>
-        public OrderEvent(OrderUpdate order, long timestamp)
+        /// <param name="session">The session that this order event belongs to.</param>
+        public OrderEvent(OrderUpdate order, long timestamp, AlgorithmSession session)
         {
             OrderId = order.OrderId;
             TradeId = order.TradeId;
@@ -78,6 +79,7 @@ namespace SpreadShare.Models.Database
             FilledPrice = order.AverageFilledPrice;
             Side = order.Side.ToString();
             EventTimestamp = timestamp;
+            Session = session;
         }
 
         /// <summary>

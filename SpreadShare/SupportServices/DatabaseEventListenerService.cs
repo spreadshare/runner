@@ -26,6 +26,9 @@ namespace SpreadShare.SupportServices
             _sources = new List<IDisposable>();
             _logger = factory.CreateLogger(GetType());
             _database = database;
+            Session = new AlgorithmSession();
+            _database.Sessions.Add(Session);
+            _database.SaveChanges();
         }
 
         /// <summary>
@@ -33,6 +36,11 @@ namespace SpreadShare.SupportServices
         /// This property is not set if the database was not available.
         /// </summary>
         public static DatabaseEventListenerService Instance { get; private set; }
+
+        /// <summary>
+        /// Gets the current database session.
+        /// </summary>
+        public AlgorithmSession Session { get; }
 
         /// <summary>
         /// Lift the current instance to the static instance.
@@ -60,7 +68,7 @@ namespace SpreadShare.SupportServices
 
         private void OnNext(OrderUpdate order)
         {
-            var item = new OrderEvent(order, DateTimeOffset.Now.ToUnixTimeMilliseconds());
+            var item = new OrderEvent(order, DateTimeOffset.Now.ToUnixTimeMilliseconds(), Session);
             _database.OrderEvents.Add(item);
             _database.SaveChanges();
         }
