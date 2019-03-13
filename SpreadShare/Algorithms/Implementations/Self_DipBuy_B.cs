@@ -30,11 +30,9 @@ namespace SpreadShare.Algorithms.Implementations
         {
             public override State<Self_DipBuy_BConfiguration> OnMarketCondition(DataProvider data)
             {
-                double hoursback = 2 * (int)AlgorithmConfiguration.CandleWidth;
-
-                bool dip = data.GetPerformancePastHours(FirstPair, hoursback)
-                                       <
-                           1 - AlgorithmConfiguration.DipPercent;
+                bool dip = data.GetCandles(FirstPair, 3).RateOfChange()
+                                       >
+                           AlgorithmConfiguration.DipPercent;
                 if (dip)
                 {
                     return new BuyState();
@@ -84,12 +82,12 @@ namespace SpreadShare.Algorithms.Implementations
     internal class Self_DipBuy_BConfiguration : AlgorithmConfiguration
     {
         /// <summary>
-        /// Gets or sets how much something needs to fall to be considered a dip.
+        /// Gets or sets how much something needs to fall to be considered a dip. given like : 2% = 0.02.
         /// </summary>
         public decimal DipPercent { get; set; }
 
         /// <summary>
-        /// Gets or sets recovery, determines how much profit the system should try to get before selling.
+        /// Gets or sets recovery, determines how many candles the system should wait before selling.
         /// </summary>
         public double RecoveryTime { get; set; }
     }
