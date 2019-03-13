@@ -108,7 +108,7 @@ namespace SpreadShare.Algorithms.Implementations
                 // Get the lowest low from the last y hours.
                 decimal shortTermTimePrice = data.GetLowestLow(
                     AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.ShortTermTime);
+                    AlgorithmConfiguration.ShortTermTime * AlgorithmConfiguration.CandleSize);
 
                 // Set first stop loss order at DCMin.
                 _stoploss = trading.PlaceFullStoplossSell(AlgorithmConfiguration.TradingPairs.First(), shortTermTimePrice);
@@ -148,7 +148,7 @@ namespace SpreadShare.Algorithms.Implementations
                 // Check whether we need to trail the stoploss higher
                 bool trail = data.GetLowestLow(
                                  AlgorithmConfiguration.TradingPairs.First(),
-                                 AlgorithmConfiguration.ShortTermTime)
+                                 AlgorithmConfiguration.ShortTermTime * AlgorithmConfiguration.CandleSize)
                              >
                              _stoploss.SetPrice;
 
@@ -191,14 +191,14 @@ namespace SpreadShare.Algorithms.Implementations
                 // Check whether we need to trail the stoploss higher
                 bool trail = data.GetLowestLow(
                         AlgorithmConfiguration.TradingPairs.First(),
-                        AlgorithmConfiguration.ShortTermTime)
+                        AlgorithmConfiguration.ShortTermTime * AlgorithmConfiguration.CandleSize)
                              >
                              _stoploss.SetPrice;
 
                 // Get the highest high from the last X hours
                 decimal topLongTermPrice = data.GetHighestHigh(
                     AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.LongTermTime);
+                    AlgorithmConfiguration.LongTermTime * AlgorithmConfiguration.CandleSize);
 
                 // If the topLongTermPrice gets broken, we buy into the expected trend
                 if (data.GetHighestHigh(
