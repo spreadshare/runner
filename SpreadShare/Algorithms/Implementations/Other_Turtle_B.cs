@@ -12,23 +12,23 @@ namespace SpreadShare.Algorithms.Implementations
     /// The first Turtle inspired algorithm.
     /// Enters when longterm trends are broken, sells when the opposite shortterm trend is broken.
     /// </summary>
-    internal class MidTermTurtle : BaseAlgorithm<MidTermTurtleConfiguration>
+    internal class Other_Turtle_B : BaseAlgorithm<Other_Turtle_BConfiguration>
     {
         /// <inheritdoc />
-        protected override EntryState<MidTermTurtleConfiguration> Initial => new WelcomeState();
+        protected override EntryState<Other_Turtle_BConfiguration> Initial => new WelcomeState();
 
-        private class WelcomeState : EntryState<MidTermTurtleConfiguration>
+        private class WelcomeState : EntryState<Other_Turtle_BConfiguration>
         {
-            protected override State<MidTermTurtleConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Other_Turtle_BConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 return new EntryState();
             }
         }
 
         // Buy when the long term top gets broken.
-        private class EntryState : EntryState<MidTermTurtleConfiguration>
+        private class EntryState : EntryState<Other_Turtle_BConfiguration>
         {
-            public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
+            public override State<Other_Turtle_BConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Get the highest high from the last X hours
                 decimal topLongTermPrice = data.GetHighestHigh(
@@ -43,11 +43,11 @@ namespace SpreadShare.Algorithms.Implementations
                     return new BuyState(null, 0);
                 }
 
-                return new NothingState<MidTermTurtleConfiguration>();
+                return new NothingState<Other_Turtle_BConfiguration>();
             }
         }
 
-        private class BuyState : State<MidTermTurtleConfiguration>
+        private class BuyState : State<Other_Turtle_BConfiguration>
         {
             private OrderUpdate _stoploss;
             private int _pyramid;
@@ -58,7 +58,7 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            protected override State<MidTermTurtleConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Other_Turtle_BConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 // If the Filter and CrossoverSMA signal the trade, we buy at market.
                 trading.ExecutePartialMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First(), 0.25M);
@@ -75,7 +75,7 @@ namespace SpreadShare.Algorithms.Implementations
 
          // This class cancels the current stop loss, and sets a new one.
         // At EVERY moment in a trade, this system should have a stoploss in place
-        private class CancelStopState : State<MidTermTurtleConfiguration>
+        private class CancelStopState : State<Other_Turtle_BConfiguration>
         {
             private OrderUpdate _stoploss;
             private int _pyramid;
@@ -86,7 +86,7 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            protected override State<MidTermTurtleConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Other_Turtle_BConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 trading.CancelOrder(_stoploss);
                 return new SetStopState(_pyramid);
@@ -94,7 +94,7 @@ namespace SpreadShare.Algorithms.Implementations
         }
 
         // This state sets a stoploss
-        private class SetStopState : State<MidTermTurtleConfiguration>
+        private class SetStopState : State<Other_Turtle_BConfiguration>
         {
             private OrderUpdate _stoploss;
             private int _pyramid;
@@ -104,7 +104,7 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            protected override State<MidTermTurtleConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Other_Turtle_BConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 // Get the lowest low from the last y hours.
                 decimal shortTermTimePrice = data.GetLowestLow(
@@ -118,7 +118,7 @@ namespace SpreadShare.Algorithms.Implementations
         }
 
          // This state checks whether to enter a pyramid order, trail the current stoploss or return to entry after closing
-        private class CheckState : State<MidTermTurtleConfiguration>
+        private class CheckState : State<Other_Turtle_BConfiguration>
         {
             private OrderUpdate _stoploss;
             private int _pyramid;
@@ -129,22 +129,22 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            public override State<MidTermTurtleConfiguration> OnOrderUpdate(OrderUpdate order)
+            public override State<Other_Turtle_BConfiguration> OnOrderUpdate(OrderUpdate order)
             {
                 if (order.OrderId == _stoploss.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return new EntryState();
                 }
 
-                return new NothingState<MidTermTurtleConfiguration>();
+                return new NothingState<Other_Turtle_BConfiguration>();
             }
 
-            public override State<MidTermTurtleConfiguration> OnTimerElapsed()
+            public override State<Other_Turtle_BConfiguration> OnTimerElapsed()
             {
                 return new CheckPyramidState(_stoploss, _pyramid);
             }
 
-            public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
+            public override State<Other_Turtle_BConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Check whether we need to trail the stoploss higher
                 bool trail = data.GetLowestLow(
@@ -161,12 +161,12 @@ namespace SpreadShare.Algorithms.Implementations
 
                 SetTimer(TimeSpan.FromMinutes(AlgorithmConfiguration.CandleSize * 5));
 
-                return new NothingState<MidTermTurtleConfiguration>();
+                return new NothingState<Other_Turtle_BConfiguration>();
             }
         }
 
         // This state checks whether to enter a pyramid order, trail the current stoploss or return to entry after closing
-        private class CheckPyramidState : State<MidTermTurtleConfiguration>
+        private class CheckPyramidState : State<Other_Turtle_BConfiguration>
         {
             private OrderUpdate _stoploss;
             private int _pyramid;
@@ -177,17 +177,17 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            public override State<MidTermTurtleConfiguration> OnOrderUpdate(OrderUpdate order)
+            public override State<Other_Turtle_BConfiguration> OnOrderUpdate(OrderUpdate order)
             {
                 if (order.OrderId == _stoploss.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return new EntryState();
                 }
 
-                return new NothingState<MidTermTurtleConfiguration>();
+                return new NothingState<Other_Turtle_BConfiguration>();
             }
 
-            public override State<MidTermTurtleConfiguration> OnMarketCondition(DataProvider data)
+            public override State<Other_Turtle_BConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Check whether we need to trail the stoploss higher
                 bool trail = data.GetLowestLow(
@@ -214,15 +214,15 @@ namespace SpreadShare.Algorithms.Implementations
                     return new CancelStopState(_stoploss, _pyramid);
                 }
 
-                return new NothingState<MidTermTurtleConfiguration>();
+                return new NothingState<Other_Turtle_BConfiguration>();
             }
         }
     }
 
     /// <summary>
-    /// The MidTermTurtle settings.
+    /// The Other_Turtle_B settings.
     /// </summary>
-    internal class MidTermTurtleConfiguration : AlgorithmConfiguration
+    internal class Other_Turtle_BConfiguration : AlgorithmConfiguration
     {
         /// <summary>
         /// Gets or sets the long term breakout line time in periods.
