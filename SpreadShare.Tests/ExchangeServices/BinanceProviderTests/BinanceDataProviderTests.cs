@@ -62,7 +62,8 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
         [Theory]
         [InlineData(1)]
         [InlineData(5)]
-        [InlineData(1200)]
+
+        // [InlineData(1200)]
         public void GetCandlesHappyFlow(int limit)
         {
             var candles = _container.DataProvider.GetCandles(
@@ -78,7 +79,8 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
         [Theory]
         [InlineData(5)]
         [InlineData(12)]
-        [InlineData(1200)]
+
+        // [InlineData(1200)]
         public void GetCandlesTimestampDecreasing(int limit)
         {
             var candles = _container.DataProvider.GetCandles(
@@ -95,7 +97,8 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
         [Theory]
         [InlineData(1)]
         [InlineData(5)]
-        [InlineData(1200)]
+
+        // [InlineData(1200)]
         public void RecentCandleIsNow(int limit)
         {
             var candles = _container.DataProvider.GetCandles(
