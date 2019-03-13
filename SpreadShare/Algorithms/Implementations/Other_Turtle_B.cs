@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using NpgsqlTypes;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
@@ -31,14 +32,10 @@ namespace SpreadShare.Algorithms.Implementations
             public override State<Other_Turtle_BConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Get the highest high from the last X hours
-                decimal topLongTermPrice = data.GetHighestHigh(
-                    FirstPair,
-                    AlgorithmConfiguration.LongTermTime);
+                decimal topLongTermPrice = data.GetHighestHigh(FirstPair, AlgorithmConfiguration.LongTermTime);
 
                 // If the topLongTermPrice gets broken, we buy into the expected trend
-                if (data.GetCandles(
-                        AlgorithmConfiguration.TradingPairs.First(),
-                        1).Max(x => x.High) >= topLongTermPrice)
+                if (data.GetCurrentPriceLastTrade(FirstPair) >= topLongTermPrice)
                 {
                     return new BuyState(null, 0);
                 }
@@ -61,7 +58,7 @@ namespace SpreadShare.Algorithms.Implementations
             protected override State<Other_Turtle_BConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 // If the Filter and CrossoverSMA signal the trade, we buy at market.
-                trading.ExecutePartialMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First(), 0.25M);
+                trading.ExecutePartialMarketOrderBuy(FirstPair, 0.5M);
                 if (_stoploss != null)
                 {
                     return new CancelStopState(_stoploss, _pyramid);
@@ -107,12 +104,10 @@ namespace SpreadShare.Algorithms.Implementations
             protected override State<Other_Turtle_BConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 // Get the lowest low from the last y hours.
-                decimal shortTermTimePrice = data.GetLowestLow(
-                    AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.ShortTermTime * AlgorithmConfiguration.CandleSize);
+                decimal shortTermTimePrice = data.GetLowestLow(FirstPair, AlgorithmConfiguration.ShortTermTime);
 
                 // Set first stop loss order at DCMin.
-                _stoploss = trading.PlaceFullStoplossSell(AlgorithmConfiguration.TradingPairs.First(), shortTermTimePrice);
+                _stoploss = trading.PlaceFullStoplossSell(FirstPair, shortTermTimePrice);
                 return new CheckState(_stoploss, _pyramid);
             }
         }
@@ -147,9 +142,7 @@ namespace SpreadShare.Algorithms.Implementations
             public override State<Other_Turtle_BConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Check whether we need to trail the stoploss higher
-                bool trail = data.GetLowestLow(
-                                 AlgorithmConfiguration.TradingPairs.First(),
-                                 AlgorithmConfiguration.ShortTermTime * AlgorithmConfiguration.CandleSize)
+                bool trail = data.GetLowestLow(FirstPair, AlgorithmConfiguration.ShortTermTime)
                              >
                              _stoploss.SetPrice;
 
@@ -159,7 +152,7 @@ namespace SpreadShare.Algorithms.Implementations
                     return new CancelStopState(_stoploss, _pyramid);
                 }
 
-                SetTimer(TimeSpan.FromMinutes(AlgorithmConfiguration.CandleSize * 5));
+                SetTimer(TimeSpan.FromMinutes((int)AlgorithmConfiguration.CandleWidth));
 
                 return new NothingState<Other_Turtle_BConfiguration>();
             }
@@ -190,22 +183,22 @@ namespace SpreadShare.Algorithms.Implementations
             public override State<Other_Turtle_BConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Check whether we need to trail the stoploss higher
-                bool trail = data.GetLowestLow(
-                        AlgorithmConfiguration.TradingPairs.First(),
-                        AlgorithmConfiguration.ShortTermTime * AlgorithmConfiguration.CandleSize)
+                bool trail = data.GetLowestLow(FirstPair, AlgorithmConfiguration.ShortTermTime)
                              >
                              _stoploss.SetPrice;
 
                 // Get the highest high from the last X hours
-                decimal topLongTermPrice = data.GetHighestHigh(
-                    FirstPair,
-                    AlgorithmConfiguration.LongTermTime);
+                bool pyramid = data.GetCurrentPriceLastTrade(FirstPair)
+                               >=
+                               data.GetHighestHigh(
+                                FirstPair,
+                                AlgorithmConfiguration.LongTermTime);
 
                 // If the topLongTermPrice gets broken, we buy into the expected trend
-                if (data.GetHighestHigh(
-                        AlgorithmConfiguration.TradingPairs.First(), 1) >= topLongTermPrice)
+                if (pyramid && _pyramid < 2)
                 {
-                    return new BuyState(null, 0);
+                    _pyramid++;
+                    return new BuyState(_stoploss, _pyramid);
                 }
 
                 // If the trailing requirements are hit, we trail into a higher stoploss
