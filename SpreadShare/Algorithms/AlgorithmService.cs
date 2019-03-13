@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Dawn;
 using Microsoft.Extensions.Logging;
@@ -163,11 +162,11 @@ namespace SpreadShare.Algorithms
             {
                 {
                     Exchange.Backtesting,
-                    new Dictionary<Type, decimal> { { Configuration.Instance.EnabledAlgorithms.First(), 1 } }
+                    new Dictionary<Type, decimal> { { Configuration.Instance.EnabledAlgorithm, 1 } }
                 },
                 {
                     Exchange.Binance,
-                    new Dictionary<Type, decimal> { { Configuration.Instance.EnabledAlgorithms.First(), 1 } }
+                    new Dictionary<Type, decimal> { { Configuration.Instance.EnabledAlgorithm, 1 } }
                 },
             });
         }

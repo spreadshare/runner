@@ -197,7 +197,8 @@ namespace SpreadShare.Algorithms
                 _database.StateSwitchEvents.Add(new StateSwitchEvent(
                     Container.TimerProvider.CurrentTime.ToUnixTimeMilliseconds(),
                     CurrentState,
-                    child.GetType().Name));
+                    child.GetType().Name,
+                    DatabaseEventListenerService.Instance.Session));
 
                 _activeState = child;
 

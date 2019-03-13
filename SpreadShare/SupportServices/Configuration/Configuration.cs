@@ -17,8 +17,8 @@ namespace SpreadShare.SupportServices.Configuration
     internal class Configuration
     {
         public static Configuration Instance;
-        private readonly LazyCache<List<string>, List<Type>> _enabledAlgorithmsConstructor =
-            new LazyCache<List<string>, List<Type>>(z => z.Select(x => Reflections.AllAlgorithms.First(a => a.Name == x)).ToList());
+        private readonly LazyCache<string, Type> _enabledAlgorithmConstructor =
+            new LazyCache<string, Type>(x => Reflections.AllAlgorithms.First(a => a.Name == x));
 
         private readonly LazyCache<string, CandleWidth> _candleWidthConstructor =
             new LazyCache<string, CandleWidth>(Enum.Parse<CandleWidth>);
@@ -34,17 +34,17 @@ namespace SpreadShare.SupportServices.Configuration
         [Required]
         public BacktestSettings BacktestSettings { get; private set; }
 
-        [YamlMember(Alias = "EnabledAlgorithms")]
+        [YamlMember(Alias = "EnabledAlgorithm")]
         [Required]
-        [ForAll(typeof(IsImplementation), typeof(IBaseAlgorithm))]
-        public List<string> __enabledAlgorithms { get; private set; }
+        [IsImplementation(typeof(IBaseAlgorithm))]
+        public string __enabledAlgorithm { get; private set; }
 
         [YamlMember(Alias = "CandleWidth")]
         [Required]
         [ParsesToEnum(typeof(CandleWidth))]
         public string __candleWidth { get; private set; }
 
-        public List<Type> EnabledAlgorithms => _enabledAlgorithmsConstructor.Value(__enabledAlgorithms);
+        public Type EnabledAlgorithm => _enabledAlgorithmConstructor.Value(__enabledAlgorithm);
 
         public CandleWidth CandleWidth => _candleWidthConstructor.Value(__candleWidth);
 

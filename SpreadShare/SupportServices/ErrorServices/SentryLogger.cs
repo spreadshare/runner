@@ -55,18 +55,17 @@ namespace SpreadShare.SupportServices.ErrorServices
             // Set configuration
             _serializedConfiguration = new SerializerBuilder().Build()
                 .Serialize(Configuration.Configuration.Instance);
-            foreach (var algorithm in Configuration.Configuration.Instance.EnabledAlgorithms)
+            var algorithm = Configuration.Configuration.Instance.EnabledAlgorithm;
+
+            _serializedAlgorithmConfiguration += $"\n## {algorithm.Name} ##\n";
+            try
             {
-                _serializedAlgorithmConfiguration += $"\n## {algorithm.Name} ##\n";
-                try
-                {
-                    _serializedAlgorithmConfiguration += File.ReadAllText($"{algorithm.Name}.yaml");
-                }
-                catch (FileNotFoundException)
-                {
-                    _serializedAlgorithmConfiguration += $"Could not find file {algorithm.Name}.yaml, but this " +
-                                                         "algorithm is enabled";
-                }
+                _serializedAlgorithmConfiguration += File.ReadAllText($"{algorithm.Name}.yaml");
+            }
+            catch (FileNotFoundException)
+            {
+                _serializedAlgorithmConfiguration += $"Could not find file {algorithm.Name}.yaml, but this " +
+                                                     "algorithm is enabled";
             }
         }
 

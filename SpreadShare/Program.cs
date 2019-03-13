@@ -116,46 +116,45 @@ namespace SpreadShare
             ILogger logger = _loggerFactory.CreateLogger("Program.cs:ExecuteTradingLogic");
 
             var algorithmService = serviceProvider.GetService<IAlgorithmService>();
-            foreach (var algorithm in Configuration.Instance.EnabledAlgorithms)
+            var algorithm = Configuration.Instance.EnabledAlgorithm;
+
+            // Link algorithm in configuration to implementation in C#
+            Type algorithmConfigurationType = Reflections.GetMatchingConfigurationsType(algorithm);
+            AlgorithmConfiguration algorithmConfiguration;
+            try
             {
-                // Link algorithm in configuration to implementation in C#
-                Type algorithmConfigurationType = Reflections.GetMatchingConfigurationsType(algorithm);
-                AlgorithmConfiguration algorithmConfiguration;
-                try
-                {
-                    algorithmConfiguration = ConfigurationLoader.LoadConfiguration(algorithmConfigurationType);
-                }
-                catch (TargetInvocationException e)
-                {
-                    logger.LogError("Invalid algorithm configuration encountered:\n  > " +
-                                    $"{e.InnerException.InnerException.Message}");
-                    ExitProgramWithCode(ExitCode.InvalidConfiguration);
-                    return;
-                }
-
-                // Cancel backtesting configurations when trading
-                if (algorithmConfiguration.Exchange == Exchange.Backtesting)
-                {
-                    logger.LogError($"Algorithm {algorithm.Name} has exchange Backtesting configured, " +
-                                    "but --trading is used");
-                    ExitProgramWithCode(ExitCode.InvalidConfiguration);
-                    return;
-                }
-
-                logger.LogInformation($"Starting algorithm '{algorithm.Name}'");
-                logger.LogInformation("Using configuration: " + algorithmConfiguration.GetType().Name);
-
-                // Start algorithm
-                var algorithmResponse = algorithmService.StartAlgorithm(algorithm, algorithmConfiguration);
-
-                if (!algorithmResponse.Success)
-                {
-                    logger.LogError($"Algorithm failed to start:\n\t {algorithmResponse}");
-                    ExitProgramWithCode(ExitCode.AlgorithmStartupFailure);
-                }
-
-                logger.LogInformation($"Started algorithm '{algorithm.Name}' successfully");
+                algorithmConfiguration = ConfigurationLoader.LoadConfiguration(algorithmConfigurationType);
             }
+            catch (TargetInvocationException e)
+            {
+                logger.LogError("Invalid algorithm configuration encountered:\n  > " +
+                                $"{e.InnerException.InnerException.Message}");
+                ExitProgramWithCode(ExitCode.InvalidConfiguration);
+                return;
+            }
+
+            // Cancel backtesting configurations when trading
+            if (algorithmConfiguration.Exchange == Exchange.Backtesting)
+            {
+                logger.LogError($"Algorithm {algorithm.Name} has exchange Backtesting configured, " +
+                                "but --trading is used");
+                ExitProgramWithCode(ExitCode.InvalidConfiguration);
+                return;
+            }
+
+            logger.LogInformation($"Starting algorithm '{algorithm.Name}'");
+            logger.LogInformation("Using configuration: " + algorithmConfiguration.GetType().Name);
+
+            // Start algorithm
+            var algorithmResponse = algorithmService.StartAlgorithm(algorithm, algorithmConfiguration);
+
+            if (!algorithmResponse.Success)
+            {
+                logger.LogError($"Algorithm failed to start:\n\t {algorithmResponse}");
+                ExitProgramWithCode(ExitCode.AlgorithmStartupFailure);
+            }
+
+            logger.LogInformation($"Started algorithm '{algorithm.Name}' successfully");
         }
 
         /// <summary>

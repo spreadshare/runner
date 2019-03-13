@@ -40,6 +40,11 @@ namespace SpreadShare.SupportServices
         public DbSet<StateSwitchEvent> StateSwitchEvents { get; set; }
 
         /// <summary>
+        /// Gets or sets the algorithm sessions.
+        /// </summary>
+        public DbSet<AlgorithmSession> Sessions { get; set; }
+
+        /// <summary>
         /// Callback that sets a composite key on <see cref="BacktestingCandle"/>.
         /// </summary>
         /// <param name="modelBuilder">Provided model builder.</param>
