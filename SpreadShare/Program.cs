@@ -116,7 +116,7 @@ namespace SpreadShare
             ILogger logger = _loggerFactory.CreateLogger("Program.cs:ExecuteTradingLogic");
 
             var algorithmService = serviceProvider.GetService<IAlgorithmService>();
-            var algorithm = Configuration.Instance.EnabledAlgorithm;
+            var algorithm = Configuration.Instance.EnabledAlgorithm.Algorithm;
 
             // Link algorithm in configuration to implementation in C#
             Type algorithmConfigurationType = Reflections.GetMatchingConfigurationsType(algorithm);

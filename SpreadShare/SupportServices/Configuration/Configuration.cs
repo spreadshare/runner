@@ -17,8 +17,6 @@ namespace SpreadShare.SupportServices.Configuration
     internal class Configuration
     {
         public static Configuration Instance;
-        private readonly LazyCache<string, Type> _enabledAlgorithmConstructor =
-            new LazyCache<string, Type>(x => Reflections.AllAlgorithms.First(a => a.Name == x));
 
         private readonly LazyCache<string, CandleWidth> _candleWidthConstructor =
             new LazyCache<string, CandleWidth>(Enum.Parse<CandleWidth>);
@@ -34,17 +32,12 @@ namespace SpreadShare.SupportServices.Configuration
         [Required]
         public BacktestSettings BacktestSettings { get; private set; }
 
-        [YamlMember(Alias = "EnabledAlgorithm")]
-        [Required]
-        [IsImplementation(typeof(IBaseAlgorithm))]
-        public string __enabledAlgorithm { get; private set; }
-
         [YamlMember(Alias = "CandleWidth")]
         [Required]
         [ParsesToEnum(typeof(CandleWidth))]
         public string __candleWidth { get; private set; }
 
-        public Type EnabledAlgorithm => _enabledAlgorithmConstructor.Value(__enabledAlgorithm);
+        public EnabledAlgorithm EnabledAlgorithm { get; private set; }
 
         public CandleWidth CandleWidth => _candleWidthConstructor.Value(__candleWidth);
 
@@ -117,6 +110,35 @@ namespace SpreadShare.SupportServices.Configuration
         public Dictionary<string, decimal> __portfolio { get; private set; }
 
         public Portfolio Portfolio => _portfolioConstructor.Value(__portfolio);
+    }
+
+    internal class EnabledAlgorithm
+    {
+        private readonly LazyCache<string, Type> _enabledAlgorithmConstructor =
+            new LazyCache<string, Type>(x => Reflections.AllAlgorithms.First(a => a.Name == x));
+
+        public Type Algorithm => _enabledAlgorithmConstructor.Value(__algorithm);
+
+        [Required]
+        [YamlMember(Alias = "Algorithm")]
+        [IsImplementation(typeof(IBaseAlgorithm))]
+        public string __algorithm { get; private set; }
+
+        [Required]
+        [RangeDecimal("0", "1")]
+        public decimal Allocation { get; private set; }
+
+        /// <summary>
+        /// Convert EnabledAlgorithms to dict of algorithm and allocation.
+        /// </summary>
+        /// <returns>Dictionary of algorithm and allocation.</returns>
+        public Dictionary<Type, decimal> GetAsDictionary()
+        {
+            return new Dictionary<Type, decimal>()
+            {
+                { Algorithm, Allocation },
+            };
+        }
     }
 }
 

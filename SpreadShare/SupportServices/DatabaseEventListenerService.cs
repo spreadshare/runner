@@ -28,7 +28,7 @@ namespace SpreadShare.SupportServices
             _database = database;
             Session = new AlgorithmSession
             {
-                Name = Configuration.Configuration.Instance.EnabledAlgorithm.Name,
+                Name = Configuration.Configuration.Instance.EnabledAlgorithm.Algorithm.Name,
             };
 
             _database.Sessions.Add(Session);
