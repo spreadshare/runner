@@ -226,11 +226,6 @@ namespace SpreadShare.Algorithms.Implementations
         /// Gets or sets the short term breakout line time in periods.
         /// </summary>
         public int ShortTermTime { get; set; }
-
-        /// <summary>
-        /// Gets or sets the size of the candles for the Donchian in multiples of 5 minutes, 12 = 12*5 = 60 min.
-        /// </summary>
-        public int CandleSize { get; set; }
     }
 }
 
