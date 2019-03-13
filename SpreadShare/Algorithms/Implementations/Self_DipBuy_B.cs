@@ -30,12 +30,11 @@ namespace SpreadShare.Algorithms.Implementations
         {
             public override State<Self_DipBuy_BConfiguration> OnMarketCondition(DataProvider data)
             {
-                // request the close of the current candle,
-                // see if it is at least DipPercent below the close 2 candles ago
-                bool dip = data.GetCandles(FirstPair, 1).close
+                double hoursback = 2 * (int)AlgorithmConfiguration.CandleWidth;
+
+                bool dip = data.GetPerformancePastHours(FirstPair, hoursback)
                                        <
-                           // request close 2 candles ago
-                           (data.GetCandles(FirstPair, 1, 2).close * (1 - AlgorithmConfiguration.DipPercent));
+                           1 - AlgorithmConfiguration.DipPercent;
                 if (dip)
                 {
                     return new BuyState();
@@ -63,12 +62,12 @@ namespace SpreadShare.Algorithms.Implementations
 
             protected override State<Self_DipBuy_BConfiguration> Run(TradingProvider trading, DataProvider data)
             {
-                double WaitMinutes = AlgorithmConfiguration.RecoveryTime * (int) AlgorithmConfiguration.CandleWidth;
-                SetTimer(TimeSpan.FromMinutes(WaitMinutes));
+                double waitMinutes = AlgorithmConfiguration.RecoveryTime * (int)AlgorithmConfiguration.CandleWidth;
+                SetTimer(TimeSpan.FromMinutes(waitMinutes));
                 return new NothingState<Self_DipBuy_BConfiguration>();
             }
         }
-        
+
         private class SellState : State<Self_DipBuy_BConfiguration>
         {
             protected override State<Self_DipBuy_BConfiguration> Run(TradingProvider trading, DataProvider data)
