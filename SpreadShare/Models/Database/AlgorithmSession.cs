@@ -22,5 +22,15 @@ namespace SpreadShare.Models.Database
         /// Gets or sets the name of the session.
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the timestamp at which the session was created.
+        /// </summary>
+        public long CreatedTimestamp { get; set; }
+
+        /// <summary>
+        /// Gets or sets the timestamp at which the session was closed.
+        /// </summary>
+        public long ClosedTimestamp { get; set; }
     }
 }
