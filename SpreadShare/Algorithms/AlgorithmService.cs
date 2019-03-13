@@ -47,7 +47,11 @@ namespace SpreadShare.Algorithms
 
             if (Program.CommandLineArgs.Trading)
             {
-                SetInitialAllocation();
+                // Sets initial configuration
+                _allocationManager.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>
+                {
+                    [Exchange.Binance] = Configuration.Instance.EnabledAlgorithm.GetAsDictionary(),
+                });
             }
         }
 
@@ -149,26 +153,6 @@ namespace SpreadShare.Algorithms
             _algorithms.Remove(algorithmType);
 
             return new ResponseObject(ResponseCode.Success);
-        }
-
-        /// <summary>
-        /// Sets the initial allocation in AllocationManager.
-        /// </summary>
-        // TODO: Use actual values.
-        private void SetInitialAllocation()
-        {
-            // Sets initial configuration
-            _allocationManager.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>()
-            {
-                {
-                    Exchange.Backtesting,
-                    new Dictionary<Type, decimal> { { Configuration.Instance.EnabledAlgorithm, 1 } }
-                },
-                {
-                    Exchange.Binance,
-                    new Dictionary<Type, decimal> { { Configuration.Instance.EnabledAlgorithm, 1 } }
-                },
-            });
         }
     }
 }

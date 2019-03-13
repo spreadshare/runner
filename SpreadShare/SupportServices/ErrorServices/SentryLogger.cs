@@ -57,14 +57,14 @@ namespace SpreadShare.SupportServices.ErrorServices
                 .Serialize(Configuration.Configuration.Instance);
             var algorithm = Configuration.Configuration.Instance.EnabledAlgorithm;
 
-            _serializedAlgorithmConfiguration += $"\n## {algorithm.Name} ##\n";
+            _serializedAlgorithmConfiguration += $"\n## {algorithm.Algorithm.Name} ##\n";
             try
             {
-                _serializedAlgorithmConfiguration += File.ReadAllText($"{algorithm.Name}.yaml");
+                _serializedAlgorithmConfiguration += File.ReadAllText($"{algorithm.Algorithm.Name}.yaml");
             }
             catch (FileNotFoundException)
             {
-                _serializedAlgorithmConfiguration += $"Could not find file {algorithm.Name}.yaml, but this " +
+                _serializedAlgorithmConfiguration += $"Could not find file {algorithm.Algorithm.Name}.yaml, but this " +
                                                      "algorithm is enabled";
             }
         }
