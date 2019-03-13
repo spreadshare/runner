@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService;
+using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
@@ -14,72 +14,97 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 {
     public class AverageTrueRangeTests : DataProviderTestUtils
     {
-        private readonly DataProvider _data;
-
         public AverageTrueRangeTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            _data = GetDataProvider<DataProviderElevenCandlesImplementation>();
         }
 
         [Fact]
-        public void AverageTrueRangeHappyFlow()
+        public void AverageTrueRangeSingleEdge()
         {
-            var atr = _data.GetAverageTrueRange(TradingPair.Parse("EOSETH"), 10, 2);
-            Assert.Equal(2.75M, atr);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: TwentyFiveMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 2);
+            var atr = candles.AverageTrueRange();
+            Assert.Equal(2.6M, atr);
         }
 
         [Fact]
-        public void AverageTrueRangeZeroOrNegative()
+        public void AverageTrueRangeMultipleEdges()
         {
-            var pair = TradingPair.Parse("EOSETH");
-            Assert.Throws<ArgumentOutOfRangeException>(() => _data.GetAverageTrueRange(pair, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => _data.GetAverageTrueRange(pair, -1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => _data.GetAverageTrueRange(pair, 5, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => _data.GetAverageTrueRange(pair, 5, -1));
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveteenMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 4);
+            Logger.LogCritical(JsonConvert.SerializeObject(candles));
+            var atr = candles.AverageTrueRange();
+            Assert.Equal(2.2666666666666666666666666667M, atr);
         }
 
         [Fact]
         public void AverageTrueRangeNull()
         {
-            Assert.Throws<ArgumentNullException>(() => _data.GetAverageTrueRange(null, 5));
+            BacktestingCandle[] lol = null;
+            Assert.Throws<ArgumentNullException>(() => lol.AverageTrueRange());
         }
 
         [Fact]
-        public void AverageTrueRangeNotMultiple()
+        public void AverageTrueRangeEmtpySet()
         {
-            var pair = TradingPair.Parse("EOSETH");
-            Assert.Throws<ArgumentException>(() => _data.GetAverageTrueRange(pair, 10, 6));
-            Assert.Throws<ArgumentException>(() => _data.GetAverageTrueRange(pair, 10, 20));
+            var candles = Array.Empty<BacktestingCandle>();
+            Assert.Throws<InvalidOperationException>(
+                () => candles.AverageTrueRange());
         }
 
+        // Class is instantiated via activator
         #pragma warning disable CA1812
 
-        internal class DataProviderElevenCandlesImplementation : DataProviderTestImplementation
+        private class TimerProviderNoPivotImplementation : TimerProviderTestImplementation
         {
-            public DataProviderElevenCandlesImplementation(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
-                : base(loggerFactory, exchangeCommunications)
+            public TimerProviderNoPivotImplementation(ILoggerFactory loggerFactory)
+                : base(loggerFactory)
             {
             }
 
-            public override ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair) => throw new NotImplementedException();
+            public override DateTimeOffset CurrentTime => DateTimeOffset.FromUnixTimeMilliseconds(3600000L);
 
-            public override ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair) => throw new NotImplementedException();
+            public override DateTimeOffset Pivot => DateTimeOffset.FromUnixTimeMilliseconds(0);
 
-            public override ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair) => throw new NotImplementedException();
+            public override void RunPeriodicTimer() => Expression.Empty();
+        }
 
-            public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack) => throw new NotImplementedException();
+        private class DataProviderImplementation : DataProviderTestUtils.DataProviderTestImplementation
+        {
+            public DataProviderImplementation(ILoggerFactory loggerFactory, TimerProvider timerProvider)
+                : base(loggerFactory, timerProvider)
+            {
+            }
 
-            public override ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles) => throw new NotImplementedException();
-
-            public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack) => throw new NotImplementedException();
-
-            public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width)
+            protected override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit)
             {
                 // This array is reversed before it is returned.
                 return new ResponseObject<BacktestingCandle[]>(
                     new[]
                     {
+                        // #0
+                        new BacktestingCandle(
+                            timestamp: 0L,
+                            open: 5,
+                            close: 6.6M,
+                            high: 7.2M,
+                            low: 4.5M,
+                            volume: 24053,
+                            tradingPair: "EOSETH"),
+
                         // #1
                         new BacktestingCandle(
                             timestamp: 300000L,
@@ -172,7 +197,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #10
                         new BacktestingCandle(
-                            timestamp: 30000000L,
+                            timestamp: 3000000L,
                             open: 6.2M,
                             close: 5.6M,
                             high: 6.4M,
@@ -182,17 +207,17 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #11
                         new BacktestingCandle(
-                            timestamp: 33000000L,
+                            timestamp: 3300000L,
                             open: 5.6M,
                             close: 5.7M,
                             high: 5.8M,
                             low: 5.5M,
                             volume: 24053,
                             tradingPair: "EOSETH"),
-                    }.Reverse().ToArray());
+                    }.Reverse().Take(limit).ToArray());
             }
         }
 
-        #pragma warning restore CA1812
+        #pragma warning disable
     }
 }

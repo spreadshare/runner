@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
@@ -14,117 +13,96 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 {
     public class StandardMovingAverageTests : DataProviderTestUtils
     {
-        private DataProvider _data;
-
         public StandardMovingAverageTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            _data = GetDataProvider<DataProviderTenCandlesImplementation>();
-        }
-
-        [Theory]
-        [InlineData(0, 5, 2, 0)]
-        [InlineData(1, 2, 5, 0)]
-        [InlineData(2, 1, 5, 5)]
-        [InlineData(3, 2, 3, 1)]
-        public void GetStandardMovingAverageHappyFlow(int id, int candlesPerInterval, int intervals, int offset)
-        {
-            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), candlesPerInterval, intervals, offset);
-            var answers = new Dictionary<int, decimal>
-            {
-                { 0, 5.6M },
-                { 1, 6.722M },
-                { 2, 7.1764M },
-                { 3, 6.6666666666666666666666666667M },
-            };
-
-            Assert.Equal(answers[id], sma);
         }
 
         [Fact]
-        public void GetStandardMovingAverageSingularSegment()
+        public void StandardMovingAverageSingleCandle()
         {
-            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 10, 1);
-            Assert.Equal(5.6M, sma);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 1);
+            var sma = candles.StandardMovingAverage();
+            Assert.Equal(5.7M, sma);
         }
 
         [Fact]
-        public void GetStandardMovingAverageSingularSegmentOffset()
+        public void StandardMovingAverageFourCandles()
         {
-            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 5, 1, 1);
-            Assert.Equal(5.6M, sma);
+            const string source = @"
+               Exchange: Binance
+               TradingPairs: [EOSETH]
+               CandleWidth: FiveteenMinutes
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
+            var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 4);
+            var sma = candles.StandardMovingAverage();
+            Assert.Equal(6.5525M, sma);
         }
 
         [Fact]
-        public void GetStandardMovingAverageSingularCandleSegment()
+        public void StandardMovingAverageNull()
         {
-            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 1, 1);
-            Assert.Equal(5.6M, sma);
+            BacktestingCandle[] lol = null;
+            Assert.Throws<ArgumentNullException>(() => lol.StandardMovingAverage());
         }
 
         [Fact]
-        public void GetStandardMovingAverageSingularCandleSegmentOffset()
+        public void StandardMovingAverageEmptySet()
         {
-            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 1, 1, 2);
-            Assert.Equal(6.9M, sma);
+            var candles = Array.Empty<BacktestingCandle>();
+            Assert.Throws<InvalidOperationException>(
+                () => candles.StandardMovingAverage());
         }
 
-        [Fact]
-        public void GetStandardMovingAverageOneCandleSegments()
-        {
-            var sma = _data.GetStandardMovingAverage(TradingPair.Parse("EOSETH"), 1, 10);
-            Assert.Equal(6.7482M, sma);
-        }
-
-        [Fact]
-        public void GetStandardMovingAverageNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => _data.GetStandardMovingAverage(null, 2, 10));
-        }
-
-        [Theory]
-        [InlineData(2, 0, 0)]
-        [InlineData(2, -1, 0)]
-        [InlineData(0, 2, 0)]
-        [InlineData(-1, 2, 0)]
-        [InlineData(1, 10, -1)]
-        public void GetStandardMovingAverageZeroOrNegative(int candlesPerInterval, int intervals, int offset)
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() => _data.GetStandardMovingAverage(
-                TradingPair.Parse("EOSETH"),
-                candlesPerInterval,
-                intervals,
-                offset));
-        }
-
-        // Class is instantiated via the Activator
+        // Class is instantiated via activator
         #pragma warning disable CA1812
 
-        private class DataProviderTenCandlesImplementation : DataProviderTestImplementation
+        private class TimerProviderNoPivotImplementation : TimerProviderTestImplementation
         {
-            public DataProviderTenCandlesImplementation(ILoggerFactory loggerFactory, ExchangeCommunications exchangeCommunications)
-                : base(loggerFactory, exchangeCommunications)
+            public TimerProviderNoPivotImplementation(ILoggerFactory loggerFactory)
+                : base(loggerFactory)
             {
             }
 
-            public override ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair) => throw new NotImplementedException();
+            public override DateTimeOffset CurrentTime => DateTimeOffset.FromUnixTimeMilliseconds(3600000L);
 
-            public override ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair) => throw new NotImplementedException();
+            public override DateTimeOffset Pivot => DateTimeOffset.FromUnixTimeMilliseconds(0);
 
-            public override ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair) => throw new NotImplementedException();
+            public override void RunPeriodicTimer() => Expression.Empty();
+        }
 
-            public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack) => throw new NotImplementedException();
+        private class DataProviderImplementation : DataProviderTestUtils.DataProviderTestImplementation
+        {
+            public DataProviderImplementation(ILoggerFactory loggerFactory, TimerProvider timerProvider)
+                : base(loggerFactory, timerProvider)
+            {
+            }
 
-            public override ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles) => throw new NotImplementedException();
-
-            public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack) => throw new NotImplementedException();
-
-            public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width)
+            protected override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit)
             {
                 // This array is reversed before it is returned.
                 return new ResponseObject<BacktestingCandle[]>(
                     new[]
                     {
+                        // #0
+                        new BacktestingCandle(
+                            timestamp: 0L,
+                            open: 5,
+                            close: 6.6M,
+                            high: 7.2M,
+                            low: 4.5M,
+                            volume: 24053,
+                            tradingPair: "EOSETH"),
+
                         // #1
                         new BacktestingCandle(
                             timestamp: 300000L,
@@ -217,17 +195,27 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #10
                         new BacktestingCandle(
-                            timestamp: 30000000L,
+                            timestamp: 3000000L,
                             open: 6.2M,
                             close: 5.6M,
                             high: 6.4M,
                             low: 5.5M,
                             volume: 4053,
                             tradingPair: "EOSETH"),
+
+                        // #11
+                        new BacktestingCandle(
+                            timestamp: 3300000L,
+                            open: 5.6M,
+                            close: 5.7M,
+                            high: 5.8M,
+                            low: 5.5M,
+                            volume: 24053,
+                            tradingPair: "EOSETH"),
                     }.Reverse().Take(limit).ToArray());
             }
         }
 
-        #pragma warning restore CA1812
+        #pragma warning disable
     }
 }

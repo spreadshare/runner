@@ -6,9 +6,8 @@ LoggingSettings:
   # Report errors to Sentry (https://XX@sentry.io/XX)
   SentryDSN: null
 
-# Trading: Which algorithms should be ran
-EnabledAlgorithms:
-  - TemplateAlgorithm
+# Trading: Which algorithm should be ran
+EnabledAlgorithm: TemplateAlgorithm
 
 # Trading: Settings for communication with Binance
 BinanceClientSettings:
@@ -16,8 +15,8 @@ BinanceClientSettings:
   ReceiveWindow: 20000
 
   # Specify the maximum number of candles fetched in a single request.
-  CandleRequestSize: 500 
-  
+  CandleRequestSize: 500
+
   Credentials:
     Key: api_key
     Secret: api_secret

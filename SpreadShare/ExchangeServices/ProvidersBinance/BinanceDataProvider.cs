@@ -27,8 +27,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// </summary>
         /// <param name="loggerFactory">Used to create output stream.</param>
         /// <param name="communications">For communication with Binance.</param>
-        public BinanceDataProvider(ILoggerFactory loggerFactory, BinanceCommunicationsService communications)
-            : base(loggerFactory, communications)
+        /// <param name="timerProvider">Ability to keep track of pivots.</param>
+        public BinanceDataProvider(ILoggerFactory loggerFactory, BinanceCommunicationsService communications, TimerProvider timerProvider)
+            : base(loggerFactory, timerProvider)
         {
             _communications = communications;
         }
@@ -105,11 +106,49 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         }
 
         /// <inheritdoc />
-        public override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit, CandleWidth width)
+        public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
+        {
+            Guard.Argument(hoursBack).NotNegative(x => $"{nameof(hoursBack)} cannot be negative: {x}");
+
+            decimal max = -1;
+            TradingPair maxTradingPair = null;
+
+            foreach (var tradingPair in pairs)
+            {
+                var performanceQuery = GetPerformancePastHours(tradingPair, hoursBack);
+                decimal performance;
+                if (performanceQuery.Code == ResponseCode.Success)
+                {
+                    performance = performanceQuery.Data;
+                }
+                else
+                {
+                    Logger.LogWarning($"Error fetching performance data: {performanceQuery}");
+                    return new ResponseObject<Tuple<TradingPair, decimal>>(ResponseCode.Error, performanceQuery.ToString());
+                }
+
+                if (max < performance)
+                {
+                    max = performance;
+                    maxTradingPair = tradingPair;
+                }
+            }
+
+            if (maxTradingPair == null)
+            {
+                return new ResponseObject<Tuple<TradingPair, decimal>>(ResponseCode.Error, "No trading pairs defined");
+            }
+
+            return new ResponseObject<Tuple<TradingPair, decimal>>(ResponseCode.Success, new Tuple<TradingPair, decimal>(maxTradingPair, max));
+        }
+
+        /// <inheritdoc />
+        protected override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit)
         {
             var client = _communications.Client;
             var result = new BacktestingCandle[limit];
             int chunkSize = Configuration.Instance.BinanceClientSettings.CandleRequestSize;
+            var width = Configuration.Instance.CandleWidth;
             var tasks = new (int, Task<CallResult<BinanceKline[]>>)[(limit / chunkSize) + 1];
 
             // Start the offset all the way back.
@@ -165,43 +204,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             }
 
             return new ResponseObject<BacktestingCandle[]>(ResponseCode.Success, result.ToArray());
-        }
-
-        /// <inheritdoc />
-        public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack)
-        {
-            Guard.Argument(hoursBack).NotNegative(x => $"{nameof(hoursBack)} cannot be negative: {x}");
-
-            decimal max = -1;
-            TradingPair maxTradingPair = null;
-
-            foreach (var tradingPair in pairs)
-            {
-                var performanceQuery = GetPerformancePastHours(tradingPair, hoursBack);
-                decimal performance;
-                if (performanceQuery.Code == ResponseCode.Success)
-                {
-                    performance = performanceQuery.Data;
-                }
-                else
-                {
-                    Logger.LogWarning($"Error fetching performance data: {performanceQuery}");
-                    return new ResponseObject<Tuple<TradingPair, decimal>>(ResponseCode.Error, performanceQuery.ToString());
-                }
-
-                if (max < performance)
-                {
-                    max = performance;
-                    maxTradingPair = tradingPair;
-                }
-            }
-
-            if (maxTradingPair == null)
-            {
-                return new ResponseObject<Tuple<TradingPair, decimal>>(ResponseCode.Error, "No trading pairs defined");
-            }
-
-            return new ResponseObject<Tuple<TradingPair, decimal>>(ResponseCode.Success, new Tuple<TradingPair, decimal>(maxTradingPair, max));
         }
     }
 }

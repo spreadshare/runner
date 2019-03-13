@@ -115,10 +115,10 @@ namespace SpreadShare.ExchangeServices
             // Makes sure that the communication is enabled
             _binanceCommunications.Connect();
             var timerProvider = new ExchangeTimerProvider(_loggerFactory);
-            var dataImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications);
+            var dataImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications, timerProvider);
             var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications, timerProvider);
 
-            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, timerProvider, settings);
+            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
             return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider, typeof(T));
         }
@@ -129,10 +129,10 @@ namespace SpreadShare.ExchangeServices
             _backtestCommunicationService.Connect();
 
             var backtestTimer = new BacktestTimerProvider(_loggerFactory, _databaseContext, Configuration.Instance.BacktestSettings);
-            var dataImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, backtestTimer, _backtestCommunicationService);
+            var dataImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, backtestTimer);
             var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation, _databaseContext);
 
-            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, backtestTimer, settings);
+            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
 
             // Doubly linked inheritance for backtesting edge case

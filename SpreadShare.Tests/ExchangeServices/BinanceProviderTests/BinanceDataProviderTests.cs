@@ -62,10 +62,13 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
         [Theory]
         [InlineData(1)]
         [InlineData(5)]
-        [InlineData(1200)]
+
+        // [InlineData(1200)]
         public void GetCandlesHappyFlow(int limit)
         {
-            var candles = _container.DataProvider.GetCandles(TradingPair.Parse("EOSETH"), limit);
+            var candles = _container.DataProvider.GetCandles(
+                TradingPair.Parse("EOSETH"),
+                limit);
             Assert.Equal(limit, candles.Length);
             Assert.All(candles, x =>
             {
@@ -76,10 +79,13 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
         [Theory]
         [InlineData(5)]
         [InlineData(12)]
-        [InlineData(1200)]
+
+        // [InlineData(1200)]
         public void GetCandlesTimestampDecreasing(int limit)
         {
-            var candles = _container.DataProvider.GetCandles(TradingPair.Parse("EOSETH"), limit);
+            var candles = _container.DataProvider.GetCandles(
+                TradingPair.Parse("EOSETH"),
+                limit);
             var increment = (long)TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth).TotalMilliseconds;
             var diffs = candles.Pairwise((a, b) => a.Timestamp - b.Timestamp);
             foreach (var diff in diffs)
@@ -91,10 +97,13 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
         [Theory]
         [InlineData(1)]
         [InlineData(5)]
-        [InlineData(1200)]
+
+        // [InlineData(1200)]
         public void RecentCandleIsNow(int limit)
         {
-            var candles = _container.DataProvider.GetCandles(TradingPair.Parse("EOSETH"), limit);
+            var candles = _container.DataProvider.GetCandles(
+                TradingPair.Parse("EOSETH"),
+                limit);
             var recent = candles[0].Timestamp;
             var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             Assert.True(

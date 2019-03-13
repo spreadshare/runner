@@ -32,11 +32,11 @@ namespace SpreadShare.Algorithms.Implementations
             public override State<FilteredSMACrossoverConfiguration> OnMarketCondition(DataProvider data)
             {
                 // Check whether the filter SMA is hit or not.
-                bool filterSma = data.GetStandardMovingAverage(
+                bool filterSma = DataProvider.GetStandardMovingAverage(
                                      AlgorithmConfiguration.TradingPairs.First(),
                                      AlgorithmConfiguration.FilterSMA,
                                      AlgorithmConfiguration.CandleSize)
-                                 > data.GetStandardMovingAverage(
+                                 > DataProvider.GetStandardMovingAverage(
                                      AlgorithmConfiguration.TradingPairs.First(),
                                      AlgorithmConfiguration.FilterSMA,
                                      AlgorithmConfiguration.CandleSize,
@@ -46,21 +46,21 @@ namespace SpreadShare.Algorithms.Implementations
                 int longAtrTime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.LongATR;
 
                 // Check whether the ATR is higher than average
-                bool filterAtr = data.GetAverageTrueRange(
+                bool filterAtr = DataProvider.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
                                      shortAtrTime,
                                      AlgorithmConfiguration.ShortATR)
-                                 > data.GetAverageTrueRange(
+                                 > DataProvider.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
                                      longAtrTime,
                                      AlgorithmConfiguration.LongATR);
 
                 // Check for the crossover to happen.
-                bool crossoverSma = data.GetStandardMovingAverage(
+                bool crossoverSma = DataProvider.GetStandardMovingAverage(
                                         AlgorithmConfiguration.TradingPairs.First(),
                                         AlgorithmConfiguration.ShortSMA,
                                         AlgorithmConfiguration.CandleSize)
-                                    > data.GetStandardMovingAverage(
+                                    > DataProvider.GetStandardMovingAverage(
                                         AlgorithmConfiguration.TradingPairs.First(),
                                         AlgorithmConfiguration.LongSMA,
                                         AlgorithmConfiguration.CandleSize);
@@ -204,7 +204,9 @@ namespace SpreadShare.Algorithms.Implementations
                 int candleAmount = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.DonchianMin;
 
                 // Check whether we need to trail the stoploss higher
-                var minPrice = data.GetCandles(AlgorithmConfiguration.TradingPairs.First(), candleAmount).Min(x => x.Low);
+                var minPrice = data.GetCandles(
+                    AlgorithmConfiguration.TradingPairs.First(),
+                    candleAmount).Min(x => x.Low);
                 bool trail = minPrice > _stoploss.StopPrice;
 
                 // If the trailing requirements are hit, we trail into a higher stoploss
@@ -254,11 +256,11 @@ namespace SpreadShare.Algorithms.Implementations
                              _stoploss.SetPrice;
 
                 // Check whether the filter SMA is hit or not.
-                bool filterSma = data.GetStandardMovingAverage(
+                bool filterSma = DataProvider.GetStandardMovingAverage(
                                      AlgorithmConfiguration.TradingPairs.First(),
                                      AlgorithmConfiguration.FilterSMA,
                                      AlgorithmConfiguration.CandleSize)
-                                 > data.GetStandardMovingAverage(
+                                 > DataProvider.GetStandardMovingAverage(
                                      AlgorithmConfiguration.TradingPairs.First(),
                                      AlgorithmConfiguration.FilterSMA,
                                      AlgorithmConfiguration.CandleSize,
@@ -268,21 +270,21 @@ namespace SpreadShare.Algorithms.Implementations
                 int longAtrTime = AlgorithmConfiguration.CandleSize * AlgorithmConfiguration.LongATR;
 
                 // Check whether the ATR is higher than average
-                bool filterAtr = data.GetAverageTrueRange(
+                bool filterAtr = DataProvider.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
                                      shortAtrTime,
                                      AlgorithmConfiguration.ShortATR)
-                                 > data.GetAverageTrueRange(
+                                 > DataProvider.GetAverageTrueRange(
                                      AlgorithmConfiguration.TradingPairs.First(),
                                      longAtrTime,
                                      AlgorithmConfiguration.LongATR);
 
                 // Check for the crossover to happen.
-                bool crossoverSma = data.GetStandardMovingAverage(
+                bool crossoverSma = DataProvider.GetStandardMovingAverage(
                                         AlgorithmConfiguration.TradingPairs.First(),
                                         AlgorithmConfiguration.ShortSMA,
                                         AlgorithmConfiguration.CandleSize)
-                                    > data.GetStandardMovingAverage(
+                                    > DataProvider.GetStandardMovingAverage(
                                         AlgorithmConfiguration.TradingPairs.First(),
                                         AlgorithmConfiguration.LongSMA,
                                         AlgorithmConfiguration.CandleSize);

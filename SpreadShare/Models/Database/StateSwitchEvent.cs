@@ -5,7 +5,7 @@ namespace SpreadShare.Models.Database
     /// <summary>
     /// Models a state switch event in the database.
     /// </summary>
-    internal class StateSwitchEvent : ICsvSerializable
+    internal class StateSwitchEvent : DatabaseEvent, ICsvSerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
@@ -18,6 +18,21 @@ namespace SpreadShare.Models.Database
             Timestamp = timestamp;
             From = from;
             To = to;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
+        /// </summary>
+        /// <param name="timestamp">Timestamp.</param>
+        /// <param name="from">Origin state.</param>
+        /// <param name="to">Goal state.</param>
+        /// <param name="session">The current session.</param>
+        public StateSwitchEvent(long timestamp, string from, string to, AlgorithmSession session)
+        {
+            Timestamp = timestamp;
+            From = from;
+            To = to;
+            Session = session;
         }
 
         /// <summary>

@@ -32,12 +32,13 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 // Get the highest high from the last X hours
                 decimal topLongTermPrice = data.GetHighestHigh(
-                    AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.LongTermTime * AlgorithmConfiguration.CandleSize);
+                    FirstPair,
+                    AlgorithmConfiguration.LongTermTime);
 
                 // If the topLongTermPrice gets broken, we buy into the expected trend
                 if (data.GetCandles(
-                        AlgorithmConfiguration.TradingPairs.First(), 1).Max(x => x.High) >= topLongTermPrice)
+                        AlgorithmConfiguration.TradingPairs.First(),
+                        1).Max(x => x.High) >= topLongTermPrice)
                 {
                     return new BuyState(null, 0);
                 }
@@ -197,8 +198,8 @@ namespace SpreadShare.Algorithms.Implementations
 
                 // Get the highest high from the last X hours
                 decimal topLongTermPrice = data.GetHighestHigh(
-                    AlgorithmConfiguration.TradingPairs.First(),
-                    AlgorithmConfiguration.LongTermTime * AlgorithmConfiguration.CandleSize);
+                    FirstPair,
+                    AlgorithmConfiguration.LongTermTime);
 
                 // If the topLongTermPrice gets broken, we buy into the expected trend
                 if (data.GetHighestHigh(

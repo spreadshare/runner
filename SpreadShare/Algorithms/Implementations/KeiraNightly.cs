@@ -20,11 +20,23 @@ namespace SpreadShare.Algorithms.Implementations
 
         private class MarketBuyState : EntryState<Config>
         {
+            public override State<KeiraNightlyConfiguration> OnMarketCondition(DataProvider data)
+            {
+                var candles = data.GetCandles(FirstPair, 10);
+                var candles2 = data.GetCandles(FirstPair, 20);
+                if (candles.StandardMovingAverage() > candles2.StandardMovingAverage())
+                {
+                    return new LimitSellState();
+                }
+
+                return new NothingState<KeiraNightlyConfiguration>();
+            }
+
             protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 var pair = AlgorithmConfiguration.TradingPairs.First();
                 trading.ExecuteFullMarketOrderBuy(pair);
-                return new LimitSellState();
+                return new NothingState<KeiraNightlyConfiguration>();
             }
         }
 
