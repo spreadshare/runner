@@ -89,7 +89,7 @@ namespace SpreadShare.Algorithms.Implementations
                 return new SetStopState(_pyramid);
             }
         }
-
+        
         // This state sets a stoploss
         private class SetStopState : State<Other_Turtle_BConfiguration>
         {
@@ -99,6 +99,16 @@ namespace SpreadShare.Algorithms.Implementations
             public SetStopState(int pyramid)
             {
                 _pyramid = pyramid;
+            }
+            
+            public override State<Other_Turtle_BConfiguration> OnOrderUpdate(OrderUpdate order)
+            {
+                if (_stoploss != null && order.OrderId == _stoploss.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
+                {
+                    return new EntryState();
+                }
+
+                return new NothingState<Other_Turtle_BConfiguration>();
             }
 
             protected override State<Other_Turtle_BConfiguration> Run(TradingProvider trading, DataProvider data)
