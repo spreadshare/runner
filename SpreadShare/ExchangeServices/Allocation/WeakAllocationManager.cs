@@ -11,7 +11,7 @@ namespace SpreadShare.ExchangeServices.Allocation
     {
         private readonly AllocationManager _allocationManager;
         private readonly Type _algorithm;
-        private Exchange _exchange;
+        private readonly Exchange _exchange;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WeakAllocationManager"/> class.
@@ -53,8 +53,8 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// which will be used to update the allocation.
         /// </summary>
         /// <param name="p">TradeProposal to be verified.</param>
-        /// <param name="tradeCallback">Trade callback to be executed if verification was succesful.</param>
-        /// <returns>Boolean indicating succesful execution.</returns>
+        /// <param name="tradeCallback">Trade callback to be executed if verification was successful.</param>
+        /// <returns>Boolean indicating successful execution.</returns>
         public ResponseObject<OrderUpdate> QueueTrade(TradeProposal p, Func<OrderUpdate> tradeCallback)
             => _allocationManager.QueueTrade(p, _algorithm, _exchange, tradeCallback);
     }

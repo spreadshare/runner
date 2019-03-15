@@ -90,13 +90,6 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <returns>ResponseObject containing the order.</returns>
         public abstract ResponseObject<OrderUpdate> WaitForOrderStatus(long orderId, OrderUpdate.OrderStatus status);
 
-        /// <summary>
-        /// Gets the info of a certain order.
-        /// </summary>
-        /// <param name="orderId">The id of the order.</param>
-        /// <returns>ResponseObject containing the order.</returns>
-        public abstract ResponseObject<OrderUpdate> GetOrderInfo(long orderId);
-
         /// <inheritdoc />
         public abstract void OnCompleted();
 

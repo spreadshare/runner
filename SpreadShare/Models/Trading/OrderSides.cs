@@ -1,4 +1,4 @@
-namespace SpreadShare.Models
+namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Represents buy or sell orders.

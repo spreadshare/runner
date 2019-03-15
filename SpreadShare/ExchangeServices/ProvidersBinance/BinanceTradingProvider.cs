@@ -10,7 +10,7 @@ using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 using SpreadShare.Utilities;
-using OrderSide = SpreadShare.Models.OrderSide;
+using OrderSide = SpreadShare.Models.Trading.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
@@ -251,12 +251,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             }
 
             return new ResponseObject<OrderUpdate>(ResponseCode.NotFound);
-        }
-
-        /// <inheritdoc/>
-        public override ResponseObject<OrderUpdate> GetOrderInfo(long orderId)
-        {
-            throw new NotImplementedException();
         }
 
         /// <inheritdoc />

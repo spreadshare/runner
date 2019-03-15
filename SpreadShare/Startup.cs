@@ -87,7 +87,7 @@ namespace SpreadShare
             TradingPair.Sync(logger);
 
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
-            var service = serviceProvider.GetService<IDatabaseMigrationService>();
+            var service = serviceProvider.GetService<DatabaseMigrationService>();
             if (!service.Migrate().Success)
             {
                 logger.LogWarning("Could not migrate database.");
@@ -120,7 +120,7 @@ namespace SpreadShare
                 .SetMinimumLevel(LogLevel.Information));
 
             // Add MyService dependency
-            services.AddSingleton<IDatabaseMigrationService, DatabaseMigrationService>();
+            services.AddSingleton<DatabaseMigrationService, DatabaseMigrationService>();
 
             // Database utilities
             services.AddSingleton<DatabaseUtilities, DatabaseUtilities>();
