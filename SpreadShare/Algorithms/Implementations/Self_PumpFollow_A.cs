@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
+using SpreadShare.Utilities;
 using Config = SpreadShare.Algorithms.Implementations.Self_PumpFollow_AConfiguration;
 
 #pragma warning disable SA1402
@@ -92,7 +94,8 @@ namespace SpreadShare.Algorithms.Implementations
         /// <summary>
         /// Gets or sets WaitTime, determines how long to wait until we get out in candles.
         /// </summary>
-        public double WaitTime { get; set; }
+        [RangeInt(1, 50)]
+        public int WaitTime { get; set; }
     }
 }
 

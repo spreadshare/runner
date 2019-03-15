@@ -1,6 +1,7 @@
 using System;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using Config = SpreadShare.Algorithms.Implementations.Self_DipBuy_BConfiguration;
 
 #pragma warning disable SA1402
@@ -83,12 +84,14 @@ namespace SpreadShare.Algorithms.Implementations
         /// <summary>
         /// Gets or sets how much something needs to fall to be considered a dip. given like : 2% = 0.02.
         /// </summary>
+        [RangeDecimal("0.005", "0.4")]
         public decimal DipPercent { get; set; }
 
         /// <summary>
         /// Gets or sets recovery, determines how many candles the system should wait before selling.
         /// </summary>
-        public double RecoveryTime { get; set; }
+        [RangeInt(1, 100)]
+        public int RecoveryTime { get; set; }
     }
 }
 

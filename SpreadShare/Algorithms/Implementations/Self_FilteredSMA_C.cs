@@ -2,6 +2,7 @@ using System;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using Config = SpreadShare.Algorithms.Implementations.Self_FilteredSMA_CConfiguration;
 
 #pragma warning disable SA1402
@@ -265,26 +266,31 @@ namespace SpreadShare.Algorithms.Implementations
         /// <summary>
         /// Gets or sets the Short term crossover SMA in amount of candles.
         /// </summary>
+        [RangeInt(3, 15)]
         public int ShortSMA { get; set; }
 
         /// <summary>
         /// Gets or sets the long term crossover SMA in amount of candles.
         /// </summary>
+        [RangeInt(5, 50)]
         public int LongSMA { get; set; }
 
         /// <summary>
         /// Gets or sets the Short term ATR for the filter in amount of candles.
         /// </summary>
+        [RangeInt(3, 25)]
         public int ShortATR { get; set; }
 
         /// <summary>
         /// Gets or sets the Long term ATR for the filter in amount of candles.
         /// </summary>
+        [RangeInt(5, 75)]
         public int LongATR { get; set; }
 
         /// <summary>
         /// Gets or sets the short term breakout line time in amount of candles.
         /// </summary>
+        [RangeInt(10, 50)]
         public int DonchianMin { get; set; }
     }
 }

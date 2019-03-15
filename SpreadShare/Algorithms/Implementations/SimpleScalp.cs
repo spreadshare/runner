@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using Config = SpreadShare.Algorithms.Implementations.SimpleScalpConfiguration;
 
 #pragma warning disable SA1402
@@ -103,16 +104,19 @@ namespace SpreadShare.Algorithms.Implementations
         /// <summary>
         /// Gets or sets at what point you take profit.
         /// </summary>
+        [RangeDecimal("-1", "-1")]
         public decimal TakeProfit { get; set; }
 
         /// <summary>
         /// Gets or sets the WaitTime, basically a cooldown after exiting a trade.
         /// </summary>
+        [RangeInt(-1, -1)]
         public int WaitTime { get; set; }
 
         /// <summary>
         /// Gets or sets the StopTime, determines how long to wait until we get out and try again.
         /// </summary>
+        [RangeInt(-1, -1)]
         public int StopTime { get; set; }
     }
 }

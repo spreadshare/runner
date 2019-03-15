@@ -94,8 +94,8 @@ namespace SpreadShare.Algorithms.Implementations
         // This state sets a stoploss
         private class SetStopState : State<Config>
         {
-            private OrderUpdate _stoploss;
             private readonly int _pyramid;
+            private OrderUpdate _stoploss;
 
             public SetStopState(int pyramid)
             {
@@ -231,11 +231,13 @@ namespace SpreadShare.Algorithms.Implementations
         /// <summary>
         /// Gets or sets the long term breakout line time in periods.
         /// </summary>
+        [RangeInt(20, 250)]
         public int LongTermTime { get; set; }
 
         /// <summary>
         /// Gets or sets the short term breakout line time in periods.
         /// </summary>
+        [RangeInt(5, 100)]
         public int ShortTermTime { get; set; }
     }
 }

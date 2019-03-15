@@ -2,6 +2,7 @@ using System;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using Config = SpreadShare.Algorithms.Implementations.Self_PumpMmtm_AConfiguration;
 
 #pragma warning disable SA1402
@@ -47,22 +48,22 @@ namespace SpreadShare.Algorithms.Implementations
         // Buys the highest performer, and moves into checkstate after HoldTime amount of hours
          private class BuyState : State<Config>
          {
-             private readonly TradingPair _pair;
-             private OrderUpdate _buyorder;
+            private readonly TradingPair _pair;
+            private OrderUpdate _buyOrder;
 
-             public BuyState(TradingPair pair1)
+            public BuyState(TradingPair pair1)
             {
                  _pair = pair1;
             }
 
             public override State<Config> OnTimerElapsed()
             {
-                return new CheckState(_buyorder);
+                return new CheckState(_buyOrder);
             }
 
             protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
-                _buyorder = trading.ExecuteFullMarketOrderBuy(_pair);
+                _buyOrder = trading.ExecuteFullMarketOrderBuy(_pair);
                 SetTimer(TimeSpan.FromHours(AlgorithmConfiguration.HoldTime));
                 return new NothingState<Config>();
             }
@@ -151,16 +152,19 @@ namespace SpreadShare.Algorithms.Implementations
         /// <summary>
         /// Gets or sets how long back the algorithm checks in hours.
         /// </summary>
-        public double CheckTime { get; set; }
+        [RangeInt(1, 120)]
+        public int CheckTime { get; set; }
 
         /// <summary>
         /// Gets or sets how long the algorithm needs to hold the best performer in hours.
         /// </summary>
-        public double HoldTime { get; set; }
+        [RangeInt(1, 120)]
+        public int HoldTime { get; set; }
 
         /// <summary>
         /// Gets or sets the minimum threshold a pair must have gained to pass the check in %, 10% is written as 0.10.
         /// </summary>
+        [RangeDecimal("0.01", "0.1")]
         public decimal Threshold { get; set; }
     }
 }
