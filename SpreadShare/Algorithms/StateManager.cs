@@ -19,6 +19,7 @@ namespace SpreadShare.Algorithms
         where T : AlgorithmConfiguration
     {
         private readonly object _lock = new object();
+        private readonly T _configuration;
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly DatabaseContext _database;
@@ -47,6 +48,8 @@ namespace SpreadShare.Algorithms
                 // Setup logging
                 _logger = container.LoggerFactory.CreateLogger(GetType());
                 _loggerFactory = container.LoggerFactory;
+
+                _configuration = algorithmConfiguration;
 
                 // Link the parent algorithm configuration
                 AlgorithmConfiguration = algorithmConfiguration;
@@ -203,7 +206,12 @@ namespace SpreadShare.Algorithms
                 _activeState = child;
 
                 // Keep switching if the run method yields a new state.
-                SwitchState(_activeState.Activate(AlgorithmConfiguration, Container, _loggerFactory));
+                var next = _activeState.Activate(AlgorithmConfiguration, Container, _loggerFactory);
+                if (!(next is NothingState<T>))
+                {
+                    _logger.LogDebug($"Sleeping {(int)_configuration.CandleWidth} to prevent rapid trading.");
+                    SwitchState(next);
+                }
             }
         }
 
