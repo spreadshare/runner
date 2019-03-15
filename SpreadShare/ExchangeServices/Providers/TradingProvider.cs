@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
-using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.Utilities;

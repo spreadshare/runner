@@ -9,7 +9,6 @@ using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.Models;
 using SpreadShare.Models.Exceptions;
-using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Utilities;
 
@@ -21,34 +20,28 @@ namespace SpreadShare.Algorithms
     internal class AlgorithmService : IAlgorithmService
     {
         private readonly ILogger _logger;
-        private readonly AllocationManager _allocationManager;
         private readonly ExchangeFactoryService _exchangeFactoryService;
         private readonly Dictionary<Type, IBaseAlgorithm> _algorithms;
-        private readonly DatabaseContext _database;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AlgorithmService"/> class.
         /// </summary>
         /// <param name="loggerFactory">Provides logging capabilities.</param>
-        /// <param name="database">The database context.</param>
         /// <param name="allocationManager">Set allocations on startup.</param>
         /// <param name="exchangeFactoryService">Provides containers for algorithms.</param>
         public AlgorithmService(
             ILoggerFactory loggerFactory,
-            DatabaseContext database,
             AllocationManager allocationManager,
             ExchangeFactoryService exchangeFactoryService)
         {
             _logger = loggerFactory.CreateLogger<AlgorithmService>();
-            _allocationManager = allocationManager;
-            _database = database;
             _exchangeFactoryService = exchangeFactoryService;
             _algorithms = new Dictionary<Type, IBaseAlgorithm>();
 
             if (Program.CommandLineArgs.Trading)
             {
                 // Sets initial configuration
-                _allocationManager.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>
+                allocationManager.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>
                 {
                     [Exchange.Binance] = Configuration.Instance.EnabledAlgorithm.GetAsDictionary(),
                 });
@@ -82,11 +75,8 @@ namespace SpreadShare.Algorithms
             // Build container
             var container = _exchangeFactoryService.BuildContainer<T>(configuration);
 
-            // Start the timer provider
-            container.TimerProvider.RunPeriodicTimer();
-
             // Initialise algorithm with container
-            var startResponse = algorithm.Start(configuration, container, _database);
+            var startResponse = algorithm.Start(configuration, container);
 
             if (!startResponse.Success)
             {

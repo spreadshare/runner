@@ -22,12 +22,12 @@ namespace SpreadShare.Algorithms
         private StateManager<T> StateManager { get; set; }
 
         /// <inheritdoc />
-        public ResponseObject Start(AlgorithmConfiguration configuration, ExchangeProvidersContainer container, DatabaseContext database)
+        public ResponseObject Start(AlgorithmConfiguration configuration, ExchangeProvidersContainer container)
         {
             Guard.Argument(configuration).Require(
                 x => x is T,
                 x => $"{x} cannot not be converted to {typeof(T)}, please make sure to use the correct AlgorithmConfiguration");
-            Start(configuration as T, container, database);
+            Start(configuration as T, container);
             return new ResponseObject(ResponseCode.Success);
         }
 
@@ -46,7 +46,11 @@ namespace SpreadShare.Algorithms
             return new ResponseObject(ResponseCode.Success);
         }
 
-        private void Start(T configuration, ExchangeProvidersContainer container, DatabaseContext database)
-            => StateManager = new StateManager<T>(configuration, Initial, container, database);
+        private void Start(T configuration, ExchangeProvidersContainer container)
+        {
+            StateManager = new StateManager<T>(configuration, container, Initial);
+            DatabaseEventListenerService.Instance?.AddDataSource(StateManager);
+            container.TimerProvider.RunPeriodicTimer();
+        }
     }
 }

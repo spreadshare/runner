@@ -65,6 +65,18 @@ namespace SpreadShare.SupportServices
                 e => { })));
         }
 
+        /// <summary>
+        /// Add whose broadcasted state switches should be recorded as events.
+        /// </summary>
+        /// <param name="source">The broadcaster of state switches.</param>
+        public void AddDataSource(Observable<(Type, Type)> source)
+        {
+            _sources.Add(source.Subscribe(new ConfigurableObserver<(Type, Type)>(
+                OnNext,
+                () => { },
+                e => { })));
+        }
+
         /// <inheritdoc />
         public virtual void Dispose()
         {
@@ -76,6 +88,18 @@ namespace SpreadShare.SupportServices
         {
             var item = new OrderEvent(order, DateTimeOffset.Now.ToUnixTimeMilliseconds(), Session);
             _database.OrderEvents.Add(item);
+            _database.SaveChanges();
+        }
+
+        private void OnNext((Type, Type) stateSwitch)
+        {
+            var (from, to) = stateSwitch;
+            var item = new StateSwitchEvent(
+                DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                from.Name,
+                to.Name,
+                Session);
+            _database.StateSwitchEvents.Add(item);
             _database.SaveChanges();
         }
 
