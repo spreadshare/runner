@@ -7,7 +7,9 @@ LoggingSettings:
   SentryDSN: null
 
 # Trading: Which algorithm should be ran
-EnabledAlgorithm: TemplateAlgorithm
+EnabledAlgorithm:
+    Algorithm: TemplateAlgorithm
+    Allocation: 1
 
 # Trading: Settings for communication with Binance
 BinanceClientSettings:

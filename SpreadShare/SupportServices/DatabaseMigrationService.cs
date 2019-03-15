@@ -6,7 +6,7 @@ namespace SpreadShare.SupportServices
     /// <summary>
     /// Service for migrating the database.
     /// </summary>
-    internal class DatabaseMigrationService : IDatabaseMigrationService
+    internal class DatabaseMigrationService
     {
         private readonly DatabaseContext _dbContext;
 

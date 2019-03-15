@@ -9,6 +9,7 @@ using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.Models.Exceptions;
+using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.BacktestDaemon;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.ErrorServices;
@@ -92,6 +93,8 @@ namespace SpreadShare
         /// <param name="exitCode">Reason for termination.</param>
         public static void ExitProgramWithCode(ExitCode exitCode)
         {
+            DatabaseEventListenerService.Instance?.Dispose();
+
             // Flush the logs by disposing the factory
             _loggerFactory?.Dispose();
             if (exitCode != ExitCode.Success)
@@ -116,7 +119,7 @@ namespace SpreadShare
             ILogger logger = _loggerFactory.CreateLogger("Program.cs:ExecuteTradingLogic");
 
             var algorithmService = serviceProvider.GetService<IAlgorithmService>();
-            var algorithm = Configuration.Instance.EnabledAlgorithm;
+            var algorithm = Configuration.Instance.EnabledAlgorithm.Algorithm;
 
             // Link algorithm in configuration to implementation in C#
             Type algorithmConfigurationType = Reflections.GetMatchingConfigurationsType(algorithm);

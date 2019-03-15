@@ -10,7 +10,7 @@ using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
-using OrderSide = SpreadShare.Models.OrderSide;
+using OrderSide = SpreadShare.Models.Trading.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
@@ -144,20 +144,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject CancelOrder(TradingPair pair, long orderId)
         {
-            var orderQuery = GetOrderInfo(orderId);
-            if (!orderQuery.Success)
+            if (!WatchList.ContainsKey(orderId))
             {
                 throw new InvalidStateException($"Cannot cancel order {orderId} because it doesn't exist.");
             }
 
-            var order = orderQuery.Data;
+            var order = WatchList[orderId];
             order.Status = OrderUpdate.OrderStatus.Cancelled;
             order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
-
-            if (WatchList.ContainsKey(orderId))
-            {
-                WatchList.Remove(order.OrderId);
-            }
+            WatchList.Remove(order.OrderId);
 
             // Add to order cache to confirm cancelled.
             _orderCache.Enqueue(order);
@@ -184,17 +179,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             }
 
             return new ResponseObject<OrderUpdate>(ResponseCode.Error, "Backtest order was not added to the cache correctly");
-        }
-
-        /// <inheritdoc/>
-        public override ResponseObject<OrderUpdate> GetOrderInfo(long orderId)
-        {
-            if (WatchList.ContainsKey(orderId))
-            {
-                return new ResponseObject<OrderUpdate>(ResponseCode.Success, WatchList[orderId]);
-            }
-
-            return new ResponseObject<OrderUpdate>(ResponseCode.Error, $"Order {orderId} with was not found");
         }
 
         /// <inheritdoc />

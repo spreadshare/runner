@@ -10,7 +10,7 @@ using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 using Xunit;
 using Xunit.Abstractions;
-using OrderSide = SpreadShare.Models.OrderSide;
+using OrderSide = SpreadShare.Models.Trading.OrderSide;
 
 namespace SpreadShare.Tests.ExchangeServices.AllocationTests
 {

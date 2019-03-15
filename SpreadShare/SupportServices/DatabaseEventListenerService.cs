@@ -28,7 +28,9 @@ namespace SpreadShare.SupportServices
             _database = database;
             Session = new AlgorithmSession
             {
-                Name = Configuration.Configuration.Instance.EnabledAlgorithm.Name,
+                Name = Configuration.Configuration.Instance.EnabledAlgorithm.Algorithm.Name,
+                CreatedTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                Active = true,
             };
 
             _database.Sessions.Add(Session);
@@ -85,6 +87,11 @@ namespace SpreadShare.SupportServices
                 {
                     source?.Dispose();
                 }
+
+                _logger.LogInformation($"Deactivating session '{Session.Name}'");
+                Session.Active = false;
+                Session.ClosedTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                _database.SaveChanges();
             }
         }
     }

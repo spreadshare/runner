@@ -6,7 +6,7 @@ using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
 using static SpreadShare.Models.Trading.OrderUpdate;
-using OrderSide = SpreadShare.Models.OrderSide;
+using OrderSide = SpreadShare.Models.Trading.OrderSide;
 
 namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 {

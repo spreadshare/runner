@@ -59,7 +59,7 @@ namespace SpreadShare.ExchangeServices.Providers
                         Program.ExitProgramWithCode(ExitCode.ConsecutiveExceptionFailure);
                     }
 
-                    var coolDown = TimeSpan.FromMilliseconds(10000 * Math.Pow(2, _consecutiveExceptions));
+                    var coolDown = TimeSpan.FromMilliseconds(30000 * Math.Pow(2, _consecutiveExceptions));
                     Logger.LogWarning($"Continuing program after {coolDown}");
                     await Task.Delay((int)coolDown.TotalMilliseconds).ConfigureAwait(false);
                 }
