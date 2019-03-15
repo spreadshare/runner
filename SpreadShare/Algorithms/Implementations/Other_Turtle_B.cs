@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;

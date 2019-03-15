@@ -76,6 +76,7 @@ namespace SpreadShare.ExchangeServices.Providers
             e.Switch(
                 SwitchType.Case<TargetInvocationException>(() => HandleException(e.InnerException)),
                 SwitchType.Case<ArgumentException>(() => Program.ExitProgramWithCode(ExitCode.UnexpectedValue)),
+                SwitchType.Case<OutOfFundsException>(() => Program.ExitProgramWithCode(ExitCode.OrderFailure)),
                 SwitchType.Case<OrderRefusedException>(() => Program.ExitProgramWithCode(ExitCode.OrderFailure)),
                 SwitchType.Case<OrderFailedException>(() => Program.ExitProgramWithCode(ExitCode.OrderFailure)),
                 SwitchType.Case<ExchangeConnectionException>(() => _consecutiveExceptions++),

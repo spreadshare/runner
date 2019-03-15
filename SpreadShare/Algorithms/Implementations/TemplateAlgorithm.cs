@@ -31,7 +31,8 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 Logger.LogInformation("I wonder if Miss Bitcoin thinks I should buy...");
                 Logger.LogInformation(ShowAlloc(trading));
-                return new NothingState<Config>();
+                Logger.LogInformation(ShowAlloc(trading));
+                return new ZombieState();
             }
 
             private string ShowAlloc(TradingProvider trading)
@@ -40,6 +41,15 @@ namespace SpreadShare.Algorithms.Implementations
                 var left = AlgorithmConfiguration.TradingPairs.First().Left;
                 var right = AlgorithmConfiguration.TradingPairs.First().Right;
                 return $"Total alloc: {alloc.GetAllocation(left)}{left} -- {alloc.GetAllocation(right)}{right}";
+            }
+        }
+
+        private class ZombieState : State<TemplateAlgorithmConfiguration>
+        {
+            protected override State<TemplateAlgorithmConfiguration> Run(TradingProvider trading, DataProvider data)
+            {
+                Logger.LogInformation("I desire to expire.");
+                return new NothingState<TemplateAlgorithmConfiguration>();
             }
         }
     }

@@ -1,8 +1,4 @@
-using System;
-using System.Linq;
-using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using Config = SpreadShare.Algorithms.Implementations.Self_LongSMA_AConfiguration;
