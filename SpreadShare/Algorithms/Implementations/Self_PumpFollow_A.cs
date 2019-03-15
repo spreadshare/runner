@@ -30,7 +30,6 @@ namespace SpreadShare.Algorithms.Implementations
         {
             public override State<Self_PumpFollow_AConfiguration> OnMarketCondition(DataProvider data)
             {
-                
                 bool filterSma = data.GetCandles(FirstPair, 50).StandardMovingAverage()
                                  >
                                  data.GetCandles(FirstPair, 75).StandardMovingAverage();
@@ -38,11 +37,10 @@ namespace SpreadShare.Algorithms.Implementations
                 decimal crossvalue = (data.GetCandles(FirstPair, 5).AverageTrueRange()
                                       /
                                       data.GetCandles(FirstPair, 1).First().Close)
-                                      *
-                                      2;
-                
+                                     * 2;
+
                 bool pump = data.GetCandles(FirstPair, 3).RateOfChange() > crossvalue;
-                
+
                 if (filterSma && pump)
                 {
                     return new BuyState();
@@ -51,6 +49,7 @@ namespace SpreadShare.Algorithms.Implementations
                 return new NothingState<Self_PumpFollow_AConfiguration>();
             }
         }
+
         private class BuyState : State<Self_PumpFollow_AConfiguration>
         {
             protected override State<Self_PumpFollow_AConfiguration> Run(TradingProvider trading, DataProvider data)

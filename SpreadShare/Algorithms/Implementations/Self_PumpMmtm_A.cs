@@ -11,24 +11,24 @@ namespace SpreadShare.Algorithms.Implementations
     /// The Simple bandwagoning algorithm
     /// buys the highest performer of the last period.
     /// </summary>
-    internal class SimpleBandwagon : BaseAlgorithm<SimpleBandwagonConfiguration>
+    internal class Self_PumpMmtm_A : BaseAlgorithm<Self_PumpMmtm_AConfiguration>
     {
          /// <inheritdoc />
-         protected override EntryState<SimpleBandwagonConfiguration> Initial => new WelcomeState();
+         protected override EntryState<Self_PumpMmtm_AConfiguration> Initial => new WelcomeState();
 
          // Buys the highest performer of the last number of hours
-         private class WelcomeState : EntryState<SimpleBandwagonConfiguration>
+         private class WelcomeState : EntryState<Self_PumpMmtm_AConfiguration>
          {
-             protected override State<SimpleBandwagonConfiguration> Run(TradingProvider trading, DataProvider data)
+             protected override State<Self_PumpMmtm_AConfiguration> Run(TradingProvider trading, DataProvider data)
              {
                  return new EntryState();
              }
          }
 
         // Checks for a winner among list of tradingpairs, once a winner is found, moves to buystate to enter.
-         private class EntryState : EntryState<SimpleBandwagonConfiguration>
+         private class EntryState : EntryState<Self_PumpMmtm_AConfiguration>
          {
-             public override State<SimpleBandwagonConfiguration> OnMarketCondition(DataProvider data)
+             public override State<Self_PumpMmtm_AConfiguration> OnMarketCondition(DataProvider data)
              {
                  (var winner, var performance) = data.GetTopPerformance(
                      AlgorithmConfiguration.TradingPairs,
@@ -39,12 +39,12 @@ namespace SpreadShare.Algorithms.Implementations
                      return new BuyState(winner);
                  }
 
-                 return new NothingState<SimpleBandwagonConfiguration>();
+                 return new NothingState<Self_PumpMmtm_AConfiguration>();
              }
          }
 
         // Buys the highest performer, and moves into checkstate after HoldTime amount of hours
-         private class BuyState : State<SimpleBandwagonConfiguration>
+         private class BuyState : State<Self_PumpMmtm_AConfiguration>
          {
             private OrderUpdate _buyorder;
             private TradingPair _pair;
@@ -54,16 +54,16 @@ namespace SpreadShare.Algorithms.Implementations
                  _pair = pair1;
             }
 
-            public override State<SimpleBandwagonConfiguration> OnTimerElapsed()
+            public override State<Self_PumpMmtm_AConfiguration> OnTimerElapsed()
             {
                 return new CheckState(_buyorder);
             }
 
-            protected override State<SimpleBandwagonConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Self_PumpMmtm_AConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 _buyorder = trading.ExecuteFullMarketOrderBuy(_pair);
                 SetTimer(TimeSpan.FromHours(AlgorithmConfiguration.HoldTime));
-                return new NothingState<SimpleBandwagonConfiguration>();
+                return new NothingState<Self_PumpMmtm_AConfiguration>();
             }
          }
 
@@ -71,7 +71,7 @@ namespace SpreadShare.Algorithms.Implementations
         // If the current pair is still the best, it stays in the trade and waits an hour
         // If another pair is now the best, it switches to changestate
         // If no pairs are winners, it sells
-         private class CheckState : State<SimpleBandwagonConfiguration>
+         private class CheckState : State<Self_PumpMmtm_AConfiguration>
          {
             private OrderUpdate _oldbuy;
 
@@ -80,7 +80,7 @@ namespace SpreadShare.Algorithms.Implementations
                 _oldbuy = buyorder;
             }
 
-            public override State<SimpleBandwagonConfiguration> OnMarketCondition(DataProvider data)
+            public override State<Self_PumpMmtm_AConfiguration> OnMarketCondition(DataProvider data)
             {
                 (var winner, var performance) = data.GetTopPerformance(
                     AlgorithmConfiguration.TradingPairs,
@@ -90,7 +90,7 @@ namespace SpreadShare.Algorithms.Implementations
                      &&
                      winner != _oldbuy.Pair)
                 {
-                     return new ChangeState(_oldbuy);
+                     return new SellState(_oldbuy);
                 }
 
                 if (performance < (1 + AlgorithmConfiguration.Threshold))
@@ -103,7 +103,7 @@ namespace SpreadShare.Algorithms.Implementations
          }
 
         // If there are no winners, sell the current asset and moves back to scan for entries
-         private class SellState : State<SimpleBandwagonConfiguration>
+         private class SellState : State<Self_PumpMmtm_AConfiguration>
          {
             private OrderUpdate _oldbuy;
 
@@ -112,7 +112,7 @@ namespace SpreadShare.Algorithms.Implementations
                 _oldbuy = buyorder;
             }
 
-            protected override State<SimpleBandwagonConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Self_PumpMmtm_AConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 trading.ExecuteFullMarketOrderSell(_oldbuy.Pair);
                 return new EntryState();
@@ -120,7 +120,7 @@ namespace SpreadShare.Algorithms.Implementations
          }
 
         // If the current pair is still the best, wait an hour and go back to checkstate
-         private class IdleState : State<SimpleBandwagonConfiguration>
+         private class IdleState : State<Self_PumpMmtm_AConfiguration>
          {
             private OrderUpdate _oldbuy;
 
@@ -129,40 +129,23 @@ namespace SpreadShare.Algorithms.Implementations
                 _oldbuy = buyorder;
             }
 
-            public override State<SimpleBandwagonConfiguration> OnTimerElapsed()
+            public override State<Self_PumpMmtm_AConfiguration> OnTimerElapsed()
             {
                 return new CheckState(_oldbuy);
             }
 
-            protected override State<SimpleBandwagonConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Self_PumpMmtm_AConfiguration> Run(TradingProvider trading, DataProvider data)
             {
                 SetTimer(TimeSpan.FromHours(1));
-                return new NothingState<SimpleBandwagonConfiguration>();
-            }
-         }
-
-        // If the current pair is no longer the winner, sell and go back to entry to reenter a different pair
-         private class ChangeState : State<SimpleBandwagonConfiguration>
-         {
-            private OrderUpdate _oldbuy;
-
-            public ChangeState(OrderUpdate buyorder)
-            {
-                _oldbuy = buyorder;
-            }
-
-            protected override State<SimpleBandwagonConfiguration> Run(TradingProvider trading, DataProvider data)
-            {
-                trading.ExecuteFullMarketOrderSell(_oldbuy.Pair);
-                return new EntryState();
+                return new NothingState<Self_PumpMmtm_AConfiguration>();
             }
          }
     }
 
     /// <summary>
-    /// The SimpleBandwagon settings.
+    /// The Self_PumpMmtm_A settings.
     /// </summary>
-    internal class SimpleBandwagonConfiguration : AlgorithmConfiguration
+    internal class Self_PumpMmtm_AConfiguration : AlgorithmConfiguration
     {
         /// <summary>
         /// Gets or sets how long back the algo checks in hours.
