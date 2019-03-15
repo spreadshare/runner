@@ -1,9 +1,10 @@
 using System;
-using System.Linq;
-using NpgsqlTypes;
+using System.ComponentModel.DataAnnotations;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
+using Config = SpreadShare.Algorithms.Implementations.Other_Turtle_BConfiguration;
 
 #pragma warning disable SA1402
 
@@ -11,25 +12,25 @@ namespace SpreadShare.Algorithms.Implementations
 {
     /// <summary>
     /// The first Turtle inspired algorithm.
-    /// Enters when longterm trends are broken, sells when the opposite shortterm trend is broken.
+    /// Enters when long term trends are broken, sells when the opposite short term trend is broken.
     /// </summary>
-    internal class Other_Turtle_B : BaseAlgorithm<Other_Turtle_BConfiguration>
+    internal class Other_Turtle_B : BaseAlgorithm<Config>
     {
         /// <inheritdoc />
-        protected override EntryState<Other_Turtle_BConfiguration> Initial => new WelcomeState();
+        protected override EntryState<Config> Initial => new WelcomeState();
 
-        private class WelcomeState : EntryState<Other_Turtle_BConfiguration>
+        private class WelcomeState : EntryState<Config>
         {
-            protected override State<Other_Turtle_BConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 return new EntryState();
             }
         }
 
         // Buy when the long term top gets broken.
-        private class EntryState : EntryState<Other_Turtle_BConfiguration>
+        private class EntryState : EntryState<Config>
         {
-            public override State<Other_Turtle_BConfiguration> OnMarketCondition(DataProvider data)
+            public override State<Config> OnMarketCondition(DataProvider data)
             {
                 // Get the highest high from the last X hours
                 decimal topLongTermPrice = data.GetHighestHigh(FirstPair, AlgorithmConfiguration.LongTermTime);
@@ -40,11 +41,11 @@ namespace SpreadShare.Algorithms.Implementations
                     return new BuyState(null, 0);
                 }
 
-                return new NothingState<Other_Turtle_BConfiguration>();
+                return new NothingState<Config>();
             }
         }
 
-        private class BuyState : State<Other_Turtle_BConfiguration>
+        private class BuyState : State<Config>
         {
             private OrderUpdate _stoploss;
             private int _pyramid;
@@ -55,7 +56,7 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            protected override State<Other_Turtle_BConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 // If the Filter and CrossoverSMA signal the trade, we buy at market.
                 trading.ExecutePartialMarketOrderBuy(FirstPair, 0.5M);
@@ -72,10 +73,10 @@ namespace SpreadShare.Algorithms.Implementations
 
          // This class cancels the current stop loss, and sets a new one.
         // At EVERY moment in a trade, this system should have a stoploss in place
-        private class CancelStopState : State<Other_Turtle_BConfiguration>
+        private class CancelStopState : State<Config>
         {
-            private OrderUpdate _stoploss;
-            private int _pyramid;
+            private readonly OrderUpdate _stoploss;
+            private readonly int _pyramid;
 
             public CancelStopState(OrderUpdate stoploss, int pyramid)
             {
@@ -83,7 +84,7 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            protected override State<Other_Turtle_BConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 trading.CancelOrder(_stoploss);
                 return new SetStopState(_pyramid);
@@ -91,27 +92,27 @@ namespace SpreadShare.Algorithms.Implementations
         }
 
         // This state sets a stoploss
-        private class SetStopState : State<Other_Turtle_BConfiguration>
+        private class SetStopState : State<Config>
         {
             private OrderUpdate _stoploss;
-            private int _pyramid;
+            private readonly int _pyramid;
 
             public SetStopState(int pyramid)
             {
                 _pyramid = pyramid;
             }
 
-            public override State<Other_Turtle_BConfiguration> OnOrderUpdate(OrderUpdate order)
+            public override State<Config> OnOrderUpdate(OrderUpdate order)
             {
                 if (_stoploss != null && order.OrderId == _stoploss.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return new EntryState();
                 }
 
-                return new NothingState<Other_Turtle_BConfiguration>();
+                return new NothingState<Config>();
             }
 
-            protected override State<Other_Turtle_BConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 // Get the lowest low from the last y hours.
                 decimal shortTermTimePrice = data.GetLowestLow(FirstPair, AlgorithmConfiguration.ShortTermTime);
@@ -123,10 +124,10 @@ namespace SpreadShare.Algorithms.Implementations
         }
 
          // This state checks whether to enter a pyramid order, trail the current stoploss or return to entry after closing
-        private class CheckState : State<Other_Turtle_BConfiguration>
+        private class CheckState : State<Config>
         {
-            private OrderUpdate _stoploss;
-            private int _pyramid;
+            private readonly OrderUpdate _stoploss;
+            private readonly int _pyramid;
 
             public CheckState(OrderUpdate stoploss, int pyramid)
             {
@@ -134,22 +135,22 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            public override State<Other_Turtle_BConfiguration> OnOrderUpdate(OrderUpdate order)
+            public override State<Config> OnOrderUpdate(OrderUpdate order)
             {
                 if (order.OrderId == _stoploss.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return new EntryState();
                 }
 
-                return new NothingState<Other_Turtle_BConfiguration>();
+                return new NothingState<Config>();
             }
 
-            public override State<Other_Turtle_BConfiguration> OnTimerElapsed()
+            public override State<Config> OnTimerElapsed()
             {
                 return new CheckPyramidState(_stoploss, _pyramid);
             }
 
-            public override State<Other_Turtle_BConfiguration> OnMarketCondition(DataProvider data)
+            public override State<Config> OnMarketCondition(DataProvider data)
             {
                 // Check whether we need to trail the stoploss higher
                 bool trail = data.GetLowestLow(FirstPair, AlgorithmConfiguration.ShortTermTime)
@@ -164,14 +165,14 @@ namespace SpreadShare.Algorithms.Implementations
 
                 SetTimer(TimeSpan.FromMinutes((int)AlgorithmConfiguration.CandleWidth));
 
-                return new NothingState<Other_Turtle_BConfiguration>();
+                return new NothingState<Config>();
             }
         }
 
         // This state checks whether to enter a pyramid order, trail the current stoploss or return to entry after closing
-        private class CheckPyramidState : State<Other_Turtle_BConfiguration>
+        private class CheckPyramidState : State<Config>
         {
-            private OrderUpdate _stoploss;
+            private readonly OrderUpdate _stoploss;
             private int _pyramid;
 
             public CheckPyramidState(OrderUpdate stoploss, int pyramid)
@@ -180,17 +181,17 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
-            public override State<Other_Turtle_BConfiguration> OnOrderUpdate(OrderUpdate order)
+            public override State<Config> OnOrderUpdate(OrderUpdate order)
             {
                 if (order.OrderId == _stoploss.OrderId && order.Status == OrderUpdate.OrderStatus.Filled)
                 {
                     return new EntryState();
                 }
 
-                return new NothingState<Other_Turtle_BConfiguration>();
+                return new NothingState<Config>();
             }
 
-            public override State<Other_Turtle_BConfiguration> OnMarketCondition(DataProvider data)
+            public override State<Config> OnMarketCondition(DataProvider data)
             {
                 // Check whether we need to trail the stoploss higher
                 bool trail = data.GetLowestLow(FirstPair, AlgorithmConfiguration.ShortTermTime)
@@ -217,7 +218,7 @@ namespace SpreadShare.Algorithms.Implementations
                     return new CancelStopState(_stoploss, _pyramid);
                 }
 
-                return new NothingState<Other_Turtle_BConfiguration>();
+                return new NothingState<Config>();
             }
         }
     }

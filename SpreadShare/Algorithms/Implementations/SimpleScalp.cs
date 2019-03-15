@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using Config = SpreadShare.Algorithms.Implementations.SimpleScalpConfiguration;
 
 #pragma warning disable SA1402
 
@@ -11,83 +12,83 @@ namespace SpreadShare.Algorithms.Implementations
 {
     /// <summary>
     /// The first simple scalp algorithm.
-    /// buys without entryconditions and immediately sets an exit sell, with a time-based stop loss.
+    /// buys without entry conditions and immediately sets an exit sell, with a time-based stop loss.
     /// </summary>
-    internal class SimpleScalp : BaseAlgorithm<SimpleScalpConfiguration>
+    internal class SimpleScalp : BaseAlgorithm<Config>
     {
         /// <inheritdoc />
-        protected override EntryState<SimpleScalpConfiguration> Initial => new WelcomeState();
+        protected override EntryState<Config> Initial => new WelcomeState();
 
         // Buy at market, set a limit sell immediately, and a 2 hour stop. if the stop is hit, sell at market, and wait
-        private class WelcomeState : EntryState<SimpleScalpConfiguration>
+        private class WelcomeState : EntryState<Config>
         {
-            protected override State<SimpleScalpConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 return new EntryState();
             }
         }
 
-        private class EntryState : EntryState<SimpleScalpConfiguration>
+        private class EntryState : EntryState<Config>
         {
-            private OrderUpdate _limitsell;
+            private OrderUpdate _limitSell;
 
-            public override State<SimpleScalpConfiguration> OnTimerElapsed()
+            public override State<Config> OnTimerElapsed()
             {
-                return new StopState(_limitsell);
+                return new StopState(_limitSell);
             }
 
-            public override State<SimpleScalpConfiguration> OnOrderUpdate(OrderUpdate order)
+            public override State<Config> OnOrderUpdate(OrderUpdate order)
             {
-                if (order.Status == OrderUpdate.OrderStatus.Filled && order.OrderId == _limitsell.OrderId)
+                if (order.Status == OrderUpdate.OrderStatus.Filled && order.OrderId == _limitSell.OrderId)
                 {
                     return new WaitState();
                 }
 
-                return new NothingState<SimpleScalpConfiguration>();
+                return new NothingState<Config>();
             }
 
-            protected override State<SimpleScalpConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
-                OrderUpdate buyorder =
+                OrderUpdate buyOrder =
                     trading.ExecuteFullMarketOrderBuy(AlgorithmConfiguration.TradingPairs.First());
                 Portfolio portfolio = trading.GetPortfolio();
-                _limitsell = trading.PlaceLimitOrderSell(
+                _limitSell = trading.PlaceLimitOrderSell(
                     AlgorithmConfiguration.TradingPairs.First(),
                     portfolio.GetAllocation(AlgorithmConfiguration.TradingPairs.First().Left).Free,
-                    buyorder.AverageFilledPrice * AlgorithmConfiguration.TakeProfit);
+                    buyOrder.AverageFilledPrice * AlgorithmConfiguration.TakeProfit);
                 SetTimer(TimeSpan.FromHours(AlgorithmConfiguration.StopTime));
-                return new NothingState<SimpleScalpConfiguration>();
+                return new NothingState<Config>();
             }
         }
 
         // On a successful trade, wait WaitTime minutes long and then restart putting in orders
-        private class WaitState : State<SimpleScalpConfiguration>
+        private class WaitState : State<Config>
         {
-            public override State<SimpleScalpConfiguration> OnTimerElapsed()
+            public override State<Config> OnTimerElapsed()
             {
                 return new EntryState();
             }
 
-            protected override State<SimpleScalpConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 Logger.LogInformation($"Total btc {trading.GetPortfolio().GetAllocation(new Currency("BTC"))}");
                 SetTimer(TimeSpan.FromMinutes(AlgorithmConfiguration.WaitTime));
-                return new NothingState<SimpleScalpConfiguration>();
+                return new NothingState<Config>();
             }
         }
 
-        private class StopState : State<SimpleScalpConfiguration>
+        private class StopState : State<Config>
         {
-            private OrderUpdate oldlimit;
+            private readonly OrderUpdate oldLimit;
 
-            public StopState(OrderUpdate limitsell)
+            public StopState(OrderUpdate limitSell)
             {
-                oldlimit = limitsell;
+                oldLimit = limitSell;
             }
 
-            protected override State<SimpleScalpConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
-                trading.CancelOrder(oldlimit);
+                trading.CancelOrder(oldLimit);
                 trading.ExecuteFullMarketOrderSell(AlgorithmConfiguration.TradingPairs.First());
                 return new WaitState();
             }
@@ -100,17 +101,17 @@ namespace SpreadShare.Algorithms.Implementations
     internal class SimpleScalpConfiguration : AlgorithmConfiguration
     {
         /// <summary>
-        /// Gets or sets At what point you take profit.
+        /// Gets or sets at what point you take profit.
         /// </summary>
         public decimal TakeProfit { get; set; }
 
         /// <summary>
-        /// Gets or sets The waittime, basically a cooldown after exiting a trade.
+        /// Gets or sets the WaitTime, basically a cooldown after exiting a trade.
         /// </summary>
         public int WaitTime { get; set; }
 
         /// <summary>
-        /// Gets or sets Stoptime, determines how long to wait untill we get out and try again.
+        /// Gets or sets the StopTime, determines how long to wait until we get out and try again.
         /// </summary>
         public int StopTime { get; set; }
     }

@@ -1,8 +1,7 @@
 using System;
-using System.Linq;
 using SpreadShare.ExchangeServices.Providers;
-using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using Config = SpreadShare.Algorithms.Implementations.Self_DipBuy_BConfiguration;
 
 #pragma warning disable SA1402
 
@@ -10,25 +9,25 @@ namespace SpreadShare.Algorithms.Implementations
 {
     /// <summary>
     /// The first short dip algorithm.
-    /// buys when the market has an unesecary dip, and sell after recovery.
+    /// buys when the market has an unnecessary dip, and sell after recovery.
     /// </summary>
-    internal class Self_DipBuy_B : BaseAlgorithm<Self_DipBuy_BConfiguration>
+    internal class Self_DipBuy_B : BaseAlgorithm<Config>
     {
         /// <inheritdoc />
-        protected override EntryState<Self_DipBuy_BConfiguration> Initial => new WelcomeState();
+        protected override EntryState<Config> Initial => new WelcomeState();
 
         // Buy when the price dips more than X percent in Y minutes, and sell after Z% recovery or after A hours
-        private class WelcomeState : EntryState<Self_DipBuy_BConfiguration>
+        private class WelcomeState : EntryState<Config>
         {
-            protected override State<Self_DipBuy_BConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 return new EntryState();
             }
         }
 
-        private class EntryState : EntryState<Self_DipBuy_BConfiguration>
+        private class EntryState : EntryState<Config>
         {
-            public override State<Self_DipBuy_BConfiguration> OnMarketCondition(DataProvider data)
+            public override State<Config> OnMarketCondition(DataProvider data)
             {
                 bool dip = data.GetCandles(FirstPair, 3).RateOfChange()
                                        >
@@ -38,37 +37,37 @@ namespace SpreadShare.Algorithms.Implementations
                     return new BuyState();
                 }
 
-                return new NothingState<Self_DipBuy_BConfiguration>();
+                return new NothingState<Config>();
             }
         }
 
-        private class BuyState : State<Self_DipBuy_BConfiguration>
+        private class BuyState : State<Config>
         {
-            protected override State<Self_DipBuy_BConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 trading.ExecutePartialMarketOrderBuy(FirstPair, 0.7M);
                 return new WaitState();
             }
         }
 
-        private class WaitState : State<Self_DipBuy_BConfiguration>
+        private class WaitState : State<Config>
         {
-            public override State<Self_DipBuy_BConfiguration> OnTimerElapsed()
+            public override State<Config> OnTimerElapsed()
             {
                 return new SellState();
             }
 
-            protected override State<Self_DipBuy_BConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 double waitMinutes = AlgorithmConfiguration.RecoveryTime * (int)AlgorithmConfiguration.CandleWidth;
                 SetTimer(TimeSpan.FromMinutes(waitMinutes));
-                return new NothingState<Self_DipBuy_BConfiguration>();
+                return new NothingState<Config>();
             }
         }
 
-        private class SellState : State<Self_DipBuy_BConfiguration>
+        private class SellState : State<Config>
         {
-            protected override State<Self_DipBuy_BConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 trading.ExecuteFullMarketOrderSell(FirstPair);
                 return new EntryState();

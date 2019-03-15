@@ -2,6 +2,7 @@ using System;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using Config = SpreadShare.Algorithms.Implementations.Self_PumpMmtm_AConfiguration;
 
 #pragma warning disable SA1402
 
@@ -14,23 +15,23 @@ namespace SpreadShare.Algorithms.Implementations
     internal class Self_PumpMmtm_A : BaseAlgorithm<Self_PumpMmtm_AConfiguration>
     {
          /// <inheritdoc />
-         protected override EntryState<Self_PumpMmtm_AConfiguration> Initial => new WelcomeState();
+         protected override EntryState<Config> Initial => new WelcomeState();
 
          // Buys the highest performer of the last number of hours
-         private class WelcomeState : EntryState<Self_PumpMmtm_AConfiguration>
+         private class WelcomeState : EntryState<Config>
          {
-             protected override State<Self_PumpMmtm_AConfiguration> Run(TradingProvider trading, DataProvider data)
+             protected override State<Config> Run(TradingProvider trading, DataProvider data)
              {
                  return new EntryState();
              }
          }
 
-        // Checks for a winner among list of tradingpairs, once a winner is found, moves to buystate to enter.
-         private class EntryState : EntryState<Self_PumpMmtm_AConfiguration>
+        // Checks for a winner among list of tradingPairs, once a winner is found, moves to buystate to enter.
+         private class EntryState : EntryState<Config>
          {
-             public override State<Self_PumpMmtm_AConfiguration> OnMarketCondition(DataProvider data)
+             public override State<Config> OnMarketCondition(DataProvider data)
              {
-                 (var winner, var performance) = data.GetTopPerformance(
+                 var (winner, performance) = data.GetTopPerformance(
                      AlgorithmConfiguration.TradingPairs,
                      AlgorithmConfiguration.CheckTime);
 
@@ -39,31 +40,31 @@ namespace SpreadShare.Algorithms.Implementations
                      return new BuyState(winner);
                  }
 
-                 return new NothingState<Self_PumpMmtm_AConfiguration>();
+                 return new NothingState<Config>();
              }
          }
 
         // Buys the highest performer, and moves into checkstate after HoldTime amount of hours
-         private class BuyState : State<Self_PumpMmtm_AConfiguration>
+         private class BuyState : State<Config>
          {
-            private OrderUpdate _buyorder;
-            private TradingPair _pair;
+             private readonly TradingPair _pair;
+             private OrderUpdate _buyorder;
 
-            public BuyState(TradingPair pair1)
+             public BuyState(TradingPair pair1)
             {
                  _pair = pair1;
             }
 
-            public override State<Self_PumpMmtm_AConfiguration> OnTimerElapsed()
+            public override State<Config> OnTimerElapsed()
             {
                 return new CheckState(_buyorder);
             }
 
-            protected override State<Self_PumpMmtm_AConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 _buyorder = trading.ExecuteFullMarketOrderBuy(_pair);
                 SetTimer(TimeSpan.FromHours(AlgorithmConfiguration.HoldTime));
-                return new NothingState<Self_PumpMmtm_AConfiguration>();
+                return new NothingState<Config>();
             }
          }
 
@@ -71,73 +72,73 @@ namespace SpreadShare.Algorithms.Implementations
         // If the current pair is still the best, it stays in the trade and waits an hour
         // If another pair is now the best, it switches to changestate
         // If no pairs are winners, it sells
-         private class CheckState : State<Self_PumpMmtm_AConfiguration>
+         private class CheckState : State<Config>
          {
-            private OrderUpdate _oldbuy;
+            private readonly OrderUpdate _oldBuy;
 
-            public CheckState(OrderUpdate buyorder)
+            public CheckState(OrderUpdate buyOrder)
             {
-                _oldbuy = buyorder;
+                _oldBuy = buyOrder;
             }
 
-            public override State<Self_PumpMmtm_AConfiguration> OnMarketCondition(DataProvider data)
+            public override State<Config> OnMarketCondition(DataProvider data)
             {
-                (var winner, var performance) = data.GetTopPerformance(
+                var (winner, performance) = data.GetTopPerformance(
                     AlgorithmConfiguration.TradingPairs,
                     AlgorithmConfiguration.CheckTime);
 
                 if (performance > (1 + AlgorithmConfiguration.Threshold)
                      &&
-                     winner != _oldbuy.Pair)
+                     winner != _oldBuy.Pair)
                 {
-                     return new SellState(_oldbuy);
+                     return new SellState(_oldBuy);
                 }
 
                 if (performance < (1 + AlgorithmConfiguration.Threshold))
                 {
-                     return new SellState(_oldbuy);
+                     return new SellState(_oldBuy);
                 }
 
-                return new IdleState(_oldbuy);
+                return new IdleState(_oldBuy);
             }
          }
 
         // If there are no winners, sell the current asset and moves back to scan for entries
-         private class SellState : State<Self_PumpMmtm_AConfiguration>
+         private class SellState : State<Config>
          {
-            private OrderUpdate _oldbuy;
+            private readonly OrderUpdate _oldBuy;
 
-            public SellState(OrderUpdate buyorder)
+            public SellState(OrderUpdate buyOrder)
             {
-                _oldbuy = buyorder;
+                _oldBuy = buyOrder;
             }
 
-            protected override State<Self_PumpMmtm_AConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
-                trading.ExecuteFullMarketOrderSell(_oldbuy.Pair);
+                trading.ExecuteFullMarketOrderSell(_oldBuy.Pair);
                 return new EntryState();
             }
          }
 
         // If the current pair is still the best, wait an hour and go back to checkstate
-         private class IdleState : State<Self_PumpMmtm_AConfiguration>
+         private class IdleState : State<Config>
          {
-            private OrderUpdate _oldbuy;
+            private readonly OrderUpdate _oldBuy;
 
-            public IdleState(OrderUpdate buyorder)
+            public IdleState(OrderUpdate buyOrder)
             {
-                _oldbuy = buyorder;
+                _oldBuy = buyOrder;
             }
 
-            public override State<Self_PumpMmtm_AConfiguration> OnTimerElapsed()
+            public override State<Config> OnTimerElapsed()
             {
-                return new CheckState(_oldbuy);
+                return new CheckState(_oldBuy);
             }
 
-            protected override State<Self_PumpMmtm_AConfiguration> Run(TradingProvider trading, DataProvider data)
+            protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 SetTimer(TimeSpan.FromHours(1));
-                return new NothingState<Self_PumpMmtm_AConfiguration>();
+                return new NothingState<Config>();
             }
          }
     }
@@ -148,17 +149,17 @@ namespace SpreadShare.Algorithms.Implementations
     internal class Self_PumpMmtm_AConfiguration : AlgorithmConfiguration
     {
         /// <summary>
-        /// Gets or sets how long back the algo checks in hours.
+        /// Gets or sets how long back the algorithm checks in hours.
         /// </summary>
         public double CheckTime { get; set; }
 
         /// <summary>
-        /// Gets or sets how long the algo needs to hold the best performer in hours.
+        /// Gets or sets how long the algorithm needs to hold the best performer in hours.
         /// </summary>
         public double HoldTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the minimum treshold a pair must have gained to pass the check in %, 10% is written as 0.10.
+        /// Gets or sets the minimum threshold a pair must have gained to pass the check in %, 10% is written as 0.10.
         /// </summary>
         public decimal Threshold { get; set; }
     }
