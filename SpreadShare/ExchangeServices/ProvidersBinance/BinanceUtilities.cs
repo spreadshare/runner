@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 using SpreadShare.Utilities;
-using OrderSide = SpreadShare.Models.OrderSide;
+using OrderSide = SpreadShare.Models.Trading.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance
 {

@@ -9,7 +9,7 @@ using SpreadShare.Tests.ExchangeServices;
 using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
-using OrderSide = SpreadShare.Models.OrderSide;
+using OrderSide = SpreadShare.Models.Trading.OrderSide;
 
 namespace SpreadShare.Tests.Algorithms
 {

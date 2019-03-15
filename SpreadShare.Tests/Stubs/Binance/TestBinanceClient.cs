@@ -9,6 +9,7 @@ using CryptoExchange.Net.Objects;
 using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using OrderSide = Binance.Net.Objects.OrderSide;
 
 namespace SpreadShare.Tests.Stubs.Binance
 {

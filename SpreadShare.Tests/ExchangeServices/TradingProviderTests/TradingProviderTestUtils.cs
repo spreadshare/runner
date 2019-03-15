@@ -62,8 +62,6 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
                 return new ResponseObject<OrderUpdate>(ResponseCode.Error);
             }
 
-            public override ResponseObject<OrderUpdate> GetOrderInfo(long orderId) => throw new NotImplementedException();
-
             public override void OnCompleted() => throw new NotImplementedException();
 
             public override void OnError(Exception error) => throw new NotImplementedException();

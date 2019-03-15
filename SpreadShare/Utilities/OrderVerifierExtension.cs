@@ -1,7 +1,7 @@
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
 using static SpreadShare.Models.Trading.OrderUpdate;
-using OrderSide = SpreadShare.Models.OrderSide;
+using OrderSide = SpreadShare.Models.Trading.OrderSide;
 
 namespace SpreadShare.Utilities
 {

@@ -526,24 +526,6 @@ namespace SpreadShare.ExchangeServices.Providers
             return query.Success;
         }
 
-        /// <summary>
-        /// Get the info of an order.
-        /// </summary>
-        /// <param name="pair">The TradingPair to consider.</param>
-        /// <param name="orderId">The order id related.</param>
-        /// <returns>OrderUpdate object containing the state of the order.</returns>
-        public OrderUpdate GetOrderInfo(TradingPair pair, long orderId)
-        {
-            Guard.Argument(pair).NotNull(nameof(pair));
-            var query = HelperMethods.RetryMethod(() => Implementation.GetOrderInfo(orderId), _logger);
-            if (query.Success)
-            {
-                return query.Data;
-            }
-
-            throw new ExchangeConnectionException(query.Message);
-        }
-
         /// <inheritdoc />
         public void Dispose()
         {

@@ -4,7 +4,7 @@ using Xunit;
 using Xunit.Abstractions;
 using static SpreadShare.Models.Trading.OrderUpdate.OrderStatus;
 using static SpreadShare.Models.Trading.OrderUpdate.OrderTypes;
-using OrderSide = SpreadShare.Models.OrderSide;
+using OrderSide = SpreadShare.Models.Trading.OrderSide;
 
 namespace SpreadShare.Tests.Models
 {
