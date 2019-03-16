@@ -26,15 +26,6 @@ namespace SpreadShare.SupportServices
             _sources = new List<IDisposable>();
             _logger = factory.CreateLogger(GetType());
             _database = database;
-            Session = new AlgorithmSession
-            {
-                Name = Configuration.Configuration.Instance.EnabledAlgorithm.Algorithm.Name,
-                CreatedTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                Active = true,
-            };
-
-            _database.Sessions.Add(Session);
-            _database.SaveChanges();
         }
 
         /// <summary>
@@ -44,14 +35,26 @@ namespace SpreadShare.SupportServices
         public static DatabaseEventListenerService Instance { get; private set; }
 
         /// <summary>
-        /// Gets the current database session.
+        /// Gets or sets the current database session.
         /// </summary>
-        public AlgorithmSession Session { get; }
+        private AlgorithmSession Session { get; set; }
 
         /// <summary>
         /// Lift the current instance to the static instance.
         /// </summary>
-        public void Bind() => Instance = this;
+        public void Bind()
+        {
+            Session = new AlgorithmSession
+            {
+                Name = Configuration.Configuration.Instance.EnabledAlgorithm.Algorithm.Name,
+                CreatedTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                Active = true,
+            };
+
+            _database.Sessions.Add(Session);
+            _database.SaveChanges();
+            Instance = this;
+        }
 
         /// <summary>
         /// Add a whose broadcasted order updates should be recorded as events.
@@ -75,6 +78,28 @@ namespace SpreadShare.SupportServices
                 OnNext,
                 () => { },
                 e => { })));
+        }
+
+        /// <summary>
+        /// Allows logs to be written to the database.
+        /// </summary>
+        /// <param name="logLevel">logLevel.</param>
+        /// <param name="state">state.</param>
+        /// <param name="exception">exception.</param>
+        /// <param name="formatter">formatter.</param>
+        /// <typeparam name="TState">TState.</typeparam>
+        public void Log<TState>(LogLevel logLevel, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            var item = new LogEvent()
+            {
+                LogLevel = logLevel,
+                Session = Session,
+                Text = formatter(state, exception),
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+            };
+
+            _database.LogEvents.Add(item);
+            _database.SaveChanges();
         }
 
         /// <inheritdoc />
