@@ -83,6 +83,9 @@ namespace SpreadShare
             // Add Sentry to ErrorLogging
             loggerFactory.AddProvider(new SentryLoggerProvider());
 
+            // Add DatabaseEventListener to log pipeline.
+            loggerFactory.AddProvider(new DatabaseEventLoggerProvider());
+
             // Download all currencies from Binance
             TradingPair.Sync(logger);
 
@@ -94,8 +97,11 @@ namespace SpreadShare
             }
             else
             {
-                // Setup event capture services
-                serviceProvider.GetService<DatabaseEventListenerService>().Bind();
+                if (Program.CommandLineArgs.Trading)
+                {
+                    // Setup event capture services
+                    serviceProvider.GetService<DatabaseEventListenerService>().Bind();
+                }
             }
         }
 

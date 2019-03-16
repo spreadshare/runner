@@ -12,8 +12,8 @@ using SpreadShare.SupportServices;
 namespace SpreadShare.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190313092428_FixDatabaseEvent")]
-    partial class FixDatabaseEvent
+    [Migration("20190315143904_LogEvents")]
+    partial class LogEvents
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -29,6 +29,10 @@ namespace SpreadShare.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<bool>("Active");
+
+                    b.Property<long>("ClosedTimestamp");
+
+                    b.Property<long>("CreatedTimestamp");
 
                     b.Property<string>("Name");
 
@@ -96,6 +100,26 @@ namespace SpreadShare.Migrations
                     b.ToTable("Candles");
                 });
 
+            modelBuilder.Entity("SpreadShare.Models.Database.LogEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("LogLevel");
+
+                    b.Property<int?>("SessionId");
+
+                    b.Property<string>("Text");
+
+                    b.Property<long>("Timestamp");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId");
+
+                    b.ToTable("LogEvents");
+                });
+
             modelBuilder.Entity("SpreadShare.Models.Database.OrderEvent", b =>
                 {
                     b.Property<long>("Id")
@@ -156,6 +180,13 @@ namespace SpreadShare.Migrations
                     b.HasIndex("SessionId");
 
                     b.ToTable("StateSwitchEvents");
+                });
+
+            modelBuilder.Entity("SpreadShare.Models.Database.LogEvent", b =>
+                {
+                    b.HasOne("SpreadShare.Models.Database.AlgorithmSession", "Session")
+                        .WithMany()
+                        .HasForeignKey("SessionId");
                 });
 
             modelBuilder.Entity("SpreadShare.Models.Database.OrderEvent", b =>

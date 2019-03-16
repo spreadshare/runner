@@ -45,6 +45,11 @@ namespace SpreadShare.SupportServices
         public DbSet<AlgorithmSession> Sessions { get; set; }
 
         /// <summary>
+        /// Gets or sets the log events.
+        /// </summary>
+        public DbSet<LogEvent> LogEvents { get; set; }
+
+        /// <summary>
         /// Callback that sets a composite key on <see cref="BacktestingCandle"/>.
         /// </summary>
         /// <param name="modelBuilder">Provided model builder.</param>
