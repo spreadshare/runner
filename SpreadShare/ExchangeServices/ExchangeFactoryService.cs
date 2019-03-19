@@ -105,7 +105,7 @@ namespace SpreadShare.ExchangeServices
                     throw new ArgumentOutOfRangeException(nameof(algorithmConfiguration));
             }
 
-            DatabaseEventListenerService.Instance?.AddDataSource(container.TradingProvider);
+            DatabaseEventListenerService.Instance?.AddOrderSource(container.TradingProvider);
             return container;
         }
 

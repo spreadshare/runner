@@ -11,27 +11,23 @@ namespace SpreadShare.Models.Database
         /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
         /// </summary>
         /// <param name="timestamp">Timestamp.</param>
-        /// <param name="from">Origin state.</param>
-        /// <param name="to">Goal state.</param>
-        public StateSwitchEvent(long timestamp, string from, string to)
+        /// <param name="name">Goal state.</param>
+        public StateSwitchEvent(long timestamp, string name)
         {
             Timestamp = timestamp;
-            From = from;
-            To = to;
+            Name = name;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
         /// </summary>
         /// <param name="timestamp">Timestamp.</param>
-        /// <param name="from">Origin state.</param>
-        /// <param name="to">Goal state.</param>
+        /// <param name="name">Goal state.</param>
         /// <param name="session">The current session.</param>
-        public StateSwitchEvent(long timestamp, string from, string to, AlgorithmSession session)
+        public StateSwitchEvent(long timestamp, string name, AlgorithmSession session)
         {
             Timestamp = timestamp;
-            From = from;
-            To = to;
+            Name = name;
             Session = session;
         }
 
@@ -47,14 +43,9 @@ namespace SpreadShare.Models.Database
         public long Timestamp { get; set; }
 
         /// <summary>
-        /// Gets or sets the state from which was switched.
-        /// </summary>
-        public string From { get; set; }
-
-        /// <summary>
         /// Gets or sets the state to which was switched.
         /// </summary>
-        public string To { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Get a header matching the format of the CSV representation.
@@ -65,8 +56,7 @@ namespace SpreadShare.Models.Database
         {
             return $"{nameof(Id)}{delimiter}" +
                    $"{nameof(Timestamp)}{delimiter}" +
-                   $"{nameof(From)}{delimiter}" +
-                   $"{nameof(To)}";
+                   $"{nameof(Name)}{delimiter}";
         }
 
         /// <inheritdoc />
@@ -80,8 +70,7 @@ namespace SpreadShare.Models.Database
         {
             return $"{Id}{delimiter}" +
                    $"{Timestamp}{delimiter}" +
-                   $"{From}{delimiter}" +
-                   $"{To}";
+                   $"{Name}{delimiter}";
         }
     }
 }
