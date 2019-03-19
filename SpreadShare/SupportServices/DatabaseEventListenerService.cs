@@ -60,7 +60,7 @@ namespace SpreadShare.SupportServices
         /// Add a whose broadcasted order updates should be recorded as events.
         /// </summary>
         /// <param name="source">The broadcaster of order updates.</param>
-        public void AddDataSource(Observable<OrderUpdate> source)
+        public void AddOrderSource(Observable<OrderUpdate> source)
         {
             _sources.Add(source.Subscribe(new ConfigurableObserver<OrderUpdate>(
                 OnNext,
@@ -72,9 +72,9 @@ namespace SpreadShare.SupportServices
         /// Add whose broadcasted state switches should be recorded as events.
         /// </summary>
         /// <param name="source">The broadcaster of state switches.</param>
-        public void AddDataSource(Observable<(Type, Type)> source)
+        public void AddStateSource(Observable<Type> source)
         {
-            _sources.Add(source.Subscribe(new ConfigurableObserver<(Type, Type)>(
+            _sources.Add(source.Subscribe(new ConfigurableObserver<Type>(
                 OnNext,
                 () => { },
                 e => { })));
@@ -90,7 +90,7 @@ namespace SpreadShare.SupportServices
         /// <typeparam name="TState">TState.</typeparam>
         public void Log<TState>(LogLevel logLevel, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            var item = new LogEvent()
+            var item = new LogEvent
             {
                 LogLevel = logLevel,
                 Session = Session,
@@ -116,13 +116,11 @@ namespace SpreadShare.SupportServices
             _database.SaveChanges();
         }
 
-        private void OnNext((Type, Type) stateSwitch)
+        private void OnNext(Type stateSwitch)
         {
-            var (from, to) = stateSwitch;
             var item = new StateSwitchEvent(
                 DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                from.Name,
-                to.Name,
+                stateSwitch.Name,
                 Session);
             _database.StateSwitchEvents.Add(item);
             _database.SaveChanges();

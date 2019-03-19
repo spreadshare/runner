@@ -49,7 +49,7 @@ namespace SpreadShare.Algorithms
         private void Start(T configuration, ExchangeProvidersContainer container)
         {
             StateManager = new StateManager<T>(configuration, container, Initial);
-            DatabaseEventListenerService.Instance?.AddDataSource(StateManager);
+            DatabaseEventListenerService.Instance?.AddStateSource(StateManager);
             container.TimerProvider.RunPeriodicTimer();
         }
     }

@@ -12,7 +12,7 @@ namespace SpreadShare.Algorithms
     /// Object managing the active state and related resources.
     /// </summary>
     /// <typeparam name="T">The type of the parent algorithm configuration.</typeparam>
-    internal sealed class StateManager<T> : Observable<(Type, Type)>, IDisposable
+    internal sealed class StateManager<T> : Observable<Type>, IDisposable
         where T : AlgorithmConfiguration
     {
         private readonly object _lock = new object();
@@ -104,6 +104,8 @@ namespace SpreadShare.Algorithms
 
             _active = true;
 
+            UpdateObservers(initial.GetType());
+
             // Setup initial state
             _activeState = initial;
             SwitchState(_activeState.Activate(AlgorithmConfiguration, Container, _loggerFactory));
@@ -194,7 +196,7 @@ namespace SpreadShare.Algorithms
                 }
 
                 // Add state switch event to the database
-                UpdateObservers((_activeState.GetType(), child.GetType()));
+                UpdateObservers(child.GetType());
 
                 _activeState = child;
 
