@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
@@ -205,6 +206,7 @@ namespace SpreadShare.Algorithms
                 if (!(next is NothingState<T>))
                 {
                     _logger.LogDebug($"Sleeping {(int)_configuration.CandleWidth} to prevent rapid trading.");
+                    Thread.Sleep((int)TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth).TotalMilliseconds);
                     SwitchState(next);
                 }
             }
