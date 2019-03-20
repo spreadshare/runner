@@ -12,6 +12,7 @@ namespace SpreadShare.SupportServices
     /// </summary>
     internal class DatabaseEventListenerService : IDisposable
     {
+        private static readonly object __lock = new object();
         private readonly List<IDisposable> _sources;
         private readonly ILogger _logger;
         private readonly DatabaseContext _database;
@@ -25,7 +26,10 @@ namespace SpreadShare.SupportServices
         {
             _sources = new List<IDisposable>();
             _logger = factory.CreateLogger(GetType());
-            _database = database;
+            lock (__lock)
+            {
+                _database = database;
+            }
         }
 
         /// <summary>
@@ -51,8 +55,12 @@ namespace SpreadShare.SupportServices
                 Active = true,
             };
 
-            _database.Sessions.Add(Session);
-            _database.SaveChanges();
+            lock (__lock)
+            {
+                _database.Sessions.Add(Session);
+                _database.SaveChanges();
+            }
+
             Instance = this;
         }
 
@@ -98,8 +106,11 @@ namespace SpreadShare.SupportServices
                 Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
             };
 
-            _database.LogEvents.Add(item);
-            _database.SaveChanges();
+            lock (__lock)
+            {
+                _database.LogEvents.Add(item);
+                _database.SaveChanges();
+            }
         }
 
         /// <inheritdoc />
@@ -112,8 +123,11 @@ namespace SpreadShare.SupportServices
         private void OnNext(OrderUpdate order)
         {
             var item = new OrderEvent(order, DateTimeOffset.Now.ToUnixTimeMilliseconds(), Session);
-            _database.OrderEvents.Add(item);
-            _database.SaveChanges();
+            lock (__lock)
+            {
+                _database.OrderEvents.Add(item);
+                _database.SaveChanges();
+            }
         }
 
         private void OnNext(Type stateSwitch)
@@ -122,8 +136,12 @@ namespace SpreadShare.SupportServices
                 DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 stateSwitch.Name,
                 Session);
-            _database.StateSwitchEvents.Add(item);
-            _database.SaveChanges();
+
+            lock (__lock)
+            {
+                _database.StateSwitchEvents.Add(item);
+                _database.SaveChanges();
+            }
         }
 
         private void Dispose(bool disposing)
@@ -138,7 +156,11 @@ namespace SpreadShare.SupportServices
                 _logger.LogInformation($"Deactivating session '{Session.Name}'");
                 Session.Active = false;
                 Session.ClosedTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                _database.SaveChanges();
+
+                lock (__lock)
+                {
+                    _database.SaveChanges();
+                }
             }
         }
     }
