@@ -1,15 +1,6 @@
 version: '3.4'
 
 services:
-  # zeromq:
-  #   build:
-  #     context: zeromq
-  #     dockerfile: Dockerfile
-  #   entrypoint: python
-  #   command: -u zeromq.py
-  #   depends_on: 
-  #     - spreadshare
-
   spreadshare:
     image: ${DOCKER_REGISTRY}spreadshare
     build:
@@ -21,19 +12,6 @@ services:
       - ./backtesting-output:/app/backtesting-output # Path-based volume
     tty: true
     stdin_open: true
-
-  # datapump:
-  #  build:
-  #    context: DataPump
-  #    dockerfile: Dockerfile
-  #  entrypoint: python
-  #  command: -u datapump.py
-  #  env_file:
-  #    - .env
-  #  depends_on: 
-  #    - db
-  #  volumes:
-  #    - ./DataPump/input-data:/app/input-data # Path-based volume
 
   db:
     image: "postgres"

@@ -166,36 +166,6 @@ namespace SpreadShare.ExchangeServices.Providers
                 : throw new ExchangeConnectionException(query.Message);
         }
 
-        // Will be removed soon
-        #pragma warning disable CA1822, CA1801, SA1204
-        /// <summary>
-        /// Calculate the Average True Range (ATR) of certain pair given a number of candles, and a number
-        /// of chunks they ought to be split in.
-        /// </summary>
-        /// <param name="pair">TradingPair to consider.</param>
-        /// <param name="candlesBack">The number of candles to use (must be a multiple of <see param="chunks"/>.</param>
-        /// <param name="chunks">The number of chunks to divide the candles in before calculating the ATR.</param>
-        /// <returns>The ATR value.</returns>
-        public static decimal GetAverageTrueRange(TradingPair pair, int candlesBack, int chunks = 5)
-        {
-            throw new Exception("Thanks I deprecated!");
-        }
-
-        /// <summary>
-        /// Gets the Standard Moving Average (SMA) of a given pair, using a certain number of intervals, lasting a certain
-        /// number of minutes.
-        /// </summary>
-        /// <param name="pair">The pair to calculate the SMA over.</param>
-        /// <param name="candlesPerInterval">The number of minutes one interval should last.</param>
-        /// <param name="numberOfIntervals">The number of intervals to consider.</param>
-        /// <param name="intervalOffset">how many intervals offset (into the past).</param>
-        /// <returns>The Standard Moving Average.</returns>
-        public static decimal GetStandardMovingAverage(TradingPair pair, int candlesPerInterval, int numberOfIntervals, int intervalOffset = 0)
-        {
-            throw new Exception("Thanks, I deprecated!");
-        }
-        #pragma warning restore CA1822, CA1801, SA1204
-
         /// <summary>
         /// Gets a value estimation of a portfolio.
         /// </summary>
