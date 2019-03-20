@@ -205,8 +205,13 @@ namespace SpreadShare.Algorithms
                 var next = _activeState.Activate(AlgorithmConfiguration, Container, _loggerFactory);
                 if (!(next is NothingState<T>))
                 {
-                    _logger.LogDebug($"Sleeping {(int)_configuration.CandleWidth} to prevent rapid trading.");
-                    Thread.Sleep((int)TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth).TotalMilliseconds);
+                    if (Program.CommandLineArgs.Trading)
+                    {
+                        _logger.LogDebug($"Sleeping {(int)_configuration.CandleWidth} to prevent rapid trading.");
+                        Thread.Sleep((int)TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth)
+                            .TotalMilliseconds);
+                    }
+
                     SwitchState(next);
                 }
             }
