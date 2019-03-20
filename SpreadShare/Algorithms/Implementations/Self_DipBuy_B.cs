@@ -33,7 +33,12 @@ namespace SpreadShare.Algorithms.Implementations
                 bool dip = data.GetCandles(FirstPair, 3).RateOfChange()
                                        >
                            AlgorithmConfiguration.DipPercent;
-                if (dip)
+
+                bool atrDeviation = data.GetCandles(FirstPair, 5).AverageTrueRange()
+                                    >
+                                    data.GetCandles(FirstPair, 25).AverageTrueRange();
+
+                if (dip && atrDeviation)
                 {
                     return new BuyState();
                 }
