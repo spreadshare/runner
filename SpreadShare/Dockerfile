@@ -1,8 +1,8 @@
 FROM microsoft/dotnet:2.2-sdk AS publish
 WORKDIR /src
 
-COPY SpreadShare/SpreadShare.csproj SpreadShare/
-RUN dotnet restore SpreadShare/SpreadShare.csproj
+COPY SpreadShare.csproj SpreadShare/
+RUN dotnet restore SpreadShare.csproj
 COPY . .
 WORKDIR /src/SpreadShare
 RUN dotnet publish SpreadShare.csproj -c Release -o /app
