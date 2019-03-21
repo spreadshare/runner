@@ -4,7 +4,7 @@ services:
   spreadshare:
     image: ${DOCKER_REGISTRY}spreadshare
     build:
-      context: SpreadShare
+      context: .
     depends_on:
       - db
     volumes:
