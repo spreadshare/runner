@@ -4,8 +4,7 @@ services:
   spreadshare:
     image: ${DOCKER_REGISTRY}spreadshare
     build:
-      context: .
-      dockerfile: SpreadShare/Dockerfile
+      context: SpreadShare
     depends_on:
       - db
     volumes:
