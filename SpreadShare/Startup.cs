@@ -94,6 +94,10 @@ namespace SpreadShare
             if (!service.Migrate().Success)
             {
                 logger.LogWarning("Could not migrate database.");
+                if (Program.CommandLineArgs.Migrate)
+                {
+                    Program.ExitProgramWithCode(ExitCode.MigrationFailure);
+                }
             }
             else
             {
@@ -101,6 +105,10 @@ namespace SpreadShare
                 {
                     // Setup event capture services
                     serviceProvider.GetService<DatabaseEventListenerService>().Bind();
+                }
+                else if (Program.CommandLineArgs.Migrate)
+                {
+                    Program.ExitProgramWithCode(ExitCode.Success);
                 }
             }
         }

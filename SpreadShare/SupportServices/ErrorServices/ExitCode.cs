@@ -71,5 +71,10 @@ namespace SpreadShare.SupportServices.ErrorServices
         /// Exceptions kept being generated, even after retrying.
         /// </summary>
         ConsecutiveExceptionFailure = 12,
+
+        /// <summary>
+        /// The database could not be migrated.
+        /// </summary>
+        MigrationFailure = 13,
     }
 }

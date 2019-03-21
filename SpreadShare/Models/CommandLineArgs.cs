@@ -20,6 +20,12 @@ namespace SpreadShare.Models
         public bool Backtesting { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the --migrate flag was used. mutually exclusive with --trading and --backtest.
+        /// </summary>
+        [Option("migrate", Default = false, Required = true, SetName = "migrate", HelpText = "Ensure the database is migrated, then shut down.")]
+        public bool Migrate { get; set; }
+
+        /// <summary>
         /// Gets or sets the filepath of the configuration JSON.
         /// </summary>
         [Option("configpath", Default = "appsettings.yaml", HelpText = "The path to the configuration.yaml file")]
