@@ -22,7 +22,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesNull()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveMinutes
             ";
@@ -36,7 +35,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesCorrectAmountAllIdentity()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveMinutes
             ";
@@ -50,7 +48,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesCorrectAmountPartialIdentity()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveMinutes
             ";
@@ -64,7 +61,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesCorrectAmountAll()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveteenMinutes
             ";
@@ -78,7 +74,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesCorrectAmountPartial()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveteenMinutes
             ";
@@ -92,7 +87,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesNoPivotThirtyMinutes()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: ThirtyMinutes
             ";
@@ -107,7 +101,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesNoPivotFiveteenMinutes()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveteenMinutes
             ";
@@ -124,7 +117,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesOne()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveteenMinutes
             ";
@@ -138,7 +130,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesMultiple()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveteenMinutes
             ";
@@ -154,7 +145,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void GetCustomCandlesIdentity()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveMinutes
             ";

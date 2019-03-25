@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpreadShare.ExchangeServices;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
@@ -21,11 +19,6 @@ namespace SpreadShare.SupportServices.Configuration
     internal class AlgorithmConfiguration
     {
         // ###      YAML MEMBERS      ###
-        [YamlMember(Alias = "Exchange")]
-        [Required]
-        [ParsesToEnum(typeof(Exchange))]
-        public string __exchange { get; protected set; }
-
         [YamlMember(Alias = "TradingPairs")]
         [Required]
         [NotEmpty]
@@ -33,7 +26,6 @@ namespace SpreadShare.SupportServices.Configuration
         public List<string> __tradingPairs { get; protected set; }
 
         // ###    PRIVATE PARSERS    ###
-        private readonly LazyCache<string, Exchange> _exchangeConstructor = new LazyCache<string, Exchange>(Enum.Parse<Exchange>);
         private readonly LazyCache<List<string>, List<TradingPair>> _activeTradingPairsConstructor = new LazyCache<List<string>, List<TradingPair>>(x => x.Select(TradingPair.Parse).ToList());
         private readonly LazyCache<List<TradingPair>, Currency> _baseCurrencyConstructor = new LazyCache<List<TradingPair>, Currency>(
             x =>
@@ -47,11 +39,6 @@ namespace SpreadShare.SupportServices.Configuration
             });
 
         // ###    PUBLIC PARSED PROPERTIES ###
-
-        /// <summary>
-        /// Gets the exchange at which the algorithm operates.
-        /// </summary>
-        public Exchange Exchange => _exchangeConstructor.Value(__exchange);
 
         /// <summary>
         /// Gets or sets the candle width this algorithm works with.

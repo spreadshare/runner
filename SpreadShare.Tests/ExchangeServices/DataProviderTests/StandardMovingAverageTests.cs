@@ -22,7 +22,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void StandardMovingAverageSingleCandle()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveMinutes
             ";
@@ -37,7 +36,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void StandardMovingAverageFourCandles()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveteenMinutes
             ";

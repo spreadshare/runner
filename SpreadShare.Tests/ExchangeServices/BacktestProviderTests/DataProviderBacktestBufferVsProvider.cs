@@ -24,7 +24,6 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         public void HighestHighIsMaximumOfCandleHighs()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveMinutes
             ";
@@ -40,7 +39,6 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         public void LowestLowIsMaximumOfCandleLows()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveMinutes
             ";

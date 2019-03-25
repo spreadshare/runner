@@ -88,10 +88,10 @@ namespace SpreadShare.ExchangeServices
                     $"Cannot build container for {typeof(T).Name} using a {algorithmConfiguration.GetType().Name} object");
             }
 
-            var allocationManager = _allocationManager.GetWeakAllocationManager(typeof(T), algorithmConfiguration.Exchange);
+            var allocationManager = _allocationManager.GetWeakAllocationManager(typeof(T), Configuration.Instance.EnabledAlgorithm.Exchange);
 
             ExchangeProvidersContainer container = null;
-            switch (algorithmConfiguration.Exchange)
+            switch (Configuration.Instance.EnabledAlgorithm.Exchange)
             {
                 case Exchange.Binance:
                     container = BuildBinanceContainer<T>(algorithmConfiguration, allocationManager);
