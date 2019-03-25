@@ -156,9 +156,13 @@ namespace SpreadShare.ExchangeServices.Providers
                         return new ResponseObject<OrderUpdate>(ResponseCode.Error, attempt.Message);
                     }, _logger);
 
-                return orderQuery.Success
-                    ? WaitForOrderStatus(orderQuery.Data.OrderId, OrderUpdate.OrderStatus.Filled)
-                    : throw new OrderFailedException(orderQuery.Message);
+                if (orderQuery.Success)
+                {
+                    _openOrders.Add(orderQuery.Data.OrderId, orderQuery.Data);
+                    return WaitForOrderStatus(orderQuery.Data.OrderId, OrderUpdate.OrderStatus.Filled);
+                }
+
+                throw new OrderFailedException(orderQuery.Message);
             });
 
             if (!result.Success)
@@ -193,9 +197,13 @@ namespace SpreadShare.ExchangeServices.Providers
                 var orderQuery = HelperMethods.RetryMethod(
                     () => Implementation.ExecuteMarketOrder(pair, OrderSide.Sell, quantity, TradeId), _logger);
 
-                return orderQuery.Success
-                    ? WaitForOrderStatus(orderQuery.Data.OrderId, OrderUpdate.OrderStatus.Filled)
-                    : throw new OrderFailedException(orderQuery.Message);
+                if (orderQuery.Success)
+                {
+                    _openOrders.Add(orderQuery.Data.OrderId, orderQuery.Data);
+                    return WaitForOrderStatus(orderQuery.Data.OrderId, OrderUpdate.OrderStatus.Filled);
+                }
+
+                throw new OrderFailedException(orderQuery.Message);
             });
 
             if (!result.Success)
@@ -560,9 +568,9 @@ namespace SpreadShare.ExchangeServices.Providers
 
         private void HandleOrderUpdate(OrderUpdate order)
         {
-            if (!_openOrders.ContainsKey(order.OrderId) && order.OrderType != OrderUpdate.OrderTypes.Market)
+            if (!_openOrders.ContainsKey(order.OrderId))
             {
-                _logger.LogWarning($"Observed order {order.OrderId} as {order.Status} but the order was not tracked");
+                _logger.LogDebug($"Observed order {order.OrderId} as {order.Status}, but the order does not belong to me.");
                 return;
             }
 
