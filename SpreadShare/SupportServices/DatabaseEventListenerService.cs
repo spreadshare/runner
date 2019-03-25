@@ -52,6 +52,7 @@ namespace SpreadShare.SupportServices
             {
                 Name = Configuration.Configuration.Instance.EnabledAlgorithm.Algorithm.Name,
                 CreatedTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                ContainerId = Environment.MachineName,
                 Active = true,
             };
 
