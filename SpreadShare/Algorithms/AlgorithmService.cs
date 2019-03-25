@@ -64,7 +64,7 @@ namespace SpreadShare.Algorithms
             }
 
             // Prevent starting real deployment without flag.
-            if (configuration.Exchange != Exchange.Backtesting && !Program.CommandLineArgs.Trading)
+            if (Configuration.Instance.EnabledAlgorithm.Exchange != Exchange.Backtesting && !Program.CommandLineArgs.Trading)
             {
                 throw new PermissionDeniedException($"Cannot deploy {typeof(T).Name} on non trading mode.");
             }
@@ -84,7 +84,7 @@ namespace SpreadShare.Algorithms
             }
 
             // Run backtest asynchronously by awaiting the timer.
-            if (configuration.Exchange == Exchange.Backtesting)
+            if (Configuration.Instance.EnabledAlgorithm.Exchange == Exchange.Backtesting)
             {
                 if (container.TimerProvider is BacktestTimerProvider backtestTimer)
                 {
@@ -104,7 +104,7 @@ namespace SpreadShare.Algorithms
                 else
                 {
                     throw new InvalidStateException(
-                        $"Error starting {typeof(T).Name}, configuration defined exchange as {configuration.Exchange}, " +
+                        $"Error starting {typeof(T).Name}, configuration defined exchange as {Configuration.Instance.EnabledAlgorithm.Exchange}, " +
                         $"but the container did not contain a {typeof(ExchangeTimerProvider).Name}");
                 }
             }

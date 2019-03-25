@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpreadShare.Algorithms;
+using SpreadShare.ExchangeServices;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using SpreadShare.Utilities;
@@ -21,6 +22,11 @@ namespace SpreadShare.SupportServices.Configuration
         private readonly LazyCache<string, CandleWidth> _candleWidthConstructor =
             new LazyCache<string, CandleWidth>(Enum.Parse<CandleWidth>);
 
+        [YamlMember(Alias = "CandleWidth")]
+        [Required]
+        [ParsesToEnum(typeof(CandleWidth))]
+        public string __candleWidth { get; private set; }
+
         [Required]
         public ConnectionStrings ConnectionStrings { get; private set; }
 
@@ -31,11 +37,6 @@ namespace SpreadShare.SupportServices.Configuration
 
         [Required]
         public BacktestSettings BacktestSettings { get; private set; }
-
-        [YamlMember(Alias = "CandleWidth")]
-        [Required]
-        [ParsesToEnum(typeof(CandleWidth))]
-        public string __candleWidth { get; private set; }
 
         public EnabledAlgorithm EnabledAlgorithm { get; private set; }
 
@@ -117,6 +118,9 @@ namespace SpreadShare.SupportServices.Configuration
         private readonly LazyCache<string, Type> _enabledAlgorithmConstructor =
             new LazyCache<string, Type>(x => Reflections.AllAlgorithms.First(a => a.Name == x));
 
+        private readonly LazyCache<string, Exchange> _exchangeConstructor =
+            new LazyCache<string, Exchange>(Enum.Parse<Exchange>);
+
         public Type Algorithm => _enabledAlgorithmConstructor.Value(__algorithm);
 
         [Required]
@@ -124,9 +128,16 @@ namespace SpreadShare.SupportServices.Configuration
         [IsImplementation(typeof(IBaseAlgorithm))]
         public string __algorithm { get; private set; }
 
+        [YamlMember(Alias = "Exchange")]
+        [Required]
+        [ParsesToEnum(typeof(Exchange))]
+        public string __exchange { get; private set; }
+
         [Required]
         [RangeDecimal("0", "1")]
         public decimal Allocation { get; private set; }
+
+        public Exchange Exchange => _exchangeConstructor.Value(__exchange);
 
         /// <summary>
         /// Convert EnabledAlgorithms to dict of algorithm and allocation.

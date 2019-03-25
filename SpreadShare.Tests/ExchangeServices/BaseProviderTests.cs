@@ -23,7 +23,6 @@ namespace SpreadShare.Tests.ExchangeServices
 
         private const string AlgorithmSettingsSource =
         @"
-           Exchange: Binance
            TradingPairs: [ EOSETH ]
            CandleWidth: FiveMinutes
         ";

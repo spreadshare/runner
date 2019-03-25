@@ -23,7 +23,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void AverageTrueRangeSingleEdge()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: TwentyFiveMinutes
             ";
@@ -38,7 +37,6 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void AverageTrueRangeMultipleEdges()
         {
             const string source = @"
-               Exchange: Binance
                TradingPairs: [EOSETH]
                CandleWidth: FiveteenMinutes
             ";

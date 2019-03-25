@@ -137,9 +137,9 @@ namespace SpreadShare
             }
 
             // Cancel backtesting configurations when trading
-            if (algorithmConfiguration.Exchange == Exchange.Backtesting)
+            if (Configuration.Instance.EnabledAlgorithm.Exchange == Exchange.Backtesting)
             {
-                logger.LogError($"Algorithm {algorithm.Name} has exchange Backtesting configured, " +
+                logger.LogError($"Application {algorithm.Name} has exchange Backtesting configured, " +
                                 "but --trading is used");
                 ExitProgramWithCode(ExitCode.InvalidConfiguration);
                 return;
@@ -171,6 +171,14 @@ namespace SpreadShare
 
             // Init backtest execution engine
             serviceProvider.GetService<BacktestDaemonService>().Bind();
+
+            if (CommandLineArgs.Backtesting && Configuration.Instance.EnabledAlgorithm.Exchange != Exchange.Backtesting)
+            {
+                ILogger logger = _loggerFactory.CreateLogger("Program.cs:ExecuteBacktestingLogic");
+                logger.LogError($"Application was started in backtest mode, but the configuration " +
+                                $"has {Configuration.Instance.EnabledAlgorithm.Exchange} configured");
+                ExitProgramWithCode(ExitCode.InvalidConfiguration);
+            }
 
             // Accept TTY input
             serviceProvider.GetService<BacktestDaemonService>().Run();

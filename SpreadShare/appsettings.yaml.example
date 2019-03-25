@@ -10,6 +10,7 @@ LoggingSettings:
 EnabledAlgorithm:
     Algorithm: TemplateAlgorithm
     Allocation: 1
+    Exchange: Binance
 
 # Trading: Settings for communication with Binance
 BinanceClientSettings:
