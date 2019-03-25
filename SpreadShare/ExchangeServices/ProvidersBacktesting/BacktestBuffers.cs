@@ -165,7 +165,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             // Skip the last few candles that cannot be compressed.
             int excess = candles.Length % ratio;
-            return DataProviderUtilities.CompressCandles(candles.SkipLast(excess).ToArray(), ratio);
+
+            // Compress the candles with the ascending flag
+            return DataProviderUtilities.CompressCandles(candles.SkipLast(excess).ToArray(), ratio, true);
         }
 
         /// <summary>

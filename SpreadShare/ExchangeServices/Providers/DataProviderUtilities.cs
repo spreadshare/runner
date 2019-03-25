@@ -18,10 +18,12 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="input">The collection of candles to compress.</param>
         /// <param name="compressionRatio">The reducing ratio. (e.g. 2 -> 10 candles become 5 candles.</param>
+        /// <param name="ascending">Whether or not the candles are ordered from old to new.</param>
         /// <returns>An array of candles.</returns>
         public static BacktestingCandle[] CompressCandles(
             BacktestingCandle[] input,
-            int compressionRatio)
+            int compressionRatio,
+            bool ascending = false)
         {
             Guard.Argument(compressionRatio)
                 .NotZero()
@@ -40,8 +42,9 @@ namespace SpreadShare.ExchangeServices.Providers
             Parallel.For(0, result.Length, index =>
             {
                 var subset = input.Skip(index * compressionRatio).Take(compressionRatio).ToList();
-                var first = subset[subset.Count - 1];
-                var last = subset[0];
+                var first = ascending ? subset[0] : subset[subset.Count - 1];
+                var last = ascending ? subset[subset.Count - 1] : subset[0];
+
                 result[index] = new BacktestingCandle(
                     timestamp: first.Timestamp,
                     open: first.Open,
