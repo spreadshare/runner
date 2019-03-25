@@ -24,6 +24,11 @@ namespace SpreadShare.Models.Database
         public string Name { get; set; }
 
         /// <summary>
+        /// Gets or sets the id of the docker container this session was started in.
+        /// </summary>
+        public string ContainerId { get; set; }
+
+        /// <summary>
         /// Gets or sets the timestamp at which the session was created.
         /// </summary>
         public long CreatedTimestamp { get; set; }
