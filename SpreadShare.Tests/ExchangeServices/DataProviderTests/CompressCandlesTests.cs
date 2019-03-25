@@ -35,6 +35,32 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         }
 
         [Fact]
+        public void CompressCandlesAscendingHappyFlow()
+        {
+            var input = GetFiveMinuteCandles(10).Reverse().ToArray();
+            decimal inputHigh = input.Max(x => x.High);
+            decimal inputLow = input.Min(x => x.Low);
+            decimal inputOpen = input[0].Open;
+            decimal inputClose = input[input.Length - 1].Close;
+
+            var output = DataProviderUtilities.CompressCandles(input, 2, true);
+            Assert.Equal(10, input.Length);
+            Assert.Equal(5, output.Length);
+            Assert.Equal(inputHigh, output.Max(x => x.High));
+            Assert.Equal(inputLow, output.Min(x => x.Low));
+            Assert.Equal(inputOpen, output[0].Open);
+            Assert.Equal(inputClose, output[output.Length - 1].Close);
+
+            // Assert that the interval has doubled and is ascending.
+            long startTime = input[0].Timestamp;
+            foreach (var candle in output)
+            {
+                Assert.Equal(startTime, candle.Timestamp);
+                startTime += 600000L;
+            }
+        }
+
+        [Fact]
         public void CompressCandlesSimpleCase()
         {
             var input = GetFiveMinuteCandles(2);
