@@ -112,6 +112,16 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
+        public void BalanceCompareOneSmaller()
+        {
+            var currency = new Currency("ETH");
+            Balance a = new Balance(currency, 4, 2);
+            Balance b = new Balance(currency, 1, 3);
+            Assert.True(a < b);
+            Assert.True(b < a);
+        }
+
+        [Fact]
         public void DifferentCurrencyOperations()
         {
             Balance left = new Balance(new Currency("ETH"), 0, 0);

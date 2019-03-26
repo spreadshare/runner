@@ -87,7 +87,7 @@ namespace SpreadShare.ExchangeServices.Allocation
             }
 
             _allocation = initialAllocation;
-            _logger.LogInformation("Configured AllocationManager");
+            _logger.LogInformation($"Configured AllocationManager with {JsonConvert.SerializeObject(_allocation)}");
             UpdateObservers(_allocation);
         }
 

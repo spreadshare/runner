@@ -65,7 +65,12 @@ namespace SpreadShare.Models.Trading
         /// <returns>A zero initiated balance object.</returns>
         public static Balance Empty(Currency c) => new Balance(c, 0.0M, 0.0M);
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Compares two balances, a balance is smaller if either locked or free is smaller.
+        /// </summary>
+        /// <param name="other">The balance to compare to.</param>
+        /// <returns>Compare value.</returns>
+        /// <exception cref="InvalidOperationException">When balances with different symbols are compared.</exception>
         public int CompareTo(Balance other)
         {
             if (Symbol != other.Symbol)
@@ -73,13 +78,17 @@ namespace SpreadShare.Models.Trading
                 throw new InvalidOperationException($"Cannot compare two balances with different symbols: {this} and {other}");
             }
 
-            var freeComparison = Free.CompareTo(other.Free);
-            if (freeComparison != 0)
+            if (Free < other.Free || Locked < other.Locked)
             {
-                return freeComparison;
+                return -1;
             }
 
-            return Locked.CompareTo(other.Locked);
+            if (Free == other.Free && Locked == other.Locked)
+            {
+                return 0;
+            }
+
+            return 1;
         }
 
         /// <inheritdoc />
