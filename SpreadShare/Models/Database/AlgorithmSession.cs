@@ -1,11 +1,14 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
+using SpreadShare.Models.Trading;
 
 namespace SpreadShare.Models.Database
 {
     /// <summary>
     /// Defines the session of the current instance.
     /// </summary>
-    public class AlgorithmSession
+    internal class AlgorithmSession
     {
         /// <summary>
         /// Gets or sets the ID of the algorithm session.
@@ -37,5 +40,20 @@ namespace SpreadShare.Models.Database
         /// Gets or sets the timestamp at which the session was closed.
         /// </summary>
         public long ClosedTimestamp { get; set; }
+
+        /// <summary>
+        /// Gets or sets a json representation of the current allocation.
+        /// </summary>
+        public string AllocationJson { get; set; }
+
+        /// <summary>
+        /// Gets or sets the portfolio representation of the <see cref="AllocationJson"/> value.
+        /// </summary>
+        [NotMapped]
+        public Portfolio Allocation
+        {
+            get => JsonConvert.DeserializeObject<Portfolio>(AllocationJson);
+            set => AllocationJson = JsonConvert.SerializeObject(value);
+        }
     }
 }
