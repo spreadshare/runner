@@ -68,6 +68,11 @@ namespace SpreadShare.Models.Trading
         /// <inheritdoc />
         public int CompareTo(Balance other)
         {
+            if (Symbol != other.Symbol)
+            {
+                throw new InvalidOperationException($"Cannot compare two balances with different symbols: {this} and {other}");
+            }
+
             var freeComparison = Free.CompareTo(other.Free);
             if (freeComparison != 0)
             {

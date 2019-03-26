@@ -307,6 +307,83 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
+        public void ContainedInSingleCase()
+        {
+            var c1 = new Currency("ETH");
+            var c2 = new Currency("ETH");
+            var a = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 1, 1) },
+            });
+
+            var b = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c2, new Balance(c1, 2, 2) },
+            });
+
+            Assert.True(a.ContainedIn(b));
+            Assert.False(b.ContainedIn(a));
+        }
+
+        [Fact]
+        public void ContainedInEqualCase()
+        {
+            var c1 = new Currency("ETH");
+            var c2 = new Currency("ETH");
+            var a = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 1, 1) },
+            });
+
+            var b = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c2, new Balance(c1, 1, 1) },
+            });
+
+            Assert.True(a.ContainedIn(b));
+            Assert.True(b.ContainedIn(a));
+        }
+
+        [Fact]
+        public void ContainedInNoOverlap()
+        {
+            var c1 = new Currency("ETH");
+            var c2 = new Currency("BTC");
+            var a = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 1, 1) },
+            });
+
+            var b = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c2, new Balance(c2, 1, 1) },
+            });
+
+            Assert.False(a.ContainedIn(b));
+            Assert.False(b.ContainedIn(a));
+        }
+
+        [Fact]
+        public void ContainedInOverlap()
+        {
+            var c1 = new Currency("ETH");
+            var c2 = new Currency("BTC");
+            var a = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 1, 1) },
+            });
+
+            var b = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 10, 2) },
+                { c2, new Balance(c1, 1, 1) },
+            });
+
+            Assert.True(a.ContainedIn(b));
+            Assert.False(b.ContainedIn(a));
+        }
+
+        [Fact]
         public void JsonString()
         {
             Currency c1 = new Currency("ETH");
