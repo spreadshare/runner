@@ -41,9 +41,10 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="initialAllocation">Initial set of allocations.</param>
         public void SetInitialConfiguration(Portfolio initialAllocation)
         {
-            if (_allocation != null)
+            if (_allocation != null && Program.CommandLineArgs.Trading)
             {
-                _logger.LogWarning("Initial allocation is being set, but had been initialized before..");
+                _logger.LogError("Initial allocation is being set, but had been initialized before..");
+                throw new InvalidOperationException("Attempt to reconfigure allocation");
             }
 
             // Get the assets from the exchange
