@@ -56,20 +56,17 @@ namespace SpreadShare.ExchangeServices
                 return;
             }
 
-            foreach (var item in (Exchange[])Enum.GetValues(typeof(Exchange)))
+            switch (Configuration.Instance.EnabledAlgorithm.Exchange)
             {
-                switch (item)
-                {
-                    case Exchange.Binance:
-                        _binanceCommunications.Connect();
-                        break;
-                    case Exchange.Backtesting:
-                        _backtestCommunicationService.Connect();
-                        break;
-                    default:
-                        throw new MissingFieldException(
-                            $"No communications instance for {item} in ExchangeFactory");
-                }
+                case Exchange.Binance:
+                    _binanceCommunications.Connect();
+                    break;
+                case Exchange.Backtesting:
+                    _backtestCommunicationService.Connect();
+                    break;
+                default:
+                    throw new MissingFieldException(
+                        $"No communications instance for {Configuration.Instance.EnabledAlgorithm.Exchange} in ExchangeFactory");
             }
         }
 
