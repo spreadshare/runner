@@ -1,10 +1,10 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices;
-using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
+using SpreadShare.ExchangeServices.ProvidersBacktesting;
+using SpreadShare.ExchangeServices.ProvidersBinance;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,7 +15,6 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
     /// </summary>
     public class PortfolioFetcherTests : BaseTest
     {
-        private readonly IPortfolioFetcherService _fetcher;
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
@@ -26,7 +25,6 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             : base(outputHelper)
         {
             _serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
-            _fetcher = _serviceProvider.GetService<IPortfolioFetcherService>();
         }
 
         /// <summary>
@@ -36,13 +34,11 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         public void BinancePortfolioIsFetched()
         {
             // Connect the communications
-            _serviceProvider.GetService<BinanceCommunicationsService>().Connect();
-            var query = _fetcher.GetPortfolio(Exchange.Binance);
+            var binance = _serviceProvider.GetService<BinanceCommunicationsService>();
+            binance.Connect();
+            var fetcher = new BinancePortfolioFetcher(LoggerFactory, binance);
+            var query = fetcher.GetPortfolio();
             Assert.True(query.Success);
-            if (query.Success)
-            {
-                Logger.LogInformation(query.Data.ToJson());
-            }
         }
 
         /// <summary>
@@ -52,13 +48,11 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         public void BacktestPortfolioIsFetched()
         {
             // Connection the communications
-            _serviceProvider.GetService<BacktestCommunicationService>().Connect();
-            var query = _fetcher.GetPortfolio(Exchange.Backtesting);
-            if (query.Success)
-            {
-                Logger.LogInformation(query.Data.ToJson());
-            }
-            else
+            var backtest = _serviceProvider.GetService<BacktestCommunicationService>();
+            backtest.Connect();
+            var fetcher = new BacktestPortfolioFetcher(LoggerFactory, backtest);
+            var query = fetcher.GetPortfolio();
+            if (!query.Success)
             {
                 Logger.LogError(query.Message);
             }

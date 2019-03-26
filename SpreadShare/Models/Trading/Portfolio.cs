@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dawn;
@@ -5,12 +6,14 @@ using Newtonsoft.Json;
 
 namespace SpreadShare.Models.Trading
 {
+    #pragma warning disable SA1402
     /// <summary>
     /// Provides information about the allocated funds of an algorithm.
     /// </summary>
+    [JsonConverter(typeof(PortfolioSerializer))]
     internal class Portfolio
     {
-        private Dictionary<Currency, Balance> _dict;
+        private readonly Dictionary<Currency, Balance> _dict;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Portfolio"/> class.
@@ -28,7 +31,19 @@ namespace SpreadShare.Models.Trading
         public static Portfolio Empty => new Portfolio(new Dictionary<Currency, Balance>());
 
         /// <summary>
-        /// Adds to portfolio instances and returns the result.
+        /// Adds two portfolio instances and returns the result.
+        /// </summary>
+        /// <param name="left">The left portfolio.</param>
+        /// <param name="right">The right portfolio.</param>
+        /// <returns>summed portfolio.</returns>
+        public static Portfolio operator +(Portfolio left, Portfolio right)
+            => Add(left, right);
+
+        public static Portfolio operator -(Portfolio left, Portfolio right)
+            => Subtract(left, right);
+
+        /// <summary>
+        /// Adds two portfolio instances and returns the result.
         /// </summary>
         /// <param name="first">First portfolio.</param>
         /// <param name="second">Second portfolio.</param>
@@ -48,35 +63,12 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Gets a copy of the Assets scaled down with given scale.
-        /// </summary>
-        /// <param name="portfolio">The portfolio to duplicate.</param>
-        /// <param name="scale">Decimal between 0 and 1 indicating the scale.</param>
-        /// <returns>Exchange balance corresponding to the given currency.</returns>
-        public static Portfolio DuplicateWithScale(Portfolio portfolio, decimal scale)
-        {
-            Guard.Argument(portfolio).NotNull();
-            Guard.Argument(scale).Require(x => x > 0 && x <= 1, x => $"scale should be between 0 or 1 (including) but was {x}");
-
-            // Create deep copy of the dictionary
-            var ret = new Portfolio(new Dictionary<Currency, Balance>(portfolio._dict));
-
-            // Map the scaling factor over all the values.
-            ret = new Portfolio(ret._dict.Values.Select(
-                x => new Balance(
-                    x.Symbol,
-                    x.Free * scale,
-                    x.Locked * scale)).ToDictionary(x => x.Symbol, x => x));
-            return ret;
-        }
-
-        /// <summary>
-        /// Calculates the substracted difference (both free and locked) between two portfolios.
+        /// Calculates the subtracted difference (both free and locked) between two portfolios.
         /// </summary>
         /// <param name="first">The first portfolio.</param>
         /// <param name="second">The second portfolio.</param>
         /// <returns>List of balances representing the differences.</returns>
-        public static List<Balance> SubtractedDifferences(Portfolio first, Portfolio second)
+        public static Portfolio Subtract(Portfolio first, Portfolio second)
         {
             Guard.Argument(first).NotNull();
             Guard.Argument(second).NotNull();
@@ -87,8 +79,34 @@ namespace SpreadShare.Models.Trading
                 key,
                 (foo.Keys.Contains(key) ? foo[key].Free : 0.0M) - (bar.Keys.Contains(key) ? bar[key].Free : 0.0M),
                 (foo.Keys.Contains(key) ? foo[key].Locked : 0.0M) - (bar.Keys.Contains(key) ? bar[key].Locked : 0.0M)));
-            return res.Where(x => x.Free != 0.0M || x.Locked != 0.0M).ToList();
+            var dict = res.Where(x => x.Free != 0.0M || x.Locked != 0.0M).ToDictionary(x => x.Symbol, x => x);
+            return new Portfolio(dict);
         }
+
+        /// <summary>
+        /// Determines whether one portfolio is contained in another portfolio.
+        /// </summary>
+        /// <param name="other">Portfolio to compare.</param>
+        /// <returns>Whether the portfolio is contained in the other portfolio.</returns>
+        public bool ContainedIn(Portfolio other)
+        {
+            foreach (var balance in AllBalances())
+            {
+                if (balance > other.GetAllocation(balance.Symbol))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Returns a deep copy of the portfolio instance.
+        /// </summary>
+        /// <returns>A portfolio.</returns>
+        public Portfolio Copy()
+            => new Portfolio(new Dictionary<Currency, Balance>(_dict));
 
         /// <summary>
         /// Returns the quantity of allocated funds, will return 0 if nothing is allocated.
@@ -136,15 +154,33 @@ namespace SpreadShare.Models.Trading
         {
             return _dict.Values;
         }
+    }
 
-        /// <summary>
-        /// Returns a string format JSON representation of the portfolio.
-        /// </summary>
-        /// <returns>JSON string.</returns>
-        public string ToJson()
+    /// <summary>
+    /// Custom serializer for the <see cref="Portfolio"/> model.
+    /// </summary>
+    internal class PortfolioSerializer : JsonConverter
+    {
+        /// <inheritdoc/>
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            return JsonConvert.SerializeObject(_dict.Where(
-                pair => pair.Value.Free + pair.Value.Locked > 0.0M).ToDictionary(x => x.Key, x => x.Value).Values);
+            var portfolio = value as Portfolio ?? Portfolio.Empty;
+            serializer.Serialize(writer, portfolio.AllBalances().Where(x => x.Free != 0 || x.Locked != 0));
+        }
+
+        /// <inheritdoc/>
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            var balances = serializer.Deserialize<Balance[]>(reader);
+            return new Portfolio(balances.ToDictionary(x => x.Symbol, x => x));
+        }
+
+        /// <inheritdoc/>
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(Portfolio);
         }
     }
+
+    #pragma warning restore SA1402
 }

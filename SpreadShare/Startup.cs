@@ -9,6 +9,8 @@ using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
+using SpreadShare.ExchangeServices.ProvidersBacktesting;
+using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.BacktestDaemon;
@@ -146,7 +148,17 @@ namespace SpreadShare
             services.AddSingleton<BacktestDaemonService, BacktestDaemonService>();
 
             // Add Portfolio fetching
-            services.AddSingleton<IPortfolioFetcherService, PortfolioFetcherService>();
+            switch (Configuration.Instance.EnabledAlgorithm.Exchange)
+            {
+                case Exchange.Backtesting:
+                    services.AddSingleton<IPortfolioFetcherService, BacktestPortfolioFetcher>();
+                    break;
+                case Exchange.Binance:
+                    services.AddSingleton<IPortfolioFetcherService, BinancePortfolioFetcher>();
+                    break;
+                default:
+                    throw new NotImplementedException($"The portfolio fetcher for {Configuration.Instance.EnabledAlgorithm.Exchange} is not linked.");
+            }
         }
         #pragma warning restore CA1822
 

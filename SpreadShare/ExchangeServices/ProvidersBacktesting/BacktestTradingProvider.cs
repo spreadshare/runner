@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
@@ -82,7 +83,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Write the trade to the database
             _database.BacktestOrders.Add(new BacktestOrder(
                 order,
-                ParentImplementation.GetPortfolio().ToJson(),
+                JsonConvert.SerializeObject(ParentImplementation.GetPortfolio()),
                 _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
 
             return new ResponseObject<OrderUpdate>(
@@ -160,7 +161,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Add cancelled order to the database
             _database.BacktestOrders.Add(new BacktestOrder(
                 order,
-                ParentImplementation.GetPortfolio().ToJson(),
+                JsonConvert.SerializeObject(ParentImplementation.GetPortfolio()),
                 _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
 
             return new ResponseObject(ResponseCode.Success);
@@ -206,7 +207,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     // Write the filled trade to the database
                     _database.BacktestOrders.Add(new BacktestOrder(
                         order,
-                        ParentImplementation.GetPortfolio().ToJson(),
+                        JsonConvert.SerializeObject(ParentImplementation.GetPortfolio()),
                         _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
 
                     UpdateObservers(order);

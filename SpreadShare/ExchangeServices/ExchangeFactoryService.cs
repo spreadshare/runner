@@ -88,18 +88,16 @@ namespace SpreadShare.ExchangeServices
                     $"Cannot build container for {typeof(T).Name} using a {algorithmConfiguration.GetType().Name} object");
             }
 
-            var allocationManager = _allocationManager.GetWeakAllocationManager(typeof(T), Configuration.Instance.EnabledAlgorithm.Exchange);
-
             ExchangeProvidersContainer container = null;
             switch (Configuration.Instance.EnabledAlgorithm.Exchange)
             {
                 case Exchange.Binance:
-                    container = BuildBinanceContainer<T>(algorithmConfiguration, allocationManager);
+                    container = BuildBinanceContainer<T>(algorithmConfiguration, _allocationManager);
                     break;
 
                 case Exchange.Backtesting:
                     // Skip the Database Event Listener injection phase
-                    return BuildBacktestingContainer<T>(algorithmConfiguration, allocationManager);
+                    return BuildBacktestingContainer<T>(algorithmConfiguration, _allocationManager);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(algorithmConfiguration));
@@ -109,7 +107,7 @@ namespace SpreadShare.ExchangeServices
             return container;
         }
 
-        private ExchangeProvidersContainer BuildBinanceContainer<T>(AlgorithmConfiguration settings, WeakAllocationManager allocationManager)
+        private ExchangeProvidersContainer BuildBinanceContainer<T>(AlgorithmConfiguration settings, AllocationManager allocationManager)
             where T : IBaseAlgorithm
         {
             // Makes sure that the communication is enabled
@@ -123,7 +121,7 @@ namespace SpreadShare.ExchangeServices
             return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider, typeof(T));
         }
 
-        private ExchangeProvidersContainer BuildBacktestingContainer<T>(AlgorithmConfiguration settings, WeakAllocationManager allocationManager)
+        private ExchangeProvidersContainer BuildBacktestingContainer<T>(AlgorithmConfiguration settings, AllocationManager allocationManager)
             where T : IBaseAlgorithm
         {
             _backtestCommunicationService.Connect();

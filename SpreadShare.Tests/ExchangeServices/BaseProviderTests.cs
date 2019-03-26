@@ -1,11 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.Tests.Stubs;
 using Xunit.Abstractions;
 using YamlDotNet.Serialization;
 
@@ -47,16 +46,7 @@ namespace SpreadShare.Tests.ExchangeServices
             lock (_lock)
             {
                 var alloc = serviceProvider.GetService<AllocationManager>();
-                alloc.SetInitialConfiguration(
-                    new Dictionary<Exchange, Dictionary<Type, decimal>>
-                    {
-                        {
-                            Exchange.Binance, new Dictionary<Type, decimal>
-                            {
-                                { typeof(TemplateAlgorithm), 1M },
-                            }
-                        },
-                    });
+                alloc.SetInitialConfiguration(TestPortfolioFetcher.GetStaticPortfolio());
             }
         }
 

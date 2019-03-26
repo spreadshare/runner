@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using CommandLine;
 using SpreadShare.Algorithms;
-using SpreadShare.ExchangeServices;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices.BacktestDaemon.CommandAttributes;
 using SpreadShare.SupportServices.Configuration;
@@ -96,13 +94,9 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                 : _args.ID;
             state.CurrentBacktestConfigurationPath = _args.ConfigurationPath;
 
-            state.AllocationManager.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>()
-            {
-                {
-                    Exchange.Backtesting,
-                    new Dictionary<Type, decimal> { { _algo, 1 } }
-                },
-            });
+            // Reset the allocation for a new run.
+            state.AllocationManager.SetInitialConfiguration(Configuration.Configuration.Instance.BacktestSettings
+                .Portfolio);
 
             // Backtests are run synchronously by design.
             var result = state.AlgorithmService.StartAlgorithm(_algo, _configuration);

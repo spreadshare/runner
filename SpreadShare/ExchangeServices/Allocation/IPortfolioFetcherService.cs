@@ -12,7 +12,6 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// Gets the portfolio of the user.
         /// </summary>
         /// <returns>The portfolio.</returns>
-        /// <param name="exchange">Exchange to be used.</param>
-        ResponseObject<Portfolio> GetPortfolio(Exchange exchange);
+        ResponseObject<Portfolio> GetPortfolio();
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
@@ -246,46 +247,6 @@ namespace SpreadShare.Tests.Models
             Assert.Throws<ArgumentNullException>(() => portfolio.UpdateAllocation(null));
         }
 
-        [Fact]
-        public void DuplicateWithScaleHappyFlow()
-        {
-            Currency c1 = new Currency("BTC");
-            Currency c2 = new Currency("ETH");
-            var portfolio = new Portfolio(new Dictionary<Currency, Balance>
-            {
-                { c1, new Balance(c1, 4, 8) },
-                { c2, new Balance(c2, 5, 0.001M) },
-            });
-
-            var scaled = Portfolio.DuplicateWithScale(portfolio, 0.7M);
-
-            Assert.Equal(2.8M, scaled.GetAllocation(c1).Free);
-            Assert.Equal(5.6M, scaled.GetAllocation(c1).Locked);
-            Assert.Equal(3.5M, scaled.GetAllocation(c2).Free);
-            Assert.Equal(0.0007M, scaled.GetAllocation(c2).Locked);
-        }
-
-        [Fact]
-        public void DuplicateWithScaleExactlyOne()
-        {
-            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-            var scaled = Portfolio.DuplicateWithScale(portfolio, 1);
-            Assert.True(!scaled.AllBalances().Any());
-        }
-
-        [Fact]
-        public void DuplicateWithScaleInvalidScale()
-        {
-            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-            Assert.Throws<ArgumentException>(() => Portfolio.DuplicateWithScale(portfolio, -1));
-        }
-
-        [Fact]
-        public void DuplicateWithScaleNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => Portfolio.DuplicateWithScale(null, 1));
-        }
-
         /// <summary>
         /// Tests if the difference between to portfolios is correct.
         /// </summary>
@@ -310,10 +271,10 @@ namespace SpreadShare.Tests.Models
                 { c4, new Balance(c4, 4.2M, -0.00000001M) },
             });
 
-            var diff = Portfolio.SubtractedDifferences(first, second);
-            Assert.Equal(4, diff.Count);
+            var diff = Portfolio.Subtract(first, second);
+            Assert.Equal(4, diff.AllBalances().Count());
 
-            foreach (var balance in diff)
+            foreach (var balance in diff.AllBalances())
             {
                 switch (balance.Symbol.ToString())
                 {
@@ -341,8 +302,8 @@ namespace SpreadShare.Tests.Models
         public void BalancesAreSubtractedNull()
         {
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-            Assert.Throws<ArgumentNullException>(() => Portfolio.SubtractedDifferences(portfolio, null));
-            Assert.Throws<ArgumentNullException>(() => Portfolio.SubtractedDifferences(null, portfolio));
+            Assert.Throws<ArgumentNullException>(() => Portfolio.Subtract(portfolio, null));
+            Assert.Throws<ArgumentNullException>(() => Portfolio.Subtract(null, portfolio));
         }
 
         [Fact]
@@ -358,7 +319,7 @@ namespace SpreadShare.Tests.Models
                 { c3, new Balance(c3, 0.0M, 0.0M) },
             });
 
-            string str = portfolio.ToJson();
+            string str = JsonConvert.SerializeObject(portfolio);
             Assert.Contains("\"ETH\"", str, StringComparison.Ordinal);
             Assert.Contains("\"BTC\"", str, StringComparison.Ordinal);
             Assert.DoesNotContain("\"VET\"", str, StringComparison.Ordinal);

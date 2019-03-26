@@ -1,7 +1,6 @@
 using System;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
@@ -17,20 +16,18 @@ namespace SpreadShare.Tests.Stubs
         public const string RefuseCoin = "VIA";
 
         public TestAllocationManager(ILoggerFactory loggerFactory, IPortfolioFetcherService portfolioFetcherService)
-            : base(loggerFactory, portfolioFetcherService)
+            : base(loggerFactory, portfolioFetcherService, null)
         {
         }
 
         /// <summary>
-        /// Make sure that allocation is ignored for tests.
+        /// Makes sure that allocation is ignored for tests.
         /// </summary>
-        /// <param name="exchange">exchange.</param>
-        /// <param name="algo">algo.</param>
         /// <param name="exec">exec.</param>
-        public override void UpdateAllocation(Exchange exchange, Type algo, TradeExecution exec) => Expression.Empty();
+        public override void UpdateAllocation(TradeExecution exec) => Expression.Empty();
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> QueueTrade(TradeProposal p, Type algorithm, Exchange exchange, Func<OrderUpdate> tradeCallback)
+        public override ResponseObject<OrderUpdate> QueueTrade(TradeProposal p, Func<OrderUpdate> tradeCallback)
         {
             if (p.From.Symbol == new Currency(RefuseCoin))
             {

@@ -6,7 +6,7 @@ namespace SpreadShare.Models.Trading
     /// <summary>
     /// Model for representing a currency a certain quantity, locked or free.
     /// </summary>
-    internal struct Balance
+    internal struct Balance : IComparable<Balance>
     {
         /// <summary>
         /// Symbol of the asset.
@@ -54,12 +54,28 @@ namespace SpreadShare.Models.Trading
             return new Balance(a.Symbol, a.Free + b.Free, a.Locked + b.Locked);
         }
 
+        public static bool operator <(Balance a, Balance b) => a.CompareTo(b) < 0;
+
+        public static bool operator >(Balance a, Balance b) => a.CompareTo(b) > 0;
+
         /// <summary>
         /// Returns a new instance of balance with free and locked balances set to zero given a certain currency.
         /// </summary>
         /// <param name="c">Currency to represent.</param>
         /// <returns>A zero initiated balance object.</returns>
         public static Balance Empty(Currency c) => new Balance(c, 0.0M, 0.0M);
+
+        /// <inheritdoc />
+        public int CompareTo(Balance other)
+        {
+            var freeComparison = Free.CompareTo(other.Free);
+            if (freeComparison != 0)
+            {
+                return freeComparison;
+            }
+
+            return Locked.CompareTo(other.Locked);
+        }
 
         /// <inheritdoc />
         public override string ToString()
