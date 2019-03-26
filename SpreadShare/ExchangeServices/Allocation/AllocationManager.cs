@@ -81,7 +81,7 @@ namespace SpreadShare.ExchangeServices.Allocation
             if (!initialAllocation.ContainedIn(available))
             {
                 _logger.LogError($"The requested allocation: {JsonConvert.SerializeObject(initialAllocation)}\n"
-                                 + $"was larger than the available assets: {JsonConvert.SerializeObject(available)}");
+                                 + $"was not contained in the available assets: {JsonConvert.SerializeObject(available)}");
                 throw new AllocationUnavailableException();
             }
 

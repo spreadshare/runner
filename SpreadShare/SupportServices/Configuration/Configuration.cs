@@ -108,6 +108,8 @@ namespace SpreadShare.SupportServices.Configuration
         [YamlMember(Alias = "Portfolio")]
         [Required]
         [NotEmpty]
+        [ForKeys(typeof(CanBeConstructed), typeof(Currency))]
+        [ForValues(typeof(RangeDecimal), "0.0", "79228162514264337593543950335")]
         public Dictionary<string, decimal> __portfolio { get; private set; }
 
         public Portfolio Portfolio => _portfolioConstructor.Value(__portfolio).Copy();
@@ -142,6 +144,8 @@ namespace SpreadShare.SupportServices.Configuration
         [YamlMember(Alias = "Allocation")]
         [Required]
         [NotEmpty]
+        [ForKeys(typeof(CanBeConstructed), typeof(Currency))]
+        [ForValues(typeof(RangeDecimal), "0", "79228162514264337593543950335")]
         public Dictionary<string, decimal> __allocation { get; private set; }
 
         public Exchange Exchange => _exchangeConstructor.Value(__exchange);
