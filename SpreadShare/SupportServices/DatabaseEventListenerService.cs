@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
@@ -12,21 +13,24 @@ namespace SpreadShare.SupportServices
     /// </summary>
     internal class DatabaseEventListenerService : IDisposable
     {
-        private static readonly object __lock = new object();
+        private static readonly object Lock = new object();
         private readonly List<IDisposable> _sources;
         private readonly ILogger _logger;
         private readonly DatabaseContext _database;
+        private readonly AllocationManager _allocation;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseEventListenerService"/> class.
         /// </summary>
         /// <param name="factory">To create output.</param>
-        /// <param name="database">To events to.</param>
-        public DatabaseEventListenerService(ILoggerFactory factory, DatabaseContext database)
+        /// <param name="allocation">To listen for portfolio changes.</param>
+        /// <param name="database">To log events to.</param>
+        public DatabaseEventListenerService(ILoggerFactory factory, AllocationManager allocation, DatabaseContext database)
         {
             _sources = new List<IDisposable>();
             _logger = factory.CreateLogger(GetType());
-            lock (__lock)
+            _allocation = allocation;
+            lock (Lock)
             {
                 _database = database;
             }
@@ -56,7 +60,12 @@ namespace SpreadShare.SupportServices
                 Active = true,
             };
 
-            lock (__lock)
+            _sources.Add(_allocation.Subscribe(new ConfigurableObserver<Portfolio>(
+                OnNext,
+                () => { },
+                _ => { })));
+
+            lock (Lock)
             {
                 _database.Sessions.Add(Session);
                 _database.SaveChanges();
@@ -107,7 +116,7 @@ namespace SpreadShare.SupportServices
                 Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
             };
 
-            lock (__lock)
+            lock (Lock)
             {
                 _database.LogEvents.Add(item);
                 _database.SaveChanges();
@@ -124,7 +133,7 @@ namespace SpreadShare.SupportServices
         private void OnNext(OrderUpdate order)
         {
             var item = new OrderEvent(order, DateTimeOffset.Now.ToUnixTimeMilliseconds(), Session);
-            lock (__lock)
+            lock (Lock)
             {
                 _database.OrderEvents.Add(item);
                 _database.SaveChanges();
@@ -138,9 +147,18 @@ namespace SpreadShare.SupportServices
                 stateSwitch.Name,
                 Session);
 
-            lock (__lock)
+            lock (Lock)
             {
                 _database.StateSwitchEvents.Add(item);
+                _database.SaveChanges();
+            }
+        }
+
+        private void OnNext(Portfolio portfolio)
+        {
+            lock (Lock)
+            {
+                Session.Allocation = portfolio;
                 _database.SaveChanges();
             }
         }
@@ -158,7 +176,7 @@ namespace SpreadShare.SupportServices
                 Session.Active = false;
                 Session.ClosedTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-                lock (__lock)
+                lock (Lock)
                 {
                     _database.SaveChanges();
                 }

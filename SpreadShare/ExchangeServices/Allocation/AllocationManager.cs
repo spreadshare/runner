@@ -3,6 +3,7 @@ using System.Linq;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
@@ -14,7 +15,7 @@ namespace SpreadShare.ExchangeServices.Allocation
     /// <summary>
     /// This class provides allocation management for multiple algorithms.
     /// </summary>
-    internal class AllocationManager
+    internal class AllocationManager : Observable<Portfolio>
     {
         private readonly ILogger _logger;
         private readonly IPortfolioFetcherService _portfolioFetcherService;
@@ -87,6 +88,7 @@ namespace SpreadShare.ExchangeServices.Allocation
 
             _allocation = initialAllocation;
             _logger.LogInformation("Configured AllocationManager");
+            UpdateObservers(_allocation);
         }
 
         /// <summary>
@@ -118,6 +120,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         {
             _logger.LogInformation($"Allocation Update: {JsonConvert.SerializeObject(exec)}");
             _allocation.UpdateAllocation(exec);
+            UpdateObservers(_allocation);
         }
 
          /// <summary>

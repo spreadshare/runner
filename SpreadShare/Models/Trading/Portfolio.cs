@@ -37,23 +37,11 @@ namespace SpreadShare.Models.Trading
         /// <param name="right">The right portfolio.</param>
         /// <returns>summed portfolio.</returns>
         public static Portfolio operator +(Portfolio left, Portfolio right)
-            => Add(left, right);
-
-        public static Portfolio operator -(Portfolio left, Portfolio right)
-            => Subtract(left, right);
-
-        /// <summary>
-        /// Adds two portfolio instances and returns the result.
-        /// </summary>
-        /// <param name="first">First portfolio.</param>
-        /// <param name="second">Second portfolio.</param>
-        /// <returns>Combined portfolio.</returns>
-        public static Portfolio Add(Portfolio first, Portfolio second)
         {
-            Guard.Argument(first).NotNull();
-            Guard.Argument(second).NotNull();
-            var firstDict = first._dict;
-            var secondDict = second._dict;
+            Guard.Argument(left).NotNull();
+            Guard.Argument(right).NotNull();
+            var firstDict = left._dict;
+            var secondDict = right._dict;
             var allKeys = firstDict.Keys.Union(secondDict.Keys);
             var res = allKeys.ToDictionary(key => key, key => new Balance(
                 key,
@@ -62,18 +50,12 @@ namespace SpreadShare.Models.Trading
             return new Portfolio(res);
         }
 
-        /// <summary>
-        /// Calculates the subtracted difference (both free and locked) between two portfolios.
-        /// </summary>
-        /// <param name="first">The first portfolio.</param>
-        /// <param name="second">The second portfolio.</param>
-        /// <returns>List of balances representing the differences.</returns>
-        public static Portfolio Subtract(Portfolio first, Portfolio second)
+        public static Portfolio operator -(Portfolio left, Portfolio right)
         {
-            Guard.Argument(first).NotNull();
-            Guard.Argument(second).NotNull();
-            var foo = first._dict;
-            var bar = second._dict;
+            Guard.Argument(left).NotNull();
+            Guard.Argument(right).NotNull();
+            var foo = left._dict;
+            var bar = right._dict;
             var allKeys = foo.Keys.Union(bar.Keys);
             var res = allKeys.Select(key => new Balance(
                 key,
@@ -105,7 +87,7 @@ namespace SpreadShare.Models.Trading
         /// Returns a deep copy of the portfolio instance.
         /// </summary>
         /// <returns>A portfolio.</returns>
-        public Portfolio Copy()
+        public Portfolio Clone()
             => new Portfolio(new Dictionary<Currency, Balance>(_dict));
 
         /// <summary>

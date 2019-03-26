@@ -23,7 +23,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
             var comms = serviceProvider.GetService<BacktestCommunicationService>();
-            _fetcher = new BacktestPortfolioFetcher(LoggerFactory, comms);
+            _fetcher = new BacktestPortfolioFetcher(comms);
         }
 
         [Fact]

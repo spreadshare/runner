@@ -88,7 +88,7 @@ namespace SpreadShare.Tests.Models
                 { c, new Balance(c, free2, locked2) },
             });
 
-            var result = Portfolio.Add(first, second);
+            var result = first + second;
             Assert.Equal(free1 + free2, result.GetAllocation(c).Free);
             Assert.Equal(locked1 + locked2, result.GetAllocation(c).Locked);
             Assert.Equal(free1, first.GetAllocation(c).Free);
@@ -116,7 +116,7 @@ namespace SpreadShare.Tests.Models
                 { c3, new Balance(c3, 66.5M, 0.0000000004M) },
             });
 
-            var result = Portfolio.Add(first, second);
+            var result = first + second;
 
             Assert.Equal(4.02M, result.GetAllocation(c1).Free);
             Assert.Equal(1.0M, result.GetAllocation(c1).Locked);
@@ -142,7 +142,7 @@ namespace SpreadShare.Tests.Models
                 { c2, new Balance(c2, 1.0M, 5.5M) },
             });
 
-            var result = Portfolio.Add(first, second);
+            var result = first + second;
 
             Assert.Equal(4.0M, result.GetAllocation(c1).Free);
             Assert.Equal(1.0M, result.GetAllocation(c1).Locked);
@@ -154,8 +154,8 @@ namespace SpreadShare.Tests.Models
         public void BalancesAreSummedNull()
         {
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-            Assert.Throws<ArgumentNullException>(() => Portfolio.Add(portfolio, null));
-            Assert.Throws<ArgumentNullException>(() => Portfolio.Add(null, portfolio));
+            Assert.Throws<ArgumentNullException>(() => portfolio + null);
+            Assert.Throws<ArgumentNullException>(() => null + portfolio);
         }
 
         [Fact]
@@ -271,7 +271,7 @@ namespace SpreadShare.Tests.Models
                 { c4, new Balance(c4, 4.2M, -0.00000001M) },
             });
 
-            var diff = Portfolio.Subtract(first, second);
+            var diff = first - second;
             Assert.Equal(4, diff.AllBalances().Count());
 
             foreach (var balance in diff.AllBalances())
@@ -302,8 +302,8 @@ namespace SpreadShare.Tests.Models
         public void BalancesAreSubtractedNull()
         {
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-            Assert.Throws<ArgumentNullException>(() => Portfolio.Subtract(portfolio, null));
-            Assert.Throws<ArgumentNullException>(() => Portfolio.Subtract(null, portfolio));
+            Assert.Throws<ArgumentNullException>(() => portfolio - null);
+            Assert.Throws<ArgumentNullException>(() => null - portfolio);
         }
 
         [Fact]

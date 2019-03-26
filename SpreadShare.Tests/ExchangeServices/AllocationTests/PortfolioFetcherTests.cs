@@ -50,7 +50,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             // Connection the communications
             var backtest = _serviceProvider.GetService<BacktestCommunicationService>();
             backtest.Connect();
-            var fetcher = new BacktestPortfolioFetcher(LoggerFactory, backtest);
+            var fetcher = new BacktestPortfolioFetcher(backtest);
             var query = fetcher.GetPortfolio();
             if (!query.Success)
             {

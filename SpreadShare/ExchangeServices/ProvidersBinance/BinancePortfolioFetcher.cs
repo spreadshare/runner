@@ -11,8 +11,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
     /// <summary>
     /// Is able to fetch portfolio from binance.
     /// </summary>
-    internal class BinancePortfolioFetcher : PortfolioFetcherService
+    internal class BinancePortfolioFetcher : IPortfolioFetcherService
     {
+        private readonly ILogger _logger;
         private readonly BinanceCommunicationsService _binance;
 
         /// <summary>
@@ -21,18 +22,18 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <param name="loggerFactory">To enable logging.</param>
         /// <param name="comms">Provides access to binance.</param>
         public BinancePortfolioFetcher(ILoggerFactory loggerFactory, BinanceCommunicationsService comms)
-            : base(loggerFactory)
         {
+            _logger = loggerFactory.CreateLogger(GetType());
             _binance = comms;
         }
 
         /// <inheritdoc />
-        public override ResponseObject<Portfolio> GetPortfolio()
+        public ResponseObject<Portfolio> GetPortfolio()
         {
             var accountInfo = _binance.Client.GetAccountInfo(Configuration.Instance.BinanceClientSettings.ReceiveWindow);
             if (!accountInfo.Success)
             {
-                Logger.LogCritical($"Could not get assets: {accountInfo.Error.Message}");
+                _logger.LogCritical($"Could not get assets: {accountInfo.Error.Message}");
                 return new ResponseObject<Portfolio>(ResponseCode.Error);
             }
 
