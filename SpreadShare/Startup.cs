@@ -83,7 +83,10 @@ namespace SpreadShare
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
 
             // Add Sentry to ErrorLogging
-            loggerFactory.AddProvider(new SentryLoggerProvider());
+            if (Program.CommandLineArgs.Trading)
+            {
+                loggerFactory.AddProvider(new SentryLoggerProvider());
+            }
 
             // Add DatabaseEventListener to log pipeline.
             loggerFactory.AddProvider(new DatabaseEventLoggerProvider());
