@@ -127,8 +127,10 @@ namespace SpreadShare
         public void ConfigureServices(IServiceCollection services)
         {
             // Add Database context dependency
-            services.AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>(opt
-                => opt.UseNpgsql(Configuration.Instance.ConnectionStrings.LocalConnection));
+            services.AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>(
+                opt
+                => opt.UseNpgsql(Configuration.Instance.ConnectionStrings.LocalConnection),
+                ServiceLifetime.Transient);
 
             // TODO: Add layered timeout for unsuccessfully connecting to DB
             // Add Logging dependency
