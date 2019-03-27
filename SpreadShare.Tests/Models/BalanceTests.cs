@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
@@ -133,6 +134,17 @@ namespace SpreadShare.Tests.Models
         {
             Balance balance = new Balance(new Currency("ETH"), 3, 5.5M);
             Assert.Equal("ETH -> 3|5.5", balance.ToString());
+        }
+
+        [Fact]
+        public void JsonIdentity()
+        {
+            Balance balance = new Balance(new Currency("ETH"), 2, 3);
+            var json = JsonConvert.SerializeObject(balance);
+            var returned = JsonConvert.DeserializeObject<Balance>(json);
+            Assert.Equal(balance.Symbol, returned.Symbol);
+            Assert.Equal(balance.Free, returned.Free);
+            Assert.Equal(balance.Locked, returned.Locked);
         }
     }
 }

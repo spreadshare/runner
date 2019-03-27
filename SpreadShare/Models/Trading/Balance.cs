@@ -9,21 +9,6 @@ namespace SpreadShare.Models.Trading
     internal struct Balance
     {
         /// <summary>
-        /// Symbol of the asset.
-        /// </summary>
-        public readonly Currency Symbol;
-
-        /// <summary>
-        /// SetQuantity of balance that is free.
-        /// </summary>
-        public decimal Free;
-
-        /// <summary>
-        /// SetQuantity of balance that is locked.
-        /// </summary>
-        public decimal Locked;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Balance"/> struct.
         /// </summary>
         /// <param name="symbol">Symbol of the asset.</param>
@@ -35,6 +20,21 @@ namespace SpreadShare.Models.Trading
             Free = free;
             Locked = locked;
         }
+
+        /// <summary>
+        /// Gets or sets the symbol of the asset.
+        /// </summary>
+        public Currency Symbol { get; set; }
+
+        /// <summary>
+        /// Gets or sets the quantity of balance that is free.
+        /// </summary>
+        public decimal Free { get; set; }
+
+        /// <summary>
+        /// Gets or sets the quantity of balance that is locked.
+        /// </summary>
+        public decimal Locked { get; set; }
 
         public static Balance operator -(Balance a, Balance b)
         {
