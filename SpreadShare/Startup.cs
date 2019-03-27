@@ -82,6 +82,9 @@ namespace SpreadShare
         {
             ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
 
+            // Download all currencies from Binance
+            TradingPair.Sync(logger);
+
             // Add Sentry to ErrorLogging
             if (Program.CommandLineArgs.Trading)
             {
@@ -90,9 +93,6 @@ namespace SpreadShare
 
             // Add DatabaseEventListener to log pipeline.
             loggerFactory.AddProvider(new DatabaseEventLoggerProvider());
-
-            // Download all currencies from Binance
-            TradingPair.Sync(logger);
 
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<DatabaseMigrationService>();
