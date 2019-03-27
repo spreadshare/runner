@@ -88,12 +88,44 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
+        public void BalanceCompareHappyFlow()
+        {
+            var currency = new Currency("ETH");
+            Balance a = new Balance(currency, 1, 1);
+            Balance b = new Balance(currency, 1.2M, 1.8M);
+            Assert.True(a.ContainedIn(b));
+            Assert.False(b.ContainedIn(a));
+        }
+
+        [Fact]
+        public void BalanceCompareEqual()
+        {
+            var currency = new Currency("ETH");
+            Balance a = new Balance(currency, 1, 1);
+            Balance b = new Balance(currency, 1, 1);
+            Assert.True(a.ContainedIn(b));
+            Assert.True(b.ContainedIn(a));
+        }
+
+        [Fact]
+        public void BalanceCompareOneSmaller()
+        {
+            var currency = new Currency("ETH");
+            Balance a = new Balance(currency, 4, 2);
+            Balance b = new Balance(currency, 1, 3);
+            Assert.False(a.ContainedIn(b));
+            Assert.False(b.ContainedIn(a));
+        }
+
+        [Fact]
         public void DifferentCurrencyOperations()
         {
             Balance left = new Balance(new Currency("ETH"), 0, 0);
             Balance right = new Balance(new Currency("BTC"), 0, 0);
             Assert.Throws<InvalidOperationException>(() => left + right);
             Assert.Throws<InvalidOperationException>(() => left - right);
+            Assert.Throws<InvalidOperationException>(() => left.ContainedIn(right));
+            Assert.Throws<InvalidOperationException>(() => right.ContainedIn(left));
         }
 
         [Fact]

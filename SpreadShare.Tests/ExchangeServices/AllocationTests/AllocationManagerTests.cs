@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Algorithms.Implementations;
-using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
+using SpreadShare.ExchangeServices.ProvidersBacktesting;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 using Xunit;
@@ -18,42 +18,34 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
     {
         private const string ObscureCoin = "SNGLS";
         private readonly IPortfolioFetcherService _fetcher;
-        private readonly BacktestCommunicationService _comms;
 
         public AllocationManagerTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
-            _fetcher = serviceProvider.GetService<IPortfolioFetcherService>();
-            _comms = serviceProvider.GetService<BacktestCommunicationService>();
+            var comms = serviceProvider.GetService<BacktestCommunicationService>();
+            _fetcher = new BacktestPortfolioFetcher(comms);
         }
 
         [Fact]
         public void ConstructorHappyFlow()
         {
-            var unused = new AllocationManager(LoggerFactory, _fetcher);
+            var unused = new AllocationManager(LoggerFactory, _fetcher, null);
         }
 
         [Fact]
         public void ValidateAllocationsSetRequired()
         {
-            var allocationManager = new AllocationManager(LoggerFactory, _fetcher);
+            var allocationManager = new AllocationManager(LoggerFactory, _fetcher, null);
 
             Currency c = new Currency("ETH");
 
-            Assert.Throws<ArgumentNullException>(() => allocationManager.GetAvailableFunds(
-                Exchange.Backtesting,
-                typeof(TemplateAlgorithm),
-                c));
+            Assert.Throws<ArgumentNullException>(() => allocationManager.GetAvailableFunds(c));
 
-            Assert.Throws<ArgumentNullException>(() => allocationManager.GetAllFunds(
-                Exchange.Backtesting,
-                typeof(TemplateAlgorithm)));
+            Assert.Throws<ArgumentNullException>(() => allocationManager.GetAllFunds());
 
             Assert.Throws<ArgumentNullException>(() => allocationManager.QueueTrade(
                 new TradeProposal(TradingPair.Parse("EOSETH"), new Balance(c, 10, 10)),
-                typeof(TemplateAlgorithm),
-                Exchange.Backtesting,
                 () => new OrderUpdate(
                     orderId: 0,
                     tradeId: 0,
@@ -66,68 +58,61 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                     setQuantity: 0)));
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(0.001)]
-        public void SetAllocationHappyFlow(decimal factor)
+        [Fact]
+        public void SetAllocationHappyFlow()
         {
-            var alloc = new AllocationManager(LoggerFactory, _fetcher);
-            alloc.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>
+            var alloc = new AllocationManager(LoggerFactory, _fetcher, null);
+            var currency = new Currency("ETH");
+            alloc.SetInitialConfiguration(new Portfolio(new Dictionary<Currency, Balance>()
             {
-                {
-                  Exchange.Backtesting,
-                  new Dictionary<Type, decimal>
-                  {
-                     { typeof(TemplateAlgorithm), factor },
-                  }
-                },
-            });
+                { currency, new Balance(currency, 2, 0) },
+            }));
 
-            Currency c = new Currency(ObscureCoin);
-            var local = Configuration.Instance.BacktestSettings.Portfolio.GetAllocation(c);
-            var amount = alloc.GetAvailableFunds(Exchange.Backtesting, typeof(TemplateAlgorithm), c);
-            Assert.Equal(local.Free * factor, amount.Free);
+            Assert.Equal(2, alloc.GetAvailableFunds(currency).Free);
+            Assert.Equal(0, alloc.GetAvailableFunds(currency).Locked);
         }
 
-        [Theory]
-        [InlineData(-1)]
-        [InlineData(-0.0001)]
-        [InlineData(2.5)]
-        public void SetAllocationInvalidFactor(decimal factor)
+        [Fact]
+        public void SetAllocationNoFreeFunds()
         {
-            var alloc = new AllocationManager(LoggerFactory, _fetcher);
-            Assert.Throws<ArgumentException>(() => alloc.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>
-            {
+            var alloc = new AllocationManager(LoggerFactory, _fetcher, null);
+            var currency = new Currency("ETH");
+            var allMoney = Configuration.Instance.BacktestSettings.Portfolio.GetAllocation(currency).Free;
+            Assert.Throws<AllocationUnavailableException>(() =>
+                alloc.SetInitialConfiguration(new Portfolio(new Dictionary<Currency, Balance>()
                 {
-                    Exchange.Backtesting,
-                    new Dictionary<Type, decimal>
-                    {
-                        { typeof(TemplateAlgorithm), factor },
-                    }
-                },
-            }));
+                    { currency, new Balance(currency, allMoney + 1, 0) },
+                })));
+        }
+
+        [Fact]
+        public void SetAllocationNoLockedFunds()
+        {
+            var alloc = new AllocationManager(LoggerFactory, _fetcher, null);
+            var currency = new Currency("ETH");
+            Assert.Throws<AllocationUnavailableException>(() =>
+                alloc.SetInitialConfiguration(new Portfolio(new Dictionary<Currency, Balance>()
+                {
+                    { currency, new Balance(currency, 1, 2) },
+                })));
         }
 
         [Fact]
         public void QueueTradeHappyFlow()
         {
-            Type algo = typeof(TemplateAlgorithm);
             var alloc = MakeDefaultAllocation();
 
-            var weak = alloc.GetWeakAllocationManager(algo, Exchange.Backtesting);
-
             // Get most valuable asset from backtesting settings.
-            decimal total = weak.GetAvailableFunds(new Currency("ETH")).Free;
-            decimal quote = weak.GetAvailableFunds(new Currency("EOS")).Free;
+            decimal total = alloc.GetAvailableFunds(new Currency("ETH")).Free;
+            decimal quote = alloc.GetAvailableFunds(new Currency("EOS")).Free;
             Balance balance = new Balance(new Currency("ETH"), total, 0);
 
             var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), balance);
 
-            var result = weak.QueueTrade(proposal, () =>
+            var result = alloc.QueueTrade(proposal, () =>
             {
                 Logger.LogInformation($"Trading all of the {proposal.From.Free}{proposal.From.Symbol}");
 
-                // Mock real world side effects by changing the 'remote' portfolio
                 var order = new OrderUpdate(
                     orderId: 0,
                     tradeId: 0,
@@ -144,20 +129,19 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
                     LastFillPrice = 1,
                     LastFillIncrement = proposal.From.Free,
                 };
-                _comms.RemotePortfolio.UpdateAllocation(TradeExecution.FromOrder(order));
+
                 return order;
             });
 
             Assert.True(result.Success, "Valid trade was declared invalid");
-            Assert.Equal(total - proposal.From.Free, weak.GetAvailableFunds(balance.Symbol).Free);
-            Assert.Equal(quote + proposal.From.Free, weak.GetAvailableFunds(new Currency("EOS")).Free);
+            Assert.Equal(total - proposal.From.Free, alloc.GetAvailableFunds(balance.Symbol).Free);
+            Assert.Equal(quote + proposal.From.Free, alloc.GetAvailableFunds(new Currency("EOS")).Free);
         }
 
         [Fact]
         public void QueueTradeInvalid()
         {
-            Type algo = typeof(TemplateAlgorithm);
-            var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
+            var alloc = MakeDefaultAllocation();
             Balance balance = alloc.GetAvailableFunds(new Currency("ETH"));
             var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), new Balance(
                 balance.Symbol,
@@ -177,16 +161,14 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void QueueTradeNull()
         {
-            Type algo = typeof(TemplateAlgorithm);
-            var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
+            var alloc = MakeDefaultAllocation();
             Assert.Throws<ArgumentNullException>(() => alloc.QueueTrade(null, () => null));
         }
 
         [Fact]
         public void QueueTradeReportZero()
         {
-            Type algo = typeof(TemplateAlgorithm);
-            var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
+            var alloc = MakeDefaultAllocation();
             Balance balance = alloc.GetAvailableFunds(new Currency("ETH"));
             var proposal = new TradeProposal(TradingPair.Parse("EOSETH"), balance);
 
@@ -211,8 +193,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void GetAllFundsHappyFlow()
         {
-            Type algo = typeof(TemplateAlgorithm);
-            var alloc = MakeDefaultAllocation().GetWeakAllocationManager(algo, Exchange.Backtesting);
+            var alloc = MakeDefaultAllocation();
             var funds = alloc.GetAllFunds();
             Assert.NotNull(funds);
         }
@@ -220,36 +201,20 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void GetAllFundEmpty()
         {
-            Type algo = typeof(TemplateAlgorithm);
-            var totalalloc = new AllocationManager(LoggerFactory, _fetcher);
-            totalalloc.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>
-            {
-                { Exchange.Backtesting, new Dictionary<Type, decimal>() },
-            });
-            var alloc = totalalloc.GetWeakAllocationManager(algo, Exchange.Backtesting);
+            var alloc = new AllocationManager(LoggerFactory, _fetcher, null);
+            alloc.SetInitialConfiguration(new Portfolio(new Dictionary<Currency, Balance>()));
             var funds = alloc.GetAllFunds();
             Assert.NotNull(funds);
             Assert.Empty(funds.AllBalances());
         }
 
-        private AllocationManager MakeDefaultAllocation(decimal scale = 1.0M)
+        private AllocationManager MakeDefaultAllocation()
         {
-            var alloc = new AllocationManager(LoggerFactory, _fetcher);
-            alloc.SetInitialConfiguration(new Dictionary<Exchange, Dictionary<Type, decimal>>
-            {
-                {
-                    Exchange.Backtesting,
-                    new Dictionary<Type, decimal>
-                    {
-                        { typeof(TemplateAlgorithm), scale },
-                    }
-                },
-            });
+            var alloc = new AllocationManager(LoggerFactory, _fetcher, null);
+            alloc.SetInitialConfiguration(Configuration.Instance.BacktestSettings.Portfolio);
 
             // Free up at least 10 SNGLS (ObscureCoin)
             alloc.UpdateAllocation(
-                Exchange.Backtesting,
-                typeof(TemplateAlgorithm),
                 new TradeExecution(
                     Balance.Empty(new Currency(ObscureCoin)),
                     new Balance(new Currency(ObscureCoin), 10, 0)));

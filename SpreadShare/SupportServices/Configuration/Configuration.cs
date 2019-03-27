@@ -108,9 +108,11 @@ namespace SpreadShare.SupportServices.Configuration
         [YamlMember(Alias = "Portfolio")]
         [Required]
         [NotEmpty]
+        [ForKeys(typeof(CanBeConstructed), typeof(Currency))]
+        [ForValues(typeof(RangeDecimal), "0.0", "79228162514264337593543950335")]
         public Dictionary<string, decimal> __portfolio { get; private set; }
 
-        public Portfolio Portfolio => _portfolioConstructor.Value(__portfolio);
+        public Portfolio Portfolio => _portfolioConstructor.Value(__portfolio).Clone();
     }
 
     internal class EnabledAlgorithm
@@ -120,6 +122,12 @@ namespace SpreadShare.SupportServices.Configuration
 
         private readonly LazyCache<string, Exchange> _exchangeConstructor =
             new LazyCache<string, Exchange>(Enum.Parse<Exchange>);
+
+        private readonly LazyCache<Dictionary<string, decimal>, Portfolio> _allocationConstructor =
+            new LazyCache<Dictionary<string, decimal>, Portfolio>(
+                x => new Portfolio(x.ToDictionary(
+                    y => new Currency(y.Key),
+                    y => new Balance(new Currency(y.Key), y.Value, 0))));
 
         public Type Algorithm => _enabledAlgorithmConstructor.Value(__algorithm);
 
@@ -133,23 +141,16 @@ namespace SpreadShare.SupportServices.Configuration
         [ParsesToEnum(typeof(Exchange))]
         public string __exchange { get; private set; }
 
+        [YamlMember(Alias = "Allocation")]
         [Required]
-        [RangeDecimal("0", "1")]
-        public decimal Allocation { get; private set; }
+        [NotEmpty]
+        [ForKeys(typeof(CanBeConstructed), typeof(Currency))]
+        [ForValues(typeof(RangeDecimal), "0", "79228162514264337593543950335")]
+        public Dictionary<string, decimal> __allocation { get; private set; }
 
         public Exchange Exchange => _exchangeConstructor.Value(__exchange);
 
-        /// <summary>
-        /// Convert EnabledAlgorithms to dict of algorithm and allocation.
-        /// </summary>
-        /// <returns>Dictionary of algorithm and allocation.</returns>
-        public Dictionary<Type, decimal> GetAsDictionary()
-        {
-            return new Dictionary<Type, decimal>()
-            {
-                { Algorithm, Allocation },
-            };
-        }
+        public Portfolio Allocation => _allocationConstructor.Value(__allocation);
     }
 }
 

@@ -18,7 +18,7 @@ namespace SpreadShare.ExchangeServices.Providers
     internal class TradingProvider : Observable<OrderUpdate>, IDisposable
     {
         private readonly ILogger _logger;
-        private readonly WeakAllocationManager _allocationManager;
+        private readonly AllocationManager _allocationManager;
         private readonly DataProvider _dataProvider;
         private readonly Dictionary<long, OrderUpdate> _openOrders;
 
@@ -33,7 +33,7 @@ namespace SpreadShare.ExchangeServices.Providers
             ILoggerFactory loggerFactory,
             AbstractTradingProvider implementation,
             DataProvider dataProvider,
-            WeakAllocationManager allocationManager)
+            AllocationManager allocationManager)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             Implementation = implementation;

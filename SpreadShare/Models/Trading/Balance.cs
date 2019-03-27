@@ -61,6 +61,27 @@ namespace SpreadShare.Models.Trading
         /// <returns>A zero initiated balance object.</returns>
         public static Balance Empty(Currency c) => new Balance(c, 0.0M, 0.0M);
 
+        /// <summary>
+        /// Indicates whether this balance is contained in the given balance.
+        /// </summary>
+        /// <param name="other">The balance to compare to.</param>
+        /// <returns>Whether the balance is contained in another balance.</returns>
+        /// <exception cref="InvalidOperationException">When balances with different symbols are compared.</exception>
+        public bool ContainedIn(Balance other)
+        {
+            if (Symbol != other.Symbol)
+            {
+                throw new InvalidOperationException($"Cannot compare two balances with different symbols: {this} and {other}");
+            }
+
+            if (Free <= other.Free && Locked <= other.Locked)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         /// <inheritdoc />
         public override string ToString()
         {

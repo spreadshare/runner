@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
@@ -87,7 +88,7 @@ namespace SpreadShare.Tests.Models
                 { c, new Balance(c, free2, locked2) },
             });
 
-            var result = Portfolio.Add(first, second);
+            var result = first + second;
             Assert.Equal(free1 + free2, result.GetAllocation(c).Free);
             Assert.Equal(locked1 + locked2, result.GetAllocation(c).Locked);
             Assert.Equal(free1, first.GetAllocation(c).Free);
@@ -115,7 +116,7 @@ namespace SpreadShare.Tests.Models
                 { c3, new Balance(c3, 66.5M, 0.0000000004M) },
             });
 
-            var result = Portfolio.Add(first, second);
+            var result = first + second;
 
             Assert.Equal(4.02M, result.GetAllocation(c1).Free);
             Assert.Equal(1.0M, result.GetAllocation(c1).Locked);
@@ -141,7 +142,7 @@ namespace SpreadShare.Tests.Models
                 { c2, new Balance(c2, 1.0M, 5.5M) },
             });
 
-            var result = Portfolio.Add(first, second);
+            var result = first + second;
 
             Assert.Equal(4.0M, result.GetAllocation(c1).Free);
             Assert.Equal(1.0M, result.GetAllocation(c1).Locked);
@@ -153,8 +154,8 @@ namespace SpreadShare.Tests.Models
         public void BalancesAreSummedNull()
         {
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-            Assert.Throws<ArgumentNullException>(() => Portfolio.Add(portfolio, null));
-            Assert.Throws<ArgumentNullException>(() => Portfolio.Add(null, portfolio));
+            Assert.Throws<ArgumentNullException>(() => portfolio + null);
+            Assert.Throws<ArgumentNullException>(() => null + portfolio);
         }
 
         [Fact]
@@ -246,46 +247,6 @@ namespace SpreadShare.Tests.Models
             Assert.Throws<ArgumentNullException>(() => portfolio.UpdateAllocation(null));
         }
 
-        [Fact]
-        public void DuplicateWithScaleHappyFlow()
-        {
-            Currency c1 = new Currency("BTC");
-            Currency c2 = new Currency("ETH");
-            var portfolio = new Portfolio(new Dictionary<Currency, Balance>
-            {
-                { c1, new Balance(c1, 4, 8) },
-                { c2, new Balance(c2, 5, 0.001M) },
-            });
-
-            var scaled = Portfolio.DuplicateWithScale(portfolio, 0.7M);
-
-            Assert.Equal(2.8M, scaled.GetAllocation(c1).Free);
-            Assert.Equal(5.6M, scaled.GetAllocation(c1).Locked);
-            Assert.Equal(3.5M, scaled.GetAllocation(c2).Free);
-            Assert.Equal(0.0007M, scaled.GetAllocation(c2).Locked);
-        }
-
-        [Fact]
-        public void DuplicateWithScaleExactlyOne()
-        {
-            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-            var scaled = Portfolio.DuplicateWithScale(portfolio, 1);
-            Assert.True(!scaled.AllBalances().Any());
-        }
-
-        [Fact]
-        public void DuplicateWithScaleInvalidScale()
-        {
-            var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-            Assert.Throws<ArgumentException>(() => Portfolio.DuplicateWithScale(portfolio, -1));
-        }
-
-        [Fact]
-        public void DuplicateWithScaleNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => Portfolio.DuplicateWithScale(null, 1));
-        }
-
         /// <summary>
         /// Tests if the difference between to portfolios is correct.
         /// </summary>
@@ -310,10 +271,10 @@ namespace SpreadShare.Tests.Models
                 { c4, new Balance(c4, 4.2M, -0.00000001M) },
             });
 
-            var diff = Portfolio.SubtractedDifferences(first, second);
-            Assert.Equal(4, diff.Count);
+            var diff = first - second;
+            Assert.Equal(4, diff.AllBalances().Count());
 
-            foreach (var balance in diff)
+            foreach (var balance in diff.AllBalances())
             {
                 switch (balance.Symbol.ToString())
                 {
@@ -341,8 +302,85 @@ namespace SpreadShare.Tests.Models
         public void BalancesAreSubtractedNull()
         {
             var portfolio = new Portfolio(new Dictionary<Currency, Balance>());
-            Assert.Throws<ArgumentNullException>(() => Portfolio.SubtractedDifferences(portfolio, null));
-            Assert.Throws<ArgumentNullException>(() => Portfolio.SubtractedDifferences(null, portfolio));
+            Assert.Throws<ArgumentNullException>(() => portfolio - null);
+            Assert.Throws<ArgumentNullException>(() => null - portfolio);
+        }
+
+        [Fact]
+        public void ContainedInSingleCase()
+        {
+            var c1 = new Currency("ETH");
+            var c2 = new Currency("ETH");
+            var a = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 1, 1) },
+            });
+
+            var b = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c2, new Balance(c1, 2, 2) },
+            });
+
+            Assert.True(a.ContainedIn(b));
+            Assert.False(b.ContainedIn(a));
+        }
+
+        [Fact]
+        public void ContainedInEqualCase()
+        {
+            var c1 = new Currency("ETH");
+            var c2 = new Currency("ETH");
+            var a = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 1, 1) },
+            });
+
+            var b = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c2, new Balance(c1, 1, 1) },
+            });
+
+            Assert.True(a.ContainedIn(b));
+            Assert.True(b.ContainedIn(a));
+        }
+
+        [Fact]
+        public void ContainedInNoOverlap()
+        {
+            var c1 = new Currency("ETH");
+            var c2 = new Currency("BTC");
+            var a = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 1, 1) },
+            });
+
+            var b = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c2, new Balance(c2, 1, 1) },
+            });
+
+            Assert.False(a.ContainedIn(b));
+            Assert.False(b.ContainedIn(a));
+        }
+
+        [Fact]
+        public void ContainedInOverlap()
+        {
+            var c1 = new Currency("ETH");
+            var c2 = new Currency("BTC");
+            var a = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 1, 1) },
+            });
+
+            var b = new Portfolio(new Dictionary<Currency, Balance>
+            {
+                { c1, new Balance(c1, 10, 2) },
+                { c2, new Balance(c1, 1, 1) },
+            });
+
+            Assert.True(a.ContainedIn(b));
+            Assert.False(b.ContainedIn(a));
         }
 
         [Fact]
@@ -358,7 +396,7 @@ namespace SpreadShare.Tests.Models
                 { c3, new Balance(c3, 0.0M, 0.0M) },
             });
 
-            string str = portfolio.ToJson();
+            string str = JsonConvert.SerializeObject(portfolio);
             Assert.Contains("\"ETH\"", str, StringComparison.Ordinal);
             Assert.Contains("\"BTC\"", str, StringComparison.Ordinal);
             Assert.DoesNotContain("\"VET\"", str, StringComparison.Ordinal);
