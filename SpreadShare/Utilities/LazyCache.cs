@@ -2,6 +2,7 @@ using System;
 
 namespace SpreadShare.Utilities
 {
+    #pragma warning disable SA1402
     /// <summary>
     /// Builds a given item once and then keeps the cached value.
     /// </summary>
@@ -38,4 +39,40 @@ namespace SpreadShare.Utilities
             return _cached;
         }
     }
+
+    /// <summary>
+    /// Builds a given item once and keeps the cached value.
+    /// </summary>
+    /// <typeparam name="TI">The type of the input.</typeparam>
+    public class LazyCache<TI>
+    {
+        private object _cached;
+        private bool _build;
+
+        /// <summary>
+        /// Returns the value of an item by evaluation the transform function once.
+        /// </summary>
+        /// <param name="data">The data to transform.</param>
+        /// <param name="transform">mapping from TI to outType.</param>
+        /// <param name="outType">The expected output type.</param>
+        /// <returns>Transformed object.</returns>
+        public object Value(TI data, Func<TI, object> transform, Type outType)
+        {
+            if (!_build)
+            {
+                _cached = transform(data);
+                _build = true;
+            }
+
+            if (!_cached.GetType().IsAssignableFrom(outType))
+            {
+                throw new InvalidOperationException(
+                    $"Transform function gave object of type {_cached} which cannot be converted to {outType}");
+            }
+
+            return _cached;
+        }
+    }
+
+    #pragma warning restore SA1402
 }

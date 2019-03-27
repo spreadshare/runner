@@ -42,6 +42,11 @@ namespace SpreadShare.Models.Database
         public long ClosedTimestamp { get; set; }
 
         /// <summary>
+        /// Gets or sets the configuration of the current algorithm.
+        /// </summary>
+        public string AlgorithmConfiguration { get; set; }
+
+        /// <summary>
         /// Gets or sets a json representation of the current allocation.
         /// </summary>
         public string AllocationJson { get; set; }

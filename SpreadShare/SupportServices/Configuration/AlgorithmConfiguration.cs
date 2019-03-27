@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
@@ -20,7 +21,8 @@ namespace SpreadShare.SupportServices.Configuration
     {
         // ###      YAML MEMBERS      ###
         [YamlMember(Alias = "TradingPairs")]
-        [Required]
+        [JsonIgnore]
+        [ConstraintAttributes.Required]
         [NotEmpty]
         [ForAll(typeof(ParsesToClass), typeof(TradingPair))]
         public List<string> __tradingPairs { get; protected set; }
@@ -49,7 +51,7 @@ namespace SpreadShare.SupportServices.Configuration
         /// <summary>
         /// Gets th base currency of the algorithm.
         /// </summary>
-        [Required]
+        [ConstraintAttributes.Required]
         public Currency BaseCurrency => _baseCurrencyConstructor.Value(TradingPairs);
 
         /// <summary>

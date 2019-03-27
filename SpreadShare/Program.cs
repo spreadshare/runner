@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using System.Threading;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
@@ -122,16 +121,15 @@ namespace SpreadShare
             var algorithm = Configuration.Instance.EnabledAlgorithm.Algorithm;
 
             // Link algorithm in configuration to implementation in C#
-            Type algorithmConfigurationType = Reflections.GetMatchingConfigurationsType(algorithm);
             AlgorithmConfiguration algorithmConfiguration;
             try
             {
-                algorithmConfiguration = ConfigurationLoader.LoadConfiguration(algorithmConfigurationType);
+                algorithmConfiguration = Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration;
             }
-            catch (TargetInvocationException e)
+            catch (InvalidConfigurationException e)
             {
                 logger.LogError("Invalid algorithm configuration encountered:\n  > " +
-                                $"{e.InnerException.InnerException.Message}");
+                                $"{e.Message}");
                 ExitProgramWithCode(ExitCode.InvalidConfiguration);
                 return;
             }

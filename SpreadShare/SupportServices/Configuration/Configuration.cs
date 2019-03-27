@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models.Trading;
@@ -129,7 +130,8 @@ namespace SpreadShare.SupportServices.Configuration
                     y => new Currency(y.Key),
                     y => new Balance(new Currency(y.Key), y.Value, 0))));
 
-        public Type Algorithm => _enabledAlgorithmConstructor.Value(__algorithm);
+        private readonly LazyCache<Dictionary<string, object>> _algorithmConfigurationConstructor =
+            new LazyCache<Dictionary<string, object>>();
 
         [Required]
         [YamlMember(Alias = "Algorithm")]
@@ -141,6 +143,9 @@ namespace SpreadShare.SupportServices.Configuration
         [ParsesToEnum(typeof(Exchange))]
         public string __exchange { get; private set; }
 
+        [YamlMember(Alias = "Parameters")]
+        public Dictionary<string, object> __parameters { get; private set; }
+
         [YamlMember(Alias = "Allocation")]
         [Required]
         [NotEmpty]
@@ -148,9 +153,39 @@ namespace SpreadShare.SupportServices.Configuration
         [ForValues(typeof(RangeDecimal), "0", "79228162514264337593543950335")]
         public Dictionary<string, decimal> __allocation { get; private set; }
 
+        public Type Algorithm => _enabledAlgorithmConstructor.Value(__algorithm);
+
         public Exchange Exchange => _exchangeConstructor.Value(__exchange);
 
         public Portfolio Allocation => _allocationConstructor.Value(__allocation);
+
+        [IgnoreConstraints]
+        public AlgorithmConfiguration AlgorithmConfiguration
+        {
+            get
+            {
+                Type config = Reflections.GetMatchingConfigurationsType(Algorithm);
+                try
+                {
+                    return _algorithmConfigurationConstructor.Value(
+                        __parameters,
+                        x =>
+                        {
+                            // Serialize the parameter dictionary back to string and re-deserialize with the right type.
+                            var data = new DeserializerBuilder().Build().Deserialize(
+                                new SerializerBuilder().Build().Serialize(__parameters),
+                                config);
+                            ConfigurationValidator.ValidateConstraintsRecursively(data);
+                            return data;
+                        },
+                        config) as AlgorithmConfiguration;
+                }
+                catch (TargetInvocationException e)
+                {
+                    throw e.InnerException;
+                }
+            }
+        }
     }
 }
 
