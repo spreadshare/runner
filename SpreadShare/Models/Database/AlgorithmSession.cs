@@ -57,8 +57,8 @@ namespace SpreadShare.Models.Database
         [NotMapped]
         public Portfolio Allocation
         {
-            get => JsonConvert.DeserializeObject<Portfolio>(AllocationJson);
-            set => AllocationJson = JsonConvert.SerializeObject(value);
+            get => JsonConvert.DeserializeObject<Portfolio>(AllocationJson ?? "[]");
+            set => AllocationJson = JsonConvert.SerializeObject(value ?? Portfolio.Empty);
         }
     }
 }

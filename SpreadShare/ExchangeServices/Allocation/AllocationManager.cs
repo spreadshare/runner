@@ -67,8 +67,11 @@ namespace SpreadShare.ExchangeServices.Allocation
             {
                 try
                 {
-                    allocated = _databaseContext.Sessions.Where(x => x.Active).Select(x => x.Allocation)
-                        .Aggregate((a, b) => a + b);
+                    var allocatedPortfolios = _databaseContext.Sessions.Where(x => x.Active).Select(x => x.Allocation);
+                    foreach (var allocatedPortfolio in allocatedPortfolios)
+                    {
+                        allocated += allocatedPortfolio;
+                    }
                 }
                 catch (Exception e)
                 {
