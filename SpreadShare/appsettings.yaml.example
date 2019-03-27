@@ -10,6 +10,10 @@ LoggingSettings:
 EnabledAlgorithm:
     Algorithm: TemplateAlgorithm
     Exchange: Binance
+    Parameters:
+      CandleWidth: FiveMinutes
+      TradingPairs:
+        - TRXETH
     Allocation:
         ETH: 0
         BTC: 0

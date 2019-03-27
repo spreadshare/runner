@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models.Database;
@@ -57,6 +58,7 @@ namespace SpreadShare.SupportServices
                 Name = Configuration.Configuration.Instance.EnabledAlgorithm.Algorithm.Name,
                 CreatedTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 ContainerId = Environment.MachineName,
+                AlgorithmConfiguration = JsonConvert.SerializeObject(Configuration.Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration),
                 Active = true,
             };
 

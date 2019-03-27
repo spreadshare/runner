@@ -29,6 +29,11 @@ namespace SpreadShare.SupportServices.Configuration
             Type objType = obj.GetType();
             foreach (var p in objType.GetProperties())
             {
+                if (p.GetCustomAttribute<IgnoreConstraintsAttribute>() != null)
+                {
+                    continue;
+                }
+
                 // Always validate the value.
                 var value = p.GetValue(obj, null);
 
