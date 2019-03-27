@@ -384,7 +384,7 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
-        public void JsonString()
+        public void JsonZeroFilter()
         {
             Currency c1 = new Currency("ETH");
             Currency c2 = new Currency("BTC");
@@ -403,6 +403,33 @@ namespace SpreadShare.Tests.Models
             Assert.Contains("\"Free\"", str, StringComparison.Ordinal);
             Assert.Contains("\"Locked\"", str, StringComparison.Ordinal);
             Assert.Contains(".", str, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void JsonIdentity()
+        {
+            Currency c1 = new Currency("ETH");
+            Currency c2 = new Currency("BTC");
+            Currency c3 = new Currency("VET");
+            Currency c4 = new Currency("DOGE");
+            var portfolio = new Portfolio(new Dictionary<Currency, Balance>()
+            {
+                { c1, new Balance(c1, 1.0M, 2.0M) },
+                { c2, new Balance(c2, 99.0M, 0.0M) },
+                { c3, new Balance(c3, 0.0M, -1.0M) },
+                { c4, new Balance(c4, 0M, 0M) }, // This entry ought to be omitted when serializing
+            });
+
+            var json = JsonConvert.SerializeObject(portfolio);
+            var post = JsonConvert.DeserializeObject<Portfolio>(json);
+            Assert.Equal(portfolio.AllBalances().Count(), post.AllBalances().Count() + 1);
+            var unused = portfolio.AllBalances().Zip(post.AllBalances(), (a, b) =>
+            {
+                Assert.Equal(a.Symbol, b.Symbol);
+                Assert.Equal(a.Free, b.Free);
+                Assert.Equal(a.Locked, b.Locked);
+                return true;
+            });
         }
     }
 }
