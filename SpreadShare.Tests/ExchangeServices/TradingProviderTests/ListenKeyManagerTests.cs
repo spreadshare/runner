@@ -9,7 +9,7 @@ using SpreadShare.SupportServices.Configuration;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SpreadShare.Tests.UserService
+namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
 {
     /// <summary>
     /// Tests of the <ListenKeyManager cref="ListenKeyManager"/> class.

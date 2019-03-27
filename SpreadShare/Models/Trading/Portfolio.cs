@@ -66,22 +66,12 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Determines whether one portfolio is contained in another portfolio.
+        /// Determines whether this portfolio is contained in another portfolio.
         /// </summary>
         /// <param name="other">Portfolio to compare.</param>
         /// <returns>Whether the portfolio is contained in the other portfolio.</returns>
         public bool ContainedIn(Portfolio other)
-        {
-            foreach (var balance in AllBalances())
-            {
-                if (balance > other.GetAllocation(balance.Symbol))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+            => AllBalances().All(x => x.ContainedIn(other.GetAllocation(x.Symbol)));
 
         /// <summary>
         /// Returns a deep copy of the portfolio instance.

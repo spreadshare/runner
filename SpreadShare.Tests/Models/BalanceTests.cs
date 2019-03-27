@@ -93,10 +93,8 @@ namespace SpreadShare.Tests.Models
             var currency = new Currency("ETH");
             Balance a = new Balance(currency, 1, 1);
             Balance b = new Balance(currency, 1.2M, 1.8M);
-            Assert.True(a < b);
-            Assert.False(a > b);
-            Assert.True(b > a);
-            Assert.False(b < a);
+            Assert.True(a.ContainedIn(b));
+            Assert.False(b.ContainedIn(a));
         }
 
         [Fact]
@@ -105,10 +103,8 @@ namespace SpreadShare.Tests.Models
             var currency = new Currency("ETH");
             Balance a = new Balance(currency, 1, 1);
             Balance b = new Balance(currency, 1, 1);
-            Assert.False(a < b);
-            Assert.False(a > b);
-            Assert.False(b > a);
-            Assert.False(b < a);
+            Assert.True(a.ContainedIn(b));
+            Assert.True(b.ContainedIn(a));
         }
 
         [Fact]
@@ -117,8 +113,8 @@ namespace SpreadShare.Tests.Models
             var currency = new Currency("ETH");
             Balance a = new Balance(currency, 4, 2);
             Balance b = new Balance(currency, 1, 3);
-            Assert.True(a < b);
-            Assert.True(b < a);
+            Assert.False(a.ContainedIn(b));
+            Assert.False(b.ContainedIn(a));
         }
 
         [Fact]
@@ -128,8 +124,8 @@ namespace SpreadShare.Tests.Models
             Balance right = new Balance(new Currency("BTC"), 0, 0);
             Assert.Throws<InvalidOperationException>(() => left + right);
             Assert.Throws<InvalidOperationException>(() => left - right);
-            Assert.Throws<InvalidOperationException>(() => left < right);
-            Assert.Throws<InvalidOperationException>(() => left > right);
+            Assert.Throws<InvalidOperationException>(() => left.ContainedIn(right));
+            Assert.Throws<InvalidOperationException>(() => right.ContainedIn(left));
         }
 
         [Fact]

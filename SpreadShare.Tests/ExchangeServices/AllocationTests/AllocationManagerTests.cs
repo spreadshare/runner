@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 using Xunit;
@@ -64,11 +65,36 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             var currency = new Currency("ETH");
             alloc.SetInitialConfiguration(new Portfolio(new Dictionary<Currency, Balance>()
             {
-                { currency, new Balance(currency, 2, 1) },
+                { currency, new Balance(currency, 2, 0) },
             }));
 
             Assert.Equal(2, alloc.GetAvailableFunds(currency).Free);
-            Assert.Equal(1, alloc.GetAvailableFunds(currency).Locked);
+            Assert.Equal(0, alloc.GetAvailableFunds(currency).Locked);
+        }
+
+        [Fact]
+        public void SetAllocationNoFreeFunds()
+        {
+            var alloc = new AllocationManager(LoggerFactory, _fetcher, null);
+            var currency = new Currency("ETH");
+            var allMoney = Configuration.Instance.BacktestSettings.Portfolio.GetAllocation(currency).Free;
+            Assert.Throws<AllocationUnavailableException>(() =>
+                alloc.SetInitialConfiguration(new Portfolio(new Dictionary<Currency, Balance>()
+                {
+                    { currency, new Balance(currency, allMoney + 1, 0) },
+                })));
+        }
+
+        [Fact]
+        public void SetAllocationNoLockedFunds()
+        {
+            var alloc = new AllocationManager(LoggerFactory, _fetcher, null);
+            var currency = new Currency("ETH");
+            Assert.Throws<AllocationUnavailableException>(() =>
+                alloc.SetInitialConfiguration(new Portfolio(new Dictionary<Currency, Balance>()
+                {
+                    { currency, new Balance(currency, 1, 2) },
+                })));
         }
 
         [Fact]

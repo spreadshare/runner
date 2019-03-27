@@ -6,7 +6,7 @@ namespace SpreadShare.Models.Trading
     /// <summary>
     /// Model for representing a currency a certain quantity, locked or free.
     /// </summary>
-    internal struct Balance : IComparable<Balance>
+    internal struct Balance
     {
         /// <summary>
         /// Symbol of the asset.
@@ -54,10 +54,6 @@ namespace SpreadShare.Models.Trading
             return new Balance(a.Symbol, a.Free + b.Free, a.Locked + b.Locked);
         }
 
-        public static bool operator <(Balance a, Balance b) => a.CompareTo(b) < 0;
-
-        public static bool operator >(Balance a, Balance b) => a.CompareTo(b) > 0;
-
         /// <summary>
         /// Returns a new instance of balance with free and locked balances set to zero given a certain currency.
         /// </summary>
@@ -66,29 +62,24 @@ namespace SpreadShare.Models.Trading
         public static Balance Empty(Currency c) => new Balance(c, 0.0M, 0.0M);
 
         /// <summary>
-        /// Compares two balances, a balance is smaller if either locked or free is smaller.
+        /// Indicates whether this balance is contained in the given balance.
         /// </summary>
         /// <param name="other">The balance to compare to.</param>
-        /// <returns>Compare value.</returns>
+        /// <returns>Whether the balance is contained in another balance.</returns>
         /// <exception cref="InvalidOperationException">When balances with different symbols are compared.</exception>
-        public int CompareTo(Balance other)
+        public bool ContainedIn(Balance other)
         {
             if (Symbol != other.Symbol)
             {
                 throw new InvalidOperationException($"Cannot compare two balances with different symbols: {this} and {other}");
             }
 
-            if (Free < other.Free || Locked < other.Locked)
+            if (Free <= other.Free && Locked <= other.Locked)
             {
-                return -1;
+                return true;
             }
 
-            if (Free == other.Free && Locked == other.Locked)
-            {
-                return 0;
-            }
-
-            return 1;
+            return false;
         }
 
         /// <inheritdoc />
