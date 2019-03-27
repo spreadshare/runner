@@ -6,12 +6,16 @@ using Binance.Net;
 using Binance.Net.Objects;
 using Dawn;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+
+#pragma warning disable SA1402
 
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Object representation of a trading pair.
     /// </summary>
+    [JsonConverter(typeof(TradingPairSerializer))]
     internal class TradingPair
     {
         private static readonly Dictionary<string, TradingPair> Table = new Dictionary<string, TradingPair>();
@@ -244,4 +248,32 @@ namespace SpreadShare.Models.Trading
             return new string(input.Where(x => !char.IsWhiteSpace(x)).ToArray());
         }
     }
+
+    /// <summary>
+    /// Serialize/Deserialize TradingPair as string.
+    /// </summary>
+    internal class TradingPairSerializer : JsonConverter
+    {
+        /// <inheritdoc />
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var pair = value as TradingPair ?? throw new NullReferenceException("Cannot parse null to TradingPair");
+            serializer.Serialize(writer, pair.ToString());
+        }
+
+        /// <inheritdoc />
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            var str = serializer.Deserialize<string>(reader);
+            return TradingPair.Parse(str);
+        }
+
+        /// <inheritdoc />
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(TradingPair);
+        }
+    }
 }
+
+#pragma warning restore SA1402
