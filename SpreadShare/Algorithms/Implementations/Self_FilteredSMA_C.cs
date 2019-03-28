@@ -182,7 +182,7 @@ namespace SpreadShare.Algorithms.Implementations
                 // Check whether we need to trail the stoploss higher
                 bool trail = data.GetLowestLow(FirstPair, AlgorithmConfiguration.DonchianMin)
                              >
-                             _stoploss.SetPrice;
+                             _stoploss.StopPrice;
 
                 // If the trailing requirements are hit, we trail into a higher stoploss
                 if (trail)
