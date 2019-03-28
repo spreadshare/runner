@@ -96,24 +96,8 @@ namespace SpreadShare.SupportServices.Configuration
 
     internal class BacktestSettings
     {
-        private readonly LazyCache<Dictionary<string, decimal>, Portfolio> _portfolioConstructor =
-            new LazyCache<Dictionary<string, decimal>, Portfolio>(
-                x => new Portfolio(x.Select(
-                        kv => (new Currency(kv.Key), // string -> currency
-                        new Balance(new Currency(kv.Key), kv.Value, 0M))) // decimal -> balance
-                    .ToDictionary(k => k.Item1, k => k.Item2)));
-
         [Required]
         public string OutputFolder { get; private set; }
-
-        [YamlMember(Alias = "Portfolio")]
-        [Required]
-        [NotEmpty]
-        [ForKeys(typeof(CanBeConstructed), typeof(Currency))]
-        [ForValues(typeof(RangeDecimal), "0.0", "79228162514264337593543950335")]
-        public Dictionary<string, decimal> __portfolio { get; private set; }
-
-        public Portfolio Portfolio => _portfolioConstructor.Value(__portfolio).Clone();
     }
 
     internal class EnabledAlgorithm
@@ -157,7 +141,7 @@ namespace SpreadShare.SupportServices.Configuration
 
         public Exchange Exchange => _exchangeConstructor.Value(__exchange);
 
-        public Portfolio Allocation => _allocationConstructor.Value(__allocation);
+        public Portfolio Allocation => _allocationConstructor.Value(__allocation).Clone();
 
         [IgnoreConstraints]
         public AlgorithmConfiguration AlgorithmConfiguration

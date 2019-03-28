@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
-using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
 using OrderSide = SpreadShare.Models.Trading.OrderSide;
@@ -23,8 +21,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
             : base(outputHelper)
         {
             var serviceProvider = ServiceProviderSingleton.Instance.ServiceProvider;
-            var comms = serviceProvider.GetService<BacktestCommunicationService>();
-            _fetcher = new BacktestPortfolioFetcher(comms);
+            _fetcher = new TestPortfolioFetcher();
         }
 
         [Fact]
@@ -77,7 +74,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         {
             var alloc = new AllocationManager(LoggerFactory, _fetcher, null);
             var currency = new Currency("ETH");
-            var allMoney = Configuration.Instance.BacktestSettings.Portfolio.GetAllocation(currency).Free;
+            var allMoney = _fetcher.GetPortfolio().Data.GetAllocation(currency).Free;
             Assert.Throws<AllocationUnavailableException>(() =>
                 alloc.SetInitialConfiguration(new Portfolio(new Dictionary<Currency, Balance>()
                 {
@@ -211,7 +208,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         private AllocationManager MakeDefaultAllocation()
         {
             var alloc = new AllocationManager(LoggerFactory, _fetcher, null);
-            alloc.SetInitialConfiguration(Configuration.Instance.BacktestSettings.Portfolio);
+            alloc.SetInitialConfiguration(Configuration.Instance.EnabledAlgorithm.Allocation);
 
             // Free up at least 10 SNGLS (ObscureCoin)
             alloc.UpdateAllocation(

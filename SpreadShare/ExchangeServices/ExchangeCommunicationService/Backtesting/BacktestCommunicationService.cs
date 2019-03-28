@@ -20,7 +20,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting
         {
             _logger = factory.CreateLogger(GetType());
 
-            RemotePortfolio = Configuration.Instance.BacktestSettings.Portfolio;
+            RemotePortfolio = Configuration.Instance.EnabledAlgorithm.Allocation;
         }
 
         /// <summary>
