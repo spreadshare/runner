@@ -1,5 +1,6 @@
 using System;
 using Dawn;
+using Newtonsoft.Json;
 
 namespace SpreadShare.Models.Trading
 {
@@ -84,8 +85,6 @@ namespace SpreadShare.Models.Trading
 
         /// <inheritdoc />
         public override string ToString()
-        {
-            return $"{Symbol} -> {Free}|{Locked}";
-        }
+            => JsonConvert.SerializeObject(this);
     }
 }

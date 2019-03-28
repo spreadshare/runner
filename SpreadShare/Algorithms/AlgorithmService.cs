@@ -10,6 +10,7 @@ using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.Models;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.SupportServices.ErrorServices;
 using SpreadShare.Utilities;
 
 namespace SpreadShare.Algorithms
@@ -41,7 +42,14 @@ namespace SpreadShare.Algorithms
             if (Program.CommandLineArgs.Trading)
             {
                 // Sets initial configuration
-                allocationManager.SetInitialConfiguration(Configuration.Instance.EnabledAlgorithm.Allocation);
+                try
+                {
+                    allocationManager.SetInitialConfiguration(Configuration.Instance.EnabledAlgorithm.Allocation);
+                }
+                catch (AllocationUnavailableException)
+                {
+                    Program.ExitProgramWithCode(ExitCode.AllocationUnavailable);
+                }
             }
         }
 
