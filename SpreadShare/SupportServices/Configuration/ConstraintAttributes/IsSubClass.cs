@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dawn;
 using SpreadShare.Utilities;
@@ -29,11 +30,12 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         protected override Type InputType => typeof(string);
 
         /// <inheritdoc/>
-        public override string OnError(string name, object value)
-            => $"{name} has value {value} which is not a subclass of {_parent.Name}";
-
-        /// <inheritdoc/>
-        protected override bool Predicate(object value)
-            => Reflections.GetAllSubtypes(_parent).Select(x => x.Name).Contains((string)value);
+        protected override IEnumerable<string> GetErrors(string name, object value)
+        {
+            if (!Reflections.GetAllSubtypes(_parent).Select(x => x.Name).Contains((string)value))
+            {
+                yield return $"{name} has value {value} which is not a subclass of {_parent.Name}";
+            }
+        }
     }
 }

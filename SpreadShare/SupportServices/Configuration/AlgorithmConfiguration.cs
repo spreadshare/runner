@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -40,18 +41,23 @@ namespace SpreadShare.SupportServices.Configuration
                 throw new InvalidConfigurationException("Not all TradingPairs have the same base currency.");
             });
 
+        private readonly LazyCache<string, CandleWidth> _candleWidthConstructor = new LazyCache<string, CandleWidth>(
+            Enum.Parse<CandleWidth>);
+
         // ###    PUBLIC PARSED PROPERTIES ###
+        [YamlMember(Alias = "CandleWidth")]
+        [ParsesToEnum(typeof(CandleWidth))]
+        [CompatibleCandleWidth]
+        public string __candleWidth { get; protected set; }
 
         /// <summary>
-        /// Gets or sets the candle width this algorithm works with.
+        /// Gets the candle width this algorithm works with.
         /// </summary>
-        [CompatibleCandleWidth]
-        public CandleWidth CandleWidth { get; protected set; }
+        public CandleWidth CandleWidth => _candleWidthConstructor.Value(__candleWidth);
 
         /// <summary>
         /// Gets th base currency of the algorithm.
         /// </summary>
-        [ConstraintAttributes.Required]
         public Currency BaseCurrency => _baseCurrencyConstructor.Value(TradingPairs);
 
         /// <summary>

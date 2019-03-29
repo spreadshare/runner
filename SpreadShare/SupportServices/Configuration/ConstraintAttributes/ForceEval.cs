@@ -3,17 +3,14 @@ using System.Collections.Generic;
 namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
 {
     /// <summary>
-    /// Requires a setting to be not null.
+    /// Enforces that read only properties are validated.
     /// </summary>
-    internal class Required : Constraint
+    internal class ForceEval : Constraint
     {
         /// <inheritdoc/>
         protected override IEnumerable<string> GetErrors(string name, object value)
         {
-            if (value == null)
-            {
-                yield return $"{name} must have a value";
-            }
+            yield break;
         }
     }
 }

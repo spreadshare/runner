@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Mail;
 
 namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
@@ -17,20 +18,21 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         protected override Type InputType => typeof(string);
 
         /// <inheritdoc/>
-        public override string OnError(string name, object value)
-            => $"{name} has value {value}, which is not a valid email address {(HostName != null ? $", given host name must be {HostName}" : string.Empty)}.";
-
-        /// <inheritdoc/>
-        protected override bool Predicate(object value)
+        protected override IEnumerable<string> GetErrors(string name, object value)
         {
+            MailAddress mailAddress;
             try
             {
-                var mailAddress = new MailAddress((string)value);
-                return (string)value == mailAddress.Address && (HostName is null || HostName == mailAddress.Host);
+                mailAddress = new MailAddress((string)value);
             }
             catch
             {
-                return false;
+                mailAddress = new MailAddress("failure@error.com");
+            }
+
+            if ((string)value != mailAddress.Address || HostName != null || HostName == mailAddress.Host)
+            {
+                yield return $"{name} has value {value}, which is not a valid email address {(HostName != null ? $", given host name must be {HostName}" : string.Empty)}.";
             }
         }
     }

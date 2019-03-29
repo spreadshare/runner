@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
 {
@@ -7,8 +8,8 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
     /// </summary>
     internal class RangeInt : Constraint
     {
-        private readonly int _min;
-        private readonly int _max;
+        private readonly decimal _min;
+        private readonly decimal _max;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RangeInt"/> class.
@@ -25,11 +26,12 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         protected override Type InputType => typeof(int);
 
         /// <inheritdoc/>
-        public override string OnError(string name, object value)
-            => $"{name} was not in range {_min}, {_max}";
-
-        /// <inheritdoc/>
-        protected override bool Predicate(object value)
-            => (int)value >= _min && (int)value <= _max;
+        protected override IEnumerable<string> GetErrors(string name, object value)
+        {
+            if ((int)value < _min || (int)value > _max)
+            {
+                yield return $"{name} has value {value} which is not in [{_min}, {_max}]";
+            }
+        }
     }
 }

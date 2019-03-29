@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
@@ -11,11 +12,6 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
     internal class ForKeys : DictionaryConstraint
     {
         private readonly Constraint _implementation;
-
-        /// <summary>
-        /// Keeps track of the last failed element to enrich the error message.
-        /// </summary>
-        private (object, int) _failureCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ForKeys"/> class.
@@ -33,25 +29,18 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         }
 
         /// <inheritdoc/>
-        public override string OnError(string name, object value)
-            => $"ForAll failure: {_implementation.OnError($"{name}[{_failureCache.Item2}]", _failureCache.Item1)}";
-
-        /// <inheritdoc/>
-        protected override bool Predicate(object value)
+        protected override IEnumerable<string> GetErrors(string name, object value)
         {
             int index = 0;
             foreach (var key in CastDict((IDictionary)value).Select(x => x.Key))
             {
-                if (!_implementation.Valid(key))
+                foreach (var failure in _implementation.Validate($"{name}.Keys[{index}]", key))
                 {
-                    _failureCache = (key, index);
-                    return false;
+                    yield return failure;
                 }
 
                 index++;
             }
-
-            return true;
         }
     }
 }

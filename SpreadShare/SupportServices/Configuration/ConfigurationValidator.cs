@@ -1,9 +1,12 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.EntityFrameworkCore.Internal;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
+using SpreadShare.Utilities;
 using YamlDotNet.Serialization;
 
 namespace SpreadShare.SupportServices.Configuration
@@ -14,49 +17,85 @@ namespace SpreadShare.SupportServices.Configuration
     internal static class ConfigurationValidator
     {
         /// <summary>
+        /// Throws <see cref="InvalidConfigurationException"/> when the given objects does not pass all constraints.
+        /// </summary>
+        /// <param name="obj">The object to validate.</param>
+        /// <exception cref="InvalidConfigurationException">Not all constraints passed.</exception>
+        public static void ValidateConstraintsRecursively(object obj)
+        {
+            if (GetConstraintFailuresRecursively(obj).Any())
+            {
+                throw new InvalidConfigurationException(GetConstraintFailuresRecursively(obj).Join(Environment.NewLine));
+            }
+        }
+
+        /// <summary>
         /// Validate that all properties abide by there <see cref="Constraint"/> attributes.
         /// </summary>
         /// <param name="obj">The object to validate.</param>
-        public static void ValidateConstraintsRecursively(object obj)
+        /// <returns>Description of every constraint violation.</returns>
+        public static IEnumerable<string> GetConstraintFailuresRecursively(object obj)
         {
             // Base case
             if (obj == null)
             {
-                return;
+                yield break;
             }
 
             // Check write-able properties
             Type objType = obj.GetType();
             foreach (var p in objType.GetProperties())
             {
-                if (p.GetCustomAttribute<IgnoreConstraintsAttribute>() != null)
+                object value = null;
+                string evalError = null;
+                try
                 {
+                    // Attempt to evaluate the value
+                    value = p.GetValue(obj, null);
+                }
+                catch (Exception e)
+                {
+                    // Exception during evaluation
+                    evalError = e.Unpack().Message;
+                }
+
+                if (evalError != null)
+                {
+                    // Yield exception and continue.
+                    yield return evalError;
                     continue;
                 }
 
-                // Always validate the value.
-                var value = p.GetValue(obj, null);
+                foreach (var failure in ValidateProperty(p, value))
+                {
+                    yield return failure;
+                }
 
-                ValidateProperty(p, value);
                 if (value is IEnumerable enumerable)
                 {
                     // The value is a list, recurse if it is not a simple type.
                     foreach (var child in enumerable)
                     {
-                        if (!IsSimpleType(child.GetType()) && p.CanWrite)
+                        if (!IsSimpleType(child.GetType()) && (p.CanWrite || p.GetCustomAttribute<ForceEval>() != null))
                         {
-                            ValidateConstraintsRecursively(child);
+                            foreach (var failure in GetConstraintFailuresRecursively(child))
+                            {
+                                yield return failure;
+                            }
                         }
                     }
                 }
-                else if (!IsSimpleType(p.PropertyType) && p.CanWrite)
+                else if (!IsSimpleType(p.PropertyType) && (p.CanWrite || p.GetCustomAttribute<ForceEval>() != null))
                 {
-                    ValidateConstraintsRecursively(value);
+                    foreach (var failure in GetConstraintFailuresRecursively(value))
+                    {
+                        yield return failure;
+                    }
                 }
             }
         }
 
-        private static void ValidateProperty(PropertyInfo property, object value)
+        private static IEnumerable<string> ValidateProperty(PropertyInfo property, object value)
         {
             var constraints = property.GetCustomAttributes().OfType<Constraint>();
             foreach (var constraint in constraints)
@@ -67,12 +106,11 @@ namespace SpreadShare.SupportServices.Configuration
                    continue;
                 }
 
-                if (!constraint.Valid(value))
+                // If possible, use the YamlAlias as name
+                string name = property.GetCustomAttribute<YamlMemberAttribute>()?.Alias ?? property.Name;
+                foreach (var failure in constraint.Validate(name, value))
                 {
-                    // If possible, use the YamlAlias as name
-                    string name = property.GetCustomAttribute<YamlMemberAttribute>()?.Alias ?? property.Name;
-                    throw new InvalidConfigurationException(
-                        $"{constraint.GetType().Name}: {constraint.OnError(name, value)}");
+                    yield return $"{constraint.GetType().Name}: {failure}";
                 }
             }
         }

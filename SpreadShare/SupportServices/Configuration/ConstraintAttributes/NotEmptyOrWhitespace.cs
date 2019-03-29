@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
 {
@@ -11,13 +12,12 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         protected override Type InputType => typeof(string);
 
         /// <inheritdoc/>
-        public override string OnError(string name, object value)
-            => $"{name} cannot be empty or whitespace";
-
-        /// <inheritdoc/>
-        protected override bool Predicate(object value)
+        protected override IEnumerable<string> GetErrors(string name, object value)
         {
-            return !string.IsNullOrEmpty((string)value) && !string.IsNullOrWhiteSpace((string)value);
+            if (string.IsNullOrEmpty((string)value) || string.IsNullOrWhiteSpace((string)value))
+            {
+                yield return $"{name} cannot be empty or whitespace";
+            }
         }
     }
 }

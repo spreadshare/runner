@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 
 namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
@@ -9,7 +10,6 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
     internal class CanBeConstructed : Constraint
     {
         private readonly Type _target;
-        private string _failureCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CanBeConstructed"/> class.
@@ -25,20 +25,24 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         }
 
         /// <inheritdoc/>
-        public override string OnError(string name, object value)
-            => $"{name} has value '{value}' which was rejected by the .ctor(string) method of {_target}: {_failureCache}";
-
-        /// <inheritdoc/>
-        protected override bool Predicate(object value)
+        protected override IEnumerable<string> GetErrors(string name, object value)
         {
+            string message = null;
             try
             {
-                return Activator.CreateInstance(_target, value) != null;
+                if (Activator.CreateInstance(_target, value) == null)
+                {
+                    throw new ArgumentException($"Cannot instantiate {_target} width {value}");
+                }
             }
             catch (Exception e)
             {
-                _failureCache = e.Message;
-                return false;
+                message = e.Message;
+            }
+
+            if (message != null)
+            {
+                yield return message;
             }
         }
     }
