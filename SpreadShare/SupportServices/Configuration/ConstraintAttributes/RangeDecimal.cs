@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
@@ -26,11 +27,12 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         protected override Type InputType => typeof(decimal);
 
         /// <inheritdoc/>
-        public override string OnError(string name, object value)
-            => $"{name} was not in range {_min}, {_max}";
-
-        /// <inheritdoc/>
-        protected override bool Predicate(object value)
-            => (decimal)value >= _min && (decimal)value <= _max;
+        protected override IEnumerable<string> GetErrors(string name, object value)
+        {
+            if ((decimal)value < _min || (decimal)value > _max)
+            {
+                yield return $"{name} has value {value} which is not in [{_min}, {_max}]";
+            }
+        }
     }
 }

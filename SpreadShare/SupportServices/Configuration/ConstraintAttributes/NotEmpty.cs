@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Internal;
 
 namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
@@ -13,12 +14,12 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         protected override Type InputType => typeof(IEnumerable);
 
         /// <inheritdoc/>
-        public override string OnError(string name, object value) => $"{name} cannot be empty";
-
-        /// <inheritdoc/>
-        protected override bool Predicate(object value)
+        protected override IEnumerable<string> GetErrors(string name, object value)
         {
-            return ((IEnumerable)value).Any();
+            if (!((IEnumerable)value).Any())
+            {
+                yield return $"{name} cannot be empty";
+            }
         }
     }
 }

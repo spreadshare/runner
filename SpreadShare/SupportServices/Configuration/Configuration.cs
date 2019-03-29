@@ -143,7 +143,7 @@ namespace SpreadShare.SupportServices.Configuration
 
         public Portfolio Allocation => _allocationConstructor.Value(__allocation).Clone();
 
-        [IgnoreConstraints]
+        [ForceEval]
         public AlgorithmConfiguration AlgorithmConfiguration
         {
             get
@@ -153,15 +153,9 @@ namespace SpreadShare.SupportServices.Configuration
                 {
                     return _algorithmConfigurationConstructor.Value(
                         __parameters,
-                        x =>
-                        {
-                            // Serialize the parameter dictionary back to string and re-deserialize with the right type.
-                            var data = new DeserializerBuilder().Build().Deserialize(
+                        x => new DeserializerBuilder().Build().Deserialize( // Re-Deserialize with the now known type.
                                 new SerializerBuilder().Build().Serialize(__parameters),
-                                config);
-                            ConfigurationValidator.ValidateConstraintsRecursively(data);
-                            return data;
-                        },
+                                config),
                         config) as AlgorithmConfiguration;
                 }
                 catch (TargetInvocationException e)

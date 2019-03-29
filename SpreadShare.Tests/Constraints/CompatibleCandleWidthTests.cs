@@ -25,7 +25,6 @@ namespace SpreadShare.Tests.Constraints
             const string input = "Value: TenMinutes";
             var obj = _deserializer.Deserialize<CompatibleCandleWidthObject>(new StringReader(input));
             ConfigurationValidator.ValidateConstraintsRecursively(obj);
-            Assert.Equal(CandleWidth.TenMinutes, obj.Value);
         }
 
         [Fact]
@@ -43,12 +42,12 @@ namespace SpreadShare.Tests.Constraints
             const string input = "Value: FiveMinutes";
             var obj = _deserializer.Deserialize<CompatibleCandleWidthObject>(new StringReader(input));
             ConfigurationValidator.ValidateConstraintsRecursively(obj);
-            Assert.Equal(CandleWidth.FiveMinutes, obj.Value);
         }
 
         [Fact]
         public void CompatibleCandleWidthNotDivisible()
         {
+            Assert.Equal(7, (int)CandleWidth.DONOTUSETestEntry);
             const string input = "Value: DONOTUSETestEntry";
             var obj = _deserializer.Deserialize<CompatibleCandleWidthObject>(new StringReader(input));
             Assert.Throws<InvalidConfigurationException>(
@@ -60,7 +59,7 @@ namespace SpreadShare.Tests.Constraints
         private class CompatibleCandleWidthObject
         {
             [CompatibleCandleWidth]
-            public CandleWidth Value { get; set; }
+            public string Value { get; set; }
         }
         #pragma warning restore CA1812
     }

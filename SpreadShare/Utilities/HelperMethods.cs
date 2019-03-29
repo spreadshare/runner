@@ -67,5 +67,20 @@ namespace SpreadShare.Utilities
         {
             return denominator == 0 ? 0 : numerator / denominator;
         }
+
+        /// <summary>
+        /// Get the most inner exception.
+        /// </summary>
+        /// <param name="e">The exception to unpack.</param>
+        /// <returns>the most inner exception.</returns>
+        public static Exception Unpack(this Exception e)
+        {
+            if (e.InnerException != null)
+            {
+                return e.InnerException.Unpack();
+            }
+
+            return e;
+        }
     }
 }

@@ -56,6 +56,7 @@ namespace SpreadShare
                 Console.ForegroundColor = ConsoleColor.Red; // Logger.logError is not available yet
                 Console.WriteLine($" > {e.Message}");
                 Console.ResetColor();
+                ExitProgramWithCode(ExitCode.InvalidConfiguration);
                 return 1;
             }
 

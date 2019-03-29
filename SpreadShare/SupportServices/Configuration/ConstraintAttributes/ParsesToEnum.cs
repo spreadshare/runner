@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Data;
+using Dawn;
 
 namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
 {
@@ -13,17 +16,25 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         /// Initializes a new instance of the <see cref="ParsesToEnum"/> class.
         /// </summary>
         /// <param name="type">The type of the enum.</param>
-        public ParsesToEnum(Type type) => _target = type;
+        public ParsesToEnum(Type type)
+        {
+            Guard.Argument(type)
+                .Require<InvalidConstraintException>(
+                    x => x.IsEnum,
+                    x => $"The {nameof(ParsesToEnum)} constraint must take a Enum type argument.");
+            _target = type;
+        }
 
         /// <inheritdoc/>
         protected override Type InputType => typeof(string);
 
         /// <inheritdoc/>
-        public override string OnError(string name, object value)
-            => $"{name} has value '{value}' which is not a member of the {_target.Name} enum.";
-
-        /// <inheritdoc/>
-        protected override bool Predicate(object value)
-            => Enum.TryParse(_target, (string)value, out var unused);
+        protected override IEnumerable<string> GetErrors(string name, object value)
+        {
+            if (!Enum.TryParse(_target, (string)value, out var unused))
+            {
+                yield return $"{name} has value '{value}' which is not a member of the {_target.Name} enum.";
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 
 namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
@@ -10,11 +11,6 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
     internal class ForAll : Constraint
     {
         private readonly Constraint _implementation;
-
-        /// <summary>
-        /// Keeps track of the last failed element to enrich the error message.
-        /// </summary>
-        private (object, int) _failureCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ForAll"/> class.
@@ -35,25 +31,21 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         protected override Type InputType => typeof(IEnumerable);
 
         /// <inheritdoc/>
-        public override string OnError(string name, object value)
-            => $"ForAll failure: {_implementation.OnError($"{name}[{_failureCache.Item2}]", _failureCache.Item1)}";
-
-        /// <inheritdoc/>
-        protected override bool Predicate(object value)
+        protected override IEnumerable<string> GetErrors(string name, object value)
         {
             int index = 0;
             foreach (var item in (IEnumerable)value)
             {
                 if (!_implementation.Valid(item))
                 {
-                    _failureCache = (item, index);
-                    return false;
+                    foreach (var failure in _implementation.Validate($"{name}[{index}]", item))
+                    {
+                        yield return failure;
+                    }
                 }
 
                 index++;
             }
-
-            return true;
         }
     }
 }

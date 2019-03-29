@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dawn;
 using SpreadShare.Utilities;
@@ -10,7 +11,7 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
     /// </summary>
     internal class IsImplementation : Constraint
     {
-        private Type _parent;
+        private readonly Type _parent;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IsImplementation"/> class.
@@ -26,11 +27,12 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         }
 
         /// <inheritdoc/>
-        public override string OnError(string name, object value)
-            => $"{name} has the value '{value}', which does not implement the interface {_parent.Name}";
-
-        /// <inheritdoc/>
-        protected override bool Predicate(object value)
-            => Reflections.AllAlgorithms.Any(x => x.Name == (string)value);
+        protected override IEnumerable<string> GetErrors(string name, object value)
+        {
+            if (Reflections.AllAlgorithms.All(x => x.Name != (string)value))
+            {
+                yield return $"{name} has the value '{value}', which does not implement the interface {_parent.Name}";
+            }
+        }
     }
 }

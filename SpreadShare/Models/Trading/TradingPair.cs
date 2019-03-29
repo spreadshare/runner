@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using Binance.Net;
 using Binance.Net.Objects;
 using Dawn;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 #pragma warning disable SA1402
@@ -124,8 +123,7 @@ namespace SpreadShare.Models.Trading
         /// <summary>
         /// Download all currencies from Binance.
         /// </summary>
-        /// <param name="logger">Used to create output.</param>
-        public static void Sync(ILogger logger)
+        public static void Sync()
         {
             using (var client = new BinanceClient())
             {
@@ -149,7 +147,7 @@ namespace SpreadShare.Models.Trading
                     var pair = rx.Match(item.Name);
                     if (!pair.Success)
                     {
-                        logger.LogWarning($"Could not extract pairs from {item.Name}, skipping");
+                        Console.WriteLine($"Could not extract pairs from {item.Name}, skipping");
                         continue;
                     }
 
@@ -157,7 +155,7 @@ namespace SpreadShare.Models.Trading
                     string right = pair.Groups[2].Value;
                     if (string.IsNullOrEmpty(left) || string.IsNullOrEmpty(right))
                     {
-                        logger.LogWarning($"Either left: |{left}| or right: |{right}|  --> was a null or empty string (from {item.Name})");
+                        Console.WriteLine($"Either left: |{left}| or right: |{right}|  --> was a null or empty string (from {item.Name})");
                         continue;
                     }
 
@@ -177,7 +175,7 @@ namespace SpreadShare.Models.Trading
 
                     if (stepSize == 0 || pricePrecision == 0)
                     {
-                        logger.LogWarning($"Could not extract all filters from {item.Name}, skipping");
+                        Console.WriteLine($"Could not extract all filters from {item.Name}, skipping");
                         continue;
                     }
 
