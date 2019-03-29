@@ -76,5 +76,10 @@ namespace SpreadShare.SupportServices.ErrorServices
         /// The database could not be migrated.
         /// </summary>
         MigrationFailure = 13,
+
+        /// <summary>
+        /// The configured allocation was not available.
+        /// </summary>
+        AllocationUnavailable = 14,
     }
 }

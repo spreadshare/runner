@@ -85,8 +85,8 @@ namespace SpreadShare.ExchangeServices.Allocation
 
             if (!initialAllocation.ContainedIn(available))
             {
-                _logger.LogError($"The requested allocation: {JsonConvert.SerializeObject(initialAllocation)}\n"
-                                 + $"was not contained in the available assets: {JsonConvert.SerializeObject(available)}");
+                _logger.LogError($"The requested allocation:\n {JsonConvert.SerializeObject(initialAllocation, Formatting.Indented)}\n"
+                                 + $"was not contained in the available assets:\n {JsonConvert.SerializeObject(available, Formatting.Indented)}");
                 throw new AllocationUnavailableException();
             }
 
@@ -122,7 +122,7 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="exec">The trade execution to process.</param>
         public virtual void UpdateAllocation(TradeExecution exec)
         {
-            _logger.LogInformation($"Allocation Update: {JsonConvert.SerializeObject(exec)}");
+            _logger.LogInformation($"Allocation Update: {JsonConvert.SerializeObject(exec, Formatting.Indented)}");
             _allocation.UpdateAllocation(exec);
             UpdateObservers(_allocation);
         }

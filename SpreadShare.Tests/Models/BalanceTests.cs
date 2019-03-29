@@ -130,13 +130,6 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
-        public void ToStringTest()
-        {
-            Balance balance = new Balance(new Currency("ETH"), 3, 5.5M);
-            Assert.Equal("ETH -> 3|5.5", balance.ToString());
-        }
-
-        [Fact]
         public void JsonIdentity()
         {
             Balance balance = new Balance(new Currency("ETH"), 2, 3);
