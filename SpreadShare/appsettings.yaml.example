@@ -15,8 +15,7 @@ EnabledAlgorithm:
       TradingPairs:
         - TRXETH
     Allocation:
-        ETH: 0
-        BTC: 0
+        ETH: 10
 
 # Trading: Settings for communication with Binance
 BinanceClientSettings:
@@ -31,10 +30,6 @@ BinanceClientSettings:
     Secret: api_secret
 
 BacktestSettings:
-  # Defines what currencies are present in the portfolio. Format: 'ETH: 10'
-  Portfolio:
-    ETH: 10
-
   # Standard folder to place results in
   OutputFolder: ./backtesting_output
 

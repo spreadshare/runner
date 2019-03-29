@@ -95,8 +95,8 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
             state.CurrentBacktestConfigurationPath = _args.ConfigurationPath;
 
             // Reset the allocation for a new run.
-            state.AllocationManager.SetInitialConfiguration(Configuration.Configuration.Instance.BacktestSettings
-                .Portfolio);
+            state.AllocationManager.SetInitialConfiguration(Configuration.Configuration.Instance.EnabledAlgorithm
+                .Allocation);
 
             // Backtests are run synchronously by design.
             var result = state.AlgorithmService.StartAlgorithm(_algo, _configuration);
