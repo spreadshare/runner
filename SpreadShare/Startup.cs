@@ -42,6 +42,8 @@ namespace SpreadShare
         /// <param name="filepath">Location of the configuration file.</param>
         public Startup(string filepath)
         {
+            // Download all currencies from Binance
+            TradingPair.Sync();
             using (var file = new StreamReader(filepath))
             {
                 var configuration = new DeserializerBuilder()
@@ -80,10 +82,7 @@ namespace SpreadShare
         /// <param name="loggerFactory">LoggerFactory for creating a logger.</param>
         public static void Configure(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
-            ILogger logger = loggerFactory.CreateLogger("ConfigureServices");
-
-            // Download all currencies from Binance
-            TradingPair.Sync(logger);
+            var logger = loggerFactory.CreateLogger("Startup::Configure");
 
             // Add Sentry to ErrorLogging
             if (Program.CommandLineArgs.Trading)

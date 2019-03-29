@@ -8,8 +8,8 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
     /// </summary>
     internal class RangeLong : Constraint
     {
-        private readonly decimal _min;
-        private readonly decimal _max;
+        private readonly long _min;
+        private readonly long _max;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RangeLong"/> class.
