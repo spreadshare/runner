@@ -74,9 +74,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Make sure all constructor processes are finished
             await Task.Delay(1000).ConfigureAwait(false);
 
-            // Clear the trades and state switch event table
-            _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"BacktestOrders\"");
-            _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"StateSwitchEvents\"");
+            // Clear the trades and state switch event table (NOTE: Sequences are not reset)
+            _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"BacktestOrders\";");
+            _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"StateSwitchEvents\";");
             _database.SaveChanges();
 
             while (CurrentTime < EndTime)

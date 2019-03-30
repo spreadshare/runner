@@ -5,21 +5,20 @@ using Binance.Net.Objects;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using SpreadShare.ExchangeServices.ProvidersBinance;
+using SpreadShare.ExchangeServices.Providers.Observing;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.ErrorServices;
 
-namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
+namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
     /// <summary>
-    /// Binance implementantion of the communication service.
+    /// Binance implementation of the communication service.
     /// </summary>
-    internal class BinanceCommunicationsService : ExchangeCommunications, IDisposable
+    internal class BinanceCommunicationsService : Observable<OrderUpdate>, IDisposable
     {
         private readonly ILogger _logger;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly BinanceClientSettings.CredentialsWrapper _authy;
-        private ListenKeyManager _listenKeyManager;
+        private readonly ListenKeyManager _listenKeyManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceCommunicationsService"/> class.
@@ -28,9 +27,17 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         public BinanceCommunicationsService(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger(GetType());
-            _loggerFactory = loggerFactory;
-            _authy = Configuration.Instance.BinanceClientSettings.Credentials;
             ReceiveWindow = Configuration.Instance.BinanceClientSettings.ReceiveWindow;
+
+            var auth = Configuration.Instance.BinanceClientSettings.Credentials;
+            Client = new BinanceClient();
+            Client.SetApiCredentials(auth.Key, auth.Secret);
+
+            var options = new BinanceSocketClientOptions { LogVerbosity = LogVerbosity.Debug };
+            Socket = new BinanceSocketClient(options);
+
+            // Setup ListenKeyManager
+            _listenKeyManager = new ListenKeyManager(loggerFactory, Client);
         }
 
         /// <summary>
@@ -46,7 +53,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         /// <summary>
         /// Gets the instance of the binance user socket.
         /// </summary>
-        public BinanceSocketClient Socket { get; private set; }
+        public BinanceSocketClient Socket { get; }
 
         /// <inheritdoc />
         public void Dispose()
@@ -56,38 +63,9 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Disposes the current object's resource.
-        /// </summary>
-        /// <param name="disposing">Whether to dispose the resources of the object.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _listenKeyManager?.Dispose();
-                Client?.Dispose();
-                Socket?.Dispose();
-            }
-        }
-
-        /// <inheritdoc />
-        protected override void Startup()
-        {
-            Client = new BinanceClient();
-            Client.SetApiCredentials(_authy.Key, _authy.Secret);
-
-            var options = new BinanceSocketClientOptions { LogVerbosity = LogVerbosity.Debug };
-            Socket = new BinanceSocketClient(options);
-
-            // Setup ListenKeyManager
-            _listenKeyManager = new ListenKeyManager(_loggerFactory, Client);
-
-            EnableStreams();
-        }
-
-        /// <summary>
         /// Enable streams for 24 hours.
         /// </summary>
-        private void EnableStreams()
+        public void EnableStreams()
         {
             _logger.LogInformation($"Enabling streams at {DateTime.UtcNow}");
 
@@ -104,7 +82,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
             // Start socket connection
             // TODO: Is this correct?
             // TODO: TradeId is not correct.
-            var succesOrderBook = Socket.SubscribeToUserStream(
+            var successOrderBook = Socket.SubscribeToUserStream(
                 listenKey,
                 accountInfoUpdate =>
                 {
@@ -116,7 +94,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                     // ####### WARNING ##########################################################
                     // ### Any exception will cause this method to shutdown without warning,
                     // ### causing the observers to hear nothing. This is completely shitty behavior,
-                    // ### do not make the mistake i made and waste your time.
+                    // ### do not make the mistake I made and waste your time.
                     // ##########################################################################
                     try
                     {
@@ -129,22 +107,36 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
                     }
                 });
 
-            if (!succesOrderBook.Success)
+            if (!successOrderBook.Success)
             {
-                _logger.LogError(succesOrderBook.Error.Message);
+                _logger.LogError(successOrderBook.Error.Message);
                 Program.ExitProgramWithCode(ExitCode.BinanceCommunicationStartupFailure);
             }
 
             // Set error handler
-            succesOrderBook.Data.ConnectionLost += () =>
+            successOrderBook.Data.ConnectionLost += () =>
             {
                 _logger.LogCritical($"Connection got closed at {DateTime.UtcNow}. Attempt to open socket");
                 EnableStreams();
             };
 
-            succesOrderBook.Data.ConnectionRestored += t => _logger.LogCritical($"Connection was restored after {t}");
+            successOrderBook.Data.ConnectionRestored += t => _logger.LogCritical($"Connection was restored after {t}");
 
             _logger.LogInformation("Binance Communication Service was successfully started!");
+        }
+
+        /// <summary>
+        /// Disposes the current object's resource.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose the resources of the object.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _listenKeyManager?.Dispose();
+                Client?.Dispose();
+                Socket?.Dispose();
+            }
         }
     }
 }

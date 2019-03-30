@@ -4,7 +4,7 @@ using Binance.Net.Interfaces;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
 
-namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
+namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
     /// <summary>
     /// Object for obtaining and renewing listen keys for Binance.
@@ -34,7 +34,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Obtain listenkey that is valid for 24 hours (auto renews every 30 min).
+        /// Obtain ListenKey that is valid for 24 hours (auto renews every 30 min).
         /// </summary>
         /// <returns>ListenKey valid for 24 hours.</returns>
         public ResponseObject<string> Obtain()
@@ -52,7 +52,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
 
             _listenKey = getListenKey.Data;
 
-            // Set timer every 30 min for autorenewal
+            // Set timer every 30 min for auto-renewal
             SetTimer();
 
             return new ResponseObject<string>(ResponseCode.Success, _listenKey, "Successfully obtained listenKey");
@@ -79,7 +79,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Clears timer and listenkey.
+        /// Clears timer and ListenKey.
         /// </summary>
         private void Cleanup()
         {
@@ -105,15 +105,15 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
         }
 
         /// <summary>
-        /// Renew listenkey.
+        /// Renew ListenKey.
         /// </summary>
         /// <param name="stateInfo">Given context from the method starting the timer.</param>
         private void Renew(object stateInfo)
         {
-            _logger.LogInformation($"{DateTime.UtcNow} | Requesting renewal of listenKey: {_listenKey}");
+            _logger.LogDebug($"{DateTime.UtcNow} | Requesting renewal of listenKey: {_listenKey}");
             var renewal = _client.KeepAliveUserStream(_listenKey);
 
-            // If renewal error'ed
+            // If renewal gives an error
             if (!renewal.Success)
             {
                 _logger.LogError($"{DateTime.UtcNow} | Could not renew listenKey: {_listenKey}");
@@ -135,7 +135,7 @@ namespace SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance
             }
 
             // Renewal succeeded
-            _logger.LogInformation($"{DateTime.UtcNow} | Renewed listenKey: {_listenKey}");
+            _logger.LogDebug($"{DateTime.UtcNow} | Renewed listenKey: {_listenKey}");
         }
     }
 }

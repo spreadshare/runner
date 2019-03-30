@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using CommandLine;
 using SpreadShare.Algorithms;
+using SpreadShare.Models;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices.BacktestDaemon.CommandAttributes;
 using SpreadShare.SupportServices.Configuration;
@@ -101,7 +102,7 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
             // Backtests are run synchronously by design.
             var result = state.AlgorithmService.StartAlgorithm(_algo, _configuration);
 
-            if (result.Success || result.Message == ResponseCommon.OutOfFunds.Message)
+            if (result.Success || result.Message == ResponseObject.OutOfFunds.Message)
             {
                 // Notify third party applications that the backtest with their id has finished.
                 Console.WriteLine($"BACKTEST_FINISHED={BacktestDaemonService.Instance.State.CurrentBacktestID}");

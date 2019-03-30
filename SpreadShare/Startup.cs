@@ -7,8 +7,6 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models.Trading;
@@ -66,10 +64,8 @@ namespace SpreadShare
             // Binance communication dependency
             services.AddSingleton<BinanceCommunicationsService, BinanceCommunicationsService>();
 
-            services.AddSingleton<BacktestCommunicationService, BacktestCommunicationService>();
-
             // Create algorithm service that manages running algorithms
-            services.AddSingleton<IAlgorithmService, AlgorithmService>();
+            services.AddSingleton<AlgorithmService, AlgorithmService>();
 
             // Add allocation manager
             services.AddSingleton<AllocationManager, AllocationManager>();
@@ -127,28 +123,18 @@ namespace SpreadShare
         {
             // Add Database context dependency
             services.AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>(
-                opt
-                => opt.UseNpgsql(Configuration.Instance.ConnectionStrings.LocalConnection),
+                opt => opt.UseNpgsql(Configuration.Instance.ConnectionStrings.LocalConnection),
                 ServiceLifetime.Transient);
 
-            // TODO: Add layered timeout for unsuccessfully connecting to DB
             // Add Logging dependency
             services.AddLogging(loggingBuilder => loggingBuilder
-                .AddConsole(opt => opt.DisableColors = false)
                 .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
                 .AddFilter("SpreadShare", Program.CommandLineArgs.VerboseLogging ? LogLevel.Debug : LogLevel.Critical)
                 .SetMinimumLevel(LogLevel.Information));
 
-            // Add MyService dependency
             services.AddSingleton<DatabaseMigrationService, DatabaseMigrationService>();
-
-            // Database utilities
             services.AddSingleton<DatabaseUtilities, DatabaseUtilities>();
-
-            // Database event logging
             services.AddSingleton<DatabaseEventListenerService, DatabaseEventListenerService>();
-
-            // Backtesting service.
             services.AddSingleton<BacktestDaemonService, BacktestDaemonService>();
 
             // Add Portfolio fetching

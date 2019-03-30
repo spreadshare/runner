@@ -1,7 +1,6 @@
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;

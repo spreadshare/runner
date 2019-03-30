@@ -1,5 +1,4 @@
 using System;
-using SpreadShare.Utilities;
 
 namespace SpreadShare.Models.Exceptions.OrderExceptions
 {
@@ -21,7 +20,7 @@ namespace SpreadShare.Models.Exceptions.OrderExceptions
         /// Initializes a new instance of the <see cref="OutOfFundsException"/> class.
         /// </summary>
         public OutOfFundsException()
-            : base(ResponseCommon.OutOfFunds.Message)
+            : base(ResponseObject.OutOfFunds.Message)
         {
         }
 

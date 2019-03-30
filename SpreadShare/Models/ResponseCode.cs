@@ -12,11 +12,6 @@ namespace SpreadShare.Models
         Error,
 
         /// <summary>
-        /// The action was not defined
-        /// </summary>
-        NotDefined,
-
-        /// <summary>
         /// The action was successful
         /// </summary>
         Success,

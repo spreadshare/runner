@@ -7,7 +7,7 @@ namespace SpreadShare.ExchangeServices
     /// <summary>
     /// Container that provides algorithms with the data gathering, timers and trading capabilities.
     /// </summary>
-    internal class ExchangeProvidersContainer
+    internal class ExchangeProvidersContainer : IDisposable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ExchangeProvidersContainer"/> class.
@@ -55,5 +55,25 @@ namespace SpreadShare.ExchangeServices
         /// Gets the type of the algorithm this container represents.
         /// </summary>
         public Type Algorithm { get; }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose the StateManager.
+        /// </summary>
+        /// <param name="disposing">Actually do it.</param>
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                LoggerFactory?.Dispose();
+                TradingProvider?.Dispose();
+            }
+        }
     }
 }

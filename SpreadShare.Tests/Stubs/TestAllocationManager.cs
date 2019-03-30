@@ -31,7 +31,7 @@ namespace SpreadShare.Tests.Stubs
         {
             if (p.From.Symbol == new Currency(RefuseCoin))
             {
-                return ResponseCommon.OrderRefused;
+                return ResponseObject.OrderRefused;
             }
 
             return new ResponseObject<OrderUpdate>(tradeCallback());

@@ -11,7 +11,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 {
     public class BacktestBufferGetCandlesTests : BaseTest
     {
-        private Func<BacktestingCandle[], CandleWidth, BacktestingCandle[]> _buidCandleBuffer;
+        private Func<BacktestingCandle[], CandleWidth, BacktestingCandle[]> _buildCandleBuffer;
 
         private BacktestingCandle[] _candles =
             {
@@ -131,7 +131,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         {
             var method = typeof(BacktestBuffers)
                 .GetMethod("BuildCandleBuffer", BindingFlags.Static | BindingFlags.NonPublic);
-            _buidCandleBuffer = (candles, channelWidth)
+            _buildCandleBuffer = (candles, channelWidth)
                 =>
             {
                 try
@@ -149,14 +149,14 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         public void BuildCandleBufferNotSaturated()
         {
             var candles = _candles.ToArray();
-            var result = _buidCandleBuffer(candles, CandleWidth.TenMinutes);
+            var result = _buildCandleBuffer(candles, CandleWidth.TenMinutes);
             Assert.Equal(5, result.Length);
         }
 
         [Fact]
         public void BuildCandleBufferIdentity()
         {
-            var result = _buidCandleBuffer(_candles, CandleWidth.FiveMinutes);
+            var result = _buildCandleBuffer(_candles, CandleWidth.FiveMinutes);
             Assert.Equal(11, result.Length);
             for (int i = 0; i < result.Length; i++)
             {
@@ -173,7 +173,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         public void BuildCandleBufferSingleCandleResult()
         {
             var candles = _candles.Skip(1).ToArray();
-            var result = _buidCandleBuffer(candles, CandleWidth.ThirtyMinutes);
+            var result = _buildCandleBuffer(candles, CandleWidth.ThirtyMinutes);
             Assert.Single(result);
             Assert.Equal(candles.Max(x => x.High), result[0].High);
             Assert.Equal(candles.Min(x => x.Low), result[0].Low);
@@ -183,14 +183,14 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         public void BuildCandleBufferInvalidCandleSize()
         {
             Assert.Throws<InvalidOperationException>(
-                () => _buidCandleBuffer(_candles, CandleWidth.DONOTUSETestEntry));
+                () => _buildCandleBuffer(_candles, CandleWidth.DONOTUSETestEntry));
         }
 
         [Fact]
         public void BuildCandleBufferSmallerCandleSize()
         {
             Assert.Throws<InvalidOperationException>(
-                () => _buidCandleBuffer(_candles, CandleWidth.OneMinute));
+                () => _buildCandleBuffer(_candles, CandleWidth.OneMinute));
         }
     }
 }

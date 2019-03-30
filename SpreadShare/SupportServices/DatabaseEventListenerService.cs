@@ -63,9 +63,9 @@ namespace SpreadShare.SupportServices
             };
 
             _sources.Add(_allocation.Subscribe(new ConfigurableObserver<Portfolio>(
-                OnNext,
                 () => { },
-                _ => { })));
+                _ => { },
+                OnNext)));
 
             lock (Lock)
             {
@@ -83,9 +83,9 @@ namespace SpreadShare.SupportServices
         public void AddOrderSource(Observable<OrderUpdate> source)
         {
             _sources.Add(source.Subscribe(new ConfigurableObserver<OrderUpdate>(
-                OnNext,
                 () => { },
-                e => { })));
+                _ => { },
+                OnNext)));
         }
 
         /// <summary>
@@ -95,9 +95,9 @@ namespace SpreadShare.SupportServices
         public void AddStateSource(Observable<Type> source)
         {
             _sources.Add(source.Subscribe(new ConfigurableObserver<Type>(
-                OnNext,
                 () => { },
-                e => { })));
+                _ => { },
+                OnNext)));
         }
 
         /// <summary>
