@@ -19,7 +19,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private static Dictionary<string, BacktestingCandle[]> _buffers;
         private static Dictionary<(string, int), decimal[]> _highestHighBuffer;
         private static Dictionary<(string, int), decimal[]> _lowestLowBuffer;
-        private static Dictionary<(string, CandleWidth), BacktestingCandle[]> _candleBuffer;
+        private static Dictionary<(string, int), BacktestingCandle[]> _candleBuffer;
 
         private readonly DatabaseContext _db;
         private readonly ILogger _logger;
@@ -51,7 +51,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             if (_candleBuffer == null)
             {
-                _candleBuffer = new Dictionary<(string, CandleWidth), BacktestingCandle[]>();
+                _candleBuffer = new Dictionary<(string, int), BacktestingCandle[]>();
             }
         }
 
@@ -80,7 +80,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="pair">The TradingPair to consider.</param>
         /// <param name="channelWidth">The width of the candles.</param>
         /// <returns>Complete compressed candle buffer.</returns>
-        public BacktestingCandle[] GetCandles(TradingPair pair, CandleWidth channelWidth)
+        public BacktestingCandle[] GetCandles(TradingPair pair, int channelWidth)
         {
             if (!_candleBuffer.ContainsKey((pair.ToString(), channelWidth)))
             {
@@ -153,15 +153,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private static decimal[] BuildLowestLowBuffer(BacktestingCandle[] candles, int channelWidth)
             => BuildBuffer(candles, channelWidth, new AscendingComparer(), x => x.Low);
 
-        private static BacktestingCandle[] BuildCandleBuffer(BacktestingCandle[] candles, CandleWidth channelWidth)
+        private static BacktestingCandle[] BuildCandleBuffer(BacktestingCandle[] candles, int channelWidth)
         {
             var localSize = Configuration.Instance.CandleWidth;
-            if ((int)channelWidth < (int)localSize || (int)channelWidth % (int)localSize != 0)
+            if (channelWidth < localSize || channelWidth % localSize != 0)
             {
                 throw new InvalidOperationException($"Cannot build a buffer with size {channelWidth} given the configured {localSize}");
             }
 
-            int ratio = (int)channelWidth / (int)localSize;
+            int ratio = channelWidth / localSize;
 
             // Skip the last few candles that cannot be compressed.
             int excess = candles.Length % ratio;

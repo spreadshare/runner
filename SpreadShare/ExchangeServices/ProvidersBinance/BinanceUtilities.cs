@@ -3,6 +3,7 @@ using Binance.Net.Objects;
 using CryptoExchange.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
+using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 using SpreadShare.Utilities;
 using OrderSide = SpreadShare.Models.Trading.OrderSide;
@@ -134,20 +135,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <param name="width">The width of a candle.</param>
         /// <returns>Binance.Net.KlineInterval.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Only OneMinute and FiveMinutes are currently available.</exception>
-        public static KlineInterval ToExternal(CandleWidth width)
+        public static KlineInterval ToExternal(int width)
         {
             switch (width)
             {
-                case CandleWidth.OneMinute:
+                case 1:
                     return KlineInterval.OneMinute;
-                case CandleWidth.ThreeMinutes:
-                    return KlineInterval.ThreeMinutes;
-                case CandleWidth.FiveMinutes:
+                case 5:
                     return KlineInterval.FiveMinutes;
-                case CandleWidth.FiveteenMinutes:
-                    return KlineInterval.FiveteenMinutes;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(width), width, null);
+                    throw new ArgumentOutOfRangeException(nameof(width), width, $"{width} is not a valid KlineInterval on Binance.");
             }
         }
 

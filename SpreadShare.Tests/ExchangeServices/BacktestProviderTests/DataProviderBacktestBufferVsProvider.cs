@@ -25,7 +25,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: FiveMinutes
+               CandleWidth: 5
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProvider<DataProviderGetCandlesImplementation>(config);
@@ -40,7 +40,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: FiveMinutes
+               CandleWidth: 5
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProvider<DataProviderGetCandlesImplementation>(config);
@@ -60,7 +60,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
             {
             }
 
-            public override ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles)
+            public override ResponseObject<decimal> GetHighestHigh(TradingPair pair, int width, int numberOfCandles)
             {
                 var candles = GetCandles(pair, numberOfCandles).Data;
                 var method = typeof(BacktestBuffers)
@@ -69,7 +69,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 return new ResponseObject<decimal>(highestHighBuffer.Last());
             }
 
-            public override ResponseObject<decimal> GetLowestLow(TradingPair pair, CandleWidth width, int numberOfCandles)
+            public override ResponseObject<decimal> GetLowestLow(TradingPair pair, int width, int numberOfCandles)
             {
                 var candles = GetCandles(pair, numberOfCandles).Data;
                 var method = typeof(BacktestBuffers)

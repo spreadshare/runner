@@ -23,7 +23,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: FiveMinutes
+               CandleWidth: 5
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
@@ -36,7 +36,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: FiveMinutes
+               CandleWidth: 5
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
@@ -49,7 +49,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: FiveMinutes
+               CandleWidth: 5
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
@@ -62,7 +62,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: FiveteenMinutes
+               CandleWidth: 15
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
@@ -75,7 +75,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: FiveteenMinutes
+               CandleWidth: 15
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
@@ -88,7 +88,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: ThirtyMinutes
+               CandleWidth: 30
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
@@ -102,7 +102,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: FiveteenMinutes
+               CandleWidth: 15
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
@@ -118,7 +118,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: FiveteenMinutes
+               CandleWidth: 15
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>(config);
@@ -131,7 +131,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: FiveteenMinutes
+               CandleWidth: 15
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>(config);
@@ -146,7 +146,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             const string source = @"
                TradingPairs: [EOSETH]
-               CandleWidth: FiveMinutes
+               CandleWidth: 5
             ";
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>(config);

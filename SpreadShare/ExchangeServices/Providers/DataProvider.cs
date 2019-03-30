@@ -34,7 +34,7 @@ namespace SpreadShare.ExchangeServices.Providers
         // Setter is used with reflection in the tests.
         private AbstractDataProvider Implementation { get; set; }
 
-        private CandleWidth CandleWidth => _algorithmConfiguration.CandleWidth;
+        private int CandleWidth => _algorithmConfiguration.CandleWidth;
 
         /// <summary>
         /// Gets the current price of a trading pair by checking the last trade.

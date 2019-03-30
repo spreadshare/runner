@@ -102,11 +102,11 @@ namespace SpreadShare.Utilities
         /// <param name="pair">TradingPair.</param>
         /// <param name="check">The expected width of a candle.</param>
         /// <returns>Whether the database candles intervals matched the given CandleWidth.</returns>
-        public bool ValidateCandleWidth(TradingPair pair, CandleWidth check)
+        public bool ValidateCandleWidth(TradingPair pair, int check)
         {
             Guard.Argument(pair).NotNull();
 
-            int width = (int)TimeSpan.FromMinutes((int)check).TotalMilliseconds;
+            int width = (int)TimeSpan.FromMinutes(check).TotalMilliseconds;
 
             // Take a small sample of candles.
             var sample = _databaseContext.Candles.AsNoTracking()

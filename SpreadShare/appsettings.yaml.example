@@ -11,7 +11,7 @@ EnabledAlgorithm:
     Algorithm: TemplateAlgorithm
     Exchange: Binance
     Parameters:
-      CandleWidth: FiveMinutes
+      CandleWidth: 5 
       TradingPairs:
         - TRXETH
     Allocation:
@@ -32,6 +32,3 @@ BinanceClientSettings:
 BacktestSettings:
   # Standard folder to place results in
   OutputFolder: ./backtesting_output
-
-# Indicate the timespan of a candle used. In backtesting this should be equal to the candle timespan in the database
-CandleWidth: FiveMinutes

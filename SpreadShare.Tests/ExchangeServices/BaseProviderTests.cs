@@ -23,7 +23,7 @@ namespace SpreadShare.Tests.ExchangeServices
         private const string AlgorithmSettingsSource =
         @"
            TradingPairs: [ EOSETH ]
-           CandleWidth: FiveMinutes
+           CandleWidth: 5 
         ";
 
         private static object _lock = new object();

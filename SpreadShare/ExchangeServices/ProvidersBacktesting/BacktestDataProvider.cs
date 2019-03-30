@@ -39,7 +39,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair)
         {
-            var (candle, _) = FindCandle(pair, _timer.CurrentTime.ToUnixTimeMilliseconds(), Configuration.Instance.CandleWidth);
+            var candle = FindCandle(pair, _timer.CurrentTime.ToUnixTimeMilliseconds(), Configuration.Instance.CandleWidth);
             return new ResponseObject<decimal>(ResponseCode.Success, candle.Average);
         }
 
@@ -48,7 +48,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             // Ask for the open of one candle in the future
             var timestamp = (_timer.CurrentTime + TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth)).ToUnixTimeMilliseconds();
-            var (candle, _) = FindCandle(pair, timestamp, Configuration.Instance.CandleWidth);
+            var candle = FindCandle(pair, timestamp, Configuration.Instance.CandleWidth);
             return new ResponseObject<decimal>(ResponseCode.Success, candle.Open);
         }
 
@@ -59,8 +59,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack)
         {
             long timestamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
-            var (candleNow, _) = FindCandle(pair, timestamp, Configuration.Instance.CandleWidth);
-            var (candleBack, _) = FindCandle(pair, timestamp - (long)(hoursBack * 3600L * 1000L), Configuration.Instance.CandleWidth);
+            var candleNow = FindCandle(pair, timestamp, Configuration.Instance.CandleWidth);
+            var candleBack = FindCandle(pair, timestamp - (long)(hoursBack * 3600L * 1000L), Configuration.Instance.CandleWidth);
 
             return new ResponseObject<decimal>(ResponseCode.Success, candleNow.Average / candleBack.Average);
         }
@@ -116,14 +116,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override ResponseObject<BacktestingCandle[]> GetCustomCandles(TradingPair pair, int numberOfCandles, CandleWidth width)
+        public override ResponseObject<BacktestingCandle[]> GetCustomCandles(TradingPair pair, int numberOfCandles, int width)
         {
             var result = new BacktestingCandle[numberOfCandles];
             var time = _timer.CurrentTime;
             for (int i = 0; i < result.Length; i++)
             {
-                var (candle, _) = FindCandle(pair, time.ToUnixTimeMilliseconds(), width);
-                result[i] = candle;
+                result[i] = FindCandle(pair, time.ToUnixTimeMilliseconds(), width);
                 time -= TimeSpan.FromMinutes((int)width);
             }
 
@@ -136,10 +135,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var time = _timer.CurrentTime;
             var result = new BacktestingCandle[limit];
             var width = Configuration.Instance.CandleWidth;
-            for (int i = 0; i < limit; i++)
+            for (var i = 0; i < limit; i++)
             {
-                (result[i], _) = FindCandle(pair, time.ToUnixTimeMilliseconds(), width);
-                time -= TimeSpan.FromMinutes((int)width);
+                result[i] = FindCandle(pair, time.ToUnixTimeMilliseconds(), width);
+                time -= TimeSpan.FromMinutes(width);
             }
 
             return new ResponseObject<BacktestingCandle[]>(result);
@@ -152,10 +151,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="timestamp">CreatedTimestamp to match.</param>
         /// <param name="channelWidth">The width of the candles.</param>
         /// <returns>Candle matching timestamp most closely and the index at which it was encountered.</returns>
-        private (BacktestingCandle, long) FindCandle(TradingPair pair, long timestamp, CandleWidth channelWidth)
+        private BacktestingCandle FindCandle(TradingPair pair, long timestamp, int channelWidth)
         {
             var buffer = _buffers.GetCandles(pair, channelWidth);
-            var millisecondsCandleWidth = (int)TimeSpan.FromMinutes((int)channelWidth).TotalMilliseconds;
+            var millisecondsCandleWidth = (int)TimeSpan.FromMinutes(channelWidth).TotalMilliseconds;
 
             // Minus one to prevent reading candles whose close is in the future.
             long index = ((timestamp - buffer[0].Timestamp) / millisecondsCandleWidth) - 1;
@@ -165,7 +164,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 throw new InvalidOperationException("Tried to read outside backtest data buffer");
             }
 
-            return (buffer[index], index);
+            return buffer[index];
         }
     }
 }

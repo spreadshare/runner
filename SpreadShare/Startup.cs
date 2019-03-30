@@ -47,8 +47,8 @@ namespace SpreadShare
                 var configuration = new DeserializerBuilder()
                     .Build()
                     .Deserialize<Configuration>(file);
-                ConfigurationValidator.ValidateConstraintsRecursively(configuration);
                 configuration.Bind();
+                ConfigurationValidator.ValidateConstraintsRecursively(configuration);
             }
         }
 
