@@ -19,12 +19,11 @@ namespace SpreadShare.Algorithms
         private readonly object _lock = new object();
         private readonly T _configuration;
         private readonly ILogger _logger;
-        private readonly ILoggerFactory _loggerFactory;
+        private readonly ExchangeProvidersContainer _container;
         private readonly IDisposable _timerObserver;
         private readonly IDisposable _tradingObserver;
 
         private State<T> _activeState;
-        private bool _active;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateManager{T}"/> class.
@@ -41,54 +40,55 @@ namespace SpreadShare.Algorithms
             lock (_lock)
             {
                 // Setup logging
-                _logger = container.LoggerFactory.CreateLogger(GetType());
-                _loggerFactory = container.LoggerFactory;
-
                 _configuration = algorithmConfiguration;
-
-                // Link the parent algorithm configuration
-                AlgorithmConfiguration = algorithmConfiguration;
-
-                Container = container;
+                _container = container;
+                _logger = container.LoggerFactory.CreateLogger(GetType());
 
                 // Setup observing
-                var periodicObserver = new ConfigurableObserver<long>(
-                    time =>
+                _timerObserver = container.TimerProvider.Subscribe(
+                    new ConfigurableObserver<long>(
+                    () => { },
+                    _ => { },
+                    _ =>
                     {
-                        if (!_active)
+                        if (_activeState is null)
                         {
                             Activate(initial);
                         }
 
                         OnMarketConditionEval();
                         EvaluateStateTimer();
-                    },
-                    () => { },
-                    e => { });
-                _timerObserver = container.TimerProvider.Subscribe(periodicObserver);
+                    }));
 
-                var orderObserver = new ConfigurableObserver<OrderUpdate>(
-                    OnOrderUpdateEval,
+                _tradingObserver = container.TradingProvider.Subscribe(
+                    new ConfigurableObserver<OrderUpdate>(
                     () => { },
-                    e => { });
-                _tradingObserver = container.TradingProvider.Subscribe(orderObserver);
+                    _ => { },
+                    OnOrderUpdateEval));
             }
         }
-
-        /// <summary>
-        /// Gets the container with exchange service providers.
-        /// </summary>
-        private ExchangeProvidersContainer Container { get; }
-
-        /// <summary>
-        /// Gets a link to the algorithm configuration.
-        /// </summary>
-        private T AlgorithmConfiguration { get; }
 
         /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        /// <summary>
+        /// Dispose the StateManager.
+        /// </summary>
+        /// <param name="disposing">Actually do it.</param>
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                lock (_lock)
+                {
+                    _timerObserver.Dispose();
+                    _tradingObserver.Dispose();
+                    _container.Dispose();
+                }
+            }
         }
 
         /// <summary>
@@ -98,18 +98,13 @@ namespace SpreadShare.Algorithms
         private void Activate(EntryState<T> initial)
         {
             Guard.Argument(initial).NotNull();
-            if (_active)
+            if (_activeState != null)
             {
                 throw new InvalidOperationException("Cannot activate the state manager when it is already active.");
             }
 
-            _active = true;
-
-            UpdateObservers(initial.GetType());
-
-            // Setup initial state
             _activeState = initial;
-            SwitchState(_activeState.Activate(AlgorithmConfiguration, Container, _loggerFactory));
+            SwitchState(_activeState.Activate(_configuration, _container));
         }
 
         /// <summary>
@@ -121,7 +116,7 @@ namespace SpreadShare.Algorithms
             {
                 try
                 {
-                    var next = _activeState.OnMarketCondition(Container.DataProvider);
+                    var next = _activeState.OnMarketCondition(_container.DataProvider);
                     SwitchState(next);
                 }
                 catch (Exception e)
@@ -154,19 +149,26 @@ namespace SpreadShare.Algorithms
         }
 
         /// <summary>
-        /// Dispose the StateManager.
+        /// Evaluate the timer of the current state.
         /// </summary>
-        /// <param name="disposing">Actually do it.</param>
-        private void Dispose(bool disposing)
+        private void EvaluateStateTimer()
         {
-            if (disposing)
+            lock (_lock)
             {
-                lock (_lock)
+                try
                 {
-                    _loggerFactory.Dispose();
-                    _timerObserver.Dispose();
-                    _tradingObserver.Dispose();
-                    Container.TradingProvider.Dispose();
+                    if (!_activeState.TimerTriggered
+                        && _activeState.EndTime <= _container.TimerProvider.CurrentTime)
+                    {
+                        _activeState.TimerTriggered = true;
+                        var next = _activeState.OnTimerElapsed();
+                        SwitchState(next);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e.ToString());
+                    throw;
                 }
             }
         }
@@ -188,12 +190,12 @@ namespace SpreadShare.Algorithms
             lock (_lock)
             {
                 _logger.LogInformation(
-                    $"STATE SWITCH: {_active.GetType().Name} ---> {child.GetType().Name} at {Container.TimerProvider.CurrentTime}");
+                    $"STATE SWITCH: {_activeState.GetType().Name} ---> {child.GetType().Name} at {_container.TimerProvider.CurrentTime}");
 
                 // Full cycle -> increase TradeID
                 if (child is EntryState<T>)
                 {
-                    Container.TradingProvider.IncrementTradeId();
+                    _container.TradingProvider.IncrementTradeId();
                 }
 
                 // Add state switch event to the database
@@ -202,9 +204,10 @@ namespace SpreadShare.Algorithms
                 _activeState = child;
 
                 // Keep switching if the run method yields a new state.
-                var next = _activeState.Activate(AlgorithmConfiguration, Container, _loggerFactory);
+                var next = _activeState.Activate(_configuration, _container);
                 if (!(next is NothingState<T>))
                 {
+                    // TODO: Remove this
                     if (Program.CommandLineArgs.Trading)
                     {
                         _logger.LogDebug($"Sleeping {(int)_configuration.CandleWidth} to prevent rapid trading.");
@@ -213,30 +216,6 @@ namespace SpreadShare.Algorithms
                     }
 
                     SwitchState(next);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Evaluate the timer of the current state.
-        /// </summary>
-        private void EvaluateStateTimer()
-        {
-            lock (_lock)
-            {
-                try
-                {
-                    if (!_activeState.TimerTriggered && _activeState.EndTime <= Container.TimerProvider.CurrentTime)
-                    {
-                        _activeState.TimerTriggered = true;
-                        var next = _activeState.OnTimerElapsed();
-                        SwitchState(next);
-                    }
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e.ToString());
-                    throw;
                 }
             }
         }

@@ -1,8 +1,6 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.ExchangeServices.ProvidersBinance;
 using Xunit;
@@ -35,7 +33,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         {
             // Connect the communications
             var binance = _serviceProvider.GetService<BinanceCommunicationsService>();
-            binance.Connect();
+            binance.EnableStreams();
             var fetcher = new BinancePortfolioFetcher(LoggerFactory, binance);
             var query = fetcher.GetPortfolio();
             Assert.True(query.Success);
@@ -47,10 +45,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         [Fact]
         public void BacktestPortfolioIsFetched()
         {
-            // Connection the communications
-            var backtest = _serviceProvider.GetService<BacktestCommunicationService>();
-            backtest.Connect();
-            var fetcher = new BacktestPortfolioFetcher(backtest);
+            var fetcher = new BacktestPortfolioFetcher();
             var query = fetcher.GetPortfolio();
             if (!query.Success)
             {

@@ -54,34 +54,24 @@ namespace SpreadShare.ExchangeServices.Allocation
                 throw new ExchangeConnectionException(remoteQuery.Message);
             }
 
-            var remote = remoteQuery.Data;
-
-            var allocated = Portfolio.Empty;
-
             // Get the already allocated resources from the active sessions
-            if (_databaseContext == null)
+            var allocated = Portfolio.Empty;
+            try
             {
-                _logger.LogWarning($"Database was not available, cannot verify if requested allocation is available.");
+                var allocatedPortfolios = _databaseContext.Sessions.Where(x => x.Active).Select(x => x.Allocation);
+                foreach (var allocatedPortfolio in allocatedPortfolios)
+                {
+                    allocated += allocatedPortfolio;
+                }
             }
-            else
+            catch (Exception e)
             {
-                try
-                {
-                    var allocatedPortfolios = _databaseContext.Sessions.Where(x => x.Active).Select(x => x.Allocation);
-                    foreach (var allocatedPortfolio in allocatedPortfolios)
-                    {
-                        allocated += allocatedPortfolio;
-                    }
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e.Message);
-                    _logger.LogWarning($"Database was not available, cannot verify if requested allocation is available.");
-                }
+                _logger.LogError(e.Message);
+                _logger.LogWarning($"Database was not available, cannot verify if requested allocation is available.");
             }
 
             // Available allocation are the assets on the exchange, minus the already allocated resources.
-            var available = remote - allocated;
+            var available = remoteQuery.Data - allocated;
 
             if (!initialAllocation.ContainedIn(available))
             {
@@ -145,7 +135,7 @@ namespace SpreadShare.ExchangeServices.Allocation
                 _logger.LogCritical($"Got trade proposal for ({p.From}, but allocation " +
                                     $"showed only ({alloc}) was available\n" +
                                     "Trade will not be executed.");
-                return ResponseCommon.OrderRefused;
+                return ResponseObject.OrderRefused;
             }
 
             // Let the provider execute the trade and save the execution report
@@ -156,7 +146,7 @@ namespace SpreadShare.ExchangeServices.Allocation
             if (order is null)
             {
                 _logger.LogWarning("TradingProvider implementation returned a null OrderUpdate");
-                return ResponseCommon.OrderPlacementFailed("Implementation returned a null OrderUpdate");
+                return ResponseObject.OrderPlacementFailed("Implementation returned a null OrderUpdate");
             }
 
             TradeExecution exec = TradeExecution.FromOrder(order);

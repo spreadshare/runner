@@ -25,7 +25,7 @@ namespace SpreadShare.Tests.ExchangeServices
         [Fact]
         public void SubscribeObserverHappyFlow()
         {
-            var observer = new ConfigurableObserver<long>(x => { }, () => { }, e => { });
+            var observer = new ConfigurableObserver<long>(() => { }, _ => { }, _ => { });
             _time.Subscribe(observer);
         }
     }

@@ -41,9 +41,9 @@ namespace SpreadShare.ExchangeServices.Providers
             _dataProvider = dataProvider;
             _openOrders = new Dictionary<long, OrderUpdate>();
             Implementation.Subscribe(new ConfigurableObserver<OrderUpdate>(
-                HandleOrderUpdate,
                 () => { },
-                e => { }));
+                _ => { },
+                HandleOrderUpdate));
         }
 
         // Setter is used with refection in the tests

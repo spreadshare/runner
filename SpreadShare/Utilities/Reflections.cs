@@ -94,7 +94,7 @@ namespace SpreadShare.Utilities
         }
 
         /// <summary>
-        /// Check wheter a type inherits from AlgorithmConfiguration.
+        /// Check whether a type inherits from AlgorithmConfiguration.
         /// </summary>
         /// <param name="t">Type to check.</param>
         /// <returns>Whether the provided type is an AlgorithmConfiguration.</returns>

@@ -48,7 +48,7 @@ namespace SpreadShare.Tests.Algorithms
         public void RunHappyFlow()
         {
             var state = new TestState();
-            state.Activate(AlgorithmConfiguration, _container, LoggerFactory);
+            state.Activate(AlgorithmConfiguration, _container);
         }
 
         [Fact]
@@ -64,7 +64,7 @@ namespace SpreadShare.Tests.Algorithms
         {
             var state = new TestState();
             Program.CommandLineArgs.Backtesting = false;
-            state.Activate(AlgorithmConfiguration, _container, LoggerFactory);
+            state.Activate(AlgorithmConfiguration, _container);
             var next = state.OnTimerElapsed();
             Assert.IsType<NothingState<TemplateAlgorithmConfiguration>>(next);
         }
@@ -91,7 +91,7 @@ namespace SpreadShare.Tests.Algorithms
             var now = _container.TimerProvider.CurrentTime;
             var span = TimeSpan.FromDays(8);
 
-            state.Activate(AlgorithmConfiguration, _container, LoggerFactory);
+            state.Activate(AlgorithmConfiguration, _container);
             _setTimer(state, span);
             Assert.Equal((now + span).DateTime, state.EndTime.DateTime, TimeSpan.FromMilliseconds(1000));
         }
@@ -100,7 +100,7 @@ namespace SpreadShare.Tests.Algorithms
         public void OrderPredicateNullNothing()
         {
             var state = new TestState();
-            state.Activate(AlgorithmConfiguration, _container, LoggerFactory);
+            state.Activate(AlgorithmConfiguration, _container);
             var next = state.OnOrderUpdate(null);
             Assert.IsType<NothingState<TemplateAlgorithmConfiguration>>(next);
         }
@@ -109,7 +109,7 @@ namespace SpreadShare.Tests.Algorithms
         public void OrderPredicateDefaultNothing()
         {
             var state = new TestState();
-            state.Activate(AlgorithmConfiguration, _container, LoggerFactory);
+            state.Activate(AlgorithmConfiguration, _container);
             Program.CommandLineArgs.Backtesting = false;
             var order = new OrderUpdate(
                 orderId: 0,
@@ -129,7 +129,7 @@ namespace SpreadShare.Tests.Algorithms
         public void OrderPredicateDefaultBacktestError()
         {
             var state = new TestState();
-            state.Activate(AlgorithmConfiguration, _container, LoggerFactory);
+            state.Activate(AlgorithmConfiguration, _container);
             Program.CommandLineArgs.Backtesting = true;
             var order = new OrderUpdate(
                 orderId: 0,
@@ -148,7 +148,7 @@ namespace SpreadShare.Tests.Algorithms
         public void OrderPredicateMarketNoError()
         {
             var state = new TestState();
-            state.Activate(AlgorithmConfiguration, _container, LoggerFactory);
+            state.Activate(AlgorithmConfiguration, _container);
             Program.CommandLineArgs.Backtesting = true;
             var order = new OrderUpdate(
                 orderId: 0,

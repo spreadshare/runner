@@ -1,7 +1,7 @@
 using SpreadShare.ExchangeServices.Allocation;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 {
@@ -10,21 +10,20 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     /// </summary>
     internal class BacktestPortfolioFetcher : IPortfolioFetcherService
     {
-        private readonly BacktestCommunicationService _backtest;
+        private readonly Portfolio _portfolio;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestPortfolioFetcher"/> class.
         /// </summary>
-        /// <param name="backtest">For fetching the backtest portfolio.</param>
-        public BacktestPortfolioFetcher(BacktestCommunicationService backtest)
+        public BacktestPortfolioFetcher()
         {
-            _backtest = backtest;
+            _portfolio = Configuration.Instance.EnabledAlgorithm.Allocation;
         }
 
         /// <inheritdoc />
         public ResponseObject<Portfolio> GetPortfolio()
         {
-            return new ResponseObject<Portfolio>(_backtest.RemotePortfolio);
+            return new ResponseObject<Portfolio>(_portfolio);
         }
     }
 }

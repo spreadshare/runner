@@ -53,14 +53,13 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Initialise the state.
         /// </summary>
-        /// <param name="settings">Algorithm settings object.</param>
+        /// <param name="algorithmConfiguration">Configuration of the algorithm.</param>
         /// <param name="container">Exchange service container.</param>
-        /// <param name="loggerFactory">LoggerFactory for creating a logger.</param>
         /// <returns>The state that the Run method yields.</returns>
-        public State<T> Activate(T settings, ExchangeProvidersContainer container, ILoggerFactory loggerFactory)
+        public State<T> Activate(T algorithmConfiguration, ExchangeProvidersContainer container)
         {
-            Logger = loggerFactory.CreateLogger(GetType());
-            AlgorithmConfiguration = settings;
+            Logger = container.LoggerFactory.CreateLogger(GetType());
+            AlgorithmConfiguration = algorithmConfiguration;
             _timerProvider = container.TimerProvider;
             return Run(container.TradingProvider, container.DataProvider);
         }

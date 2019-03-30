@@ -2,8 +2,6 @@ using System;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices.Allocation;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Backtesting;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.ExchangeServices.ProvidersBinance;
@@ -21,7 +19,6 @@ namespace SpreadShare.ExchangeServices
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly BinanceCommunicationsService _binanceCommunications;
-        private readonly BacktestCommunicationService _backtestCommunicationService;
         private readonly DatabaseContext _databaseContext;
         private readonly AllocationManager _allocationManager;
 
@@ -32,42 +29,17 @@ namespace SpreadShare.ExchangeServices
         /// <param name="context">Injected database context.</param>
         /// <param name="alloc">Injected AllocationManager service.</param>
         /// <param name="binanceComm">Injected binance communication service.</param>
-        /// <param name="backtestCom">Injected backtest communication service.</param>
         public ExchangeFactoryService(
             ILoggerFactory loggerFactory,
             DatabaseContext context,
             AllocationManager alloc,
-            BinanceCommunicationsService binanceComm,
-            BacktestCommunicationService backtestCom)
+            BinanceCommunicationsService binanceComm)
         {
             _logger = loggerFactory.CreateLogger<ExchangeFactoryService>();
             _loggerFactory = loggerFactory;
-
             _databaseContext = context;
-
-            // Link communication services
             _binanceCommunications = binanceComm;
-            _backtestCommunicationService = backtestCom;
-
             _allocationManager = alloc;
-
-            if (!Program.CommandLineArgs.Trading)
-            {
-                return;
-            }
-
-            switch (Configuration.Instance.EnabledAlgorithm.Exchange)
-            {
-                case Exchange.Binance:
-                    _binanceCommunications.Connect();
-                    break;
-                case Exchange.Backtesting:
-                    _backtestCommunicationService.Connect();
-                    break;
-                default:
-                    throw new MissingFieldException(
-                        $"No communications instance for {Configuration.Instance.EnabledAlgorithm.Exchange} in ExchangeFactory");
-            }
         }
 
         /// <summary>
@@ -85,44 +57,40 @@ namespace SpreadShare.ExchangeServices
                     $"Cannot build container for {typeof(T).Name} using a {algorithmConfiguration.GetType().Name} object");
             }
 
-            ExchangeProvidersContainer container = null;
             switch (Configuration.Instance.EnabledAlgorithm.Exchange)
             {
                 case Exchange.Binance:
-                    container = BuildBinanceContainer<T>(algorithmConfiguration, _allocationManager);
-                    break;
+                    return BuildBinanceContainer<T>(algorithmConfiguration, _allocationManager);
 
                 case Exchange.Backtesting:
-                    // Skip the Database Event Listener injection phase
                     return BuildBacktestingContainer<T>(algorithmConfiguration, _allocationManager);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(algorithmConfiguration));
             }
-
-            DatabaseEventListenerService.Instance?.AddOrderSource(container.TradingProvider);
-            return container;
         }
 
         private ExchangeProvidersContainer BuildBinanceContainer<T>(AlgorithmConfiguration settings, AllocationManager allocationManager)
             where T : IBaseAlgorithm
         {
             // Makes sure that the communication is enabled
-            _binanceCommunications.Connect();
-            var timerProvider = new ExchangeTimerProvider(_loggerFactory);
+            _binanceCommunications.EnableStreams();
+            var timerProvider = new BinanceTimerProvider(_loggerFactory);
             var dataImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications, timerProvider);
             var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications, timerProvider);
 
             var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
+
+            // Inject database event listener
+            DatabaseEventListenerService.Instance?.AddOrderSource(tradingProvider);
+
             return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider, typeof(T));
         }
 
         private ExchangeProvidersContainer BuildBacktestingContainer<T>(AlgorithmConfiguration settings, AllocationManager allocationManager)
             where T : IBaseAlgorithm
         {
-            _backtestCommunicationService.Connect();
-
             var backtestTimer = new BacktestTimerProvider(_loggerFactory, _databaseContext, Configuration.Instance.BacktestSettings);
             var dataImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, backtestTimer);
             var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation, _databaseContext);

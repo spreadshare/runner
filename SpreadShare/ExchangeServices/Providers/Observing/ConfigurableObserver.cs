@@ -9,24 +9,25 @@ namespace SpreadShare.ExchangeServices.Providers.Observing
     /// <typeparam name="T">Type of data to observe.</typeparam>
     internal class ConfigurableObserver<T> : IObserver<T>
     {
-        private readonly Action<T> _actionOnNext;
         private readonly Action _actionOnCompleted;
         private readonly Action<Exception> _actionOnError;
+        private readonly Action<T> _actionOnNext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurableObserver{T}"/> class.
         /// </summary>
-        /// <param name="onNext">Callback for observing new data.</param>
         /// <param name="onCompleted">Callback for observing end of stream.</param>
         /// <param name="onError">Callback for observing errors.</param>
-        public ConfigurableObserver(Action<T> onNext, Action onCompleted, Action<Exception> onError)
+        /// <param name="onNext">Callback for observing new data.</param>
+        public ConfigurableObserver(Action onCompleted, Action<Exception> onError, Action<T> onNext)
         {
             Guard.Argument(onNext).NotNull();
             Guard.Argument(onCompleted).NotNull();
             Guard.Argument(onError).NotNull();
+
             _actionOnCompleted = OnCompleted;
-            _actionOnNext = onNext;
             _actionOnError = onError;
+            _actionOnNext = onNext;
         }
 
         /// <inheritdoc />

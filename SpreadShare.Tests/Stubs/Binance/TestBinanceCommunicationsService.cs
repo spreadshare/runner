@@ -1,7 +1,7 @@
 using System.Threading;
 using Binance.Net.Interfaces;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
+using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.Models.Trading;
 
 namespace SpreadShare.Tests.Stubs.Binance

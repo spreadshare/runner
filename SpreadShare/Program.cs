@@ -56,8 +56,7 @@ namespace SpreadShare
                 Console.ForegroundColor = ConsoleColor.Red; // Logger.logError is not available yet
                 Console.WriteLine($" > {e.Message}");
                 Console.ResetColor();
-                ExitProgramWithCode(ExitCode.InvalidConfiguration);
-                return 1;
+                return ExitProgramWithCode(ExitCode.InvalidConfiguration);
             }
 
             startup.ConfigureServices(services);
@@ -91,7 +90,8 @@ namespace SpreadShare
         /// Cause the Main() to return with a given status code.
         /// </summary>
         /// <param name="exitCode">Reason for termination.</param>
-        public static void ExitProgramWithCode(ExitCode exitCode)
+        /// <returns>Exits before returning the exit code.</returns>
+        public static int ExitProgramWithCode(ExitCode exitCode)
         {
             DatabaseEventListenerService.Instance?.Dispose();
 
@@ -108,17 +108,19 @@ namespace SpreadShare
             }
 
             Environment.Exit((int)exitCode);
+            return (int)exitCode;
         }
 
         /// <summary>
         /// Setup and run trading algorithms.
         /// </summary>
         /// <param name="serviceProvider">Provides access to services.</param>
-        private static void ExecuteTradingLogic(IServiceProvider serviceProvider)
+        /// <returns>Exits before returning the exit code.</returns>
+        private static int ExecuteTradingLogic(IServiceProvider serviceProvider)
         {
             ILogger logger = _loggerFactory.CreateLogger("Program.cs:ExecuteTradingLogic");
 
-            var algorithmService = serviceProvider.GetService<IAlgorithmService>();
+            var algorithmService = serviceProvider.GetService<AlgorithmService>();
             var algorithm = Configuration.Instance.EnabledAlgorithm.Algorithm;
 
             // Link algorithm in configuration to implementation in C#
@@ -131,8 +133,7 @@ namespace SpreadShare
             {
                 logger.LogError("Invalid algorithm configuration encountered:\n  > " +
                                 $"{e.Message}");
-                ExitProgramWithCode(ExitCode.InvalidConfiguration);
-                return;
+                return ExitProgramWithCode(ExitCode.InvalidConfiguration);
             }
 
             // Cancel backtesting configurations when trading
@@ -140,8 +141,7 @@ namespace SpreadShare
             {
                 logger.LogError($"Application {algorithm.Name} has exchange Backtesting configured, " +
                                 "but --trading is used");
-                ExitProgramWithCode(ExitCode.InvalidConfiguration);
-                return;
+                return ExitProgramWithCode(ExitCode.InvalidConfiguration);
             }
 
             logger.LogInformation($"Starting algorithm '{algorithm.Name}'");
@@ -153,17 +153,19 @@ namespace SpreadShare
             if (!algorithmResponse.Success)
             {
                 logger.LogError($"Algorithm failed to start:\n\t {algorithmResponse}");
-                ExitProgramWithCode(ExitCode.AlgorithmStartupFailure);
+                return ExitProgramWithCode(ExitCode.AlgorithmStartupFailure);
             }
 
             logger.LogInformation($"Started algorithm '{algorithm.Name}' successfully");
+            return 0;
         }
 
         /// <summary>
         /// Setup backtesting and related database services.
         /// </summary>
         /// <param name="serviceProvider">Provides access to services.</param>
-        private static void ExecuteBacktestingLogic(IServiceProvider serviceProvider)
+        /// <returns>Exits before returning the exit code.</returns>
+        private static int ExecuteBacktestingLogic(IServiceProvider serviceProvider)
         {
             // Init database verification checks (checks per backtesting configuration)
             serviceProvider.GetService<DatabaseUtilities>().Bind();
@@ -176,11 +178,12 @@ namespace SpreadShare
                 ILogger logger = _loggerFactory.CreateLogger("Program.cs:ExecuteBacktestingLogic");
                 logger.LogError($"Application was started in backtest mode, but the configuration " +
                                 $"has {Configuration.Instance.EnabledAlgorithm.Exchange} configured");
-                ExitProgramWithCode(ExitCode.InvalidConfiguration);
+                return ExitProgramWithCode(ExitCode.InvalidConfiguration);
             }
 
             // Accept TTY input
             serviceProvider.GetService<BacktestDaemonService>().Run();
+            return 0;
         }
 
         /// <summary>
@@ -189,7 +192,7 @@ namespace SpreadShare
         /// <returns>exit code.</returns>
         private static int KeepRunningForever()
         {
-            Thread t = new Thread(() =>
+            var t = new Thread(() =>
             {
                 while (true)
                 {

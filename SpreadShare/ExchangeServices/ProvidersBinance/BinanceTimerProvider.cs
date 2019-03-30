@@ -2,25 +2,26 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.SupportServices.ErrorServices;
 using SpreadShare.Utilities;
 
-namespace SpreadShare.ExchangeServices.Providers
+namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
     /// <summary>
     /// Exchange implementation of the TimerProvider.
     /// </summary>
-    internal class ExchangeTimerProvider : TimerProvider
+    internal class BinanceTimerProvider : TimerProvider
     {
         private int _consecutiveExceptions = 0;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExchangeTimerProvider"/> class.
+        /// Initializes a new instance of the <see cref="BinanceTimerProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output.</param>
-        public ExchangeTimerProvider(ILoggerFactory loggerFactory)
+        public BinanceTimerProvider(ILoggerFactory loggerFactory)
             : base(loggerFactory)
         {
             // Set the pivot point to midnight.

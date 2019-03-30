@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Binance.Net.Objects;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models;
@@ -46,6 +45,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
 
             // Push order updates from the websocket in a concurrent queue
             communications.Subscribe(new ConfigurableObserver<OrderUpdate>(
+                    () => { },
+                    _ => { },
                     order =>
                     {
                         lock (_orderCache)
@@ -57,9 +58,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                         }
 
                         _orderCache.Enqueue(order);
-                    },
-                    () => { },
-                    e => { }));
+                    }));
         }
 
         /// <inheritdoc />
@@ -146,7 +145,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                         side,
                         pair,
                         realQuantity))
-                : ResponseCommon.OrderPlacementFailed(query.Error.Message);
+                : ResponseObject.OrderPlacementFailed(query.Error.Message);
             #pragma warning disable SA1118
         }
 
@@ -214,7 +213,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     return new ResponseObject<OrderUpdate>(order);
                 }
 
-                return ResponseCommon.OrderPlacementFailed(query.Error.Message);
+                return ResponseObject.OrderPlacementFailed(query.Error.Message);
             }
         }
 

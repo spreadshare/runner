@@ -16,11 +16,5 @@ namespace SpreadShare.Algorithms
         /// <param name="container">Provides trading and data gathering capabilities.</param>
         /// <returns>Whether the algorithm started successfully.</returns>
         ResponseObject Start(AlgorithmConfiguration configuration, ExchangeProvidersContainer container);
-
-        /// <summary>
-        /// Stops the algorithm.
-        /// </summary>
-        /// <returns>Whether the algorithm was stopped successfully.</returns>
-        ResponseObject Stop();
     }
 }

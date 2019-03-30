@@ -16,7 +16,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     internal class BacktestOutputLogger
     {
         private const char Delimiter = '|';
-        private BacktestTimerProvider _timer;
+        private readonly BacktestTimerProvider _timer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestOutputLogger"/> class.
@@ -114,6 +114,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             WriteAllText(filepath, builder.ToString());
         }
 
+        /// <summary>
+        /// Output the start and end timestamp.
+        /// </summary>
+        /// <param name="filepath">Filepath to store timestamps at.</param>
         private void OutputTimespan(string filepath)
         {
             string data = JsonConvert.SerializeObject(new

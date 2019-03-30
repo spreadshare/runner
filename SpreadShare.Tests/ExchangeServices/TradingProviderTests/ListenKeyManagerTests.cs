@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Binance.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.ExchangeServices.ExchangeCommunicationService.Binance;
+using SpreadShare.ExchangeServices.ProvidersBinance;
 using SpreadShare.SupportServices.Configuration;
 using Xunit;
 using Xunit.Abstractions;
@@ -61,31 +62,6 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             if (response.Success)
             {
                 Logger.LogError("I should not be able to obtain a listenKey");
-                Assert.True(false);
-            }
-        }
-
-        /// <summary>
-        /// Tests whether the listenkey is automatically renewed.
-        /// </summary>
-        [Fact]
-        public void ListenKeyRenewalTest()
-        {
-            var listenKeyManager = Setup(3000);
-
-            // Obtain listenKey
-            var response = listenKeyManager.Obtain();
-            if (!response.Success)
-            {
-                Logger.LogError("Unable to obtain listenKey");
-                return;
-            }
-
-            // Sleep 10 seconds to autorenew three times
-            Thread.Sleep(10000);
-            var j = TestLoggingProvider.Messages.Count(message => message.Contains("Renewed listenKey", StringComparison.InvariantCulture));
-            if (j < 2)
-            {
                 Assert.True(false);
             }
         }

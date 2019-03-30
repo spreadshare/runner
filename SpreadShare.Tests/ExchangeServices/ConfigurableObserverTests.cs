@@ -22,15 +22,15 @@ namespace SpreadShare.Tests.ExchangeServices
         [Fact]
         public void ConstructorHappyFlow()
         {
-            var observer = new ConfigurableObserver<bool>(x => { }, () => { }, e => { });
+            var observer = new ConfigurableObserver<bool>(() => { }, _ => { }, _ => { });
         }
 
         [Fact]
         public void ConstructorNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new ConfigurableObserver<bool>(null, () => { }, e => { }));
-            Assert.Throws<ArgumentNullException>(() => new ConfigurableObserver<bool>(x => { }, null, e => { }));
-            Assert.Throws<ArgumentNullException>(() => new ConfigurableObserver<bool>(x => { }, () => { }, null));
+            Assert.Throws<ArgumentNullException>(() => new ConfigurableObserver<bool>(null, _ => { }, _ => { }));
+            Assert.Throws<ArgumentNullException>(() => new ConfigurableObserver<bool>(() => { }, null, _ => { }));
+            Assert.Throws<ArgumentNullException>(() => new ConfigurableObserver<bool>(() => { }, _ => { }, null));
         }
     }
 }
