@@ -20,14 +20,6 @@ namespace SpreadShare.SupportServices.Configuration
     {
         public static Configuration Instance;
 
-        private readonly LazyCache<string, CandleWidth> _candleWidthConstructor =
-            new LazyCache<string, CandleWidth>(Enum.Parse<CandleWidth>);
-
-        [YamlMember(Alias = "CandleWidth")]
-        [Required]
-        [ParsesToEnum(typeof(CandleWidth))]
-        public string __candleWidth { get; private set; }
-
         [Required]
         public ConnectionStrings ConnectionStrings { get; private set; }
 
@@ -41,7 +33,7 @@ namespace SpreadShare.SupportServices.Configuration
 
         public EnabledAlgorithm EnabledAlgorithm { get; private set; }
 
-        public CandleWidth CandleWidth => _candleWidthConstructor.Value(__candleWidth);
+        public int CandleWidth { get; } = 5;
 
         /// <summary>
         /// Lift the current instance to the static instance.

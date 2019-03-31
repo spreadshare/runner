@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.Models.Database;
-using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -11,7 +10,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 {
     public class BacktestBufferGetCandlesTests : BaseTest
     {
-        private Func<BacktestingCandle[], CandleWidth, BacktestingCandle[]> _buildCandleBuffer;
+        private Func<BacktestingCandle[], int, BacktestingCandle[]> _buildCandleBuffer;
 
         private BacktestingCandle[] _candles =
             {
@@ -149,14 +148,14 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         public void BuildCandleBufferNotSaturated()
         {
             var candles = _candles.ToArray();
-            var result = _buildCandleBuffer(candles, CandleWidth.TenMinutes);
+            var result = _buildCandleBuffer(candles, 10);
             Assert.Equal(5, result.Length);
         }
 
         [Fact]
         public void BuildCandleBufferIdentity()
         {
-            var result = _buildCandleBuffer(_candles, CandleWidth.FiveMinutes);
+            var result = _buildCandleBuffer(_candles, 5);
             Assert.Equal(11, result.Length);
             for (int i = 0; i < result.Length; i++)
             {
@@ -173,7 +172,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         public void BuildCandleBufferSingleCandleResult()
         {
             var candles = _candles.Skip(1).ToArray();
-            var result = _buildCandleBuffer(candles, CandleWidth.ThirtyMinutes);
+            var result = _buildCandleBuffer(candles, 30);
             Assert.Single(result);
             Assert.Equal(candles.Max(x => x.High), result[0].High);
             Assert.Equal(candles.Min(x => x.Low), result[0].Low);
@@ -183,14 +182,14 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
         public void BuildCandleBufferInvalidCandleSize()
         {
             Assert.Throws<InvalidOperationException>(
-                () => _buildCandleBuffer(_candles, CandleWidth.DONOTUSETestEntry));
+                () => _buildCandleBuffer(_candles, 7));
         }
 
         [Fact]
         public void BuildCandleBufferSmallerCandleSize()
         {
             Assert.Throws<InvalidOperationException>(
-                () => _buildCandleBuffer(_candles, CandleWidth.OneMinute));
+                () => _buildCandleBuffer(_candles, 1));
         }
     }
 }

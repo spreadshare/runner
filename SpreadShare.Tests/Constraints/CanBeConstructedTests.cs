@@ -4,28 +4,24 @@ using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using Xunit;
 using Xunit.Abstractions;
-using YamlDotNet.Serialization;
 
 // Allow 'unused' classes and 'unused' constructor parameters
 #pragma warning disable CA1812, CA1801
 
 namespace SpreadShare.Tests.Constraints
 {
-    public class CanBeConstructedTests : BaseTest
+    public class CanBeConstructedTests : ConstraintTest
     {
-        private readonly IDeserializer _deserializer;
-
         public CanBeConstructedTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            _deserializer = new DeserializerBuilder().Build();
         }
 
         [Fact]
         public void CanBeConstructedHappyFlow()
         {
             const string input = "Item: a_string ";
-            var obj = _deserializer.Deserialize<ConstructableHappyFlowObject>(new StringReader(input));
+            var obj = Deserializer.Deserialize<ConstructableHappyFlowObject>(new StringReader(input));
             ConfigurationValidator.ValidateConstraintsRecursively(obj);
         }
 
@@ -33,7 +29,7 @@ namespace SpreadShare.Tests.Constraints
         public void CanBeConstructedPrivateConstructor()
         {
             const string input = "Item: a_string";
-            var obj = _deserializer.Deserialize<ConstructablePrivateConstructorObject>(new StringReader(input));
+            var obj = Deserializer.Deserialize<ConstructablePrivateConstructorObject>(new StringReader(input));
             Assert.Throws<InvalidConstraintException>(() => ConfigurationValidator.ValidateConstraintsRecursively(obj));
         }
 

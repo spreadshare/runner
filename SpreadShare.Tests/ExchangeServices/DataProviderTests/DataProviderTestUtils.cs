@@ -94,7 +94,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
             public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack) => throw new NotImplementedException();
 
-            public override ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles) => throw new NotImplementedException();
+            public override ResponseObject<decimal> GetHighestHigh(TradingPair pair, int width, int numberOfCandles) => throw new NotImplementedException();
 
             public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack) => throw new NotImplementedException();
 

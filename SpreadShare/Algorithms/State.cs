@@ -48,7 +48,7 @@ namespace SpreadShare.Algorithms
         /// <summary>
         /// Gets a shorthand version for the CandleWidth in the algorithm configuration.
         /// </summary>
-        protected CandleWidth CandleWidth => AlgorithmConfiguration.CandleWidth;
+        protected int CandleWidth => AlgorithmConfiguration.CandleWidth;
 
         /// <summary>
         /// Initialise the state.

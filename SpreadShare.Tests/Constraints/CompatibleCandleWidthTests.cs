@@ -1,37 +1,32 @@
 using System.IO;
 using SpreadShare.Models.Exceptions;
-using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using Xunit;
 using Xunit.Abstractions;
-using YamlDotNet.Serialization;
 
 namespace SpreadShare.Tests.Constraints
 {
-    public class CompatibleCandleWidthTests : BaseTest
+    public class CompatibleCandleWidthTests : ConstraintTest
     {
-        private readonly IDeserializer _deserializer;
-
-        public CompatibleCandleWidthTests(ITestOutputHelper logger)
-            : base(logger)
+        public CompatibleCandleWidthTests(ITestOutputHelper outputHelper)
+            : base(outputHelper)
         {
-            _deserializer = new DeserializerBuilder().Build();
         }
 
         [Fact]
         public void CompatibleCandleWidthHappyFlow()
         {
-            const string input = "Value: TenMinutes";
-            var obj = _deserializer.Deserialize<CompatibleCandleWidthObject>(new StringReader(input));
+            const string input = "Value: 10";
+            var obj = Deserializer.Deserialize<CompatibleCandleWidthObject>(new StringReader(input));
             ConfigurationValidator.ValidateConstraintsRecursively(obj);
         }
 
         [Fact]
         public void CompatibleCandleWidthTooSmall()
         {
-            const string input = "Value: OneMinute";
-            var obj = _deserializer.Deserialize<CompatibleCandleWidthObject>(new StringReader(input));
+            const string input = "Value: 1";
+            var obj = Deserializer.Deserialize<CompatibleCandleWidthObject>(new StringReader(input));
             Assert.Throws<InvalidConfigurationException>(
                 () => ConfigurationValidator.ValidateConstraintsRecursively(obj));
         }
@@ -39,17 +34,16 @@ namespace SpreadShare.Tests.Constraints
         [Fact]
         public void CompatibleCandleWidthSame()
         {
-            const string input = "Value: FiveMinutes";
-            var obj = _deserializer.Deserialize<CompatibleCandleWidthObject>(new StringReader(input));
+            const string input = "Value: 5";
+            var obj = Deserializer.Deserialize<CompatibleCandleWidthObject>(new StringReader(input));
             ConfigurationValidator.ValidateConstraintsRecursively(obj);
         }
 
         [Fact]
         public void CompatibleCandleWidthNotDivisible()
         {
-            Assert.Equal(7, (int)CandleWidth.DONOTUSETestEntry);
-            const string input = "Value: DONOTUSETestEntry";
-            var obj = _deserializer.Deserialize<CompatibleCandleWidthObject>(new StringReader(input));
+            const string input = "Value: 7";
+            var obj = Deserializer.Deserialize<CompatibleCandleWidthObject>(new StringReader(input));
             Assert.Throws<InvalidConfigurationException>(
                 () => ConfigurationValidator.ValidateConstraintsRecursively(obj));
         }
@@ -59,7 +53,7 @@ namespace SpreadShare.Tests.Constraints
         private class CompatibleCandleWidthObject
         {
             [CompatibleCandleWidth]
-            public string Value { get; set; }
+            public int Value { get; set; }
         }
         #pragma warning restore CA1812
     }

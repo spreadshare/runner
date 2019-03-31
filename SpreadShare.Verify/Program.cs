@@ -41,6 +41,7 @@ namespace SpreadShare.Verify
             TradingPair.Sync();
 
             var config = new DeserializerBuilder().Build().Deserialize<Configuration>(source);
+            config.Bind();
             var failures = ConfigurationValidator.GetConstraintFailuresRecursively(config).ToArray();
             if (!failures.Any())
             {
@@ -52,7 +53,7 @@ namespace SpreadShare.Verify
                 Console.WriteLine(failure);
             }
 
-            return 0;
+            return 1;
         }
     }
 }

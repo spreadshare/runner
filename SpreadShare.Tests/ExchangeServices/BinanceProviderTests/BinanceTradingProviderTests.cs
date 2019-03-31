@@ -17,42 +17,42 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
         {
         }
 
-        [Fact]
+        [Fact(Skip = "Requires trading keys")]
         public void ExecuteMarketOrderBuyHappyFlow()
         {
             var trading = GetTradingProvider();
             trading.ExecuteMarketOrderBuy(TradingPair.Parse("EOSETH"), 10);
         }
 
-        [Fact]
+        [Fact(Skip = "Requires trading keys")]
         public void ExecuteMarketOrderSellHappyFlow()
         {
             var trading = GetTradingProvider();
             trading.ExecuteMarketOrderSell(TradingPair.Parse("EOSETH"), 10);
         }
 
-        [Fact]
+        [Fact(Skip = "Requires trading keys")]
         public void PlaceLimitOrderBuyHappyFlow()
         {
             var trading = GetTradingProvider();
             trading.PlaceLimitOrderBuy(TradingPair.Parse("EOSETH"), 10, 0.01M);
         }
 
-        [Fact]
+        [Fact(Skip = "Requires trading keys")]
         public void PlaceLimitOrderSellHappyFlow()
         {
             var trading = GetTradingProvider();
             trading.PlaceLimitOrderSell(TradingPair.Parse("EOSETH"), 10, 0.01M);
         }
 
-        [Fact]
+        [Fact(Skip = "Requires trading keys")]
         public void PlaceStoplossOrderBuyHappyFlow()
         {
             var trading = GetTradingProvider();
             trading.PlaceStoplossBuy(TradingPair.Parse("EOSETH"), 10, 0.01M);
         }
 
-        [Fact]
+        [Fact(Skip = "Requires trading keys")]
         public void PlaceStoplossOrderSellHappyFlow()
         {
             var trading = GetTradingProvider();

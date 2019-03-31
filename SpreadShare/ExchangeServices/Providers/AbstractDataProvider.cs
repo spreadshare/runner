@@ -74,11 +74,11 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="numberOfCandles">Number of custom candles.</param>
         /// <param name="width">The width of the custom candle.</param>
         /// <returns>Array of custom candles.</returns>
-        public virtual ResponseObject<BacktestingCandle[]> GetCustomCandles(TradingPair pair, int numberOfCandles, CandleWidth width)
+        public virtual ResponseObject<BacktestingCandle[]> GetCustomCandles(TradingPair pair, int numberOfCandles, int width)
         {
             Guard.Argument(pair).NotNull(nameof(pair));
-            var localCandleSize = (int)Configuration.Instance.CandleWidth;
-            var targetCandleSize = (int)width;
+            var localCandleSize = Configuration.Instance.CandleWidth;
+            var targetCandleSize = width;
 
             Guard.Argument(targetCandleSize)
                 .Require<ArgumentOutOfRangeException>(
@@ -114,7 +114,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="width">The width of a candle (e.g. FiveMinutes).</param>
         /// <param name="numberOfCandles">The number of candles to utilize.</param>
         /// <returns>The highest high.</returns>
-        public virtual ResponseObject<decimal> GetHighestHigh(TradingPair pair, CandleWidth width, int numberOfCandles)
+        public virtual ResponseObject<decimal> GetHighestHigh(TradingPair pair, int width, int numberOfCandles)
         {
             var candles = GetCustomCandles(pair, numberOfCandles, width);
             return candles.Success
@@ -129,7 +129,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <param name="width">The width of a candle (e.g. FiveMinutes).</param>
         /// <param name="numberOfCandles">The number of candles to utilize.</param>
         /// <returns>The lowest low.</returns>
-        public virtual ResponseObject<decimal> GetLowestLow(TradingPair pair, CandleWidth width, int numberOfCandles)
+        public virtual ResponseObject<decimal> GetLowestLow(TradingPair pair, int width, int numberOfCandles)
         {
             var candles = GetCustomCandles(pair, numberOfCandles, width);
             return candles.Success
