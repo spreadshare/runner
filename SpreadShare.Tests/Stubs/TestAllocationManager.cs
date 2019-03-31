@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
-using SpreadShare.Utilities;
 
 namespace SpreadShare.Tests.Stubs
 {

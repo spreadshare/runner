@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
 using Binance.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

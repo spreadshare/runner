@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.Models.Database;
-using SpreadShare.Models.Trading;
 using Xunit;
 using Xunit.Abstractions;
 

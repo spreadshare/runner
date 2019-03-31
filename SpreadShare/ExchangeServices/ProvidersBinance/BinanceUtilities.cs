@@ -3,7 +3,6 @@ using Binance.Net.Objects;
 using CryptoExchange.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
-using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 using SpreadShare.Utilities;
 using OrderSide = SpreadShare.Models.Trading.OrderSide;

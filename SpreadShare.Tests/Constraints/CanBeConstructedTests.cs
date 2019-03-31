@@ -4,7 +4,6 @@ using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using Xunit;
 using Xunit.Abstractions;
-using YamlDotNet.Serialization;
 
 // Allow 'unused' classes and 'unused' constructor parameters
 #pragma warning disable CA1812, CA1801

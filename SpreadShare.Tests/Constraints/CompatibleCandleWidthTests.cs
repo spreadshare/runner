@@ -1,11 +1,9 @@
 using System.IO;
 using SpreadShare.Models.Exceptions;
-using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using Xunit;
 using Xunit.Abstractions;
-using YamlDotNet.Serialization;
 
 namespace SpreadShare.Tests.Constraints
 {
