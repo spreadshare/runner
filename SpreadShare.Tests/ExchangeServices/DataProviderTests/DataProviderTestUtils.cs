@@ -76,6 +76,8 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
             public abstract override DateTimeOffset Pivot { get; }
 
+            public abstract override DateTimeOffset LastCandleClose { get; }
+
             public abstract override void RunPeriodicTimer();
         }
 

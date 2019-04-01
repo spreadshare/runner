@@ -25,6 +25,11 @@ namespace SpreadShare.ExchangeServices.Providers
         public abstract DateTimeOffset CurrentTime { get; }
 
         /// <summary>
+        /// Gets the last 5 minute candle close timestamp.
+        /// </summary>
+        public abstract DateTimeOffset LastCandleClose { get; }
+
+        /// <summary>
         /// Gets the pivot, i.e. the starting point of candle creation.
         /// </summary>
         public abstract DateTimeOffset Pivot { get; }
@@ -38,5 +43,10 @@ namespace SpreadShare.ExchangeServices.Providers
         /// Notify the observers periodically.
         /// </summary>
         public abstract void RunPeriodicTimer();
+
+        /// <summary>
+        /// Method that terminates when a new candle has gone in.
+        /// </summary>
+        public abstract void WaitForNextCandle();
     }
 }

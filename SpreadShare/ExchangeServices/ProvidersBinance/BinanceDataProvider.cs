@@ -11,6 +11,7 @@ using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.Utilities;
 
 namespace SpreadShare.ExchangeServices.ProvidersBinance
 {
@@ -150,8 +151,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             var width = Configuration.Instance.CandleWidth;
             var tasks = new (int, Task<CallResult<BinanceKline[]>>)[(limit / chunkSize) + 1];
 
-            // Start the offset all the way back.
-            TimeSpan offset = TimeSpan.FromMinutes(limit * (int)width);
+            // Start the offset all the way back
+            TimeSpan offset = TimeSpan.FromMinutes(limit * width);
 
             // Create tasks for retrieving the candles in reverse.
             for (int i = tasks.Length - 1; i >= 0; i--)
@@ -162,14 +163,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     : chunkSize;
 
                 // Decrement the offset with the current job.
-                offset -= TimeSpan.FromMinutes(amount * (int)width);
+                offset -= TimeSpan.FromMinutes(amount * width);
 
                 tasks[i] =
                     (amount, client.GetKlinesAsync(
                                 symbol: pair.ToString(),
                                 interval: BinanceUtilities.ToExternal(width),
-                                startTime: DateTime.UtcNow - offset - TimeSpan.FromMinutes((amount + 1) * (int)width), // Request one extra candle, sometimes binance comes one short.
-                                endTime: DateTime.UtcNow - offset,
+                                startTime: TimerProvider.LastCandleClose.UtcDateTime - offset - TimeSpan.FromMinutes((amount + 1) * width), // Request one extra candle, sometimes binance comes one short.
+                                endTime: TimerProvider.LastCandleClose.UtcDateTime - offset,
                                 limit: amount + 10));
             }
 
@@ -192,7 +193,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     // Parse to the right data structure, and insert in the resulting array.
                     var x = candles[p];
                     result[q] = new BacktestingCandle(
-                        new DateTimeOffset(x.OpenTime).ToUnixTimeMilliseconds(),
+                        x.CloseTime.ToUnixTimestampMilliseconds(),
                         x.Open,
                         x.Close,
                         x.High,

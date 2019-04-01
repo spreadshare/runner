@@ -44,7 +44,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             _transformMiddleWare = new Dictionary<long, Action<OrderUpdate>>();
 
             // Push order updates from the websocket in a concurrent queue
-            communications.Subscribe(new ConfigurableObserver<OrderUpdate>(
+            communications.OrderUpdateDispenser.Subscribe(new ConfigurableObserver<OrderUpdate>(
                     () => { },
                     _ => { },
                     order =>

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Binance.Net;
 using Binance.Net.Interfaces;
 using Binance.Net.Objects;
@@ -6,6 +7,7 @@ using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.Providers.Observing;
+using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.ErrorServices;
@@ -15,8 +17,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
     /// <summary>
     /// Binance implementation of the communication service.
     /// </summary>
-    internal class BinanceCommunicationsService : Observable<OrderUpdate>, IDisposable
+    internal class BinanceCommunicationsService : IDisposable
     {
+        /// <summary>
+        /// Configurable observable that can be used to publish OrderUpdates.
+        /// </summary>
+        protected readonly ConfigurableObservable<OrderUpdate> OrderUpdateDispenserImplementation;
+
+        private readonly ConfigurableObservable<BacktestingCandle> _candleDispenserImplementation;
         private readonly ILogger _logger;
         private readonly ListenKeyManager _listenKeyManager;
 
@@ -38,7 +46,21 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
 
             // Setup ListenKeyManager
             _listenKeyManager = new ListenKeyManager(loggerFactory, Client);
+
+            // Setup dispenser
+            _candleDispenserImplementation = new ConfigurableObservable<BacktestingCandle>();
+            OrderUpdateDispenserImplementation = new ConfigurableObservable<OrderUpdate>();
         }
+
+        /// <summary>
+        /// Gets a dispenser of <see cref="OrderUpdate"/>.
+        /// </summary>
+        public IObservable<OrderUpdate> OrderUpdateDispenser => OrderUpdateDispenserImplementation;
+
+        /// <summary>
+        /// Gets a dispenser of <see cref="BacktestingCandle"/>.
+        /// </summary>
+        public IObservable<BacktestingCandle> CandleDispenser => _candleDispenserImplementation;
 
         /// <summary>
         /// Gets the number of ticks before timeout should be declared. This value is set in the configuration.
@@ -53,7 +75,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <summary>
         /// Gets the instance of the binance user socket.
         /// </summary>
-        public BinanceSocketClient Socket { get; }
+        private BinanceSocketClient Socket { get; }
 
         /// <inheritdoc />
         public void Dispose()
@@ -68,13 +90,33 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         public void EnableStreams()
         {
             _logger.LogInformation($"Enabling streams at {DateTime.UtcNow}");
+            EnableOrderStreams();
+            EnableKlineStreams();
+            _logger.LogInformation("Binance Communication Service was successfully started!");
+        }
 
+        /// <summary>
+        /// Disposes the current object's resource.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose the resources of the object.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _listenKeyManager?.Dispose();
+                Client?.Dispose();
+                Socket?.Dispose();
+            }
+        }
+
+        private void EnableOrderStreams()
+        {
             // Obtain listenKey
             var response = _listenKeyManager.Obtain();
             if (!response.Success)
             {
                 _logger.LogError("Unable to obtain listenKey");
-                return;
+                Program.ExitProgramWithCode(ExitCode.BinanceCommunicationStartupFailure);
             }
 
             var listenKey = response.Data;
@@ -99,7 +141,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     try
                     {
                         _logger.LogDebug(JsonConvert.SerializeObject(orderInfoUpdate));
-                        UpdateObservers(BinanceUtilities.ToInternal(orderInfoUpdate));
+                        OrderUpdateDispenserImplementation.Publish(BinanceUtilities.ToInternal(orderInfoUpdate));
                     }
                     catch (Exception e)
                     {
@@ -116,27 +158,42 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             // Set error handler
             successOrderBook.Data.ConnectionLost += () =>
             {
-                _logger.LogCritical($"Connection got closed at {DateTime.UtcNow}. Attempt to open socket");
-                EnableStreams();
+                _logger.LogCritical($"Order stream got closed at {DateTime.UtcNow}, attempting reconnect...");
+                EnableOrderStreams();
             };
 
-            successOrderBook.Data.ConnectionRestored += t => _logger.LogCritical($"Connection was restored after {t}");
-
-            _logger.LogInformation("Binance Communication Service was successfully started!");
+            successOrderBook.Data.ConnectionRestored += t => _logger.LogCritical($"Order stream was restored after {t}");
         }
 
-        /// <summary>
-        /// Disposes the current object's resource.
-        /// </summary>
-        /// <param name="disposing">Whether to dispose the resources of the object.</param>
-        protected virtual void Dispose(bool disposing)
+        private void EnableKlineStreams()
         {
-            if (disposing)
+            var successKlineStream = Socket.SubscribeToKlineStream(
+                Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.TradingPairs.First().ToString(),
+                BinanceUtilities.ToInternal(Configuration.Instance.CandleWidth),
+                candle =>
+                {
+                    if (candle.Data.Final)
+                    {
+                        _candleDispenserImplementation.Publish(BinanceUtilities.ToInternal(candle));
+                    }
+                });
+
+            if (!successKlineStream.Success)
             {
-                _listenKeyManager?.Dispose();
-                Client?.Dispose();
-                Socket?.Dispose();
+                _logger.LogError(successKlineStream.Error.Message);
+                Program.ExitProgramWithCode(ExitCode.BinanceCommunicationStartupFailure);
             }
+
+            successKlineStream.Data.ConnectionLost += () =>
+            {
+                _logger.LogCritical($"Kline stream got closed at {DateTime.UtcNow}, attempting reconnect...");
+                EnableKlineStreams();
+            };
+
+            successKlineStream.Data.ConnectionRestored += t =>
+            {
+                _logger.LogCritical($"Kline stream was restored after {t}");
+            };
         }
     }
 }

@@ -87,7 +87,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
                 TradingPair.Parse("EOSETH"),
                 limit);
             var increment = (long)TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth).TotalMilliseconds;
-            var diffs = candles.Pairwise((a, b) => a.Timestamp - b.Timestamp);
+            var diffs = candles.Pairwise((a, b) => a.ClosedTimestamp - b.ClosedTimestamp);
             foreach (var diff in diffs)
             {
                 Assert.Equal(increment, diff);
@@ -104,7 +104,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
             var candles = _container.DataProvider.GetCandles(
                 TradingPair.Parse("EOSETH"),
                 limit);
-            var recent = candles[0].Timestamp;
+            var recent = candles[0].ClosedTimestamp;
             var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             Assert.True(
                 now - recent <= ((int)Configuration.Instance.CandleWidth * 60 * 1000) + 10000,

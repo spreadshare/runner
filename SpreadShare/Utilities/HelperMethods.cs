@@ -82,5 +82,15 @@ namespace SpreadShare.Utilities
 
             return e;
         }
+
+        /// <summary>
+        /// Converts a datetime object to unix timestamp.
+        /// </summary>
+        /// <param name="dateTime">Date time object to convert.</param>
+        /// <returns>Milliseconds since 01-01-1970.</returns>
+        public static long ToUnixTimestampMilliseconds(this DateTime dateTime)
+        {
+            return new DateTimeOffset(dateTime.ToUniversalTime(), TimeSpan.Zero).ToUnixTimeMilliseconds();
+        }
     }
 }

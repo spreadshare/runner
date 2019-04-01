@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private readonly DatabaseContext _database;
         private readonly string _outputFolder;
         private DateTimeOffset _currentTime;
+        private DateTimeOffset _lastCandleClose;
+        private int _lastCandleCloseCounter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestTimerProvider"/> class.
@@ -35,6 +38,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             BeginTime = DateTimeOffset.FromUnixTimeMilliseconds(
                 BacktestDaemonService.Instance.State.BeginTimeStamp) + TimeSpan.FromDays(14);
             _currentTime = BeginTime;
+            _lastCandleClose = _currentTime;
+
             EndTime = DateTimeOffset.FromUnixTimeMilliseconds(
                 BacktestDaemonService.Instance.State.EndTimeStamp);
             _outputFolder = settings.OutputFolder;
@@ -44,6 +49,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// Gets the current time of the backtest universe.
         /// </summary>
         public override DateTimeOffset CurrentTime => _currentTime;
+
+        /// <inheritdoc/>
+        public override DateTimeOffset LastCandleClose => _lastCandleClose;
 
         /// <inheritdoc />
         public override DateTimeOffset Pivot => BeginTime;
@@ -79,12 +87,19 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"StateSwitchEvents\";");
             _database.SaveChanges();
 
+            var ratio = Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth
+                        / Configuration.Instance.CandleWidth;
+
             while (CurrentTime < EndTime)
             {
                 try
                 {
-                    _currentTime += TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth);
-                    UpdateObservers(CurrentTime.ToUnixTimeMilliseconds());
+                    _currentTime += TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
+                    UpdateObservers(_currentTime.ToUnixTimeMilliseconds());
+                    if (_lastCandleCloseCounter++ % ratio == 0)
+                    {
+                        _lastCandleClose = _currentTime;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -96,6 +111,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             LogOutput();
         }
+
+        /// <inheritdoc />
+        public override void WaitForNextCandle() => Expression.Empty();
 
         /// <summary>
         /// Stop the timer and log the results.

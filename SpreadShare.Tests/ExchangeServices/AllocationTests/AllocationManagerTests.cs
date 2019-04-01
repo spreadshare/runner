@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
-using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
@@ -208,7 +207,7 @@ namespace SpreadShare.Tests.ExchangeServices.AllocationTests
         private AllocationManager MakeDefaultAllocation()
         {
             var alloc = new AllocationManager(LoggerFactory, _fetcher, null);
-            alloc.SetInitialConfiguration(Configuration.Instance.EnabledAlgorithm.Allocation);
+            alloc.SetInitialConfiguration(_fetcher.GetPortfolio().Data);
 
             // Free up at least 10 SNGLS (ObscureCoin)
             alloc.UpdateAllocation(
