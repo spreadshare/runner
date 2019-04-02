@@ -63,7 +63,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
             var topAsk = data.GetCurrentPriceTopAsk(pair);
             var topBid = data.GetCurrentPriceTopBid(pair);
 
-            Assert.True(topAsk > topBid, $"Top bid is higher than lowest ask (bid: {topBid}, ask: {topAsk}");
+            Assert.True(topAsk >= topBid, $"Top bid is higher than lowest ask (bid: {topBid}, ask: {topAsk}");
         }
 
         [Theory]

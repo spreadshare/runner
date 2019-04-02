@@ -212,13 +212,27 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <param name="width">Number of minutes.</param>
         /// <returns>Binance kline interval.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Non compatible intervals.</exception>
-        public static KlineInterval ToInternal(int width)
+        public static KlineInterval ToInternalKline(int width)
         {
             switch (width)
             {
                 case 1: return KlineInterval.OneMinute;
                 case 5: return KlineInterval.FiveMinutes;
                 default: throw new ArgumentOutOfRangeException(nameof(width));
+            }
+        }
+
+        /// <summary>
+        /// Converts an Binance API error code to internal ResponseCode.
+        /// </summary>
+        /// <param name="errorCode">The code to convert.</param>
+        /// <returns>ResponseCode.</returns>
+        public static ResponseCode ToInternalError(int errorCode)
+        {
+            switch (errorCode)
+            {
+                case -2010: return ResponseCode.ImmediateOrderTrigger;
+                default: return ResponseCode.Error;
             }
         }
     }

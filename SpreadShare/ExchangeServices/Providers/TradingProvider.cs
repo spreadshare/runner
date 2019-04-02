@@ -249,7 +249,8 @@ namespace SpreadShare.ExchangeServices.Providers
                         OrderSide.Buy,
                         quantity,
                         price,
-                        TradeId), _logger).Data;
+                        TradeId),
+                    _logger).Data;
             });
 
             if (result.Success)
@@ -294,7 +295,8 @@ namespace SpreadShare.ExchangeServices.Providers
                         OrderSide.Sell,
                         quantity,
                         price,
-                        TradeId), _logger).Data;
+                        TradeId),
+                    _logger).Data;
             });
 
             if (result.Success)
@@ -398,7 +400,18 @@ namespace SpreadShare.ExchangeServices.Providers
             var result = _allocationManager.QueueTrade(proposal, () =>
             {
                 return HelperMethods.RetryMethod(
-                    () => Implementation.PlaceStoplossOrder(pair, OrderSide.Sell, quantity, price, TradeId),
+                    context =>
+                    {
+                        var query = Implementation.PlaceStoplossOrder(pair, OrderSide.Sell, quantity, price, TradeId);
+                        if (query.Code == ResponseCode.ImmediateOrderTrigger)
+                        {
+                            _logger.LogWarning($"Decreasing StopPrice and retry.");
+                            price -= pair.MinPriceTick * context.Iteration;  // Linear backoff
+                            context.DisableBackoff(); // No need for delay
+                        }
+
+                        return query;
+                    },
                     _logger).Data;
             });
 
@@ -440,7 +453,18 @@ namespace SpreadShare.ExchangeServices.Providers
             var result = _allocationManager.QueueTrade(proposal, () =>
             {
                 return HelperMethods.RetryMethod(
-                    () => Implementation.PlaceStoplossOrder(pair, OrderSide.Buy, quantity, price, TradeId),
+                    context =>
+                    {
+                        var query = Implementation.PlaceStoplossOrder(pair, OrderSide.Buy, quantity, price, TradeId);
+                        if (query.Code == ResponseCode.ImmediateOrderTrigger)
+                        {
+                            _logger.LogWarning($"Increase stop price and retry.");
+                            price += pair.MinPriceTick * context.Iteration; // Linear price backoff
+                            context.DisableBackoff(); // No need for delays
+                        }
+
+                        return query;
+                    },
                     _logger).Data;
             });
 

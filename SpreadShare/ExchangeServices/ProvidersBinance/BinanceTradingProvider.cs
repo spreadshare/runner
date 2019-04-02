@@ -130,8 +130,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 orderResponseType: null,
                 receiveWindow: (int)_communications.ReceiveWindow);
 
-            // Allow nested argument chopping
-            #pragma warning disable SA1118
             return query.Success
                 ? new ResponseObject<OrderUpdate>(
                     ResponseCode.Success,
@@ -145,8 +143,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                         side,
                         pair,
                         realQuantity))
-                : ResponseObject.OrderPlacementFailed(query.Error.Message);
-            #pragma warning disable SA1118
+                : ResponseObject.OrderPlacementFailed(BinanceUtilities.ToInternalError(query.Error.Code), query.Error.Message);
         }
 
         /// <inheritdoc />
@@ -213,7 +210,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     return new ResponseObject<OrderUpdate>(order);
                 }
 
-                return ResponseObject.OrderPlacementFailed(query.Error.Message);
+                return ResponseObject.OrderPlacementFailed(BinanceUtilities.ToInternalError(query.Error.Code), query.Error.Message);
             }
         }
 
@@ -229,12 +226,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 newClientOrderId: null,
                 receiveWindow: _communications.ReceiveWindow);
 
-            if (!query.Success)
-            {
-                return new ResponseObject(ResponseCode.Error, query.Error.Message);
-            }
-
-            return new ResponseObject(ResponseCode.Success);
+            return query.Success
+                ? new ResponseObject(ResponseCode.Success)
+                : new ResponseObject(BinanceUtilities.ToInternalError(query.Error.Code), query.Error.Message);
         }
 
         /// <inheritdoc />

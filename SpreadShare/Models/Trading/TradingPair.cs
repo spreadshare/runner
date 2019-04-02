@@ -61,6 +61,16 @@ namespace SpreadShare.Models.Trading
         public int PriceDecimals { get; }
 
         /// <summary>
+        /// Gets the smallest unit of change for the price.
+        /// </summary>
+        public decimal MinPriceTick => (decimal)Math.Pow(10, -PriceDecimals);
+
+        /// <summary>
+        /// Gets the smallest unit of change for the quantity.
+        /// </summary>
+        public decimal MinQuantityTick => (decimal)Math.Pow(10, -QuantityDecimals);
+
+        /// <summary>
         /// This function adds a parse option tot the table, this should only be used to initialize the environment.
         /// </summary>
         /// <param name="tradingPairString">String representation of the trading pair.</param>
