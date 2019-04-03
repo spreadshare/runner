@@ -47,14 +47,14 @@ namespace SpreadShare.Utilities
         /// <returns>The timestamp edges.</returns>
         public (long, long) GetTimeStampEdges(List<TradingPair> pairs)
         {
-            Guard.Argument(_databaseContext.Candles).NotEmpty(x => $"Database contains no candles!");
+            Guard.Argument(_databaseContext.Candles.AsNoTracking()).NotEmpty(x => $"Database contains no candles!");
             Guard.Argument(pairs).NotNull();
 
             long minBeginVal = 0;
             long minEndVal = long.MaxValue;
             foreach (var pair in pairs)
             {
-                if (!_databaseContext.Candles.Any(x => x.TradingPair == pair.ToString()))
+                if (!_databaseContext.Candles.AsNoTracking().Any(x => x.TradingPair == pair.ToString()))
                 {
                     throw new Exception($"Database does not contain candles for {pair}");
                 }

@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
+using SpreadShare.Models.Database;
 using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.BacktestDaemon;
 using SpreadShare.SupportServices.Configuration;
@@ -18,6 +20,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private readonly ILogger _logger;
         private readonly DatabaseContext _database;
         private readonly string _outputFolder;
+        private readonly List<BacktestOrder> _backtestOrders;
+
         private DateTimeOffset _currentTime;
         private DateTimeOffset _lastCandleClose;
         private int _lastCandleCloseCounter;
@@ -33,6 +37,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _database = database;
+            _backtestOrders = new List<BacktestOrder>();
 
             // Hardcoded 2 week offset
             BeginTime = DateTimeOffset.FromUnixTimeMilliseconds(
@@ -76,6 +81,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         public (bool, Exception) ErrorRegister { get; private set; }
 
+        /// <summary>
+        /// Add order to the logger.
+        /// </summary>
+        /// <param name="order">Order to log.</param>
+        public void AddOrder(BacktestOrder order)
+        {
+            _backtestOrders.Add(order);
+        }
+
         /// <inheritdoc />
         public override async void RunPeriodicTimer()
         {
@@ -83,9 +97,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             await Task.Delay(1000).ConfigureAwait(false);
 
             // Clear the trades and state switch event table (NOTE: Sequences are not reset)
-            _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"BacktestOrders\";");
             _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"StateSwitchEvents\";");
             _database.SaveChanges();
+            _backtestOrders.Clear();
 
             var ratio = Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth
                         / Configuration.Instance.CandleWidth;
@@ -120,12 +134,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         public void LogOutput()
         {
-            _logger.LogInformation("Flushing the trades to the database...");
-            _database.SaveChanges();
             _logger.LogInformation("Writing output");
 
             // Output to database
-            var outputLogger = new BacktestOutputLogger(_database, this, _outputFolder);
+            var outputLogger = new BacktestOutputLogger(_database, this, _outputFolder, _backtestOrders);
             outputLogger.Output();
 
             // Declare completion (hands over control back to CLI)

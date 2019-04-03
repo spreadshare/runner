@@ -80,11 +80,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Add to order cache to confirm filled
             _orderCache.Enqueue(order);
 
-            // Write the trade to the database
-            _database.BacktestOrders.Add(new BacktestOrder(
-                order,
-                JsonConvert.SerializeObject(ParentImplementation.GetPortfolio()),
-                _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
+            // Write the trade to the logger
+            LogOrder(order, ParentImplementation.GetPortfolio().Clone());
 
             return new ResponseObject<OrderUpdate>(
                 ResponseCode.Success,
@@ -158,11 +155,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Add to order cache to confirm cancelled.
             _orderCache.Enqueue(order);
 
-            // Add cancelled order to the database
-            _database.BacktestOrders.Add(new BacktestOrder(
-                order,
-                JsonConvert.SerializeObject(ParentImplementation.GetPortfolio()),
-                _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
+            // Add cancelled order to the logger
+            LogOrder(order, ParentImplementation.GetPortfolio().Clone());
 
             return new ResponseObject(ResponseCode.Success);
         }
@@ -204,11 +198,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 {
                     Logger.LogInformation($"Order {order.OrderId} confirmed at {Timer.CurrentTime}");
 
-                    // Write the filled trade to the database
-                    _database.BacktestOrders.Add(new BacktestOrder(
-                        order,
-                        JsonConvert.SerializeObject(ParentImplementation.GetPortfolio()),
-                        _dataProvider.ValuatePortfolioInBaseCurrency(ParentImplementation.GetPortfolio())));
+                    // Write the filled trade to the logger
+                    LogOrder(order, ParentImplementation.GetPortfolio().Clone());
 
                     UpdateObservers(order);
                 }
@@ -285,6 +276,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             }
 
             return false;
+        }
+
+        private void LogOrder(OrderUpdate order, Portfolio portfolio)
+        {
+            ((BacktestTimerProvider)Timer).AddOrder(
+                new BacktestOrder(
+                    order,
+                    JsonConvert.SerializeObject(portfolio),
+                    _dataProvider.ValuatePortfolioInBaseCurrency(portfolio)));
         }
     }
 }

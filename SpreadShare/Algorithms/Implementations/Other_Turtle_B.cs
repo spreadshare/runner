@@ -83,6 +83,11 @@ namespace SpreadShare.Algorithms.Implementations
                 _pyramid = pyramid;
             }
 
+            public override State<Config> OnOrderUpdate(OrderUpdate order)
+            {
+                return new NothingState<Config>();
+            }
+
             protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
                 trading.CancelOrder(_stoploss);

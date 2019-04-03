@@ -109,6 +109,8 @@ namespace SpreadShare.SupportServices.Configuration
         private readonly LazyCache<Dictionary<string, object>> _algorithmConfigurationConstructor =
             new LazyCache<Dictionary<string, object>>();
 
+        private Type _algorithmConfigurationType;
+
         [Required]
         [YamlMember(Alias = "Algorithm")]
         [IsImplementation(typeof(IBaseAlgorithm))]
@@ -140,15 +142,19 @@ namespace SpreadShare.SupportServices.Configuration
         {
             get
             {
-                Type config = Reflections.GetMatchingConfigurationsType(Algorithm);
+                if (_algorithmConfigurationType == null)
+                {
+                    _algorithmConfigurationType = Reflections.GetMatchingConfigurationsType(Algorithm);
+                }
+
                 try
                 {
                     return _algorithmConfigurationConstructor.Value(
                         __parameters,
                         x => new DeserializerBuilder().Build().Deserialize( // Re-Deserialize with the now known type.
                                 new SerializerBuilder().Build().Serialize(__parameters),
-                                config),
-                        config) as AlgorithmConfiguration;
+                                _algorithmConfigurationType),
+                        _algorithmConfigurationType) as AlgorithmConfiguration;
                 }
                 catch (TargetInvocationException e)
                 {

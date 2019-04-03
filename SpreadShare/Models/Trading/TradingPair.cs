@@ -18,6 +18,7 @@ namespace SpreadShare.Models.Trading
     internal class TradingPair
     {
         private static readonly Dictionary<string, TradingPair> Table = new Dictionary<string, TradingPair>();
+        private readonly string _toString;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TradingPair"/> class.
@@ -34,6 +35,7 @@ namespace SpreadShare.Models.Trading
 
             Left = left;
             Right = right;
+            _toString = Left.ToString() + Right.ToString();
             QuantityDecimals = quantityDecimals;
             PriceDecimals = priceDecimals;
         }
@@ -236,10 +238,7 @@ namespace SpreadShare.Models.Trading
         /// Returns a string representation of the trading pair.
         /// </summary>
         /// <returns>A string representation of the trading pair.</returns>
-        public override string ToString()
-        {
-            return $"{Left}{Right}";
-        }
+        public override string ToString() => _toString;
 
         private static string RemoveAllWhiteSpace(string input)
         {

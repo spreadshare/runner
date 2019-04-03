@@ -80,14 +80,14 @@ namespace SpreadShare
         {
             var logger = loggerFactory.CreateLogger("Startup::Configure");
 
-            // Add Sentry to ErrorLogging
             if (Program.CommandLineArgs.Trading)
             {
+                // Add Sentry to ErrorLogging
                 loggerFactory.AddProvider(new SentryLoggerProvider());
-            }
 
-            // Add DatabaseEventListener to log pipeline.
-            loggerFactory.AddProvider(new DatabaseEventLoggerProvider());
+                // Add DatabaseEventListener to log pipeline.
+                loggerFactory.AddProvider(new DatabaseEventLoggerProvider());
+            }
 
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<DatabaseMigrationService>();

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Database;
@@ -23,6 +24,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
         private readonly DatabaseContext _db;
         private readonly ILogger _logger;
+
+        private (string, int) lastChecked = (null, -1);
+        private BacktestingCandle[] lastResult;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestBuffers"/> class.
@@ -82,15 +86,27 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <returns>Complete compressed candle buffer.</returns>
         public BacktestingCandle[] GetCandles(TradingPair pair, int channelWidth)
         {
-            if (!_candleBuffer.ContainsKey((pair.ToString(), channelWidth)))
+            if (lastChecked == (pair.ToString(), channelWidth))
+            {
+                return lastResult;
+            }
+
+            BacktestingCandle[] result;
+
+            // Build buffer if it doesn't exist
+            if (!_candleBuffer.TryGetValue((pair.ToString(), channelWidth), out result))
             {
                 _logger.LogCritical($"Building compressed candle buffer for {pair} with size {channelWidth}");
                 var candles = GetCandles(pair);
-                _candleBuffer[(pair.ToString(), channelWidth)] =
-                    BuildCandleBuffer(candles, channelWidth);
+                result = BuildCandleBuffer(candles, channelWidth);
+                _candleBuffer[(pair.ToString(), channelWidth)] = result;
             }
 
-            return _candleBuffer[(pair.ToString(), channelWidth)];
+            // Cache last result
+            lastResult = result;
+            lastChecked = (pair.ToString(), channelWidth);
+
+            return result;
         }
 
         /// <summary>
