@@ -75,12 +75,15 @@ namespace SpreadShare.ExchangeServices
         {
             // Makes sure that the communication is enabled
             _binanceCommunications.EnableStreams();
-            var timerProvider = new BinanceTimerProvider(_loggerFactory);
+            var timerProvider = new BinanceTimerProvider(_loggerFactory, _binanceCommunications);
             var dataImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications, timerProvider);
             var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications, timerProvider);
 
             var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
+
+            // Doubly linked data provider to check candles
+            timerProvider.DataProvider = dataProvider;
 
             // Inject database event listener
             DatabaseEventListenerService.Instance?.AddOrderSource(tradingProvider);

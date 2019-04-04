@@ -46,7 +46,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 var last = ascending ? subset[subset.Count - 1] : subset[0];
 
                 result[index] = new BacktestingCandle(
-                    timestamp: first.Timestamp,
+                    closedTimestamp: last.ClosedTimestamp,
                     open: first.Open,
                     close: last.Close,
                     high: subset.Max(x => x.High),

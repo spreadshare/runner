@@ -1,10 +1,15 @@
 using System;
+using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
+using SpreadShare.ExchangeServices.Providers.Observing;
+using SpreadShare.Models.Database;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.ErrorServices;
 using SpreadShare.Utilities;
 
@@ -15,25 +20,76 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
     /// </summary>
     internal class BinanceTimerProvider : TimerProvider
     {
+        private readonly ILogger _logger;
         private int _consecutiveExceptions = 0;
+        private DataProvider _dataProvider;
+        private DateTimeOffset _candleCloseTimestamp;
+        private volatile bool _candleCloseFlag;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceTimerProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output.</param>
-        public BinanceTimerProvider(ILoggerFactory loggerFactory)
+        /// <param name="comms">The communication service.</param>
+        public BinanceTimerProvider(ILoggerFactory loggerFactory, BinanceCommunicationsService comms)
             : base(loggerFactory)
         {
             // Set the pivot point to midnight.
-            // Pivot = new DateTimeOffset(2018, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
             Pivot = DateTimeOffset.FromUnixTimeSeconds(0);
+            _logger = loggerFactory.CreateLogger(GetType());
+            _candleCloseTimestamp = DateTimeOffset.Now;
+            comms.CandleDispenser.Subscribe(new ConfigurableObserver<BacktestingCandle>(
+                () => { }, _ => { }, candle =>
+                {
+                    _candleCloseTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(candle.ClosedTimestamp);
+
+                    // Get the last compressed candle from the data provider to determine if a compressed candle is closed.
+                    var lastCandle = DataProvider.GetCandles(TradingPair.Parse(candle.TradingPair), 1).First();
+                    _logger.LogDebug($"StateManager: Socket Candle Time: {DateTimeOffset.FromUnixTimeMilliseconds(candle.ClosedTimestamp)} - Compressed Rest API Candle Time: {DateTimeOffset.FromUnixTimeMilliseconds(lastCandle.ClosedTimestamp)} - Diff: {lastCandle.ClosedTimestamp - candle.ClosedTimestamp}");
+                    if (lastCandle.ClosedTimestamp == candle.ClosedTimestamp)
+                    {
+                        _logger.LogInformation($"The candle has just been closed!");
+                        _candleCloseFlag = true;
+                    }
+                }));
         }
 
         /// <inheritdoc />
         public override DateTimeOffset CurrentTime => DateTimeOffset.Now;
 
+        /// <inheritdoc/>
+        public override DateTimeOffset LastCandleClose => _candleCloseTimestamp;
+
         /// <inheritdoc />
         public override DateTimeOffset Pivot { get; }
+
+        /// <summary>
+        /// Sets a <see cref="DataProvider"/> instance, the setter is used via reflection in <see cref="ExchangeFactoryService"/>.
+        /// </summary>
+        public DataProvider DataProvider
+        {
+            private get => _dataProvider;
+            set
+            {
+                if (_dataProvider != null)
+                {
+                    throw new InvalidOperationException("Cannot set the value of the DataProvider more than once.");
+                }
+
+                _dataProvider = value;
+            }
+        }
+
+        /// <inheritdoc />
+        public override void WaitForNextCandle()
+        {
+            _logger.LogDebug("Stalling program until next candle close.");
+            _candleCloseFlag = false;
+            while (!_candleCloseFlag)
+            {
+                Thread.Sleep(100);
+            }
+        }
 
         /// <summary>
         /// Notifies the observer periodically.

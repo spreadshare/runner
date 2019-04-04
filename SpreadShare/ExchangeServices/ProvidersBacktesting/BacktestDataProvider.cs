@@ -157,7 +157,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var millisecondsCandleWidth = (int)TimeSpan.FromMinutes(channelWidth).TotalMilliseconds;
 
             // Minus one to prevent reading candles whose close is in the future.
-            long index = ((timestamp - buffer[0].Timestamp) / millisecondsCandleWidth) - 1;
+            long index = ((timestamp - buffer[0].ClosedTimestamp) / millisecondsCandleWidth) - 1;
             if (index < 0)
             {
                 Logger.LogError("Got request for a candle that exists before the scope of available data");

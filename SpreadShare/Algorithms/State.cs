@@ -119,6 +119,12 @@ namespace SpreadShare.Algorithms
         }
 
         /// <summary>
+        /// Stalls the program until the start of a new candle.
+        /// </summary>
+        protected void WaitForNextCandle()
+            => _timerProvider.WaitForNextCandle();
+
+        /// <summary>
         /// Sets the post condition of a state.
         /// </summary>
         /// <param name="trading">Trading Provider.</param>

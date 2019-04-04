@@ -56,7 +56,7 @@ namespace SpreadShare.SupportServices
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<BacktestingCandle>()
-                .HasKey(c => new { c.Timestamp, c.TradingPair });
+                .HasKey(c => new { Timestamp = c.ClosedTimestamp, c.TradingPair });
         }
     }
 }

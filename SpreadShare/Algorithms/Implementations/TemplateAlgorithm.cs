@@ -31,6 +31,7 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 Logger.LogInformation("I wonder if Miss Bitcoin thinks I should buy...");
                 Logger.LogInformation(ShowAlloc(trading));
+                WaitForNextCandle();
                 Logger.LogInformation(ShowAlloc(trading));
                 return new ZombieState();
             }

@@ -184,7 +184,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     pair.ToString(),
                     _db.Candles.AsNoTracking()
                         .Where(x => x.TradingPair == pair.ToString())
-                        .OrderBy(x => x.Timestamp)
+                        .OrderBy(x => x.ClosedTimestamp)
                         .ToArray());
                 _logger.LogCritical($"Done building the buffer for {pair}");
             }

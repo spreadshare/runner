@@ -18,7 +18,7 @@ namespace SpreadShare.Tests.Stubs.Binance
 
         public void ScheduleObserverEvent(OrderUpdate order)
         {
-            new Thread(() => UpdateObservers(order)).Start();
+            new Thread(() => OrderUpdateDispenserImplementation.Publish(order)).Start();
         }
     }
 }

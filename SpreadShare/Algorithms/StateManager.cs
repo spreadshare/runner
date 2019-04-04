@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
@@ -49,7 +48,7 @@ namespace SpreadShare.Algorithms
                     new ConfigurableObserver<long>(
                     () => { },
                     _ => { },
-                    _ =>
+                    tick =>
                     {
                         if (_activeState is null)
                         {
@@ -207,14 +206,6 @@ namespace SpreadShare.Algorithms
                 var next = _activeState.Activate(_configuration, _container);
                 if (!(next is NothingState<T>))
                 {
-                    // TODO: Remove this
-                    if (Program.CommandLineArgs.Trading)
-                    {
-                        _logger.LogDebug($"Sleeping {(int)_configuration.CandleWidth} to prevent rapid trading.");
-                        Thread.Sleep((int)TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth)
-                            .TotalMilliseconds);
-                    }
-
                     SwitchState(next);
                 }
             }

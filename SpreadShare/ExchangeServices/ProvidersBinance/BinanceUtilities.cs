@@ -3,6 +3,7 @@ using Binance.Net.Objects;
 using CryptoExchange.Net.Objects;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Models;
+using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 using SpreadShare.Utilities;
 using OrderSide = SpreadShare.Models.Trading.OrderSide;
@@ -160,9 +161,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 tradeId: 0,
                 orderType: ToInternal(orderInfoUpdate.Type),
                 orderStatus: ToInternal(orderInfoUpdate.Status),
-                createdTimeStamp: DateTimeOffset
-                    .FromFileTime(orderInfoUpdate.OrderCreationTime.ToFileTime())
-                    .ToUnixTimeMilliseconds(),
+                createdTimeStamp: orderInfoUpdate.OrderCreationTime.ToUnixTimestampMilliseconds(),
                 setPrice: orderInfoUpdate.Price,
                 side: ToInternal(orderInfoUpdate.Side),
                 pair: TradingPair.Parse(orderInfoUpdate.Symbol),
@@ -188,6 +187,39 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             }
 
             return order;
+        }
+
+        /// <summary>
+        /// Converts a binance sourced candle to an internal model.
+        /// </summary>
+        /// <param name="candle">The candle to convert.</param>
+        /// <returns><see cref="BacktestingCandle"/> instance.</returns>
+        public static BacktestingCandle ToInternal(BinanceStreamKlineData candle)
+        {
+            return new BacktestingCandle(
+                closedTimestamp: candle.Data.CloseTime.ToUnixTimestampMilliseconds(),
+                open: candle.Data.Open,
+                close: candle.Data.Close,
+                high: candle.Data.High,
+                low: candle.Data.Low,
+                volume: candle.Data.Volume,
+                tradingPair: candle.Symbol);
+        }
+
+        /// <summary>
+        /// Convert a number of minutes to a <see cref="KlineInterval"/>.
+        /// </summary>
+        /// <param name="width">Number of minutes.</param>
+        /// <returns>Binance kline interval.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Non compatible intervals.</exception>
+        public static KlineInterval ToInternal(int width)
+        {
+            switch (width)
+            {
+                case 1: return KlineInterval.OneMinute;
+                case 5: return KlineInterval.FiveMinutes;
+                default: throw new ArgumentOutOfRangeException(nameof(width));
+            }
         }
     }
 }

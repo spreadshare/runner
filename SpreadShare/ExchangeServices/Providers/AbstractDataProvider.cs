@@ -86,11 +86,11 @@ namespace SpreadShare.ExchangeServices.Providers
                     x => $"Target candle size {x}min requires decompression given the configured candle size {localCandleSize}min")
                 .Require<ArgumentOutOfRangeException>(
                     x => x % localCandleSize == 0,
-                    x => $"Cannot compress candles from {x}min to {localCandleSize}min because {x} is not divible by {localCandleSize}");
+                    x => $"Cannot compress candles from {x}min to {localCandleSize}min because {x} is not divisible by {localCandleSize}");
 
             // Number of candles needed for the query
             var targetCandleCount = (targetCandleSize / localCandleSize) * numberOfCandles;
-            var timespan = TimerProvider.CurrentTime - TimerProvider.Pivot;
+            var timespan = TimerProvider.LastCandleClose - TimerProvider.Pivot;
 
             // Number of candles that are left after dividing by the target size (uncompleted batch)
             var padding = ((int)timespan.TotalMinutes % targetCandleSize) / localCandleSize;
@@ -103,6 +103,7 @@ namespace SpreadShare.ExchangeServices.Providers
             }
 
             var candles = candlesQuery.Data.Skip(padding).ToArray();
+
             return new ResponseObject<BacktestingCandle[]>(
                 DataProviderUtilities.CompressCandles(candles, targetCandleSize / localCandleSize));
         }

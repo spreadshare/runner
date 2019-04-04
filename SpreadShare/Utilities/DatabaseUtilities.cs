@@ -66,12 +66,12 @@ namespace SpreadShare.Utilities
                 {
                     first = _databaseContext.Candles.AsNoTracking()
                         .Where(x => x.TradingPair == pair.ToString())
-                        .OrderBy(x => x.Timestamp)
-                        .First().Timestamp;
+                        .OrderBy(x => x.ClosedTimestamp)
+                        .First().ClosedTimestamp;
                     last = _databaseContext.Candles.AsNoTracking()
                         .Where(x => x.TradingPair == pair.ToString())
-                        .OrderBy(x => x.Timestamp)
-                        .Last().Timestamp;
+                        .OrderBy(x => x.ClosedTimestamp)
+                        .Last().ClosedTimestamp;
 
                     // Save result in cache.
                     _timestampEdgesCache[pair] = (first, last);
@@ -111,12 +111,12 @@ namespace SpreadShare.Utilities
             // Take a small sample of candles.
             var sample = _databaseContext.Candles.AsNoTracking()
                 .Where(x => x.TradingPair == pair.ToString())
-                .OrderBy(x => x.Timestamp)
+                .OrderBy(x => x.ClosedTimestamp)
                 .Take(10);
 
             // Check if the the difference in timestamps matches the given check.
             return sample.AsEnumerable()
-                .Pairwise((a, b) => b.Timestamp - a.Timestamp == width)
+                .Pairwise((a, b) => b.ClosedTimestamp - a.ClosedTimestamp == width)
                 .All(x => x);
         }
     }
