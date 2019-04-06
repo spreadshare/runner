@@ -6,6 +6,7 @@ using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.ErrorServices;
 
 namespace SpreadShare.SupportServices
 {
@@ -130,6 +131,17 @@ namespace SpreadShare.SupportServices
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Closes the current session.
+        /// </summary>
+        /// <param name="exitCode">The exit code with which to close the session.</param>
+        public void CloseSession(ExitCode exitCode)
+        {
+            Session.Active = false;
+            Session.ExitCode = (int)exitCode;
+            _database.SaveChanges();
         }
 
         private void OnNext(OrderUpdate order)

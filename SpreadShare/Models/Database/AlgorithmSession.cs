@@ -32,6 +32,11 @@ namespace SpreadShare.Models.Database
         public string ContainerId { get; set; }
 
         /// <summary>
+        /// Gets or sets the exit code with which this session was closed.
+        /// </summary>
+        public int ExitCode { get; set; }
+
+        /// <summary>
         /// Gets or sets the timestamp at which the session was created.
         /// </summary>
         public long CreatedTimestamp { get; set; }
