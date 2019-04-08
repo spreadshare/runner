@@ -170,7 +170,10 @@ namespace SpreadShare.ExchangeServices.Providers
                 throw new OrderRefusedException(result.Message);
             }
 
-            _logger.LogError($"Executed Market Buy: {JsonConvert.SerializeObject(result)}");
+            if (Program.CommandLineArgs.Trading)
+            {
+                _logger.LogInformation($"Executed Market Buy: {JsonConvert.SerializeObject(result)}");
+            }
 
             return result.Data
                 .IsBuy()
@@ -211,7 +214,10 @@ namespace SpreadShare.ExchangeServices.Providers
                 throw new OrderRefusedException(result.Message);
             }
 
-            _logger.LogError($"Executed Market Sell: {JsonConvert.SerializeObject(result)}");
+            if (Program.CommandLineArgs.Trading)
+            {
+                _logger.LogInformation($"Executed Market Sell: {JsonConvert.SerializeObject(result)}");
+            }
 
             return result.Data
                 .IsSell()
@@ -253,7 +259,11 @@ namespace SpreadShare.ExchangeServices.Providers
                 order.IsLimit()
                      .IsBuy()
                      .IsNew();
-                _logger.LogError($"Placed Limit Buy: {JsonConvert.SerializeObject(result)}");
+                if (Program.CommandLineArgs.Trading)
+                {
+                    _logger.LogInformation($"Placed Limit Buy: {JsonConvert.SerializeObject(result)}");
+                }
+
                 return order;
             }
 
@@ -294,7 +304,12 @@ namespace SpreadShare.ExchangeServices.Providers
                 order.IsLimit()
                     .IsSell()
                     .IsNew();
-                _logger.LogError($"Placed Limit Sell: {JsonConvert.SerializeObject(result)}");
+
+                if (Program.CommandLineArgs.Trading)
+                {
+                    _logger.LogInformation($"Placed Limit Sell: {JsonConvert.SerializeObject(result)}");
+                }
+
                 return order;
             }
 
@@ -394,7 +409,12 @@ namespace SpreadShare.ExchangeServices.Providers
                 order.IsStopLoss()
                      .IsSell()
                      .IsNew();
-                _logger.LogError($"Placed Stoploss Sell: {JsonConvert.SerializeObject(result)}");
+
+                if (Program.CommandLineArgs.Trading)
+                {
+                    _logger.LogInformation($"Placed Stoploss Sell: {JsonConvert.SerializeObject(result)}");
+                }
+
                 return result.Data;
             }
 
@@ -431,7 +451,12 @@ namespace SpreadShare.ExchangeServices.Providers
                 order.IsStopLoss()
                      .IsBuy()
                      .IsNew();
-                _logger.LogError($"Placed Stoploss Buy: {JsonConvert.SerializeObject(result)}");
+
+                if (Program.CommandLineArgs.Trading)
+                {
+                    _logger.LogInformation($"Placed Stoploss Buy: {JsonConvert.SerializeObject(result)}");
+                }
+
                 return result.Data;
             }
 
@@ -523,7 +548,11 @@ namespace SpreadShare.ExchangeServices.Providers
             {
                 var confirmation = WaitForOrderStatus(order.OrderId, OrderUpdate.OrderStatus.Cancelled);
                 _openOrders.Remove(confirmation.OrderId);
-                _logger.LogError($"Cancelled Order: {JsonConvert.SerializeObject(confirmation)}");
+
+                if (Program.CommandLineArgs.Trading)
+                {
+                    _logger.LogInformation($"Cancelled Order: {JsonConvert.SerializeObject(confirmation)}");
+                }
             }
             catch
             {

@@ -81,7 +81,11 @@ namespace SpreadShare.ExchangeServices.Allocation
             }
 
             _allocation = initialAllocation;
-            _logger.LogInformation($"Configured AllocationManager with {JsonConvert.SerializeObject(_allocation)}");
+            if (Program.CommandLineArgs.Trading)
+            {
+                _logger.LogInformation($"Configured AllocationManager with {JsonConvert.SerializeObject(_allocation)}");
+            }
+
             UpdateObservers(_allocation);
         }
 
@@ -112,7 +116,11 @@ namespace SpreadShare.ExchangeServices.Allocation
         /// <param name="exec">The trade execution to process.</param>
         public virtual void UpdateAllocation(TradeExecution exec)
         {
-            _logger.LogInformation($"Allocation Update: {JsonConvert.SerializeObject(exec, Formatting.Indented)}");
+            if (Program.CommandLineArgs.Trading)
+            {
+                _logger.LogInformation($"Allocation Update: {JsonConvert.SerializeObject(exec, Formatting.Indented)}");
+            }
+
             _allocation.UpdateAllocation(exec);
             UpdateObservers(_allocation);
         }

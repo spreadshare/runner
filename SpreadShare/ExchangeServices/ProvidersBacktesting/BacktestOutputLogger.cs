@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private const char Delimiter = '|';
         private readonly BacktestTimerProvider _timer;
+        private readonly List<BacktestOrder> _orders;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestOutputLogger"/> class.
@@ -24,11 +26,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="databaseContext">DatabaseContext to fetch trades and switches.</param>
         /// <param name="timer">BacktestTimerProvider to get timespan information.</param>
         /// <param name="outputFolder">General backtest output folder.</param>
-        public BacktestOutputLogger(DatabaseContext databaseContext, BacktestTimerProvider timer, string outputFolder)
+        /// <param name="orders">Orders that have been traded.</param>
+        public BacktestOutputLogger(DatabaseContext databaseContext, BacktestTimerProvider timer, string outputFolder, List<BacktestOrder> orders)
         {
             DatabaseContext = databaseContext;
             OutputFolder = outputFolder;
             _timer = timer;
+            _orders = orders;
         }
 
         /// <summary>
@@ -90,7 +94,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var builder = new StringBuilder();
             builder.AppendLine(BacktestOrder.GetStaticCsvHeader(Delimiter));
 
-            foreach (var trade in DatabaseContext.BacktestOrders.OrderBy(x => x.FilledTimestamp).ThenBy(x => x.TradeId))
+            foreach (var trade in _orders)
             {
                 builder.AppendLine(trade.GetCsvRepresentation(Delimiter));
             }
