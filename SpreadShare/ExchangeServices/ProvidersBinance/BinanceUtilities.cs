@@ -197,7 +197,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         public static BacktestingCandle ToInternal(BinanceStreamKlineData candle)
         {
             return new BacktestingCandle(
-                closedTimestamp: candle.Data.CloseTime.ToUnixTimestampMilliseconds(),
+                openTimestamp: candle.Data.OpenTime.ToUnixTimestampMilliseconds(),
                 open: candle.Data.Open,
                 close: candle.Data.Close,
                 high: candle.Data.High,

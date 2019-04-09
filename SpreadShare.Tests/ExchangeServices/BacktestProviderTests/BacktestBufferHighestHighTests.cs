@@ -16,7 +16,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
             {
                 // #1
                 new BacktestingCandle(
-                    closedTimestamp: 300000L,
+                    openTimestamp: 300000L,
                     open: 5,
                     close: 6.6M,
                     high: 7.2M,
@@ -26,7 +26,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
                 // #2
                 new BacktestingCandle(
-                    closedTimestamp: 600000L,
+                    openTimestamp: 600000L,
                     open: 6.12M,
                     close: 8.01M,
                     high: 8.02M,
@@ -36,7 +36,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
                 // #3
                 new BacktestingCandle(
-                    closedTimestamp: 900000L,
+                    openTimestamp: 900000L,
                     open: 7.90M,
                     close: 8.872M,
                     high: 8.9M,
@@ -46,7 +46,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
                 // #4
                 new BacktestingCandle(
-                    closedTimestamp: 1200000L,
+                    openTimestamp: 1200000L,
                     open: 7.6M,
                     close: 6.8M,
                     high: 7.8M,
@@ -56,7 +56,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
                 // #5
                 new BacktestingCandle(
-                    closedTimestamp: 1500000L,
+                    openTimestamp: 1500000L,
                     open: 7.9M,
                     close: 5.6M,
                     high: 7.9M,
@@ -66,7 +66,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
                 // #6
                 new BacktestingCandle(
-                    closedTimestamp: 1800000L,
+                    openTimestamp: 1800000L,
                     open: 5.9M,
                     close: 6.3M,
                     high: 6.6M,
@@ -76,7 +76,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
                 // #7
                 new BacktestingCandle(
-                    closedTimestamp: 2100000L,
+                    openTimestamp: 2100000L,
                     open: 6.4M,
                     close: 6.6M,
                     high: 7.2M,
@@ -86,7 +86,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
                 // #8
                 new BacktestingCandle(
-                    closedTimestamp: 2400000L,
+                    openTimestamp: 2400000L,
                     open: 6.5M,
                     close: 6.9M,
                     high: 7.4M,
@@ -96,7 +96,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
                 // #9
                 new BacktestingCandle(
-                    closedTimestamp: 2700000L,
+                    openTimestamp: 2700000L,
                     open: 6.7M,
                     close: 6.2M,
                     high: 6.8M,
@@ -106,7 +106,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
                 // #10
                 new BacktestingCandle(
-                    closedTimestamp: 30000000L,
+                    openTimestamp: 30000000L,
                     open: 6.2M,
                     close: 5.6M,
                     high: 6.4M,
@@ -116,7 +116,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
                 // #11
                 new BacktestingCandle(
-                    closedTimestamp: 33000000L,
+                    openTimestamp: 33000000L,
                     open: 5.6M,
                     close: 5.7M,
                     high: 5.8M,
@@ -187,7 +187,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
             var input = new BacktestingCandle[]
             {
                 new BacktestingCandle(
-                    closedTimestamp: 0L,
+                    openTimestamp: 0L,
                     open: 10M,
                     close: 15M,
                     high: 20M,
@@ -207,7 +207,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
             var input = new BacktestingCandle[]
             {
                 new BacktestingCandle(
-                    closedTimestamp: 0L,
+                    openTimestamp: 0L,
                     open: 10M,
                     close: 15M,
                     high: 20M,
@@ -216,7 +216,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                     tradingPair: "EOSETH"),
 
                 new BacktestingCandle(
-                    closedTimestamp: 0L,
+                    openTimestamp: 0L,
                     open: 10M,
                     close: 12M,
                     high: 14M,
@@ -237,7 +237,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
             var input = new BacktestingCandle[]
             {
                 new BacktestingCandle(
-                    closedTimestamp: 0L,
+                    openTimestamp: 0L,
                     open: 10M,
                     close: 15M,
                     high: 20M,
@@ -246,7 +246,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                     tradingPair: "EOSETH"),
 
                 new BacktestingCandle(
-                    closedTimestamp: 0L,
+                    openTimestamp: 0L,
                     open: 10M,
                     close: 12M,
                     high: 21M,
@@ -267,7 +267,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
             var input = new BacktestingCandle[]
             {
                 new BacktestingCandle(
-                    closedTimestamp: 0L,
+                    openTimestamp: 0L,
                     open: 10M,
                     close: 15M,
                     high: 20M,
@@ -276,7 +276,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                     tradingPair: "EOSETH"),
 
                 new BacktestingCandle(
-                    closedTimestamp: 0L,
+                    openTimestamp: 0L,
                     open: 10M,
                     close: 12M,
                     high: 12M,
@@ -306,7 +306,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 var volume = (decimal)(random.NextDouble() * 420);
 
                 candles[i] = new BacktestingCandle(
-                    closedTimestamp: i * 60000,
+                    openTimestamp: i * 60000,
                     open: open,
                     close: close,
                     high: high,

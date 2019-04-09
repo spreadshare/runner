@@ -27,7 +27,7 @@ namespace SpreadShare.ExchangeServices.Providers
         /// <summary>
         /// Gets the last 5 minute candle close timestamp.
         /// </summary>
-        public abstract DateTimeOffset LastCandleClose { get; }
+        public abstract DateTimeOffset LastCandleOpen { get; }
 
         /// <summary>
         /// Gets the pivot, i.e. the starting point of candle creation.

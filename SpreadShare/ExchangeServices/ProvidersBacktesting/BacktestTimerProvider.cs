@@ -23,7 +23,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         private readonly List<BacktestOrder> _backtestOrders;
 
         private DateTimeOffset _currentTime;
-        private DateTimeOffset _lastCandleClose;
+        private DateTimeOffset _lastCandleOpen;
         private int _lastCandleCloseCounter;
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             BeginTime = DateTimeOffset.FromUnixTimeMilliseconds(
                 BacktestDaemonService.Instance.State.BeginTimeStamp) + TimeSpan.FromDays(14);
             _currentTime = BeginTime;
-            _lastCandleClose = _currentTime;
+            _lastCandleOpen = _currentTime;
 
             EndTime = DateTimeOffset.FromUnixTimeMilliseconds(
                 BacktestDaemonService.Instance.State.EndTimeStamp);
@@ -56,7 +56,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public override DateTimeOffset CurrentTime => _currentTime;
 
         /// <inheritdoc/>
-        public override DateTimeOffset LastCandleClose => _lastCandleClose;
+        public override DateTimeOffset LastCandleOpen => _lastCandleOpen;
 
         /// <inheritdoc />
         public override DateTimeOffset Pivot => BeginTime;
@@ -108,12 +108,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             {
                 try
                 {
-                    _currentTime += TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
-                    UpdateObservers(_currentTime.ToUnixTimeMilliseconds());
                     if (_lastCandleCloseCounter++ % ratio == 0)
                     {
-                        _lastCandleClose = _currentTime;
+                        _lastCandleOpen = _currentTime;
                     }
+
+                    _currentTime += TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
+                    UpdateObservers(_currentTime.ToUnixTimeMilliseconds());
                 }
                 catch (Exception e)
                 {

@@ -1,9 +1,11 @@
 using System;
 using CSharpx;
+using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.Tests.ExchangeServices.DataProviderTests;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -12,9 +14,9 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
     /// <summary>
     /// Tests for binance data provider.
     /// </summary>
-    public class BinanceDataProviderTests : BaseProviderTests
+    public class BinanceDataProviderTests : DataProviderTestUtils
     {
-        private ExchangeProvidersContainer _container;
+        private readonly ExchangeProvidersContainer _container;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceDataProviderTests"/> class.
@@ -23,7 +25,12 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
         public BinanceDataProviderTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            _container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
+            string source = $@"
+                TradingPairs: [EOSETH]
+                CandleWidth: {Configuration.Instance.CandleWidth} 
+            ";
+            var config = ParseAlgorithmConfiguration(source);
+            _container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(config);
         }
 
         /// <summary>
@@ -79,15 +86,14 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
         [Theory]
         [InlineData(5)]
         [InlineData(12)]
-
-        // [InlineData(1200)]
-        public void GetCandlesTimestampDecreasing(int limit)
+        [InlineData(1200)]
+        public void GetCandlesTimestampIncreasing(int limit)
         {
             var candles = _container.DataProvider.GetCandles(
                 TradingPair.Parse("EOSETH"),
                 limit);
             var increment = (long)TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth).TotalMilliseconds;
-            var diffs = candles.Pairwise((a, b) => a.ClosedTimestamp - b.ClosedTimestamp);
+            var diffs = candles.Pairwise((a, b) => b.OpenTimestamp - a.OpenTimestamp);
             foreach (var diff in diffs)
             {
                 Assert.Equal(increment, diff);
@@ -97,18 +103,22 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
         [Theory]
         [InlineData(1)]
         [InlineData(5)]
-
-        // [InlineData(1200)]
+        [InlineData(1200)]
         public void RecentCandleIsNow(int limit)
         {
             var candles = _container.DataProvider.GetCandles(
                 TradingPair.Parse("EOSETH"),
                 limit);
-            var recent = candles[0].ClosedTimestamp;
+            var lastCandle = candles[candles.Length - 1].OpenTimestamp + (Configuration.Instance.CandleWidth * 60 * 1000);
             var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            Logger.LogCritical($"LastCandle: {DateTimeOffset.FromUnixTimeMilliseconds(lastCandle)} - Now: {DateTimeOffset.FromUnixTimeMilliseconds(now)}");
+            var diff = now - lastCandle;
+            Assert.False(
+                diff < 0,
+                $"Most recent candle was not yet closed, candle closes at {DateTimeOffset.FromUnixTimeMilliseconds(lastCandle)}, but it is only {DateTimeOffset.Now}");
             Assert.True(
-                now - recent <= ((int)Configuration.Instance.CandleWidth * 60 * 1000) + 10000,
-                $"Most recent candle was not within the scope of {Configuration.Instance.CandleWidth} (expected: {now}, got {recent}), diff {TimeSpan.FromMilliseconds(now - recent)}");
+                diff < Configuration.Instance.CandleWidth * 60 * 1000,
+                $"Most recent candle was not within the scope of {Configuration.Instance.CandleWidth}m (expected: {DateTimeOffset.FromUnixTimeMilliseconds(lastCandle)}, got {DateTimeOffset.FromUnixTimeMilliseconds(now)}), diff {diff}");
         }
     }
 }
