@@ -46,9 +46,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair)
         {
-            // Ask for the open of one candle in the future
-            var timestamp = (_timer.CurrentTime + TimeSpan.FromMinutes((int)Configuration.Instance.CandleWidth)).ToUnixTimeMilliseconds();
-            var candle = FindCandle(pair, timestamp, Configuration.Instance.CandleWidth);
+            // Ask for the open of current compressed candle
+            var timestamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
+            var candle = FindCandle(pair, timestamp, Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
             return new ResponseObject<decimal>(ResponseCode.Success, candle.Open);
         }
 
@@ -119,11 +119,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public override ResponseObject<BacktestingCandle[]> GetCustomCandles(TradingPair pair, int numberOfCandles, int width)
         {
             var result = new BacktestingCandle[numberOfCandles];
-            var time = _timer.CurrentTime;
+            var time = _timer.CurrentTime - TimeSpan.FromMinutes(width * numberOfCandles);
             for (int i = 0; i < result.Length; i++)
             {
                 result[i] = FindCandle(pair, time.ToUnixTimeMilliseconds(), width);
-                time -= TimeSpan.FromMinutes(width);
+                time += TimeSpan.FromMinutes(width);
             }
 
             return new ResponseObject<BacktestingCandle[]>(result);
@@ -132,13 +132,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         protected override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit)
         {
-            var time = _timer.CurrentTime;
-            var result = new BacktestingCandle[limit];
             var width = Configuration.Instance.CandleWidth;
+            var time = _timer.CurrentTime - TimeSpan.FromMinutes(width * limit);
+            var result = new BacktestingCandle[limit];
             for (var i = 0; i < limit; i++)
             {
                 result[i] = FindCandle(pair, time.ToUnixTimeMilliseconds(), width);
-                time -= TimeSpan.FromMinutes(width);
+                time += TimeSpan.FromMinutes(width);
             }
 
             return new ResponseObject<BacktestingCandle[]>(result);
@@ -156,14 +156,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var buffer = _buffers.GetCandles(pair, channelWidth);
             var millisecondsCandleWidth = (int)TimeSpan.FromMinutes(channelWidth).TotalMilliseconds;
 
-            // Minus one to prevent fetching candles that are not yet closed.
-            var index = ((timestamp - buffer[0].OpenTimestamp) / millisecondsCandleWidth) - 1;
-            if (index >= 0)
+            var index = (timestamp - buffer[0].OpenTimestamp) / millisecondsCandleWidth;
+            if (index >= 0 && index < buffer.Length)
             {
                 return buffer[index];
             }
 
-            Logger.LogError("Got request for a candle that exists before the scope of available data");
+            Logger.LogError("Got request for a candle that exists outside the scope of available data");
             throw new InvalidOperationException("Tried to read outside backtest data buffer");
         }
     }
