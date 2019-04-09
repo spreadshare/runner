@@ -27,6 +27,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         private readonly ConfigurableObservable<BacktestingCandle> _candleDispenserImplementation;
         private readonly ILogger _logger;
         private readonly ListenKeyManager _listenKeyManager;
+        private bool _connected;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BinanceCommunicationsService"/> class.
@@ -89,10 +90,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// </summary>
         public void EnableStreams()
         {
+            if (_connected)
+            {
+                _logger.LogDebug("Binance communications was already started, ignoring.");
+                return;
+            }
+
             _logger.LogInformation($"Enabling streams at {DateTime.UtcNow}");
             EnableOrderStreams();
             EnableKlineStreams();
             _logger.LogInformation("Binance Communication Service was successfully started!");
+            _connected = true;
         }
 
         /// <summary>
@@ -159,7 +167,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             successOrderBook.Data.ConnectionLost += () =>
             {
                 _logger.LogCritical($"Order stream got closed at {DateTime.UtcNow}, attempting reconnect...");
-                EnableOrderStreams();
             };
 
             successOrderBook.Data.ConnectionRestored += t => _logger.LogCritical($"Order stream was restored after {t}");
@@ -187,7 +194,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             successKlineStream.Data.ConnectionLost += () =>
             {
                 _logger.LogCritical($"Kline stream got closed at {DateTime.UtcNow}, attempting reconnect...");
-                EnableKlineStreams();
             };
 
             successKlineStream.Data.ConnectionRestored += t =>
