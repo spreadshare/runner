@@ -18,12 +18,10 @@ namespace SpreadShare.ExchangeServices.Providers
         /// </summary>
         /// <param name="input">The collection of candles to compress.</param>
         /// <param name="compressionRatio">The reducing ratio. (e.g. 2 -> 10 candles become 5 candles.</param>
-        /// <param name="ascending">Whether or not the candles are ordered from old to new.</param>
         /// <returns>An array of candles.</returns>
         public static BacktestingCandle[] CompressCandles(
             BacktestingCandle[] input,
-            int compressionRatio,
-            bool ascending = false)
+            int compressionRatio)
         {
             Guard.Argument(compressionRatio)
                 .NotZero()
@@ -41,12 +39,12 @@ namespace SpreadShare.ExchangeServices.Providers
 
             Parallel.For(0, result.Length, index =>
             {
-                var subset = input.Skip(index * compressionRatio).Take(compressionRatio).ToList();
-                var first = ascending ? subset[0] : subset[subset.Count - 1];
-                var last = ascending ? subset[subset.Count - 1] : subset[0];
+                var subset = input.Skip(index * compressionRatio).Take(compressionRatio).ToArray();
+                var first = subset[0];
+                var last = subset[subset.Length - 1];
 
                 result[index] = new BacktestingCandle(
-                    closedTimestamp: last.ClosedTimestamp,
+                    openTimestamp: first.OpenTimestamp,
                     open: first.Open,
                     close: last.Close,
                     high: subset.Max(x => x.High),
@@ -67,21 +65,21 @@ namespace SpreadShare.ExchangeServices.Providers
         public static decimal AverageTrueRange(this IEnumerable<BacktestingCandle> input)
         {
             var candles = (input ?? throw new ArgumentNullException(nameof(input))).ToArray();
-            if (candles.Length == 0)
+            if (candles.Length < 2)
             {
-                throw new InvalidOperationException("Cannot calculate the AverageTrueRange of an empty set.");
+                throw new InvalidOperationException($"Cannot calculate the AverageTrueRange of a set containing {candles.Length} candles.");
             }
 
             var trueRanges = new decimal[candles.Length - 1];
 
-            // Calculate maximum of three edge features over the series (chunk[0] -> chunk[1] ... -> chunk[n] -> edgeCandle)
-            for (int i = 0; i < candles.Length - 1; i++)
+            // Calculate maximum of three edge features over the series (edgeCandle -> chunk[0] -> chunk[1] ... -> chunk[n])
+            for (int i = 1; i < candles.Length; i++)
             {
                 decimal highLow = Math.Abs(candles[i].High - candles[i].Low);
-                decimal highPreviousClose = Math.Abs(candles[i].High - candles[i + 1].Close);
-                decimal lowPreviousClose = Math.Abs(candles[i].Low - candles[i + 1].Close);
+                decimal highPreviousClose = Math.Abs(candles[i].High - candles[i - 1].Close);
+                decimal lowPreviousClose = Math.Abs(candles[i].Low - candles[i - 1].Close);
 
-                trueRanges[i] = new[] { highLow, highPreviousClose, lowPreviousClose }.Max();
+                trueRanges[i - 1] = new[] { highLow, highPreviousClose, lowPreviousClose }.Max();
             }
 
             return trueRanges.Average();

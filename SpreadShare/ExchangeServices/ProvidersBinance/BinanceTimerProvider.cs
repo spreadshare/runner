@@ -10,6 +10,7 @@ using SpreadShare.Models.Database;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
+using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.ErrorServices;
 using SpreadShare.Utilities;
 
@@ -23,7 +24,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         private readonly ILogger _logger;
         private int _consecutiveExceptions = 0;
         private DataProvider _dataProvider;
-        private DateTimeOffset _candleCloseTimestamp;
+        private DateTimeOffset _candleOpenTimestamp;
         private volatile bool _candleCloseFlag;
 
         /// <summary>
@@ -37,16 +38,18 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             // Set the pivot point to midnight.
             Pivot = DateTimeOffset.FromUnixTimeSeconds(0);
             _logger = loggerFactory.CreateLogger(GetType());
-            _candleCloseTimestamp = DateTimeOffset.Now;
+            _candleOpenTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(0);
             comms.CandleDispenser.Subscribe(new ConfigurableObserver<BacktestingCandle>(
                 () => { }, _ => { }, candle =>
                 {
-                    _candleCloseTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(candle.ClosedTimestamp);
+                    _candleOpenTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(candle.OpenTimestamp);
 
                     // Get the last compressed candle from the data provider to determine if a compressed candle is closed.
-                    var lastCandle = DataProvider.GetCandles(TradingPair.Parse(candle.TradingPair), 1).First();
-                    _logger.LogDebug($"StateManager: Socket Candle Time: {DateTimeOffset.FromUnixTimeMilliseconds(candle.ClosedTimestamp)} - Compressed Rest API Candle Time: {DateTimeOffset.FromUnixTimeMilliseconds(lastCandle.ClosedTimestamp)} - Diff: {lastCandle.ClosedTimestamp - candle.ClosedTimestamp}");
-                    if (lastCandle.ClosedTimestamp == candle.ClosedTimestamp)
+                    var lastCandle = DataProvider.GetCandles(TradingPair.Parse(candle.TradingPair), 1).Last();
+                    var lastCandleCloseTimestamp = lastCandle.OpenTimestamp + (Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth * 60 * 1000);
+                    var currentCandleCloseTimestamp = candle.OpenTimestamp + (Configuration.Instance.CandleWidth * 60 * 1000);
+                    _logger.LogDebug($"StateManager: Socket Candle Time: {DateTimeOffset.FromUnixTimeMilliseconds(currentCandleCloseTimestamp)} - Compressed Rest API Candle Time: {DateTimeOffset.FromUnixTimeMilliseconds(lastCandleCloseTimestamp)} - Diff: {lastCandleCloseTimestamp - currentCandleCloseTimestamp}");
+                    if (lastCandleCloseTimestamp == currentCandleCloseTimestamp)
                     {
                         _logger.LogInformation($"The candle has just been closed!");
                         _candleCloseFlag = true;
@@ -58,7 +61,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         public override DateTimeOffset CurrentTime => DateTimeOffset.Now;
 
         /// <inheritdoc/>
-        public override DateTimeOffset LastCandleClose => _candleCloseTimestamp;
+        public override DateTimeOffset LastCandleOpen => _candleOpenTimestamp;
 
         /// <inheritdoc />
         public override DateTimeOffset Pivot { get; }

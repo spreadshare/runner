@@ -151,11 +151,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
             var width = Configuration.Instance.CandleWidth;
             var tasks = new (int, Task<CallResult<BinanceKline[]>>)[(limit / chunkSize) + 1];
 
-            // Start the offset all the way back
-            TimeSpan offset = TimeSpan.FromMinutes(limit * width);
+            // Start the offset all the way back plus one candle extra to prevent fetching uncompleted candles.
+            TimeSpan offset = TimeSpan.FromMinutes((limit + 1) * width);
 
             // Create tasks for retrieving the candles in reverse.
-            for (int i = tasks.Length - 1; i >= 0; i--)
+            for (int i = 0; i < tasks.Length; i++)
             {
                 // Last task only needs to gather the remaining candles.
                 int amount = i == 0
@@ -169,9 +169,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     (amount, client.GetKlinesAsync(
                                 symbol: pair.ToString(),
                                 interval: BinanceUtilities.ToExternal(width),
-                                startTime: TimerProvider.LastCandleClose.UtcDateTime - offset - TimeSpan.FromMinutes((amount + 1) * width), // Request one extra candle, sometimes binance comes one short.
-                                endTime: TimerProvider.LastCandleClose.UtcDateTime - offset,
-                                limit: amount + 10));
+                                startTime: DateTime.UtcNow - offset - TimeSpan.FromMinutes((amount + 1) * width), // Request one extra, sometimes binance comes one short.
+                                endTime: DateTime.UtcNow - offset,
+                                limit: amount + 1));
             }
 
             // Insert all the task results into the resulting array.
@@ -186,14 +186,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                     return new ResponseObject<BacktestingCandle[]>(ResponseCode.Error, response.Error.Message);
                 }
 
-                // If needed, strip the extra requested candle, then reverse the array to match present -> past.
-                var candles = response.Data.Skip(response.Data.Length - size).Reverse().ToArray();
+                // If needed, strip the extra requested candles.
+                var candles = response.Data.Skip(response.Data.Length - size).ToArray();
                 for (int p = 0; p < size; p++, q++)
                 {
                     // Parse to the right data structure, and insert in the resulting array.
                     var x = candles[p];
                     result[q] = new BacktestingCandle(
-                        x.CloseTime.ToUnixTimestampMilliseconds(),
+                        x.OpenTime.ToUnixTimestampMilliseconds(),
                         x.Open,
                         x.Close,
                         x.High,

@@ -93,8 +93,8 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
             var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 2);
-            Assert.Equal(5.7M, candles[0].Close);
-            Assert.Equal(5.6M, candles[1].Close);
+            Assert.Equal(5.6M, candles[0].Close);
+            Assert.Equal(5.7M, candles[1].Close);
         }
 
         [Fact]
@@ -107,10 +107,10 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderNoPivotImplementation>(config);
             var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 4);
-            Assert.Equal(5.7M, candles[0].Close);
-            Assert.Equal(6.9M, candles[1].Close);
-            Assert.Equal(5.6M, candles[2].Close);
-            Assert.Equal(8.01M, candles[3].Close);
+            Assert.Equal(8.01M, candles[0].Close);
+            Assert.Equal(5.6M, candles[1].Close);
+            Assert.Equal(6.9M, candles[2].Close);
+            Assert.Equal(5.7M, candles[3].Close);
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>(config);
             var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 1);
-            Assert.Equal(6.2M, candles[0].Close);
+            Assert.Equal(8.01M, candles[0].Close);
         }
 
         [Fact]
@@ -136,9 +136,9 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>(config);
             var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 3);
-            Assert.Equal(6.2M, candles[0].Close);
-            Assert.Equal(6.3M, candles[1].Close);
-            Assert.Equal(8.872M, candles[2].Close);
+            Assert.Equal(8.01M, candles[0].Close);
+            Assert.Equal(5.6M, candles[1].Close);
+            Assert.Equal(6.9M, candles[2].Close);
         }
 
         [Fact]
@@ -151,7 +151,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             var config = ParseAlgorithmConfiguration(source);
             var data = GetDataProviderWithTimer<DataProviderImplementation, TimerProviderHappyFlowImplementation>(config);
             var candles = data.GetCandles(TradingPair.Parse("EOSETH"), 1);
-            Assert.Equal(5.7M, candles[0].Close);
+            Assert.Equal(6.6M, candles[0].Close);
         }
 
         // Class is instantiated via activator
@@ -166,7 +166,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
             public override DateTimeOffset CurrentTime => DateTimeOffset.FromUnixTimeMilliseconds(3600000L);
 
-            public override DateTimeOffset LastCandleClose => CurrentTime;
+            public override DateTimeOffset LastCandleOpen => CurrentTime;
 
             public override DateTimeOffset Pivot => DateTimeOffset.FromUnixTimeMilliseconds(300000);
 
@@ -184,7 +184,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
             public override DateTimeOffset CurrentTime => DateTimeOffset.FromUnixTimeMilliseconds(3600000L);
 
-            public override DateTimeOffset LastCandleClose => CurrentTime;
+            public override DateTimeOffset LastCandleOpen => CurrentTime;
 
             public override DateTimeOffset Pivot => DateTimeOffset.FromUnixTimeMilliseconds(0);
 
@@ -208,7 +208,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
                     {
                         // #0
                         new BacktestingCandle(
-                            closedTimestamp: 0L,
+                            openTimestamp: 0L,
                             open: 5,
                             close: 6.6M,
                             high: 7.2M,
@@ -218,7 +218,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #1
                         new BacktestingCandle(
-                            closedTimestamp: 300000L,
+                            openTimestamp: 300000L,
                             open: 5,
                             close: 6.6M,
                             high: 7.2M,
@@ -228,7 +228,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #2
                         new BacktestingCandle(
-                            closedTimestamp: 600000L,
+                            openTimestamp: 600000L,
                             open: 6.12M,
                             close: 8.01M,
                             high: 8.02M,
@@ -238,7 +238,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #3
                         new BacktestingCandle(
-                            closedTimestamp: 900000L,
+                            openTimestamp: 900000L,
                             open: 7.90M,
                             close: 8.872M,
                             high: 8.9M,
@@ -248,7 +248,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #4
                         new BacktestingCandle(
-                            closedTimestamp: 1200000L,
+                            openTimestamp: 1200000L,
                             open: 7.6M,
                             close: 6.8M,
                             high: 7.8M,
@@ -258,7 +258,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #5
                         new BacktestingCandle(
-                            closedTimestamp: 1500000L,
+                            openTimestamp: 1500000L,
                             open: 7.9M,
                             close: 5.6M,
                             high: 7.9M,
@@ -268,7 +268,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #6
                         new BacktestingCandle(
-                            closedTimestamp: 1800000L,
+                            openTimestamp: 1800000L,
                             open: 5.9M,
                             close: 6.3M,
                             high: 6.6M,
@@ -278,7 +278,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #7
                         new BacktestingCandle(
-                            closedTimestamp: 2100000L,
+                            openTimestamp: 2100000L,
                             open: 6.4M,
                             close: 6.6M,
                             high: 7.2M,
@@ -288,7 +288,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #8
                         new BacktestingCandle(
-                            closedTimestamp: 2400000L,
+                            openTimestamp: 2400000L,
                             open: 6.5M,
                             close: 6.9M,
                             high: 7.4M,
@@ -298,7 +298,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #9
                         new BacktestingCandle(
-                            closedTimestamp: 2700000L,
+                            openTimestamp: 2700000L,
                             open: 6.7M,
                             close: 6.2M,
                             high: 6.8M,
@@ -308,7 +308,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #10
                         new BacktestingCandle(
-                            closedTimestamp: 3000000L,
+                            openTimestamp: 3000000L,
                             open: 6.2M,
                             close: 5.6M,
                             high: 6.4M,
@@ -318,14 +318,14 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
 
                         // #11
                         new BacktestingCandle(
-                            closedTimestamp: 3300000L,
+                            openTimestamp: 3300000L,
                             open: 5.6M,
                             close: 5.7M,
                             high: 5.8M,
                             low: 5.5M,
                             volume: 24053,
                             tradingPair: "EOSETH"),
-                    }.Reverse().Take(limit).ToArray());
+                    }.Take(limit).ToArray());
             }
         }
 

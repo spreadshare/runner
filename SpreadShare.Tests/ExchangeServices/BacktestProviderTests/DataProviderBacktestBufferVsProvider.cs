@@ -92,7 +92,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                     var volume = (decimal)(random.NextDouble() * 420);
 
                     result[i] = new BacktestingCandle(
-                        closedTimestamp: i * 60000,
+                        openTimestamp: i * 60000,
                         open: open,
                         close: close,
                         high: high,

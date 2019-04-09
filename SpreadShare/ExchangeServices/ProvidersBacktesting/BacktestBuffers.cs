@@ -182,8 +182,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             // Skip the last few candles that cannot be compressed.
             int excess = candles.Length % ratio;
 
-            // Compress the candles with the ascending flag
-            return DataProviderUtilities.CompressCandles(candles.SkipLast(excess).ToArray(), ratio, true);
+            return DataProviderUtilities.CompressCandles(candles.SkipLast(excess).ToArray(), ratio);
         }
 
         /// <summary>
@@ -200,7 +199,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     pair.ToString(),
                     _db.Candles.AsNoTracking()
                         .Where(x => x.TradingPair == pair.ToString())
-                        .OrderBy(x => x.ClosedTimestamp)
+                        .OrderBy(x => x.OpenTimestamp)
                         .ToArray());
                 _logger.LogCritical($"Done building the buffer for {pair}");
             }

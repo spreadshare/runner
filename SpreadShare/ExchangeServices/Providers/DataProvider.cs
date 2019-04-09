@@ -128,7 +128,7 @@ namespace SpreadShare.ExchangeServices.Providers
             return query.Success
                 ? query.Data.Length == numberOfCandles
                   ? query.Data
-                  : throw new InvalidExchangeDataException($"Requested {numberOfCandles} but received {query.Data.Length}")
+                  : throw new InvalidExchangeDataException($"Requested {numberOfCandles} candles but received {query.Data.Length}")
                 : throw new ExchangeConnectionException(query.Message);
         }
 

@@ -90,7 +90,7 @@ namespace SpreadShare.ExchangeServices.Providers
 
             // Number of candles needed for the query
             var targetCandleCount = (targetCandleSize / localCandleSize) * numberOfCandles;
-            var timespan = TimerProvider.LastCandleClose - TimerProvider.Pivot;
+            var timespan = TimerProvider.LastCandleOpen - TimerProvider.Pivot;
 
             // Number of candles that are left after dividing by the target size (uncompleted batch)
             var padding = ((int)timespan.TotalMinutes % targetCandleSize) / localCandleSize;
@@ -102,7 +102,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 return candlesQuery;
             }
 
-            var candles = candlesQuery.Data.Skip(padding).ToArray();
+            var candles = candlesQuery.Data.SkipLast(padding).ToArray();
 
             return new ResponseObject<BacktestingCandle[]>(
                 DataProviderUtilities.CompressCandles(candles, targetCandleSize / localCandleSize));
