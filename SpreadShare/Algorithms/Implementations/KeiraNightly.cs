@@ -22,8 +22,8 @@ namespace SpreadShare.Algorithms.Implementations
         {
             public override State<KeiraNightlyConfiguration> OnMarketCondition(DataProvider data)
             {
-                var candles = data.GetCandles(FirstPair, 10);
-                var candles2 = data.GetCandles(FirstPair, 20);
+                var candles = data.GetCandles(FirstPair, 5);
+                var candles2 = data.GetCandles(FirstPair, 10);
                 if (candles.StandardMovingAverage() > candles2.StandardMovingAverage())
                 {
                     return new LimitSellState();
@@ -36,6 +36,7 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 var pair = AlgorithmConfiguration.TradingPairs.First();
                 trading.ExecuteFullMarketOrderBuy(pair);
+                WaitForNextCandle();
                 return new NothingState<KeiraNightlyConfiguration>();
             }
         }
@@ -100,7 +101,8 @@ namespace SpreadShare.Algorithms.Implementations
             {
                 var pair = AlgorithmConfiguration.TradingPairs.First();
                 trading.ExecuteFullMarketOrderSell(pair);
-                return new CoolDownState();
+                WaitForNextCandle();
+                return new MarketBuyState();
             }
         }
 
