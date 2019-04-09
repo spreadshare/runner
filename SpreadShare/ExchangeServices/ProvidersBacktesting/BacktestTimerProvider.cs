@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,7 +23,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
         private DateTimeOffset _currentTime;
         private DateTimeOffset _lastCandleOpen;
-        private int _lastCandleCloseCounter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestTimerProvider"/> class.
@@ -101,19 +99,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _database.SaveChanges();
             _backtestOrders.Clear();
 
-            var ratio = Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth
-                        / Configuration.Instance.CandleWidth;
-
             while (CurrentTime < EndTime)
             {
                 try
                 {
-                    if (_lastCandleCloseCounter++ % ratio == 0)
-                    {
-                        _lastCandleOpen = _currentTime;
-                    }
-
                     _currentTime += TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
+                    _lastCandleOpen = _currentTime;
                     UpdateObservers(_currentTime.ToUnixTimeMilliseconds());
                 }
                 catch (Exception e)
@@ -128,7 +119,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <inheritdoc />
-        public override void WaitForNextCandle() => Expression.Empty();
+        public override void WaitForNextCandle()
+        {
+            _currentTime += TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
+            _lastCandleOpen = _currentTime;
+        }
 
         /// <summary>
         /// Stop the timer and log the results.
