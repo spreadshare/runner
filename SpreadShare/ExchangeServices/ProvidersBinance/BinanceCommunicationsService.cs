@@ -176,7 +176,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         {
             var successKlineStream = Socket.SubscribeToKlineStream(
                 Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.TradingPairs.First().ToString(),
-                BinanceUtilities.ToInternal(Configuration.Instance.CandleWidth),
+                BinanceUtilities.ToInternalKline(Configuration.Instance.CandleWidth),
                 candle =>
                 {
                     if (candle.Data.Final)

@@ -3,7 +3,6 @@ namespace SpreadShare.Models
     /// <summary>
     /// Object representation of the code of the response to an action.
     /// </summary>
-    /// TODO: Should this not be called ResponseStatus?
     internal enum ResponseCode
     {
         /// <summary>
@@ -20,5 +19,10 @@ namespace SpreadShare.Models
         /// The requested information was not found.
         /// </summary>
         NotFound,
+
+        /// <summary>
+        /// A StopLoss order was placed at or exceeding market price, causing it to trigger instantly, which is not allowed.
+        /// </summary>
+        ImmediateOrderTrigger,
     }
 }

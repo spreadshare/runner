@@ -2,17 +2,11 @@ using System;
 using System.Collections.Generic;
 using SpreadShare.Models.Trading;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.Models
 {
-    public class TradingPairTests : BaseTest
+    public class TradingPairTests
     {
-        public TradingPairTests(ITestOutputHelper outputHelper)
-            : base(outputHelper)
-        {
-        }
-
         [Fact]
         public void ConstructorHappyFlow()
         {
@@ -178,6 +172,20 @@ namespace SpreadShare.Tests.Models
         }
 
         [Fact]
+        public void MinQuantityTickHappyFlow()
+        {
+            var pair = GetTradingPair("BNB", "ETH", 5);
+            Assert.Equal(0.00001M, pair.MinQuantityTick);
+        }
+
+        [Fact]
+        public void MinQuantityTickZero()
+        {
+            var pair = GetTradingPair("BNB", "ETH", 0);
+            Assert.Equal(1, pair.MinQuantityTick);
+        }
+
+        [Fact]
         public void RoundToPricableHappyFlow()
         {
             var pair = GetTradingPair("BNB", "ETH", 0, 4);
@@ -193,6 +201,20 @@ namespace SpreadShare.Tests.Models
             var pair = GetTradingPair("BNB", "ETH", 0, 2);
             var price = -1M;
             Assert.Throws<ArgumentOutOfRangeException>(() => pair.RoundToPriceable(price));
+        }
+
+        [Fact]
+        public void MinPriceTickHappyFlow()
+        {
+            var pair = GetTradingPair("BNB", "ETH", 0, 4);
+            Assert.Equal(0.0001M, pair.MinPriceTick);
+        }
+
+        [Fact]
+        public void MinPriceTickZero()
+        {
+            var pair = GetTradingPair("BNB", "ETH", 0, 0);
+            Assert.Equal(1M, pair.MinPriceTick);
         }
 
         internal static TradingPair GetTradingPair(string strLeft, string strRight, int quantityDecimals = 0, int priceDecimals = 0)

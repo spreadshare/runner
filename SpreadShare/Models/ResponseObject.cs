@@ -35,10 +35,19 @@ namespace SpreadShare.Models
         /// <summary>
         /// Gets a response object indicating a failed order.
         /// </summary>
+        /// <param name="code">The code to include in the response.</param>
         /// <param name="reason">The reason for the failure.</param>
         /// <returns>Desired response object.</returns>
+        public static ResponseObject<OrderUpdate> OrderPlacementFailed(ResponseCode code, string reason) =>
+            new ResponseObject<OrderUpdate>(code, $"Error while placing order: {reason}");
+
+        /// <summary>
+        /// Gets a response object indicating a failed order.
+        /// </summary>
+        /// <param name="reason">The reason for failure.</param>
+        /// <returns>ResponseObject.</returns>
         public static ResponseObject<OrderUpdate> OrderPlacementFailed(string reason) =>
-            new ResponseObject<OrderUpdate>(ResponseCode.Error, $"Error while placing order: {reason}");
+            OrderPlacementFailed(ResponseCode.Error, reason);
 
         /// <inheritdoc />
         public override string ToString() => $"{Code} | msg: {Message}";

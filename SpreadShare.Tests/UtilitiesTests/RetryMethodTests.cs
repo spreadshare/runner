@@ -13,6 +13,7 @@ namespace SpreadShare.Tests.UtilitiesTests
         private static int _retryMethodTenRetriesCounter;
         private static int _retryMethodBackoffCounter;
         private static DateTimeOffset _retryMethodBackoffPreviousStamp;
+        private static int _retryMethodContextIterationIncrementsCounter;
 
         public RetryMethodTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
@@ -27,9 +28,10 @@ namespace SpreadShare.Tests.UtilitiesTests
         }
 
         [Fact]
-        public void RetryMethodMethodNull()
+        public void RetryMethodNull()
         {
-            Assert.Throws<ArgumentNullException>(() => HelperMethods.RetryMethod(null, Logger));
+            Func<RetryContext, ResponseObject<bool>> method = null;
+            Assert.Throws<ArgumentNullException>(() => HelperMethods.RetryMethod(method, Logger));
         }
 
         [Fact]
@@ -79,7 +81,31 @@ namespace SpreadShare.Tests.UtilitiesTests
         {
             _retryMethodBackoffPreviousStamp = DateTimeOffset.Now;
             _retryMethodBackoffCounter = 0;
-            HelperMethods.RetryMethod(() => RetryMethodBackOffImplementation(backoffMillis), Logger, maxRetries, backoffMillis);
+            HelperMethods.RetryMethod(_ => RetryMethodBackOffImplementation(backoffMillis), Logger, maxRetries, backoffMillis);
+        }
+
+        [Fact]
+        public void RetryMethodContextIterationIncrements()
+        {
+            HelperMethods.RetryMethod(RetryMethodContextIterationIncrementsImplementation, Logger, 10, 0);
+        }
+
+        [Fact]
+        public void RetryMethodContextDisableBackoff()
+        {
+            var pre = DateTime.Now;
+            HelperMethods.RetryMethod(RetryMethodContextDisableBackoffImplementation, Logger, 10, 200);
+            var post = DateTime.Now;
+            Assert.Equal(pre, post, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public void RetryMethodContextDisableBackoffOnce()
+        {
+            var pre = DateTime.Now;
+            HelperMethods.RetryMethod(RetryMethodContextDisableBackoffOnceImplementation, Logger, 2, 500);
+            var post = DateTime.Now;
+            Assert.Equal(pre + TimeSpan.FromMilliseconds(1000), post, TimeSpan.FromMilliseconds(100));
         }
 
         private static ResponseObject RetryMethodBackOffImplementation(int backoffMillis)
@@ -128,6 +154,29 @@ namespace SpreadShare.Tests.UtilitiesTests
             if (_retryMethodTenRetriesCounter++ == 9)
             {
                 return new ResponseObject(ResponseCode.Success);
+            }
+
+            return new ResponseObject(ResponseCode.Error);
+        }
+
+        private ResponseObject RetryMethodContextIterationIncrementsImplementation(RetryContext context)
+        {
+            Assert.Equal(_retryMethodContextIterationIncrementsCounter, context.Iteration);
+            _retryMethodContextIterationIncrementsCounter++;
+            return new ResponseObject(ResponseCode.Error);
+        }
+
+        private ResponseObject RetryMethodContextDisableBackoffImplementation(RetryContext context)
+        {
+            context.DisableBackoff();
+            return new ResponseObject(ResponseCode.Error);
+        }
+
+        private ResponseObject RetryMethodContextDisableBackoffOnceImplementation(RetryContext context)
+        {
+            if (context.Iteration == 0)
+            {
+                context.DisableBackoff();
             }
 
             return new ResponseObject(ResponseCode.Error);
