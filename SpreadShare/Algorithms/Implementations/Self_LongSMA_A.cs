@@ -38,9 +38,9 @@ namespace SpreadShare.Algorithms.Implementations
                                   >
                                   data.GetCandles(FirstPair, AlgorithmConfiguration.SMAL).StandardMovingAverage();
 
-                bool atrDeviation = data.GetCandles(FirstPair, AlgorithmConfiguration.ShortATR).AverageTrueRange()
+                bool atrDeviation = data.GetCandles(FirstPair, 6).RateOfChange()
                                     >
-                                    data.GetCandles(FirstPair, AlgorithmConfiguration.LongATR).AverageTrueRange();
+                                    0.01m;
 
                 if (smallCross && largeCross && atrDeviation)
                 {
@@ -72,9 +72,9 @@ namespace SpreadShare.Algorithms.Implementations
                                    <
                                    data.GetCandles(FirstPair, AlgorithmConfiguration.SMAM).StandardMovingAverage();
 
-                bool xAtrDeviation = data.GetCandles(FirstPair, AlgorithmConfiguration.ShortATR).AverageTrueRange()
+                bool xAtrDeviation = data.GetCandles(FirstPair, 6).AverageTrueRange()
                                     >
-                                    data.GetCandles(FirstPair, AlgorithmConfiguration.LongATR).AverageTrueRange();
+                                    data.GetCandles(FirstPair, 26).AverageTrueRange();
 
                 if (xSmallcross && xAtrDeviation)
                 {
@@ -106,32 +106,20 @@ namespace SpreadShare.Algorithms.Implementations
         /// <summary>
         /// Gets or sets the smallest SMA in amount of candles.
         /// </summary>
-        [RangeInt(2, 10)]
+        [RangeInt(2, 25)]
         public int SMAS { get; set; }
 
         /// <summary>
         /// Gets or sets the medium SMA in amount of candles.
         /// </summary>
-        [RangeInt(5, 50)]
+        [RangeInt(5, 75)]
         public int SMAM { get; set; }
 
         /// <summary>
         /// Gets or sets the large SMA in amount of candles.
         /// </summary>
-        [RangeInt(25, 200)]
+        [RangeInt(25, 250)]
         public int SMAL { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Shortterm ATR for the filter in amount of candles.
-        /// </summary>
-        [RangeInt(3, 20)]
-        public int ShortATR { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Longterm ATR for the filter in amount of candles.
-        /// </summary>
-        [RangeInt(10, 75)]
-        public int LongATR { get; set; }
     }
 }
 
