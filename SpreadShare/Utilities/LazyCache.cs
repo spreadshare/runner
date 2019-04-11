@@ -38,6 +38,14 @@ namespace SpreadShare.Utilities
 
             return _cached;
         }
+
+        /// <summary>
+        /// Invalidate the current build, cause a rebuild on the next evaluation.
+        /// </summary>
+        public void Invalidate()
+        {
+            _build = false;
+        }
     }
 
     /// <summary>
@@ -71,6 +79,14 @@ namespace SpreadShare.Utilities
             }
 
             return _cached;
+        }
+
+        /// <summary>
+        /// Invalidate the current build, cause a rebuild on the next evaluation.
+        /// </summary>
+        public void Invalidate()
+        {
+            _build = false;
         }
     }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Dawn;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices;
 using SpreadShare.Models.Trading;
@@ -142,10 +143,7 @@ namespace SpreadShare.SupportServices.Configuration
         {
             get
             {
-                if (_algorithmConfigurationType == null)
-                {
-                    _algorithmConfigurationType = Reflections.GetMatchingConfigurationsType(Algorithm);
-                }
+                _algorithmConfigurationType = Reflections.GetMatchingConfigurationsType(Algorithm);
 
                 try
                 {
@@ -161,6 +159,38 @@ namespace SpreadShare.SupportServices.Configuration
                     throw e.InnerException;
                 }
             }
+
+            private set
+            {
+                __parameters = new Dictionary<string, object>();
+                foreach (var property in value.GetType().GetProperties().Where(x => x.CanWrite).Where(x => x.GetCustomAttribute<YamlIgnoreAttribute>() == null))
+                {
+                    var name = property.Name;
+                    var member = property.GetCustomAttribute<YamlMemberAttribute>();
+                    if (member != null)
+                    {
+                        name = member.Alias;
+                    }
+
+                    __parameters[name] = property.GetValue(value);
+                    Console.WriteLine($"Setted {name} to {property.GetValue(value)}");
+                }
+
+                _algorithmConfigurationConstructor.Invalidate();
+            }
+        }
+
+        public void ChangeAlgorithmConfiguration(Type algorithm, AlgorithmConfiguration config)
+        {
+            Guard.Argument(algorithm).Require(Reflections.IsAlgorithm, x => $"{x} is not an algorithm");
+            if (!Reflections.AlgorithmMatchesConfiguration(algorithm, config.GetType()))
+            {
+                throw new InvalidOperationException($"Cannot set algorithm to {algorithm} with config {config} because they are not compatible.");
+            }
+
+            __algorithm = algorithm.Name;
+            _enabledAlgorithmConstructor.Invalidate();
+            AlgorithmConfiguration = config;
         }
     }
 }

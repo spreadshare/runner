@@ -87,7 +87,10 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                 .FromUnixTimeMilliseconds(BacktestDaemonService.Instance.State.EndTimeStamp)
                 .ToString(CultureInfo.InvariantCulture);
 
+            Configuration.Configuration.Instance.EnabledAlgorithm.ChangeAlgorithmConfiguration(_algo, _configuration);
+
             Console.WriteLine($"Starting backtest for {_algo.Name} from {startStr} to {endStr}");
+            Console.WriteLine($"Configured Candle Width: {Configuration.Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth}m");
 
             // Set custom id or increment.
             state.CurrentBacktestID = _args.ID == -1

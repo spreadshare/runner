@@ -123,6 +123,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         {
             _currentTime += TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
             _lastCandleOpen = _currentTime;
+
+            if (_currentTime >= EndTime)
+            {
+                Finished = true;
+                return;
+            }
+
+            UpdateObservers(_currentTime.ToUnixTimeMilliseconds());
         }
 
         /// <summary>

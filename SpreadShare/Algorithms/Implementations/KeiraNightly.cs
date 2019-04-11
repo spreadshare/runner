@@ -29,6 +29,7 @@ namespace SpreadShare.Algorithms.Implementations
                     return new LimitSellState();
                 }
 
+                WaitForNextCandle();
                 return new NothingState<KeiraNightlyConfiguration>();
             }
 
