@@ -22,7 +22,6 @@ namespace SpreadShare.Algorithms.Implementations
         {
             protected override State<Config> Run(TradingProvider trading, DataProvider data)
             {
-                Logger.LogInformation($"Welcome to {GetType().Name}");
                 return new CheckState();
             }
         }
@@ -43,11 +42,10 @@ namespace SpreadShare.Algorithms.Implementations
 
                 if (entry)
                 {
-                    var atr25 = data.GetCandles(FirstPair, 25).AverageTrueRange();
-                    var atr5 = data.GetCandles(FirstPair, 5).AverageTrueRange();
+                    var atr25 = data.GetCandles(FirstPair, 51).AverageTrueRange();
+                    var atr5 = data.GetCandles(FirstPair, 6).AverageTrueRange();
                     if (atr5 > atr25)
                     {
-                        Console.WriteLine($"SMA streak and ATR: {atr5} > {atr25}");
                         return new BuyAndSellState();
                     }
                 }

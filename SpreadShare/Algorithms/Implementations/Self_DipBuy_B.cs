@@ -34,9 +34,9 @@ namespace SpreadShare.Algorithms.Implementations
                                        >
                            AlgorithmConfiguration.DipPercent;
 
-                bool atrDeviation = data.GetCandles(FirstPair, 5).AverageTrueRange()
+                bool atrDeviation = data.GetCandles(FirstPair, 6).AverageTrueRange()
                                     >
-                                    data.GetCandles(FirstPair, 25).AverageTrueRange();
+                                    data.GetCandles(FirstPair, 26).AverageTrueRange();
 
                 if (dip && atrDeviation)
                 {
