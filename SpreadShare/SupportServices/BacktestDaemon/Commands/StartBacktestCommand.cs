@@ -118,24 +118,47 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
         private void ConfigureTimestampEdges(BacktestDaemonState state, StartBacktestCommandArguments args)
         {
             var (begin, end) = DatabaseUtilities.Instance.GetTimeStampEdges(_configuration.TradingPairs);
-            begin = args.BeginEpoch == 0
-                ? begin // No setting defined, no change
-                : args.BeginEpoch < begin
-                    ? throw new InvalidCommandException(
+
+            if (args.BeginEpoch != 0)
+            {
+                if (args.BeginEpoch < 0)
+                {
+                    throw new InvalidCommandException(
                         $"Cannot set begin epoch to {DateTimeOffset.FromUnixTimeMilliseconds(args.BeginEpoch)}, " +
-                        $"the database starts at {DateTimeOffset.FromUnixTimeMilliseconds(begin)}")
-                    : args.BeginEpoch; // Accept custom setting
+                        $"the database starts at {DateTimeOffset.FromUnixTimeMilliseconds(begin)}");
+                }
 
-            end = args.EndEpoch == 0
-                ? end // No setting defined, no change
-                : args.EndEpoch > end
-                    ? throw new InvalidCommandException(
+                if (args.EndEpoch < begin)
+                {
+                    throw new InvalidCommandException("end_epoch was smaller than database start.");
+                }
+
+                if (args.BeginEpoch < begin + TimeSpan.FromDays(14).TotalMilliseconds)
+                {
+                    Console.WriteLine($"WARNING: Custom Begin Epoch is close to the beginning of the data, be carefull" +
+                                      $"not to read to far into the past.");
+                }
+
+                state.BeginTimeStamp = begin;
+            }
+            else
+            {
+                state.BeginTimeStamp = begin + (long)TimeSpan.FromDays(14).TotalMilliseconds;
+            }
+
+            if (args.EndEpoch != 0)
+            {
+                if (args.EndEpoch > end)
+                {
+                    throw new InvalidCommandException(
                         $"Cannot set end epoch to {DateTimeOffset.FromUnixTimeMilliseconds(args.EndEpoch)}, " +
-                        $"the database stops at {DateTimeOffset.FromUnixTimeMilliseconds(end)}")
-                    : args.EndEpoch; // Accept custom setting
+                        $"the database stops at {DateTimeOffset.FromUnixTimeMilliseconds(end)}");
+                }
 
-            state.BeginTimeStamp = begin;
-            state.EndTimeStamp = end;
+                end = args.EndEpoch;
+            }
+
+            state.EndTimeStamp = end - (long)TimeSpan.FromMinutes(_configuration.CandleWidth).TotalMilliseconds;
         }
     }
 
