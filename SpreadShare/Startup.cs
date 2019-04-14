@@ -87,26 +87,23 @@ namespace SpreadShare
 
                 // Add DatabaseEventListener to log pipeline.
                 loggerFactory.AddProvider(new DatabaseEventLoggerProvider());
+
+                // Setup event capture services
+                serviceProvider.GetService<DatabaseEventListenerService>().Bind();
+                return;
             }
 
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
-            var service = serviceProvider.GetService<DatabaseMigrationService>();
-            if (!service.Migrate().Success)
+
+            if (Program.CommandLineArgs.Migrate)
             {
-                logger.LogWarning("Could not migrate database.");
-                if (Program.CommandLineArgs.Migrate)
+                var service = serviceProvider.GetService<DatabaseMigrationService>();
+                if (!service.Migrate().Success)
                 {
+                    logger.LogWarning("Could not migrate database.");
                     Program.ExitProgramWithCode(ExitCode.MigrationFailure);
                 }
-            }
-            else
-            {
-                if (Program.CommandLineArgs.Trading)
-                {
-                    // Setup event capture services
-                    serviceProvider.GetService<DatabaseEventListenerService>().Bind();
-                }
-                else if (Program.CommandLineArgs.Migrate)
+                else
                 {
                     Program.ExitProgramWithCode(ExitCode.Success);
                 }
