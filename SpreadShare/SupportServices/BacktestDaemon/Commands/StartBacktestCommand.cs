@@ -71,9 +71,7 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                 }
             }
 
-            var (begin, end) = DatabaseUtilities.Instance.GetTimeStampEdges(_configuration.TradingPairs);
-            BacktestDaemonService.Instance.State.BeginTimeStamp = begin;
-            BacktestDaemonService.Instance.State.EndTimeStamp = end;
+            ConfigureTimestampEdges(BacktestDaemonService.Instance.State, _args);
             Program.CommandLineArgs.BacktestOutputPath = _args.OutputPath;
         }
 
@@ -116,6 +114,29 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                 Console.WriteLine($"BACKTEST_FAILED={BacktestDaemonService.Instance.State.CurrentBacktestID}");
             }
         }
+
+        private void ConfigureTimestampEdges(BacktestDaemonState state, StartBacktestCommandArguments args)
+        {
+            var (begin, end) = DatabaseUtilities.Instance.GetTimeStampEdges(_configuration.TradingPairs);
+            begin = args.BeginEpoch == 0
+                ? begin // No setting defined, no change
+                : args.BeginEpoch < begin
+                    ? throw new InvalidCommandException(
+                        $"Cannot set begin epoch to {DateTimeOffset.FromUnixTimeMilliseconds(args.BeginEpoch)}, " +
+                        $"the database starts at {DateTimeOffset.FromUnixTimeMilliseconds(begin)}")
+                    : args.BeginEpoch; // Accept custom setting
+
+            end = args.EndEpoch == 0
+                ? end // No setting defined, no change
+                : args.EndEpoch > end
+                    ? throw new InvalidCommandException(
+                        $"Cannot set end epoch to {DateTimeOffset.FromUnixTimeMilliseconds(args.EndEpoch)}, " +
+                        $"the database stops at {DateTimeOffset.FromUnixTimeMilliseconds(end)}")
+                    : args.EndEpoch; // Accept custom setting
+
+            state.BeginTimeStamp = begin;
+            state.EndTimeStamp = end;
+        }
     }
 
     /// <summary>
@@ -140,6 +161,18 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
         /// </summary>
         [Option("output")]
         public string OutputPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the begin epoch argument of a backtest.
+        /// </summary>
+        [Option("begin_epoch")]
+        public long BeginEpoch { get; set; }
+
+        /// <summary>
+        /// Gets or sets the end epoch argument of a backtest.
+        /// </summary>
+        [Option("end_epoch")]
+        public long EndEpoch { get; set; }
 
         /// <summary>
         /// Gets or sets the ID of the backtest.

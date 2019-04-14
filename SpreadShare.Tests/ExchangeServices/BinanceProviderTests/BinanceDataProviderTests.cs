@@ -27,7 +27,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
         {
             string source = $@"
                 TradingPairs: [EOSETH]
-                CandleWidth: {Configuration.Instance.CandleWidth} 
+                CandleWidth: {Configuration.Instance.CandleWidth}
             ";
             var config = ParseAlgorithmConfiguration(source);
             _container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(config);
