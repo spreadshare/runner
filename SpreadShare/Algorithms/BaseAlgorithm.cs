@@ -28,7 +28,13 @@ namespace SpreadShare.Algorithms
                 x => $"{x} cannot not be converted to {typeof(T)}, please make sure to use the correct AlgorithmConfiguration");
 
             StateManager = new StateManager<T>(configuration as T, container, Initial);
-            DatabaseEventListenerService.Instance?.AddStateSource(StateManager);
+
+            // Add state switch tracking
+            if (Program.CommandLineArgs.Trading)
+            {
+                DatabaseEventListenerService.Instance.AddStateSource(StateManager);
+            }
+
             container.TimerProvider.RunPeriodicTimer();
 
             return new ResponseObject(ResponseCode.Success);

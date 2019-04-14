@@ -18,27 +18,17 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private const char Delimiter = '|';
         private readonly BacktestTimerProvider _timer;
-        private readonly List<BacktestOrder> _orders;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestOutputLogger"/> class.
         /// </summary>
-        /// <param name="databaseContext">DatabaseContext to fetch trades and switches.</param>
         /// <param name="timer">BacktestTimerProvider to get timespan information.</param>
         /// <param name="outputFolder">General backtest output folder.</param>
-        /// <param name="orders">Orders that have been traded.</param>
-        public BacktestOutputLogger(DatabaseContext databaseContext, BacktestTimerProvider timer, string outputFolder, List<BacktestOrder> orders)
+        public BacktestOutputLogger(BacktestTimerProvider timer, string outputFolder)
         {
-            DatabaseContext = databaseContext;
             OutputFolder = outputFolder;
             _timer = timer;
-            _orders = orders;
         }
-
-        /// <summary>
-        /// Gets the database context.
-        /// </summary>
-        private DatabaseContext DatabaseContext { get; }
 
         /// <summary>
         /// Gets or sets the output folder.
@@ -48,7 +38,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <summary>
         /// Log output (trade and state switches) to output file.
         /// </summary>
-        public void Output()
+        /// <param name="orders">Orders that have been traded.</param>
+        /// <param name="stateSwitchEvents">List of state switches during the backtest.</param>
+        public void Output(List<BacktestOrder> orders, List<StateSwitchEvent> stateSwitchEvents)
         {
             // Set name of folder
             if (string.IsNullOrEmpty(Program.CommandLineArgs.BacktestOutputPath))
@@ -67,10 +59,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             OutputConfiguration(Path.Combine(OutputFolder, "appsettings.yaml"));
 
             // Output trades
-            OutputTrades(Path.Combine(OutputFolder, "trades.csv"));
+            OutputOrders(Path.Combine(OutputFolder, "trades.csv"), orders);
 
             // Output state switches
-            OutputStateSwitches(Path.Combine(OutputFolder, "state_switches.csv"));
+            OutputStateSwitches(Path.Combine(OutputFolder, "state_switches.csv"), stateSwitchEvents);
 
             // Output timespan
             OutputTimespan(Path.Combine(OutputFolder, "timespan.json"));
@@ -86,17 +78,18 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <summary>
-        /// Output all executed trades to filepath.
+        /// Output all executed orders to filepath.
         /// </summary>
         /// <param name="filepath">Filepath to store trades at.</param>
-        private void OutputTrades(string filepath)
+        /// <param name="orders">Orders that have been traded.</param>
+        private static void OutputOrders(string filepath, List<BacktestOrder> orders)
         {
             var builder = new StringBuilder();
             builder.AppendLine(BacktestOrder.GetStaticCsvHeader(Delimiter));
 
-            foreach (var trade in _orders)
+            foreach (var order in orders)
             {
-                builder.AppendLine(trade.GetCsvRepresentation(Delimiter));
+                builder.AppendLine(order.GetCsvRepresentation(Delimiter));
             }
 
             WriteAllText(filepath, builder.ToString());
@@ -106,11 +99,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// Output all executed state switches to filepath.
         /// </summary>
         /// <param name="filepath">Filepath to store trades at.</param>
-        private void OutputStateSwitches(string filepath)
+        /// <param name="stateSwitchEvents">List of state switches during the backtest.</param>
+        private static void OutputStateSwitches(string filepath, List<StateSwitchEvent> stateSwitchEvents)
         {
             var builder = new StringBuilder();
             builder.AppendLine(StateSwitchEvent.GetStaticCsvHeader(Delimiter));
-            foreach (var stateSwitch in DatabaseContext.StateSwitchEvents.OrderBy(x => x.Timestamp))
+            foreach (var stateSwitch in stateSwitchEvents)
             {
                 builder.AppendLine(stateSwitch.GetCsvRepresentation(Delimiter));
             }

@@ -17,9 +17,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     internal class BacktestTimerProvider : TimerProvider
     {
         private readonly ILogger _logger;
-        private readonly DatabaseContext _database;
         private readonly string _outputFolder;
         private readonly List<BacktestOrder> _backtestOrders;
+        private readonly List<StateSwitchEvent> _stateSwitchEvents;
 
         private DateTimeOffset _currentTime;
         private DateTimeOffset _lastCandleOpen;
@@ -28,14 +28,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// Initializes a new instance of the <see cref="BacktestTimerProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output.</param>
-        /// <param name="database">The database context for flushing.</param>
         /// <param name="settings">Provides startDate, endDate and outputFolder.</param>
-        public BacktestTimerProvider(ILoggerFactory loggerFactory, DatabaseContext database, BacktestSettings settings)
+        public BacktestTimerProvider(ILoggerFactory loggerFactory, BacktestSettings settings)
             : base(loggerFactory)
         {
             _logger = loggerFactory.CreateLogger(GetType());
-            _database = database;
             _backtestOrders = new List<BacktestOrder>();
+            _stateSwitchEvents = new List<StateSwitchEvent>();
 
             // Hardcoded 2 week offset
             BeginTime = DateTimeOffset.FromUnixTimeMilliseconds(
@@ -44,7 +43,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _lastCandleOpen = _currentTime;
 
             EndTime = DateTimeOffset.FromUnixTimeMilliseconds(
-                BacktestDaemonService.Instance.State.EndTimeStamp);
+                BacktestDaemonService.Instance.State.EndTimeStamp) - TimeSpan.FromHours(14);
             _outputFolder = settings.OutputFolder;
         }
 
@@ -88,16 +87,20 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _backtestOrders.Add(order);
         }
 
+        /// <summary>
+        /// Add state switch event to the logger.
+        /// </summary>
+        /// <param name="stateSwitch">StateSwitch to log.</param>
+        public void AddStateSwitch(Type stateSwitch)
+        {
+            _stateSwitchEvents.Add(new StateSwitchEvent(CurrentTime.ToUnixTimeMilliseconds(), stateSwitch.Name));
+        }
+
         /// <inheritdoc />
         public override async void RunPeriodicTimer()
         {
             // Make sure all constructor processes are finished
             await Task.Delay(1000).ConfigureAwait(false);
-
-            // Clear the trades and state switch event table (NOTE: Sequences are not reset)
-            _database.Database.ExecuteSqlCommand("TRUNCATE TABLE public.\"StateSwitchEvents\";");
-            _database.SaveChanges();
-            _backtestOrders.Clear();
 
             while (CurrentTime < EndTime)
             {
@@ -141,8 +144,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _logger.LogInformation("Writing output");
 
             // Output to database
-            var outputLogger = new BacktestOutputLogger(_database, this, _outputFolder, _backtestOrders);
-            outputLogger.Output();
+            var outputLogger = new BacktestOutputLogger(this, _outputFolder);
+            outputLogger.Output(_backtestOrders, _stateSwitchEvents);
+
+            // Clear tracked lists
+            _backtestOrders.Clear();
+            _stateSwitchEvents.Clear();
 
             // Declare completion (hands over control back to CLI)
             Finished = true;

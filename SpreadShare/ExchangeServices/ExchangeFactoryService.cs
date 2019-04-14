@@ -94,9 +94,9 @@ namespace SpreadShare.ExchangeServices
         private ExchangeProvidersContainer BuildBacktestingContainer<T>(AlgorithmConfiguration settings, AllocationManager allocationManager)
             where T : IBaseAlgorithm
         {
-            var backtestTimer = new BacktestTimerProvider(_loggerFactory, _databaseContext, Configuration.Instance.BacktestSettings);
+            var backtestTimer = new BacktestTimerProvider(_loggerFactory, Configuration.Instance.BacktestSettings);
             var dataImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, backtestTimer);
-            var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation, _databaseContext);
+            var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation);
 
             var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);

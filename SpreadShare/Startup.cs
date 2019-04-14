@@ -94,7 +94,6 @@ namespace SpreadShare
             }
 
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
-
             if (Program.CommandLineArgs.Migrate)
             {
                 var service = serviceProvider.GetService<DatabaseMigrationService>();
