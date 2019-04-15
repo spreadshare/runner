@@ -10,7 +10,6 @@ using SpreadShare.Models.Database;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
-using SpreadShare.SupportServices;
 using OrderSide = SpreadShare.Models.Trading.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
@@ -22,7 +21,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private readonly ILogger _logger;
         private readonly BacktestDataProvider _dataProvider;
-        private readonly DatabaseContext _database;
 
         /// <summary>
         /// This queue is used to cache orders until the next clock tick. It is used to confirm order placements.
@@ -37,17 +35,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="loggerFactory">Used to create output.</param>
         /// <param name="timer">Timer provider for registering trades.</param>
         /// <param name="data">Data provider for confirming trades.</param>
-        /// <param name="database">Database context for logging trades.</param>
         public BacktestTradingProvider(
             ILoggerFactory loggerFactory,
             BacktestTimerProvider timer,
-            BacktestDataProvider data,
-            DatabaseContext database)
+            BacktestDataProvider data)
             : base(loggerFactory, timer)
         {
             _logger = loggerFactory.CreateLogger(GetType());
             _dataProvider = data;
-            _database = database;
             _orderCache = new Queue<OrderUpdate>();
         }
 

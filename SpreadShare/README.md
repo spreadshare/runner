@@ -2,7 +2,7 @@
 Run algorithms for backtesting and on Binance.
 
 ## Setup and run
-#### Setup
+#### Setup Docker
 1. Install [docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-using-the-repository)
 1. Install docker-compose
     ```
@@ -22,6 +22,18 @@ Run algorithms for backtesting and on Binance.
     ```
     docker-compose up --build
     ```
+
+#### Setup Not Docker
+1. Install [dotnet 2.2](https://dotnet.microsoft.com/download/linux-package-manager/rhel/sdk-2.2.203)
+1. Create an `appsettings.yaml` file from the `appsettings.yaml.example` file in the folder `SpreadShare`.
+    ```
+    cp SpreadShare/appsettings.yaml.example SpreadShare/appsettings.yaml
+    ```
+1. Adjust the postgresql [connection string](https://www.npgsql.org/doc/connection-string-parameters.html):
+    ```
+    LocalConnection: Server=[server];Database=[database];User ID=[user];Password=[password];Pooling=true;Use SSL Stream=true;SSL Mode=Require;Trust Server Certificate=true;
+    ```
+
 
 #### Run for trading
 1. Set preferred parameters in `appsettings.yaml`

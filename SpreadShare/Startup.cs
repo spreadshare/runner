@@ -89,15 +89,19 @@ namespace SpreadShare
                 loggerFactory.AddProvider(new DatabaseEventLoggerProvider());
             }
 
+            // Early access to skip database event listener and migration.
+            if (Program.CommandLineArgs.SkipDatabase)
+            {
+                return;
+            }
+
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<DatabaseMigrationService>();
-            if (!service.Migrate().Success)
+            var result = service.Migrate();
+            if (!result.Success)
             {
-                logger.LogWarning("Could not migrate database.");
-                if (Program.CommandLineArgs.Migrate)
-                {
-                    Program.ExitProgramWithCode(ExitCode.MigrationFailure);
-                }
+                logger.LogError("Could not migrate database: " + result.Message);
+                Program.ExitProgramWithCode(ExitCode.MigrationFailure);
             }
             else
             {
