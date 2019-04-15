@@ -30,10 +30,7 @@ namespace SpreadShare.Algorithms
             StateManager = new StateManager<T>(configuration as T, container, Initial);
 
             // Add state switch tracking
-            if (Program.CommandLineArgs.Trading)
-            {
-                DatabaseEventListenerService.Instance.AddStateSource(StateManager);
-            }
+            DatabaseEventListenerService.Instance?.AddStateSource(StateManager);
 
             container.TimerProvider.RunPeriodicTimer();
 

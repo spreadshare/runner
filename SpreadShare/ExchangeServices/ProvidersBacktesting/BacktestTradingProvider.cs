@@ -10,7 +10,6 @@ using SpreadShare.Models.Database;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
-using SpreadShare.SupportServices;
 using OrderSide = SpreadShare.Models.Trading.OrderSide;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting

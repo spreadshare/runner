@@ -89,6 +89,12 @@ namespace SpreadShare
                 loggerFactory.AddProvider(new DatabaseEventLoggerProvider());
             }
 
+            // Early access to skip database event listener and migration.
+            if (Program.CommandLineArgs.SkipDatabase)
+            {
+                return;
+            }
+
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<DatabaseMigrationService>();
             var result = service.Migrate();

@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Database;
-using SpreadShare.SupportServices;
 using SpreadShare.SupportServices.BacktestDaemon;
 using SpreadShare.SupportServices.Configuration;
 

@@ -26,6 +26,12 @@ namespace SpreadShare.Models
         public bool Migrate { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to skip the database. Mutually exclusive with --migrate.
+        /// </summary>
+        [Option('s', "skipdb", Default = false, HelpText = "Skip all database calls")]
+        public bool SkipDatabase { get; set; }
+
+        /// <summary>
         /// Gets or sets the filepath of the configuration JSON.
         /// </summary>
         [Option("configpath", Default = "appsettings.yaml", HelpText = "The path to the configuration.yaml file")]
