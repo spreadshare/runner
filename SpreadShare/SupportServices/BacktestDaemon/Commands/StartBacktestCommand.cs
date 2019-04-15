@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using CommandLine;
 using SpreadShare.Algorithms;
 using SpreadShare.Models;
 using SpreadShare.Models.Exceptions;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.BacktestDaemon.CommandAttributes;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Utilities;
@@ -60,17 +62,7 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                 throw new InvalidCommandException(e.Message);
             }
 
-            foreach (var pair in _configuration.TradingPairs)
-            {
-                if (!DatabaseUtilities.Instance.ValidateCandleWidth(
-                    pair,
-                    Configuration.Configuration.Instance.CandleWidth))
-                {
-                    throw new InvalidConfigurationException(
-                        $"Database candle interval for {pair} is not compatible with {Configuration.Configuration.Instance.CandleWidth}");
-                }
-            }
-
+            DatabaseUtilities.Instance.ValidateCandleWidth(_configuration.TradingPairs, Configuration.Configuration.Instance.CandleWidth);
             ConfigureTimestampEdges(BacktestDaemonService.Instance.State, _args);
             Program.CommandLineArgs.BacktestOutputPath = _args.OutputPath;
         }
