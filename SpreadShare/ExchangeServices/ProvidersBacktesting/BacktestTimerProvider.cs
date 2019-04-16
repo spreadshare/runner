@@ -36,12 +36,12 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             // Hardcoded 2 week offset
             BeginTime = DateTimeOffset.FromUnixTimeMilliseconds(
-                BacktestDaemonService.Instance.State.BeginTimeStamp) + TimeSpan.FromDays(14);
+                BacktestDaemonService.Instance.State.BeginTimeStamp);
             _currentTime = BeginTime;
             _lastCandleOpen = _currentTime;
 
             EndTime = DateTimeOffset.FromUnixTimeMilliseconds(
-                BacktestDaemonService.Instance.State.EndTimeStamp) - TimeSpan.FromHours(14);
+                BacktestDaemonService.Instance.State.EndTimeStamp);
             _outputFolder = settings.OutputFolder;
         }
 

@@ -118,18 +118,18 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                         $"the database starts at {DateTimeOffset.FromUnixTimeMilliseconds(begin)}");
                 }
 
-                if (args.EndEpoch < begin)
+                if (args.BeginEpoch < begin)
                 {
-                    throw new InvalidCommandException("end_epoch was smaller than database start.");
+                    throw new InvalidCommandException("begin_epoch was smaller than database start.");
                 }
 
                 if (args.BeginEpoch < begin + TimeSpan.FromDays(14).TotalMilliseconds)
                 {
-                    Console.WriteLine($"WARNING: Custom Begin Epoch is close to the beginning of the data, be carefull" +
+                    Console.WriteLine($"WARNING: Custom Begin Epoch is close to the beginning of the data, be careful" +
                                       $"not to read to far into the past.");
                 }
 
-                state.BeginTimeStamp = begin;
+                state.BeginTimeStamp = args.BeginEpoch;
             }
             else
             {
