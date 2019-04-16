@@ -40,7 +40,7 @@ build.txt
 # Docker volumes
 postgres-data
 input-data
-backtesting-output
+backtesting_output
 
 # Environment secrets
 .env
@@ -55,3 +55,6 @@ coverage.hits
 
 # Locked Excel files
 *.~lock*
+
+# Backtesting output
+SpreadShare/backtesting_output

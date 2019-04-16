@@ -2,7 +2,7 @@
 Run algorithms for backtesting and on Binance.
 
 ## Setup and run
-#### Setup
+#### Setup Docker
 1. Install [docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-using-the-repository)
 1. Install docker-compose
     ```
@@ -22,6 +22,18 @@ Run algorithms for backtesting and on Binance.
     ```
     docker-compose up --build
     ```
+
+#### Setup Not Docker
+1. Install [dotnet 2.2](https://dotnet.microsoft.com/download/linux-package-manager/rhel/sdk-2.2.203)
+1. Create an `appsettings.yaml` file from the `appsettings.yaml.example` file in the folder `SpreadShare`.
+    ```
+    cp SpreadShare/appsettings.yaml.example SpreadShare/appsettings.yaml
+    ```
+1. Adjust the postgresql [connection string](https://www.npgsql.org/doc/connection-string-parameters.html):
+    ```
+    LocalConnection: Server=[server];Database=[database];User ID=[user];Password=[password];Pooling=true;Use SSL Stream=true;SSL Mode=Require;Trust Server Certificate=true;
+    ```
+
 
 #### Run for trading
 1. Set preferred parameters in `appsettings.yaml`
@@ -56,10 +68,8 @@ docker container prune
 | Binance.Net        	| Communication with Binance     	|
 | CommandLineParser  	| Parsing command line arguments 	|
 | ConsoleTables      	| /help command in TTY           	|
-| Cron               	| Job scheduling using cron      	|
 | Dawn.Guard         	| Method argument checking       	|
-| NetMQ              	| *Unused*                       	|
-| Newtonsoft.Json    	| *Unused*                       	|
+| Newtonsoft.Json    	| Render objects as json           	|
 | Roslynator         	| Code style enforcement         	|
 | Sentry             	| Error reporting                	|
 | StyleCop           	| Code style enforcement         	|
@@ -71,6 +81,24 @@ To generate a html code coverage report using minicover, you can run the `genera
 ```
 /SpreadShare.Tests/generate-report.sh
 ```
+
+___
+## Deployment
+On the deployment server, the application is started as docker container per algorithm. This process works as follows:
+
+1. Adjust the dockerfile to have no arguments on the entry point
+2. Run `docker build -t main . ` to build the base image
+3. Adjust `SpreadShare/appsettings.yaml` as required
+4. Run ```
+    docker run
+    -d
+    --network spreadshare_network
+    --mount type=bind,source="$(pwd)"/SpreadShare/appsettings.yaml,target=/app/appsettings.yaml 
+    main --trading --verbose```
+
+You can repeat step 3 and 4 as many times as you want to deploy more algorithms. Do note that it takes some time for the
+application to consume the yaml configuration. Either make sure you leave enough interval (few seconds should do) or create different
+configuration files and bind them with appsettings.yaml as alias.
 
 ___
 ## Utilities

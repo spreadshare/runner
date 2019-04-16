@@ -21,15 +21,21 @@ namespace SpreadShare.Tests.Algorithms
         public StateTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            _container = ExchangeFactoryService
-                .BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
-            var method = typeof(State<TemplateAlgorithmConfiguration>)
+            var containerMethod = typeof(ExchangeFactoryService)
+                .GetMethod("BuildBinanceContainer", BindingFlags.Instance | BindingFlags.NonPublic)
+                .MakeGenericMethod(typeof(TemplateAlgorithm));
+
+            _container = (ExchangeProvidersContainer)containerMethod.Invoke(
+                ExchangeFactoryService,
+                new object[] { AlgorithmConfiguration, new TestAllocationManager() });
+
+            var setTimerMethod = typeof(State<TemplateAlgorithmConfiguration>)
                 .GetMethod("SetTimer", BindingFlags.NonPublic | BindingFlags.Instance);
             _setTimer = (state, timespan) =>
             {
                 try
                 {
-                    method.Invoke(state, new object[] { timespan });
+                    setTimerMethod.Invoke(state, new object[] { timespan });
                 }
                 catch (TargetInvocationException e)
                 {
@@ -63,7 +69,7 @@ namespace SpreadShare.Tests.Algorithms
         public void OnTimerDefaultNothing()
         {
             var state = new TestState();
-            Program.CommandLineArgs.Backtesting = false;
+            Program.CommandLineArgs.Trading = true;
             state.Activate(AlgorithmConfiguration, _container);
             var next = state.OnTimerElapsed();
             Assert.IsType<NothingState<TemplateAlgorithmConfiguration>>(next);
@@ -73,7 +79,7 @@ namespace SpreadShare.Tests.Algorithms
         public void OnTimerBacktestDefaultError()
         {
             var state = new TestState();
-            Program.CommandLineArgs.Backtesting = true;
+            Program.CommandLineArgs.Trading = false;
             Assert.Throws<AlgorithmLogicException>(() => state.OnTimerElapsed());
         }
 
@@ -110,7 +116,7 @@ namespace SpreadShare.Tests.Algorithms
         {
             var state = new TestState();
             state.Activate(AlgorithmConfiguration, _container);
-            Program.CommandLineArgs.Backtesting = false;
+            Program.CommandLineArgs.Trading = true;
             var order = new OrderUpdate(
                 orderId: 0,
                 tradeId: 0,
@@ -130,7 +136,7 @@ namespace SpreadShare.Tests.Algorithms
         {
             var state = new TestState();
             state.Activate(AlgorithmConfiguration, _container);
-            Program.CommandLineArgs.Backtesting = true;
+            Program.CommandLineArgs.Trading = false;
             var order = new OrderUpdate(
                 orderId: 0,
                 tradeId: 0,
@@ -149,7 +155,7 @@ namespace SpreadShare.Tests.Algorithms
         {
             var state = new TestState();
             state.Activate(AlgorithmConfiguration, _container);
-            Program.CommandLineArgs.Backtesting = true;
+            Program.CommandLineArgs.Trading = false;
             var order = new OrderUpdate(
                 orderId: 0,
                 tradeId: 0,

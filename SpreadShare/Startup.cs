@@ -68,7 +68,7 @@ namespace SpreadShare
             services.AddSingleton<AlgorithmService, AlgorithmService>();
 
             // Add allocation manager
-            services.AddSingleton<AllocationManager, AllocationManager>();
+            services.AddSingleton<IAllocationManager, AllocationManager>();
         }
 
         /// <summary>
@@ -89,15 +89,19 @@ namespace SpreadShare
                 loggerFactory.AddProvider(new DatabaseEventLoggerProvider());
             }
 
+            // Early access to skip database event listener and migration.
+            if (Program.CommandLineArgs.SkipDatabase)
+            {
+                return;
+            }
+
             // Migrate the database (https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
             var service = serviceProvider.GetService<DatabaseMigrationService>();
-            if (!service.Migrate().Success)
+            var result = service.Migrate();
+            if (!result.Success)
             {
-                logger.LogWarning("Could not migrate database.");
-                if (Program.CommandLineArgs.Migrate)
-                {
-                    Program.ExitProgramWithCode(ExitCode.MigrationFailure);
-                }
+                logger.LogError("Could not migrate database: " + result.Message);
+                Program.ExitProgramWithCode(ExitCode.MigrationFailure);
             }
             else
             {
@@ -138,17 +142,19 @@ namespace SpreadShare
             services.AddSingleton<DatabaseEventListenerService, DatabaseEventListenerService>();
             services.AddSingleton<BacktestDaemonService, BacktestDaemonService>();
 
-            // Add Portfolio fetching
-            switch (Configuration.Instance.EnabledAlgorithm.Exchange)
+            if (Program.CommandLineArgs.Migrate)
             {
-                case Exchange.Backtesting:
-                    services.AddSingleton<IPortfolioFetcherService, BacktestPortfolioFetcher>();
-                    break;
-                case Exchange.Binance:
-                    services.AddSingleton<IPortfolioFetcherService, BinancePortfolioFetcher>();
-                    break;
-                default:
-                    throw new NotImplementedException($"The portfolio fetcher for {Configuration.Instance.EnabledAlgorithm.Exchange} is not linked.");
+                return;
+            }
+
+            // Add Portfolio fetching
+            if (Program.CommandLineArgs.Trading)
+            {
+                services.AddSingleton<IPortfolioFetcherService, BinancePortfolioFetcher>();
+            }
+            else
+            {
+                services.AddSingleton<IPortfolioFetcherService, BacktestPortfolioFetcher>();
             }
         }
         #pragma warning restore CA1822

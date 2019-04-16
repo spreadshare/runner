@@ -15,7 +15,7 @@ namespace SpreadShare.ExchangeServices.Allocation
     /// <summary>
     /// This class provides allocation management for multiple algorithms.
     /// </summary>
-    internal class AllocationManager : Observable<Portfolio>
+    internal class AllocationManager : Observable<Portfolio>, IAllocationManager
     {
         private readonly ILogger _logger;
         private readonly IPortfolioFetcherService _portfolioFetcherService;
@@ -35,10 +35,7 @@ namespace SpreadShare.ExchangeServices.Allocation
             _databaseContext = db;
         }
 
-        /// <summary>
-        /// Sets initial configuration of allocations per algorithm.
-        /// </summary>
-        /// <param name="initialAllocation">Initial set of allocations.</param>
+        /// <inheritdoc />
         public void SetInitialConfiguration(Portfolio initialAllocation)
         {
             if (_allocation != null && Program.CommandLineArgs.Trading)
@@ -56,18 +53,21 @@ namespace SpreadShare.ExchangeServices.Allocation
 
             // Get the already allocated resources from the active sessions
             var allocated = Portfolio.Empty;
-            try
+            if (Program.CommandLineArgs.Trading && !Program.CommandLineArgs.SkipDatabase)
             {
-                var allocatedPortfolios = _databaseContext.Sessions.Where(x => x.Active).Select(x => x.Allocation);
-                foreach (var allocatedPortfolio in allocatedPortfolios)
+                try
                 {
-                    allocated += allocatedPortfolio;
+                    var allocatedPortfolios = _databaseContext.Sessions.Where(x => x.Active).Select(x => x.Allocation);
+                    foreach (var allocatedPortfolio in allocatedPortfolios)
+                    {
+                        allocated += allocatedPortfolio;
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
-                _logger.LogWarning($"Database was not available, cannot verify if requested allocation is available.");
+                catch (Exception e)
+                {
+                    _logger.LogError(e.Message);
+                    _logger.LogWarning($"Database was not available, cannot verify if requested allocation is available.");
+                }
             }
 
             // Available allocation are the assets on the exchange, minus the already allocated resources.
@@ -89,32 +89,22 @@ namespace SpreadShare.ExchangeServices.Allocation
             UpdateObservers(_allocation);
         }
 
-        /// <summary>
-        /// Gives the entire portfolio of a certain algorithm on a certain exchange.
-        /// </summary>
-        /// <returns>Portfolio containing all available funds.</returns>
+        /// <inheritdoc />
         public Portfolio GetAllFunds()
         {
             Guard.Argument(_allocation).NotNull("Initialise allocations first");
             return _allocation;
         }
 
-        /// <summary>
-        /// Get available funds for a given algorithm and currency.
-        /// </summary>
-        /// <param name="currency">Currency to get funds for.</param>
-        /// <returns>Available funds or -1 if not available.</returns>
+        /// <inheritdoc />
         public Balance GetAvailableFunds(Currency currency)
         {
             Guard.Argument(_allocation).NotNull("Initialise allocations first");
             return _allocation.GetAllocation(currency);
         }
 
-        /// <summary>
-        /// Updates the allocation of a given algorithm, on a certain exchange given a trade execution.
-        /// </summary>
-        /// <param name="exec">The trade execution to process.</param>
-        public virtual void UpdateAllocation(TradeExecution exec)
+        /// <inheritdoc />
+        public void UpdateAllocation(TradeExecution exec)
         {
             if (Program.CommandLineArgs.Trading)
             {

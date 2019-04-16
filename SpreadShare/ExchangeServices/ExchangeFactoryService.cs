@@ -20,7 +20,7 @@ namespace SpreadShare.ExchangeServices
         private readonly ILoggerFactory _loggerFactory;
         private readonly BinanceCommunicationsService _binanceCommunications;
         private readonly DatabaseContext _databaseContext;
-        private readonly AllocationManager _allocationManager;
+        private readonly IAllocationManager _allocationManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExchangeFactoryService"/> class.
@@ -32,7 +32,7 @@ namespace SpreadShare.ExchangeServices
         public ExchangeFactoryService(
             ILoggerFactory loggerFactory,
             DatabaseContext context,
-            AllocationManager alloc,
+            IAllocationManager alloc,
             BinanceCommunicationsService binanceComm)
         {
             _logger = loggerFactory.CreateLogger<ExchangeFactoryService>();
@@ -57,20 +57,12 @@ namespace SpreadShare.ExchangeServices
                     $"Cannot build container for {typeof(T).Name} using a {algorithmConfiguration.GetType().Name} object");
             }
 
-            switch (Configuration.Instance.EnabledAlgorithm.Exchange)
-            {
-                case Exchange.Binance:
-                    return BuildBinanceContainer<T>(algorithmConfiguration, _allocationManager);
-
-                case Exchange.Backtesting:
-                    return BuildBacktestingContainer<T>(algorithmConfiguration, _allocationManager);
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(algorithmConfiguration));
-            }
+            return Program.CommandLineArgs.Trading
+                ? BuildBinanceContainer<T>(algorithmConfiguration, _allocationManager)
+                : BuildBacktestingContainer<T>(algorithmConfiguration, _allocationManager);
         }
 
-        private ExchangeProvidersContainer BuildBinanceContainer<T>(AlgorithmConfiguration settings, AllocationManager allocationManager)
+        private ExchangeProvidersContainer BuildBinanceContainer<T>(AlgorithmConfiguration settings, IAllocationManager allocationManager)
             where T : IBaseAlgorithm
         {
             // Makes sure that the communication is enabled
@@ -86,17 +78,17 @@ namespace SpreadShare.ExchangeServices
             timerProvider.DataProvider = dataProvider;
 
             // Inject database event listener
-            DatabaseEventListenerService.Instance?.AddOrderSource(tradingProvider);
+            DatabaseEventListenerService.AddOrderSource(tradingProvider);
 
             return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider, typeof(T));
         }
 
-        private ExchangeProvidersContainer BuildBacktestingContainer<T>(AlgorithmConfiguration settings, AllocationManager allocationManager)
+        private ExchangeProvidersContainer BuildBacktestingContainer<T>(AlgorithmConfiguration settings, IAllocationManager allocationManager)
             where T : IBaseAlgorithm
         {
-            var backtestTimer = new BacktestTimerProvider(_loggerFactory, _databaseContext, Configuration.Instance.BacktestSettings);
+            var backtestTimer = new BacktestTimerProvider(_loggerFactory, Configuration.Instance.BacktestSettings);
             var dataImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, backtestTimer);
-            var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation, _databaseContext);
+            var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation);
 
             var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
             var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);

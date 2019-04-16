@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Microsoft.Extensions.Logging;
-using SpreadShare.Algorithms.Implementations;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
+using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
+using SpreadShare.Tests.Stubs;
 using Xunit.Abstractions;
 
 namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
@@ -20,15 +20,10 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
         internal TradingProvider GetTradingProvider<T>()
             where T : TradingProviderTestImplementation
         {
-            var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(AlgorithmConfiguration);
-            var trading = container.TradingProvider;
-            var property = trading.GetType().GetProperty("Implementation", BindingFlags.NonPublic | BindingFlags.Instance)
-                           ?? throw new Exception($"Expected property 'Implementation' on {nameof(TradingProvider)}");
-
-            // Inject test implementation
-            var implementation = Activator.CreateInstance(typeof(T), LoggerFactory, container.TimerProvider);
-            property.SetValue(trading, implementation);
-            return trading;
+            var timer = new TestTimerProvider(LoggerFactory);
+            var implementation = (T)Activator.CreateInstance(typeof(T), LoggerFactory, timer);
+            var data = new DataProvider(LoggerFactory, new DataProviderTestImplementation(LoggerFactory, timer), AlgorithmConfiguration);
+            return new TradingProvider(LoggerFactory, implementation, data, new TestAllocationManager());
         }
 
         internal abstract class TradingProviderTestImplementation : AbstractTradingProvider
@@ -67,6 +62,26 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             public override void OnError(Exception error) => throw new NotImplementedException();
 
             public override void OnNext(long value) => throw new NotImplementedException();
+        }
+
+        private class DataProviderTestImplementation : AbstractDataProvider
+        {
+            public DataProviderTestImplementation(ILoggerFactory loggerFactory, TimerProvider timerProvider)
+                : base(loggerFactory, timerProvider)
+            {
+            }
+
+            public override ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair) => new ResponseObject<decimal>(1M);
+
+            public override ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair) => new ResponseObject<decimal>(1M);
+
+            public override ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair) => new ResponseObject<decimal>(1M);
+
+            public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack) => throw new NotImplementedException();
+
+            public override ResponseObject<Tuple<TradingPair, decimal>> GetTopPerformance(List<TradingPair> pairs, double hoursBack) => throw new NotImplementedException();
+
+            protected override ResponseObject<BacktestingCandle[]> GetCandles(TradingPair pair, int limit) => throw new NotImplementedException();
         }
     }
 }

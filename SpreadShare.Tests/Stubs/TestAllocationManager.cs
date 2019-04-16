@@ -1,32 +1,43 @@
 using System;
 using System.Linq.Expressions;
-using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models;
 using SpreadShare.Models.Trading;
 
 namespace SpreadShare.Tests.Stubs
 {
-    // This class is instantiated via the ServiceProvider.
-    #pragma warning disable CA1812
-
-    internal class TestAllocationManager : AllocationManager
+    internal class TestAllocationManager : IAllocationManager
     {
         public const string RefuseCoin = "VIA";
+        private readonly TestPortfolioFetcher _portfolio;
 
-        public TestAllocationManager(ILoggerFactory loggerFactory, IPortfolioFetcherService portfolioFetcherService)
-            : base(loggerFactory, portfolioFetcherService, null)
+        public TestAllocationManager()
         {
+            _portfolio = new TestPortfolioFetcher();
         }
+
+        /// <inheritdoc />
+        public void SetInitialConfiguration(Portfolio initialAllocation)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Portfolio GetAllFunds()
+            => _portfolio.GetPortfolio().Data;
+
+        /// <inheritdoc />
+        public Balance GetAvailableFunds(Currency currency)
+            => GetAllFunds().GetAllocation(currency);
 
         /// <summary>
         /// Makes sure that allocation is ignored for tests.
         /// </summary>
         /// <param name="exec">exec.</param>
-        public override void UpdateAllocation(TradeExecution exec) => Expression.Empty();
+        public void UpdateAllocation(TradeExecution exec) => Expression.Empty();
 
         /// <inheritdoc />
-        public override ResponseObject<OrderUpdate> QueueTrade(TradeProposal p, Func<OrderUpdate> tradeCallback)
+        public ResponseObject<OrderUpdate> QueueTrade(TradeProposal p, Func<OrderUpdate> tradeCallback)
         {
             if (p.From.Symbol == new Currency(RefuseCoin))
             {
@@ -35,7 +46,10 @@ namespace SpreadShare.Tests.Stubs
 
             return new ResponseObject<OrderUpdate>(tradeCallback());
         }
-    }
 
-    #pragma warning restore CA1812
+        public IDisposable Subscribe(IObserver<Portfolio> observer)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

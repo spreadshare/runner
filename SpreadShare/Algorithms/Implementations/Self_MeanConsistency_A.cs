@@ -1,6 +1,4 @@
-using System;
 using System.Linq;
-using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
@@ -42,9 +40,9 @@ namespace SpreadShare.Algorithms.Implementations
 
                 if (entry)
                 {
-                    var atr25 = data.GetCandles(FirstPair, 51).AverageTrueRange();
+                    var atr50 = data.GetCandles(FirstPair, 51).AverageTrueRange();
                     var atr5 = data.GetCandles(FirstPair, 6).AverageTrueRange();
-                    if (atr5 > atr25)
+                    if (atr5 > atr50)
                     {
                         return new BuyAndSellState();
                     }

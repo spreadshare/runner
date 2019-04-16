@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using Dawn;
 using SpreadShare.Algorithms;
-using SpreadShare.ExchangeServices;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration.ConstraintAttributes;
 using SpreadShare.Utilities;
@@ -98,9 +97,6 @@ namespace SpreadShare.SupportServices.Configuration
         private readonly LazyCache<string, Type> _enabledAlgorithmConstructor =
             new LazyCache<string, Type>(x => Reflections.AllAlgorithms.First(a => a.Name == x));
 
-        private readonly LazyCache<string, Exchange> _exchangeConstructor =
-            new LazyCache<string, Exchange>(Enum.Parse<Exchange>);
-
         private readonly LazyCache<Dictionary<string, decimal>, Portfolio> _allocationConstructor =
             new LazyCache<Dictionary<string, decimal>, Portfolio>(
                 x => new Portfolio(x.ToDictionary(
@@ -117,11 +113,6 @@ namespace SpreadShare.SupportServices.Configuration
         [IsImplementation(typeof(IBaseAlgorithm))]
         public string __algorithm { get; private set; }
 
-        [YamlMember(Alias = "Exchange")]
-        [Required]
-        [ParsesToEnum(typeof(Exchange))]
-        public string __exchange { get; private set; }
-
         [YamlMember(Alias = "Parameters")]
         public Dictionary<string, object> __parameters { get; private set; }
 
@@ -133,8 +124,6 @@ namespace SpreadShare.SupportServices.Configuration
         public Dictionary<string, decimal> __allocation { get; private set; }
 
         public Type Algorithm => _enabledAlgorithmConstructor.Value(__algorithm);
-
-        public Exchange Exchange => _exchangeConstructor.Value(__exchange);
 
         public Portfolio Allocation => _allocationConstructor.Value(__allocation).Clone();
 

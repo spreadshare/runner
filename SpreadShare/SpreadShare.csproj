@@ -50,6 +50,7 @@
     <None Update="*.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Remove="backtesting_output\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -62,6 +63,14 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>SpreadShare.Verify</_Parameter1>
     </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="backtesting_output\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="backtesting_output\**" />
   </ItemGroup>
 
 </Project>

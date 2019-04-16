@@ -60,20 +60,8 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                 throw new InvalidCommandException(e.Message);
             }
 
-            foreach (var pair in _configuration.TradingPairs)
-            {
-                if (!DatabaseUtilities.Instance.ValidateCandleWidth(
-                    pair,
-                    Configuration.Configuration.Instance.CandleWidth))
-                {
-                    throw new InvalidConfigurationException(
-                        $"Database candle interval for {pair} is not compatible with {Configuration.Configuration.Instance.CandleWidth}");
-                }
-            }
-
-            var (begin, end) = DatabaseUtilities.Instance.GetTimeStampEdges(_configuration.TradingPairs);
-            BacktestDaemonService.Instance.State.BeginTimeStamp = begin;
-            BacktestDaemonService.Instance.State.EndTimeStamp = end;
+            DatabaseUtilities.Instance.ValidateCandleWidth(_configuration.TradingPairs, Configuration.Configuration.Instance.CandleWidth);
+            ConfigureTimestampEdges(BacktestDaemonService.Instance.State, _args);
             Program.CommandLineArgs.BacktestOutputPath = _args.OutputPath;
         }
 
@@ -116,6 +104,52 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                 Console.WriteLine($"BACKTEST_FAILED={BacktestDaemonService.Instance.State.CurrentBacktestID}");
             }
         }
+
+        private void ConfigureTimestampEdges(BacktestDaemonState state, StartBacktestCommandArguments args)
+        {
+            var (begin, end) = DatabaseUtilities.Instance.GetTimeStampEdges(_configuration.TradingPairs);
+
+            if (args.BeginEpoch != 0)
+            {
+                if (args.BeginEpoch < 0)
+                {
+                    throw new InvalidCommandException(
+                        $"Cannot set begin epoch to {DateTimeOffset.FromUnixTimeMilliseconds(args.BeginEpoch)}, " +
+                        $"the database starts at {DateTimeOffset.FromUnixTimeMilliseconds(begin)}");
+                }
+
+                if (args.BeginEpoch < begin)
+                {
+                    throw new InvalidCommandException("begin_epoch was smaller than database start.");
+                }
+
+                if (args.BeginEpoch < begin + TimeSpan.FromDays(14).TotalMilliseconds)
+                {
+                    Console.WriteLine($"WARNING: Custom Begin Epoch is close to the beginning of the data, be careful" +
+                                      $"not to read to far into the past.");
+                }
+
+                state.BeginTimeStamp = args.BeginEpoch;
+            }
+            else
+            {
+                state.BeginTimeStamp = begin + (long)TimeSpan.FromDays(14).TotalMilliseconds;
+            }
+
+            if (args.EndEpoch != 0)
+            {
+                if (args.EndEpoch > end)
+                {
+                    throw new InvalidCommandException(
+                        $"Cannot set end epoch to {DateTimeOffset.FromUnixTimeMilliseconds(args.EndEpoch)}, " +
+                        $"the database stops at {DateTimeOffset.FromUnixTimeMilliseconds(end)}");
+                }
+
+                end = args.EndEpoch;
+            }
+
+            state.EndTimeStamp = end - (long)TimeSpan.FromMinutes(_configuration.CandleWidth).TotalMilliseconds;
+        }
     }
 
     /// <summary>
@@ -140,6 +174,18 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
         /// </summary>
         [Option("output")]
         public string OutputPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the begin epoch argument of a backtest.
+        /// </summary>
+        [Option("begin_epoch")]
+        public long BeginEpoch { get; set; }
+
+        /// <summary>
+        /// Gets or sets the end epoch argument of a backtest.
+        /// </summary>
+        [Option("end_epoch")]
+        public long EndEpoch { get; set; }
 
         /// <summary>
         /// Gets or sets the ID of the backtest.

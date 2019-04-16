@@ -14,7 +14,7 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
         /// </summary>
         /// <param name="algoService">The algorithm service.</param>
         /// <param name="allocationManager">The allocation manager.</param>
-        public BacktestDaemonState(AlgorithmService algoService, AllocationManager allocationManager)
+        public BacktestDaemonState(AlgorithmService algoService, IAllocationManager allocationManager)
         {
             Guard.Argument(algoService).NotNull();
             AlgorithmService = algoService;
@@ -29,7 +29,7 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
         /// <summary>
         /// Gets the allocation manager.
         /// </summary>
-        public AllocationManager AllocationManager { get; }
+        public IAllocationManager AllocationManager { get; }
 
         /// <summary>
         /// Gets or sets the ID of the current backtest.

@@ -3,6 +3,7 @@ using Dawn;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Providers.Observing;
+using SpreadShare.ExchangeServices.ProvidersBacktesting;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 
@@ -198,7 +199,14 @@ namespace SpreadShare.Algorithms
                 }
 
                 // Add state switch event to the database
-                UpdateObservers(child.GetType());
+                if (Program.CommandLineArgs.Trading)
+                {
+                    UpdateObservers(child.GetType());
+                }
+                else if (Program.CommandLineArgs.Backtesting)
+                {
+                    ((BacktestTimerProvider)_container.TimerProvider).AddStateSwitch(child.GetType());
+                }
 
                 _activeState = child;
 

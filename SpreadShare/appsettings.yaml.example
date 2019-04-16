@@ -1,6 +1,6 @@
 # Defines connection strings to the database
 ConnectionStrings:
-  LocalConnection: Server=db;Database=spreadshare;User ID=postgres;Password=password;Integrated Security=true;Pooling=true;
+  LocalConnection: Server=db;Database=spreadshare;User ID=postgres;Password=password;Pooling=true;SSL Mode=Prefer;Trust Server Certificate=true;
 
 LoggingSettings:
   # Report errors to Sentry (https://XX@sentry.io/XX)
@@ -9,9 +9,8 @@ LoggingSettings:
 # Trading: Which algorithm should be ran
 EnabledAlgorithm:
     Algorithm: TemplateAlgorithm
-    Exchange: Binance
     Parameters:
-      CandleWidth: 5 
+      CandleWidth: 5
       TradingPairs:
         - TRXETH
     Allocation:

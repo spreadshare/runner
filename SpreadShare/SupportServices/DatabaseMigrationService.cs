@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using SpreadShare.Models;
 
 namespace SpreadShare.SupportServices
@@ -31,6 +32,10 @@ namespace SpreadShare.SupportServices
                 return new ResponseObject(ResponseCode.Success);
             }
             catch (System.Net.Sockets.SocketException e)
+            {
+                return new ResponseObject(ResponseCode.Error, e.Message);
+            }
+            catch (PostgresException e)
             {
                 return new ResponseObject(ResponseCode.Error, e.Message);
             }

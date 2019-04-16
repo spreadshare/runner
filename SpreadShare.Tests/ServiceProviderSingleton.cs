@@ -22,8 +22,8 @@ namespace SpreadShare.Tests
         private ServiceProviderSingleton()
         {
             // Inject commandline args
-            var args = new CommandLineArgs { Trading = false, VerboseLogging = true };
-            typeof(Program).GetProperty("CommandLineArgs").SetValue(null, new CommandLineArgs());
+            var args = new CommandLineArgs { Trading = true, SkipDatabase = true };
+            typeof(Program).GetProperty("CommandLineArgs").SetValue(null, args);
 
             // Create service collection
             IServiceCollection services = new ServiceCollection();
