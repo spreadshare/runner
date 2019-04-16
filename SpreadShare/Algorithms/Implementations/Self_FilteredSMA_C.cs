@@ -37,9 +37,9 @@ namespace SpreadShare.Algorithms.Implementations
                                  data.GetCandles(FirstPair, 75).StandardMovingAverage();
 
                 // Check whether the ATR is higher than average
-                bool filterAtr = data.GetCandles(FirstPair, AlgorithmConfiguration.ShortATR).AverageTrueRange()
+                bool filterAtr = data.GetCandles(FirstPair, 6).AverageTrueRange()
                                  >
-                                 data.GetCandles(FirstPair, AlgorithmConfiguration.LongATR).AverageTrueRange();
+                                 data.GetCandles(FirstPair, 51).AverageTrueRange();
 
                 // Check for the crossover to happen.
                 bool crossoverSma = data.GetCandles(FirstPair, AlgorithmConfiguration.ShortSMA).StandardMovingAverage()
@@ -231,9 +231,9 @@ namespace SpreadShare.Algorithms.Implementations
                                  data.GetCandles(FirstPair, 75).StandardMovingAverage();
 
                 // Check whether the ATR is higher than average
-                bool filterAtr = data.GetCandles(FirstPair, AlgorithmConfiguration.ShortATR).AverageTrueRange()
+                bool filterAtr = data.GetCandles(FirstPair, 6).AverageTrueRange()
                                  >
-                                 data.GetCandles(FirstPair, AlgorithmConfiguration.LongATR).AverageTrueRange();
+                                 data.GetCandles(FirstPair, 51).AverageTrueRange();
 
                 // Check for the crossover to happen.
                 bool crossoverSma = data.GetCandles(FirstPair, AlgorithmConfiguration.ShortSMA).StandardMovingAverage()
@@ -274,18 +274,6 @@ namespace SpreadShare.Algorithms.Implementations
         /// </summary>
         [RangeInt(5, 50)]
         public int LongSMA { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Short term ATR for the filter in amount of candles.
-        /// </summary>
-        [RangeInt(3, 25)]
-        public int ShortATR { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Long term ATR for the filter in amount of candles.
-        /// </summary>
-        [RangeInt(5, 75)]
-        public int LongATR { get; set; }
 
         /// <summary>
         /// Gets or sets the short term breakout line time in amount of candles.
