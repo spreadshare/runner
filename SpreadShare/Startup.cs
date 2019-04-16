@@ -68,7 +68,7 @@ namespace SpreadShare
             services.AddSingleton<AlgorithmService, AlgorithmService>();
 
             // Add allocation manager
-            services.AddSingleton<AllocationManager, AllocationManager>();
+            services.AddSingleton<IAllocationManager, AllocationManager>();
         }
 
         /// <summary>
@@ -142,17 +142,19 @@ namespace SpreadShare
             services.AddSingleton<DatabaseEventListenerService, DatabaseEventListenerService>();
             services.AddSingleton<BacktestDaemonService, BacktestDaemonService>();
 
-            // Add Portfolio fetching
-            switch (Configuration.Instance.EnabledAlgorithm.Exchange)
+            if (Program.CommandLineArgs.Migrate)
             {
-                case Exchange.Backtesting:
-                    services.AddSingleton<IPortfolioFetcherService, BacktestPortfolioFetcher>();
-                    break;
-                case Exchange.Binance:
-                    services.AddSingleton<IPortfolioFetcherService, BinancePortfolioFetcher>();
-                    break;
-                default:
-                    throw new NotImplementedException($"The portfolio fetcher for {Configuration.Instance.EnabledAlgorithm.Exchange} is not linked.");
+                return;
+            }
+
+            // Add Portfolio fetching
+            if (Program.CommandLineArgs.Trading)
+            {
+                services.AddSingleton<IPortfolioFetcherService, BinancePortfolioFetcher>();
+            }
+            else
+            {
+                services.AddSingleton<IPortfolioFetcherService, BacktestPortfolioFetcher>();
             }
         }
         #pragma warning restore CA1822
