@@ -1,6 +1,6 @@
 # Defines connection strings to the database
 ConnectionStrings:
-  LocalConnection: Server=db;Database=spreadshare;User ID=postgres;Password=password;Pooling=true;SSL Mode=Require;Trust Server Certificate=true;
+  LocalConnection: Server=db;Database=spreadshare;User ID=postgres;Password=password;Pooling=true;SSL Mode=Prefer;Trust Server Certificate=true;
 
 LoggingSettings:
   # Report errors to Sentry (https://XX@sentry.io/XX)
