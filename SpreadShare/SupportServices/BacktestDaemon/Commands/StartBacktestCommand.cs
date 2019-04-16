@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using CommandLine;
 using SpreadShare.Algorithms;
 using SpreadShare.Models;
 using SpreadShare.Models.Exceptions;
-using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.BacktestDaemon.CommandAttributes;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Utilities;
