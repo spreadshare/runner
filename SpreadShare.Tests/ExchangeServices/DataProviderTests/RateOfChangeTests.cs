@@ -136,7 +136,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         public void RateOfChangeAll()
         {
             var roc = _candles.RateOfChange();
-            Assert.Equal(0.1578947368421052631578947368M, roc);
+            Assert.Equal(-0.1363636363636363636363636364M, roc);
         }
 
         [Fact]
@@ -163,9 +163,9 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         [Fact]
         public void RateOfChangeNegative()
         {
-            var data = _candles.Take(3);
+            var data = _candles.Skip(2).Take(3);
             var roc = data.RateOfChange();
-            Assert.Equal(-0.1760299625468164794007490637M, roc);
+            Assert.Equal(-0.151061173533083645443196005M, roc);
         }
     }
 }
