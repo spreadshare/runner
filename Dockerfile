@@ -10,4 +10,4 @@ RUN dotnet publish SpreadShare.csproj -c Release -o /app
 FROM microsoft/dotnet:2.2-runtime AS base
 WORKDIR /app
 COPY --from=publish /app .
-ENTRYPOINT ["dotnet", "SpreadShare.dll", "--backtesting"]
+ENTRYPOINT ["dotnet", "SpreadShare.dll"]
