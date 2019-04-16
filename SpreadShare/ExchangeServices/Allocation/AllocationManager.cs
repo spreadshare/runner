@@ -56,18 +56,21 @@ namespace SpreadShare.ExchangeServices.Allocation
 
             // Get the already allocated resources from the active sessions
             var allocated = Portfolio.Empty;
-            try
+            if (Program.CommandLineArgs.Trading && !Program.CommandLineArgs.SkipDatabase)
             {
-                var allocatedPortfolios = _databaseContext.Sessions.Where(x => x.Active).Select(x => x.Allocation);
-                foreach (var allocatedPortfolio in allocatedPortfolios)
+                try
                 {
-                    allocated += allocatedPortfolio;
+                    var allocatedPortfolios = _databaseContext.Sessions.Where(x => x.Active).Select(x => x.Allocation);
+                    foreach (var allocatedPortfolio in allocatedPortfolios)
+                    {
+                        allocated += allocatedPortfolio;
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
-                _logger.LogWarning($"Database was not available, cannot verify if requested allocation is available.");
+                catch (Exception e)
+                {
+                    _logger.LogError(e.Message);
+                    _logger.LogWarning($"Database was not available, cannot verify if requested allocation is available.");
+                }
             }
 
             // Available allocation are the assets on the exchange, minus the already allocated resources.

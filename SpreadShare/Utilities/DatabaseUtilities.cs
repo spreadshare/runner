@@ -4,8 +4,10 @@ using System.Linq;
 using CSharpx;
 using Dawn;
 using Microsoft.EntityFrameworkCore;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices;
+using SpreadShare.SupportServices.Configuration;
 
 namespace SpreadShare.Utilities
 {
@@ -16,6 +18,7 @@ namespace SpreadShare.Utilities
     {
         private readonly DatabaseContext _databaseContext;
         private readonly Dictionary<TradingPair, (long, long)> _timestampEdgesCache;
+        private readonly List<TradingPair> _candlewidthCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseUtilities"/> class.
@@ -25,6 +28,7 @@ namespace SpreadShare.Utilities
         {
             _databaseContext = databaseContext;
             _timestampEdgesCache = new Dictionary<TradingPair, (long, long)>();
+            _candlewidthCache = new List<TradingPair>();
         }
 
         /// <summary>
@@ -47,23 +51,23 @@ namespace SpreadShare.Utilities
         /// <returns>The timestamp edges.</returns>
         public (long, long) GetTimeStampEdges(List<TradingPair> pairs)
         {
-            Guard.Argument(_databaseContext.Candles.AsNoTracking()).NotEmpty(x => $"Database contains no candles!");
             Guard.Argument(pairs).NotNull();
 
-            long minBeginVal = 0;
-            long minEndVal = long.MaxValue;
+            var minBeginVal = long.MinValue;
+            var minEndVal = long.MaxValue;
+
             foreach (var pair in pairs)
             {
-                if (!_databaseContext.Candles.AsNoTracking().Any(x => x.TradingPair == pair.ToString()))
-                {
-                    throw new Exception($"Database does not contain candles for {pair}");
-                }
-
                 long first, last;
 
-                // First case: lookup edges
                 if (!_timestampEdgesCache.ContainsKey(pair))
                 {
+                    if (!_databaseContext.Candles.AsNoTracking().Any(x => x.TradingPair == pair.ToString()))
+                    {
+                        throw new Exception($"Database does not contain candles for {pair}");
+                    }
+
+                    // First case: lookup edges
                     first = _databaseContext.Candles.AsNoTracking()
                         .Where(x => x.TradingPair == pair.ToString())
                         .OrderBy(x => x.OpenTimestamp)
@@ -99,25 +103,44 @@ namespace SpreadShare.Utilities
         /// <summary>
         /// Check if the database candles for a certain pair match an interval.
         /// </summary>
-        /// <param name="pair">TradingPair.</param>
+        /// <param name="pairs">The TradingPairs to take into account.</param>
         /// <param name="check">The expected width of a candle.</param>
-        /// <returns>Whether the database candles intervals matched the given CandleWidth.</returns>
-        public bool ValidateCandleWidth(TradingPair pair, int check)
+        /// <exception cref="SpreadShare.Models.Exceptions.InvalidConfigurationException">Thrown when candles are not
+        /// compatible with the CandleWidth property in the configuration.</exception>
+        public void ValidateCandleWidth(List<TradingPair> pairs, int check)
         {
-            Guard.Argument(pair).NotNull();
+            Guard.Argument(pairs).NotNull().NotEmpty();
 
-            int width = (int)TimeSpan.FromMinutes(check).TotalMilliseconds;
+            var width = (int)TimeSpan.FromMinutes(check).TotalMilliseconds;
 
-            // Take a small sample of candles.
-            var sample = _databaseContext.Candles.AsNoTracking()
-                .Where(x => x.TradingPair == pair.ToString())
-                .OrderBy(x => x.OpenTimestamp)
-                .Take(10);
+            foreach (var pair in pairs)
+            {
+                // Pair has already been checked
+                if (_candlewidthCache.Contains(pair))
+                {
+                    continue;
+                }
 
-            // Check if the the difference in timestamps matches the given check.
-            return sample.AsEnumerable()
-                .Pairwise((a, b) => b.OpenTimestamp - a.OpenTimestamp == width)
-                .All(x => x);
+                // Take a small sample of candles.
+                var sample = _databaseContext.Candles.AsNoTracking()
+                    .Where(x => x.TradingPair == pair.ToString())
+                    .OrderBy(x => x.OpenTimestamp)
+                    .Take(10);
+
+                // Check if the the difference in timestamps matches the given check.
+                var subResult = sample.AsEnumerable()
+                    .Pairwise((a, b) => b.OpenTimestamp - a.OpenTimestamp == width)
+                    .All(x => x);
+
+                if (!subResult)
+                {
+                    throw new InvalidConfigurationException(
+                        $"Database candle interval for {pair} is not compatible with {Configuration.Instance.CandleWidth}");
+                }
+
+                // Cache previous positives
+                _candlewidthCache.Add(pair);
+            }
         }
     }
 }
