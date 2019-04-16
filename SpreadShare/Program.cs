@@ -93,8 +93,7 @@ namespace SpreadShare
         /// <returns>Exits before returning the exit code.</returns>
         public static int ExitProgramWithCode(ExitCode exitCode)
         {
-            DatabaseEventListenerService.Instance?.CloseSession(exitCode);
-            DatabaseEventListenerService.Instance?.Dispose();
+            DatabaseEventListenerService.CloseSession(exitCode);
 
             // Flush the logs by disposing the factory
             _loggerFactory?.Dispose();

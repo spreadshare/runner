@@ -86,7 +86,7 @@ namespace SpreadShare.ExchangeServices
             timerProvider.DataProvider = dataProvider;
 
             // Inject database event listener
-            DatabaseEventListenerService.Instance?.AddOrderSource(tradingProvider);
+            DatabaseEventListenerService.AddOrderSource(tradingProvider);
 
             return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider, typeof(T));
         }

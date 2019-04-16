@@ -39,10 +39,10 @@ namespace SpreadShare.SupportServices
         }
 
         /// <summary>
-        /// Gets the instance of the <see cref="DatabaseEventListenerService"/> class.
+        /// Gets or sets the instance of the <see cref="DatabaseEventListenerService"/> class.
         /// This property is not set if the database was not available.
         /// </summary>
-        public static DatabaseEventListenerService Instance { get; private set; }
+        private static DatabaseEventListenerService Instance { get; set; }
 
         /// <summary>
         /// Gets or sets the current database session.
@@ -50,10 +50,44 @@ namespace SpreadShare.SupportServices
         private AlgorithmSession Session { get; set; }
 
         /// <summary>
+        /// Add a whose broadcasted order updates should be recorded as events.
+        /// </summary>
+        /// <param name="source">The broadcaster of order updates.</param>
+        public static void AddOrderSource(Observable<OrderUpdate> source) => Instance?.AddOrderSourceImplementation(source);
+
+        /// <summary>
+        /// Add whose broadcasted state switches should be recorded as events.
+        /// </summary>
+        /// <param name="source">The broadcaster of state switches.</param>
+        public static void AddStateSource(Observable<Type> source) => Instance?.AddStateSourceImplementation(source);
+
+        /// <summary>
+        /// Allows logs to be written to the database.
+        /// </summary>
+        /// <param name="logLevel">logLevel.</param>
+        /// <param name="state">state.</param>
+        /// <param name="exception">exception.</param>
+        /// <param name="formatter">formatter.</param>
+        /// <typeparam name="TState">TState.</typeparam>
+        public static void Log<TState>(LogLevel logLevel, TState state, Exception exception, Func<TState, Exception, string> formatter)
+            => Instance?.LogImplementation(logLevel, state, exception, formatter);
+
+        /// <summary>
+        /// Closes the current session.
+        /// </summary>
+        /// <param name="exitCode">The exit code with which to close the session.</param>
+        public static void CloseSession(ExitCode exitCode) => Instance?.CloseSessionImplemenation(exitCode);
+
+        /// <summary>
         /// Lift the current instance to the static instance.
         /// </summary>
         public void Bind()
         {
+            if (Instance != null)
+            {
+                _logger.LogWarning("A new session is being started but one already exists.");
+            }
+
             Session = new AlgorithmSession
             {
                 Name = Configuration.Configuration.Instance.EnabledAlgorithm.Algorithm.Name,
@@ -74,14 +108,19 @@ namespace SpreadShare.SupportServices
                 _database.SaveChanges();
             }
 
+            var prev = Instance;
             Instance = this;
+            prev?.Dispose();
         }
 
-        /// <summary>
-        /// Add a whose broadcasted order updates should be recorded as events.
-        /// </summary>
-        /// <param name="source">The broadcaster of order updates.</param>
-        public void AddOrderSource(Observable<OrderUpdate> source)
+        /// <inheritdoc />
+        public virtual void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void AddOrderSourceImplementation(Observable<OrderUpdate> source)
         {
             _sources.Add(source.Subscribe(new ConfigurableObserver<OrderUpdate>(
                 () => { },
@@ -89,11 +128,7 @@ namespace SpreadShare.SupportServices
                 OnNext)));
         }
 
-        /// <summary>
-        /// Add whose broadcasted state switches should be recorded as events.
-        /// </summary>
-        /// <param name="source">The broadcaster of state switches.</param>
-        public void AddStateSource(Observable<Type> source)
+        private void AddStateSourceImplementation(Observable<Type> source)
         {
             _sources.Add(source.Subscribe(new ConfigurableObserver<Type>(
                 () => { },
@@ -101,15 +136,7 @@ namespace SpreadShare.SupportServices
                 OnNext)));
         }
 
-        /// <summary>
-        /// Allows logs to be written to the database.
-        /// </summary>
-        /// <param name="logLevel">logLevel.</param>
-        /// <param name="state">state.</param>
-        /// <param name="exception">exception.</param>
-        /// <param name="formatter">formatter.</param>
-        /// <typeparam name="TState">TState.</typeparam>
-        public void Log<TState>(LogLevel logLevel, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        private void LogImplementation<TState>(LogLevel logLevel, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             var item = new LogEvent
             {
@@ -126,22 +153,12 @@ namespace SpreadShare.SupportServices
             }
         }
 
-        /// <inheritdoc />
-        public virtual void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Closes the current session.
-        /// </summary>
-        /// <param name="exitCode">The exit code with which to close the session.</param>
-        public void CloseSession(ExitCode exitCode)
+        private void CloseSessionImplemenation(ExitCode exitCode)
         {
             Session.Active = false;
             Session.ExitCode = (int)exitCode;
             _database.SaveChanges();
+            Dispose();
         }
 
         private void OnNext(OrderUpdate order)

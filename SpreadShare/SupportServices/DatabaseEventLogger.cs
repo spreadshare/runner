@@ -11,7 +11,7 @@ namespace SpreadShare.SupportServices
     {
         /// <inheritdoc/>
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-            => DatabaseEventListenerService.Instance?.Log(logLevel, state, exception, formatter);
+            => DatabaseEventListenerService.Log(logLevel, state, exception, formatter);
 
         /// <inheritdoc/>
         public bool IsEnabled(LogLevel logLevel)
