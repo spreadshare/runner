@@ -22,7 +22,7 @@ namespace SpreadShare.Tests
         private ServiceProviderSingleton()
         {
             // Inject commandline args
-            var args = new CommandLineArgs { SkipDatabase = true };
+            var args = new CommandLineArgs { Trading = true, SkipDatabase = true };
             typeof(Program).GetProperty("CommandLineArgs").SetValue(null, args);
 
             // Create service collection

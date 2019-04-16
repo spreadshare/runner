@@ -19,7 +19,7 @@ namespace SpreadShare.SupportServices
         private readonly List<IDisposable> _sources;
         private readonly ILogger _logger;
         private readonly DatabaseContext _database;
-        private readonly AllocationManager _allocation;
+        private readonly IAllocationManager _allocation;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseEventListenerService"/> class.
@@ -27,7 +27,7 @@ namespace SpreadShare.SupportServices
         /// <param name="factory">To create output.</param>
         /// <param name="allocation">To listen for portfolio changes.</param>
         /// <param name="database">To log events to.</param>
-        public DatabaseEventListenerService(ILoggerFactory factory, AllocationManager allocation, DatabaseContext database)
+        public DatabaseEventListenerService(ILoggerFactory factory, IAllocationManager allocation, DatabaseContext database)
         {
             _sources = new List<IDisposable>();
             _logger = factory.CreateLogger(GetType());

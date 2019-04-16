@@ -56,7 +56,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         }
 
         [Fact]
-        public void AverageTrueRangeEmtpySet()
+        public void AverageTrueRangeEmptySet()
         {
             var candles = Array.Empty<BacktestingCandle>();
             Assert.Throws<InvalidOperationException>(

@@ -20,7 +20,7 @@ namespace SpreadShare.SupportServices.BacktestDaemon
         /// </summary>
         /// <param name="algoService">The algorithm service.</param>
         /// <param name="allocationManager">The allocation manager.</param>
-        public BacktestDaemonService(AlgorithmService algoService, AllocationManager allocationManager)
+        public BacktestDaemonService(AlgorithmService algoService, IAllocationManager allocationManager)
         {
             State = new BacktestDaemonState(algoService, allocationManager);
         }

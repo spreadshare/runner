@@ -29,7 +29,7 @@ namespace SpreadShare.Algorithms
         /// <param name="exchangeFactoryService">Provides containers for algorithms.</param>
         public AlgorithmService(
             ILoggerFactory loggerFactory,
-            AllocationManager allocationManager,
+            IAllocationManager allocationManager,
             ExchangeFactoryService exchangeFactoryService)
         {
             _logger = loggerFactory.CreateLogger<AlgorithmService>();
@@ -60,12 +60,6 @@ namespace SpreadShare.Algorithms
             if (!Reflections.AlgorithmMatchesConfiguration(algorithm, configuration.GetType()))
             {
                 return new ResponseObject(ResponseCode.Error, $"Provided settings object is of type {configuration.GetType()} and does not match {algorithm}");
-            }
-
-            // Prevent starting real deployment without flag.
-            if (Configuration.Instance.EnabledAlgorithm.Exchange != Exchange.Backtesting && !Program.CommandLineArgs.Trading)
-            {
-                throw new PermissionDeniedException($"Cannot deploy {algorithm.Name} on non trading mode.");
             }
 
             // Call StartAlgorithm<T> to start the algorithm
@@ -104,7 +98,7 @@ namespace SpreadShare.Algorithms
             }
 
             // Run backtest asynchronously by awaiting the timer.
-            return Configuration.Instance.EnabledAlgorithm.Exchange == Exchange.Backtesting
+            return Program.CommandLineArgs.Backtesting
                 ? WaitTillBacktestFinished(container.TimerProvider as BacktestTimerProvider)
                 : new ResponseObject(ResponseCode.Success);
         }

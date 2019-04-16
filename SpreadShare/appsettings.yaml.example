@@ -9,7 +9,6 @@ LoggingSettings:
 # Trading: Which algorithm should be ran
 EnabledAlgorithm:
     Algorithm: TemplateAlgorithm
-    Exchange: Binance
     Parameters:
       CandleWidth: 5
       TradingPairs:

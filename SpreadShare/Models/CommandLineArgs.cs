@@ -10,19 +10,13 @@ namespace SpreadShare.Models
         /// <summary>
         /// Gets or sets a value indicating whether the --trading flag was used, mutually exclusive with --backtest.
         /// </summary>
-        [Option('t', "trading", Default = false, Required = true, SetName= "trading", HelpText = "Needs to be enabled to actually perform trades.")]
+        [Option('t', "trading", Default = false, Required = false, SetName= "trading", HelpText = "Needs to be enabled to actually perform trades.")]
         public bool Trading { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the --backtesting flag used. mutually exclusive with --trading.
-        /// </summary>
-        [Option('b', "backtesting", Default = false, Required = true, SetName = "backtesting", HelpText = "Enable the backtest daemon.")]
-        public bool Backtesting { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the --migrate flag was used. mutually exclusive with --trading and --backtest.
         /// </summary>
-        [Option('m', "migrate", Default = false, Required = true, SetName = "migrate", HelpText = "Ensure the database is migrated, then shut down.")]
+        [Option('m', "migrate", Default = false, Required = false, SetName = "migrate", HelpText = "Ensure the database is migrated, then shut down.")]
         public bool Migrate { get; set; }
 
         /// <summary>
@@ -48,5 +42,10 @@ namespace SpreadShare.Models
         /// </summary>
         [Option("backtestpath", Default = "", HelpText = "The output of the backtest run")]
         public string BacktestOutputPath { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the application is in non-trading mode.
+        /// </summary>
+        public bool Backtesting => !Trading;
     }
 }

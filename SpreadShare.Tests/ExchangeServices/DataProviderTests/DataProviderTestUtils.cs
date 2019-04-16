@@ -9,6 +9,7 @@ using SpreadShare.Models;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
+using SpreadShare.Tests.Stubs;
 using Xunit.Abstractions;
 using YamlDotNet.Serialization;
 
@@ -32,14 +33,8 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         internal DataProvider GetDataProvider<T>(AlgorithmConfiguration config)
             where T : DataProviderTestImplementation
         {
-            var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(config);
-            var data = container.DataProvider;
-            var property = data.GetType().GetProperty("Implementation", BindingFlags.NonPublic | BindingFlags.Instance)
-                           ?? throw new Exception($"Expected property 'Implementation' on {nameof(DataProvider)}");
-
-            // Inject test implementation
-            var implementation = Activator.CreateInstance(typeof(T), LoggerFactory, container.TimerProvider);
-            property.SetValue(data, implementation);
+            var implementation = (T)Activator.CreateInstance(typeof(T), LoggerFactory, new TestTimerProvider(LoggerFactory));
+            var data = new DataProvider(LoggerFactory, implementation, config);
             return data;
         }
 
@@ -47,22 +42,14 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
             where TD : DataProviderTestImplementation
             where TT : TimerProviderTestImplementation
         {
-            var container = ExchangeFactoryService.BuildContainer<TemplateAlgorithm>(config);
-            var data = container.DataProvider;
-            var property = data.GetType().GetProperty("Implementation", BindingFlags.NonPublic | BindingFlags.Instance)
-                           ?? throw new Exception($"Expected property 'Implementation' on {nameof(DataProvider)}");
-
-            // Inject test implementation
-            var implementation = Activator.CreateInstance(typeof(TD), LoggerFactory, container.TimerProvider);
-            property.SetValue(data, implementation);
-
+            var implementation = (TD)Activator.CreateInstance(typeof(TD), LoggerFactory, new TestTimerProvider(LoggerFactory));
             var timerProperty = implementation.GetType()
                                .GetProperty("TimerProvider", BindingFlags.NonPublic | BindingFlags.Instance)
                            ?? throw new Exception(
                                $"Expected property 'TimerProvider' on {implementation.GetType().Name}");
             var timerProvider = Activator.CreateInstance(typeof(TT), LoggerFactory);
             timerProperty.SetValue(implementation, timerProvider);
-            return data;
+            return new DataProvider(LoggerFactory, implementation, config);
         }
 
         internal abstract class TimerProviderTestImplementation : TimerProvider

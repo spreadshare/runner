@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry;
 using SpreadShare.Algorithms;
-using SpreadShare.ExchangeServices;
 using SpreadShare.Models;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices;
@@ -136,14 +135,6 @@ namespace SpreadShare
                 return ExitProgramWithCode(ExitCode.InvalidConfiguration);
             }
 
-            // Cancel backtesting configurations when trading
-            if (Configuration.Instance.EnabledAlgorithm.Exchange == Exchange.Backtesting)
-            {
-                logger.LogError($"Application {algorithm.Name} has exchange Backtesting configured, " +
-                                "but --trading is used");
-                return ExitProgramWithCode(ExitCode.InvalidConfiguration);
-            }
-
             logger.LogInformation($"Starting algorithm '{algorithm.Name}'");
             logger.LogInformation("Using configuration: " + algorithmConfiguration.GetType().Name);
 
@@ -172,14 +163,6 @@ namespace SpreadShare
 
             // Init backtest execution engine
             serviceProvider.GetService<BacktestDaemonService>().Bind();
-
-            if (CommandLineArgs.Backtesting && Configuration.Instance.EnabledAlgorithm.Exchange != Exchange.Backtesting)
-            {
-                ILogger logger = _loggerFactory.CreateLogger("Program.cs:ExecuteBacktestingLogic");
-                logger.LogError($"Application was started in backtest mode, but the configuration " +
-                                $"has {Configuration.Instance.EnabledAlgorithm.Exchange} configured");
-                return ExitProgramWithCode(ExitCode.InvalidConfiguration);
-            }
 
             // Accept TTY input
             serviceProvider.GetService<BacktestDaemonService>().Run();
