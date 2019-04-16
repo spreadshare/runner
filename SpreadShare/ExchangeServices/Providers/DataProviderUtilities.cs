@@ -114,8 +114,8 @@ namespace SpreadShare.ExchangeServices.Providers
                 throw new InvalidOperationException("Cannot calculate the RateOfChange of an empty set.");
             }
 
-            var current = candles[0];
-            var past = candles.Last();
+            var current = candles.Last();
+            var past = candles[0];
             return HelperMethods.SafeDiv(current.Close - past.Close, past.Close);
         }
     }
