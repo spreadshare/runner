@@ -39,8 +39,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair)
         {
-            var candle = FindCandle(pair, _timer.CurrentTime.ToUnixTimeMilliseconds(), Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
-            return new ResponseObject<decimal>(ResponseCode.Success, candle.Close);
+            var nextCandleTime = _timer.CurrentTime
+                                 + TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
+            var candle = FindCandle(pair, nextCandleTime.ToUnixTimeMilliseconds(), Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
+            return new ResponseObject<decimal>(ResponseCode.Success, candle.Open);
         }
 
         /// <inheritdoc />
@@ -118,8 +120,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var time = _timer.CurrentTime - TimeSpan.FromMinutes(width * numberOfCandles);
             for (int i = 0; i < result.Length; i++)
             {
-                result[i] = FindCandle(pair, time.ToUnixTimeMilliseconds(), width);
                 time += TimeSpan.FromMinutes(width);
+                result[i] = FindCandle(pair, time.ToUnixTimeMilliseconds(), width);
             }
 
             return new ResponseObject<BacktestingCandle[]>(result);
@@ -152,7 +154,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var buffer = _buffers.GetCandles(pair, channelWidth);
             var millisecondsCandleWidth = (int)TimeSpan.FromMinutes(channelWidth).TotalMilliseconds;
 
-            var index = (timestamp - buffer[0].OpenTimestamp) / millisecondsCandleWidth;
+            // Minus one to prevent returning candles whose close is in the future
+            var index = ((timestamp - buffer[0].OpenTimestamp) / millisecondsCandleWidth) - 1;
             if (index >= 0 && index < buffer.Length)
             {
                 return buffer[index];
