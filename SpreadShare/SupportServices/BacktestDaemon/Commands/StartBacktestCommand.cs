@@ -148,7 +148,7 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                 end = args.EndEpoch;
             }
 
-            state.EndTimeStamp = end - (long)TimeSpan.FromMinutes(_configuration.CandleWidth).TotalMilliseconds;
+            state.EndTimeStamp = end;
         }
     }
 
