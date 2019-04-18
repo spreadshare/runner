@@ -76,7 +76,7 @@ namespace SpreadShare.SupportServices
         /// Closes the current session.
         /// </summary>
         /// <param name="exitCode">The exit code with which to close the session.</param>
-        public static void CloseSession(ExitCode exitCode) => Instance?.CloseSessionImplemenation(exitCode);
+        public static void CloseSession(ExitCode exitCode) => Instance?.CloseSessionImplementation(exitCode);
 
         /// <summary>
         /// Lift the current instance to the static instance.
@@ -153,11 +153,15 @@ namespace SpreadShare.SupportServices
             }
         }
 
-        private void CloseSessionImplemenation(ExitCode exitCode)
+        private void CloseSessionImplementation(ExitCode exitCode)
         {
             Session.Active = false;
             Session.ExitCode = (int)exitCode;
-            _database.SaveChanges();
+            lock (Lock)
+            {
+                _database.SaveChanges();
+            }
+
             Dispose();
         }
 
@@ -187,9 +191,9 @@ namespace SpreadShare.SupportServices
 
         private void OnNext(Portfolio portfolio)
         {
+            Session.Allocation = portfolio;
             lock (Lock)
             {
-                Session.Allocation = portfolio;
                 _database.SaveChanges();
             }
         }

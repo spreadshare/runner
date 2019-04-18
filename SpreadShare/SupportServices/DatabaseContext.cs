@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using SpreadShare.Models.Database;
 
@@ -43,6 +44,42 @@ namespace SpreadShare.SupportServices
         /// Gets or sets the log events.
         /// </summary>
         public DbSet<LogEvent> LogEvents { get; set; }
+
+        /// <inheritdoc />
+        public override int SaveChanges()
+        {
+            try
+            {
+                return base.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("#########################");
+                Console.WriteLine("SaveChanges failed");
+                Console.WriteLine(e);
+                Console.WriteLine("#########################");
+            }
+
+            return -1;
+        }
+
+        /// <inheritdoc />
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            try
+            {
+                return base.SaveChanges(acceptAllChangesOnSuccess);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("#########################");
+                Console.WriteLine("SaveChanges failed");
+                Console.WriteLine(e);
+                Console.WriteLine("#########################");
+            }
+
+            return -1;
+        }
 
         /// <summary>
         /// Callback that sets a composite key on <see cref="BacktestingCandle"/>.
