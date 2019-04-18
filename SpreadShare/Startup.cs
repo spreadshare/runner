@@ -134,6 +134,7 @@ namespace SpreadShare
             services.AddLogging(loggingBuilder => loggingBuilder
                 .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
                 .AddFilter("SpreadShare", Program.CommandLineArgs.VerboseLogging ? LogLevel.Debug : LogLevel.Critical)
+                .AddFilter<DatabaseEventLoggerProvider>("Microsoft.EntityFrameworkCore", LogLevel.None)
                 .AddConsole()
                 .SetMinimumLevel(LogLevel.Information));
 
