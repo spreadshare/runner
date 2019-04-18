@@ -92,8 +92,6 @@ namespace SpreadShare
         /// <returns>Exits before returning the exit code.</returns>
         public static int ExitProgramWithCode(ExitCode exitCode)
         {
-            DatabaseEventListenerService.CloseSession(exitCode);
-
             // Flush the logs by disposing the factory
             _loggerFactory?.Dispose();
             if (exitCode != ExitCode.Success)
@@ -105,6 +103,8 @@ namespace SpreadShare
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"----------------------------------");
             }
+
+            DatabaseEventListenerService.CloseSession(exitCode);
 
             Environment.Exit((int)exitCode);
             return (int)exitCode;
