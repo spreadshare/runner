@@ -85,10 +85,10 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
 
                 for (int i = 0; i < limit; i++)
                 {
-                    var open = (decimal)(random.NextDouble() * 30) + 1;
-                    var close = (decimal)(random.NextDouble() * 30) + 1;
                     var high = (decimal)(random.NextDouble() * 30) + 1;
-                    var low = (decimal)(random.NextDouble() * 30) + 1;
+                    var low = Math.Min((decimal)(random.NextDouble() * 30) + 1, high);
+                    var open = Math.Max(Math.Min((decimal)(random.NextDouble() * 30) + 1, high), low);
+                    var close = Math.Max(Math.Min((decimal)(random.NextDouble() * 30) + 1, high), low);
                     var volume = (decimal)(random.NextDouble() * 420);
 
                     result[i] = new BacktestingCandle(
