@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Database;
+using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices.BacktestDaemon;
 using SpreadShare.SupportServices.Configuration;
 
@@ -34,7 +35,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             _backtestOrders = new List<BacktestOrder>();
             _stateSwitchEvents = new List<StateSwitchEvent>();
 
-            // Hardcoded 2 week offset
             BeginTime = DateTimeOffset.FromUnixTimeMilliseconds(
                 BacktestDaemonService.Instance.State.BeginTimeStamp);
             _currentTime = BeginTime;
@@ -104,9 +104,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             {
                 try
                 {
-                    _currentTime += TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
                     _lastCandleOpen = _currentTime;
                     UpdateObservers(_currentTime.ToUnixTimeMilliseconds());
+                    _currentTime += TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
+                }
+                catch (BacktestOutOfDataException)
+                {
+                    Finished = true;
                 }
                 catch (Exception e)
                 {
@@ -127,8 +131,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             if (_currentTime >= EndTime)
             {
-                Finished = true;
-                return;
+                // Ensure that the execution of the current algorithm is halted (this method called from within the algorithm logic)
+                throw new BacktestOutOfDataException();
             }
 
             UpdateObservers(_currentTime.ToUnixTimeMilliseconds());

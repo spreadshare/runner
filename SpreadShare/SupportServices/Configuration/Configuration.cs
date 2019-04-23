@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -161,8 +162,16 @@ namespace SpreadShare.SupportServices.Configuration
                         name = member.Alias;
                     }
 
-                    __parameters[name] = property.GetValue(value);
-                    Console.WriteLine($"Setted {name} to {property.GetValue(value)}");
+                    var val = property.GetValue(value);
+                    __parameters[name] = val;
+                    if (val is IEnumerable list)
+                    {
+                        Console.WriteLine($"Set {name} to {string.Join(", ", list.Cast<string>().ToArray())}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Set {name} to {property.GetValue(value)}");
+                    }
                 }
 
                 _algorithmConfigurationConstructor.Invalidate();
