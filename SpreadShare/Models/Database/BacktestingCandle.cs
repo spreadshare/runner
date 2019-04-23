@@ -6,7 +6,7 @@ namespace SpreadShare.Models.Database
     /// <summary>
     /// Data structure for representing candles.
     /// </summary>
-    internal class BacktestingCandle
+    public class BacktestingCandle
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestingCandle"/> class.

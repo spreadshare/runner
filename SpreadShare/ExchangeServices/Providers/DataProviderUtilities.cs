@@ -118,5 +118,22 @@ namespace SpreadShare.ExchangeServices.Providers
             var past = candles[0];
             return HelperMethods.SafeDiv(current.Close - past.Close, past.Close);
         }
+
+        /// <summary>
+        /// Calculates the running moving average of a set numbers. f(head, [tail]) = 1/N * head + (1 - 1/N) * f(tail).
+        /// </summary>
+        /// <param name="input">The input set.</param>
+        /// <returns>The running moving average over the set.</returns>
+        public static decimal RunningMovingAverage(this IEnumerable<decimal> input)
+        {
+            var values = (input ?? throw new ArgumentNullException(nameof(input))).ToArray();
+            if (values.Length == 0)
+            {
+                throw new InvalidOperationException("Cannot calculate the RunningMovingAverage of an empty set.");
+            }
+
+            var alpha = 1M / values.Length;
+            return values.Aggregate(values[0], (rma, t) => (alpha * t) + ((1 - alpha) * rma));
+        }
     }
 }
