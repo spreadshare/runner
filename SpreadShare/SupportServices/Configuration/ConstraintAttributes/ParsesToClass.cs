@@ -38,14 +38,11 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
             string message = null;
             try
             {
-                if (_parseMethod.Invoke(null, new[] { value }) != null)
-                {
-                    message = $"Cannot create {_parseMethod} with {value}";
-                }
+                var unused = _parseMethod.Invoke(null, new[] { value });
             }
             catch (Exception e)
             {
-                message = e.InnerException?.Message;
+                message = name + " --> " + e.InnerException?.Message + $" (from method: {_parseMethod})";
             }
 
             if (message != null)

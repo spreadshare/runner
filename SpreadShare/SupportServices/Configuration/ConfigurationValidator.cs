@@ -66,7 +66,7 @@ namespace SpreadShare.SupportServices.Configuration
                     continue;
                 }
 
-                foreach (var failure in ValidateProperty(p, value))
+                foreach (var failure in GetPropertyFailures(p, value))
                 {
                     yield return failure;
                 }
@@ -95,7 +95,13 @@ namespace SpreadShare.SupportServices.Configuration
             }
         }
 
-        private static IEnumerable<string> ValidateProperty(PropertyInfo property, object value)
+        /// <summary>
+        /// Gets all constraint violations of a property given a value. (will not recurse).
+        /// </summary>
+        /// <param name="property">The property to check.</param>
+        /// <param name="value">The value to check against.</param>
+        /// <returns>All constraint violations.</returns>
+        public static IEnumerable<string> GetPropertyFailures(PropertyInfo property, object value)
         {
             var constraints = property.GetCustomAttributes().OfType<Constraint>();
             foreach (var constraint in constraints)

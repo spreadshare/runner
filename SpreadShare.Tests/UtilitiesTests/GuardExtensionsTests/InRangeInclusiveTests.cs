@@ -3,9 +3,9 @@ using Dawn;
 using SpreadShare.Utilities;
 using Xunit;
 
-namespace SpreadShare.Tests.UtilitiesTests
+namespace SpreadShare.Tests.UtilitiesTests.GuardExtensionsTests
 {
-    public class GuardExtensionsTests
+    public class InRangeInclusiveTests
     {
         [Fact]
         public void InRangeInclusiveHappyFlowDecimal()
