@@ -5,6 +5,8 @@ using System.Text;
 using Newtonsoft.Json;
 using SpreadShare.Models.Database;
 using SpreadShare.SupportServices.BacktestDaemon;
+using SpreadShare.SupportServices.Configuration;
+using YamlDotNet.Serialization;
 using static System.IO.File;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
@@ -72,7 +74,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="filepath">Filepath to store configuration at.</param>
         private static void OutputConfiguration(string filepath)
         {
-            Copy(BacktestDaemonService.Instance.State.CurrentBacktestConfigurationPath, filepath, true);
+            if (BacktestDaemonService.Instance.State.CurrentBacktestConfigurationPath != null)
+            {
+                Copy(BacktestDaemonService.Instance.State.CurrentBacktestConfigurationPath, filepath, true);
+            }
+            else
+            {
+                var str = new SerializerBuilder().Build().Serialize(Configuration.Instance.EnabledAlgorithm);
+                WriteAllText(filepath, str);
+            }
         }
 
         /// <summary>

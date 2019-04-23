@@ -51,6 +51,7 @@ namespace SpreadShare.SupportServices.Configuration
         /// <summary>
         /// Gets th base currency of the algorithm.
         /// </summary>
+        [YamlIgnore]
         public Currency BaseCurrency => _baseCurrencyConstructor.Value(TradingPairs);
 
         /// <summary>

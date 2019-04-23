@@ -1,12 +1,17 @@
 using System;
 using System.Linq;
+using System.Reflection;
+using Dawn;
 using Microsoft.EntityFrameworkCore.Internal;
 using SpreadShare.Algorithms;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices.BacktestDaemon.CommandAttributes;
 using SpreadShare.SupportServices.BacktestDaemon.Commands;
+using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Utilities;
+using YamlDotNet.Core;
+using YamlDotNet.Serialization;
 
 namespace SpreadShare.SupportServices.BacktestDaemon
 {
@@ -34,6 +39,54 @@ namespace SpreadShare.SupportServices.BacktestDaemon
         /// Gets the state of the daemon service.
         /// </summary>
         public BacktestDaemonState State { get; private set; }
+
+        /// <summary>
+        /// Gets an AlgorithmConfiguration of a certain type from the user over the command line.
+        /// </summary>
+        /// <param name="configuration">The type of configuration.</param>
+        /// <returns>Parsed AlgorithmConfiguration.</returns>
+        public static AlgorithmConfiguration GetConfigurationFromUser(Type configuration)
+        {
+            Guard.Argument(configuration).IsAlgorithmConfiguration();
+            var properties = configuration
+                .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .Where(x => x.CanWrite)
+                .ToArray();
+            var propertyNames = properties.Select(x => x.GetCustomAttribute<YamlMemberAttribute>()?.Alias ?? x.Name);
+            var config = (AlgorithmConfiguration)Activator.CreateInstance(configuration);
+            foreach (var (name, property) in propertyNames.Zip(properties, (a, b) => (a, b)))
+            {
+                object parsed = null;
+                while (parsed == null)
+                {
+                    Console.Write(name + ": ");
+                    var val = Console.ReadLine();
+                    try
+                    {
+                        parsed = new DeserializerBuilder().Build().Deserialize(val, property.PropertyType);
+                    }
+                    catch (YamlException)
+                    {
+                        Console.WriteLine($"ERROR: Could not parse input, input must be yaml parsable to {property.PropertyType.Name}");
+                        continue;
+                    }
+
+                    var failures = ConfigurationValidator.GetPropertyFailures(property, parsed).ToArray();
+                    if (!failures.Any())
+                    {
+                        continue;
+                    }
+
+                    parsed = null; // Ensure the while loop continues.
+                    Console.WriteLine("Not all constraints hold:");
+                    Console.WriteLine(string.Join("\n", failures));
+                }
+
+                property.SetValue(config, parsed);
+            }
+
+            return config;
+        }
 
         /// <summary>
         /// Lift the current instance to the static singleton.

@@ -40,7 +40,7 @@ namespace SpreadShare.SupportServices.Configuration.ConstraintAttributes
         /// </summary>
         /// <param name="value">The value to check.</param>
         /// <returns>Whether the constraint holds for <paramref name="value"/>.</returns>
-        public bool Valid(object value) => Validate(string.Empty, value).Any();
+        public bool Valid(object value) => !Validate(string.Empty, value).Any();
 
         /// <summary>
         /// Tells whether an object is of a certain type.

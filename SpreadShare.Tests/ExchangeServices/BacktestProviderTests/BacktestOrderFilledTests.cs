@@ -115,7 +115,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("EOSETH"),
                 setQuantity: 0);
-            var candle = new BacktestingCandle(0, 4, 3.8M, 3.7M, 4M, 0, "EOSETH");
+            var candle = new BacktestingCandle(0, 4, 3.8M, 4M, 3.7M, 0, "EOSETH");
             var filled = GetFilledOrder(order, candle, 0);
             Assert.False(filled);
         }
@@ -325,7 +325,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
             {
                 StopPrice = 8.5M,
             };
-            var candle = new BacktestingCandle(0, 10, 11.2M, 12.4M, 10.1M, 0, "EOSETH");
+            var candle = new BacktestingCandle(0, 10.1M, 11.2M, 12.4M, 10.1M, 0, "EOSETH");
             var filled = GetFilledOrder(order, candle, 0);
             Assert.False(filled);
         }

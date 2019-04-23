@@ -8,6 +8,7 @@ using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices.BacktestDaemon.CommandAttributes;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Utilities;
+using Parser = CommandLine.Parser;
 
 #pragma warning disable SA1402
 
@@ -49,15 +50,21 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
                             $"{_args.AlgorithmName} does not have a configuration object and cannot be started.");
 
             // Optionally load with custom path.
-            _args.ConfigurationPath = _args.ConfigurationPath ?? _args.AlgorithmName + ".yaml";
-
-            try
+            if (!_args.Inline)
             {
-                _configuration = ConfigurationLoader.LoadConfiguration(settingsType, _args.ConfigurationPath);
+                _args.ConfigurationPath = _args.ConfigurationPath ?? _args.AlgorithmName + ".yaml";
+                try
+                {
+                    _configuration = ConfigurationLoader.LoadConfiguration(settingsType, _args.ConfigurationPath);
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidCommandException(e.Message);
+                }
             }
-            catch (Exception e)
+            else
             {
-                throw new InvalidCommandException(e.Message);
+                _configuration = BacktestDaemonService.GetConfigurationFromUser(settingsType);
             }
 
             DatabaseUtilities.Instance.ValidateCandleWidth(_configuration.TradingPairs, Configuration.Configuration.Instance.CandleWidth);
@@ -166,7 +173,7 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
         /// <summary>
         /// Gets or sets the path of the configuration.
         /// </summary>
-        [Option("config")]
+        [Option("config", SetName = "fromfile")]
         public string ConfigurationPath { get; set; }
 
         /// <summary>
@@ -192,6 +199,12 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
         /// </summary>
         [Option("id", Default = -1)]
         public int ID { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to ask for the config property values inline.
+        /// </summary>
+        [Option('i', "inline", Default = false, SetName = "inline")]
+        public bool Inline { get; set; }
     }
 }
 
