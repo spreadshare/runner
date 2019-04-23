@@ -28,13 +28,13 @@ namespace SpreadShare.Algorithms.Implementations
         {
             public override State<Config> OnMarketCondition(DataProvider data)
             {
-                var candles = data.GetCandles(FirstPair, AlgorithmConfiguration.MeanEntry * 2);
+                var candles = data.GetCandles(FirstPair, AlgorithmConfiguration.MeanEntry + 5);
 
                 bool meanCondition = true;
 
                 for (int i = 0; i < AlgorithmConfiguration.MeanEntry + 1; i++)
                 {
-                    var meanEntry = candles.Skip(i).Take(AlgorithmConfiguration.MeanEntry);
+                    var meanEntry = candles.Skip(i).Take(5);
                     meanCondition &= meanEntry.Last().Close < meanEntry.StandardMovingAverage();
                 }
 
