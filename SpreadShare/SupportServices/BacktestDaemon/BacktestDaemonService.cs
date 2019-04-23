@@ -4,6 +4,7 @@ using System.Reflection;
 using Dawn;
 using Microsoft.EntityFrameworkCore.Internal;
 using SpreadShare.Algorithms;
+using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 using SpreadShare.Models.Exceptions;
 using SpreadShare.SupportServices.BacktestDaemon.CommandAttributes;
@@ -25,9 +26,10 @@ namespace SpreadShare.SupportServices.BacktestDaemon
         /// </summary>
         /// <param name="algoService">The algorithm service.</param>
         /// <param name="allocationManager">The allocation manager.</param>
-        public BacktestDaemonService(AlgorithmService algoService, IAllocationManager allocationManager)
+        /// <param name="exchangeFactoryService">The exchange factory service.</param>
+        public BacktestDaemonService(AlgorithmService algoService, IAllocationManager allocationManager, ExchangeFactoryService exchangeFactoryService)
         {
-            State = new BacktestDaemonState(algoService, allocationManager);
+            State = new BacktestDaemonState(algoService, allocationManager, exchangeFactoryService);
         }
 
         /// <summary>

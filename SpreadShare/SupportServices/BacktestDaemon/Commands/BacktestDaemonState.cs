@@ -1,5 +1,6 @@
 using Dawn;
 using SpreadShare.Algorithms;
+using SpreadShare.ExchangeServices;
 using SpreadShare.ExchangeServices.Allocation;
 
 namespace SpreadShare.SupportServices.BacktestDaemon.Commands
@@ -14,17 +15,24 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
         /// </summary>
         /// <param name="algoService">The algorithm service.</param>
         /// <param name="allocationManager">The allocation manager.</param>
-        public BacktestDaemonState(AlgorithmService algoService, IAllocationManager allocationManager)
+        /// <param name="exchangeFactory">The exchange factory service.</param>
+        public BacktestDaemonState(AlgorithmService algoService, IAllocationManager allocationManager, ExchangeFactoryService exchangeFactory)
         {
             Guard.Argument(algoService).NotNull();
             AlgorithmService = algoService;
             AllocationManager = allocationManager;
+            ExchangeFactory = exchangeFactory;
         }
 
         /// <summary>
         /// Gets the algorithm service.
         /// </summary>
         public AlgorithmService AlgorithmService { get; }
+
+        /// <summary>
+        /// Gets the ExchangeFactory.
+        /// </summary>
+        public ExchangeFactoryService ExchangeFactory { get; }
 
         /// <summary>
         /// Gets the allocation manager.
