@@ -17,6 +17,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private readonly BacktestTimerProvider _timer;
         private readonly BacktestBuffers _buffers;
+        private DataProvider _dataParent;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestDataProvider"/> class.
@@ -32,9 +33,21 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <summary>
-        /// Sets the DataProvider that implements this BackTestTradingProvider.
+        /// Gets or sets the DataProvider that implements this BackTestTradingProvider.
         /// </summary>
-        public DataProvider ParentImplementation { private get; set; }
+        public DataProvider ParentImplementation
+        {
+            get => _dataParent;
+            set
+            {
+                if (_dataParent != null)
+                {
+                    throw new InvalidOperationException("Cannot set the property more than once.");
+                }
+
+                _dataParent = value;
+            }
+        }
 
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair)

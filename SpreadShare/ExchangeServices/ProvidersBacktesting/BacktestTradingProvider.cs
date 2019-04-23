@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Dawn;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.Providers;
@@ -187,9 +188,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             foreach (var order in WatchList.Values.ToList())
             {
-                decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
+                var candle = _dataProvider.ParentImplementation.GetCandles(order.Pair, 1)[0];
 
-                if (GetFilledOrder(order, price, Timer.CurrentTime.ToUnixTimeMilliseconds()))
+                if (EvaluateFilledOrder(order, candle, Timer.CurrentTime.ToUnixTimeMilliseconds()))
                 {
                     Logger.LogInformation($"Order {order.OrderId} confirmed at {Timer.CurrentTime}");
 
@@ -210,12 +211,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// Returns a bool indicating whether or not the order was filled, and transforms the order into a filled state if so.
         /// </summary>
         /// <param name="order">The order to check as filled.</param>
-        /// <param name="currentPrice">The price to check the order against.</param>
+        /// <param name="currentCandle">The candle to check the order against.</param>
         /// <param name="currentTime">The current time (will be used as time of fill).</param>
         /// <returns>Whether the order was filled.</returns>
         /// <exception cref="UnexpectedOrderTypeException">The order type is not supported by the method.</exception>
-        private static bool GetFilledOrder(OrderUpdate order, decimal currentPrice, long currentTime)
+        private static bool EvaluateFilledOrder(OrderUpdate order, BacktestingCandle currentCandle, long currentTime)
         {
+            Guard.Argument(currentCandle).NotNull();
             if (order == null)
             {
                 return false;
@@ -224,20 +226,20 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             switch (order.OrderType)
             {
                 case OrderUpdate.OrderTypes.Limit:
-                    return GetFilledLimitOrder(order, currentPrice, currentTime);
+                    return GetFilledLimitOrder(order, currentCandle, currentTime);
                 case OrderUpdate.OrderTypes.StopLoss:
-                    return GetFilledStoplossOrder(order, currentPrice, currentTime);
+                    return GetFilledStoplossOrder(order, currentCandle, currentTime);
                 default:
                     throw new UnexpectedOrderTypeException(
                         $"Backtest watchlist should not contain order of type {order.OrderType}");
             }
         }
 
-        private static bool GetFilledStoplossOrder(OrderUpdate order, decimal currentPrice, long currentTime)
+        private static bool GetFilledStoplossOrder(OrderUpdate order, BacktestingCandle currentCandle, long currentTime)
         {
             bool filled = order.Side == OrderSide.Buy
-                ? currentPrice >= order.StopPrice
-                : currentPrice <= order.StopPrice;
+                ? currentCandle.High >= order.StopPrice
+                : currentCandle.Low <= order.StopPrice;
             if (filled)
             {
                 order.StopPrice = order.StopPrice;
@@ -253,11 +255,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             return false;
         }
 
-        private static bool GetFilledLimitOrder(OrderUpdate order, decimal currentPrice, long currentTime)
+        private static bool GetFilledLimitOrder(OrderUpdate order, BacktestingCandle currentCandle, long currentTime)
         {
             bool filled = order.Side == OrderSide.Buy
-                ? currentPrice <= order.SetPrice
-                : currentPrice >= order.SetPrice;
+                ? currentCandle.Low <= order.SetPrice
+                : currentCandle.High >= order.SetPrice;
             if (filled)
             {
                 order.StopPrice = order.StopPrice;
