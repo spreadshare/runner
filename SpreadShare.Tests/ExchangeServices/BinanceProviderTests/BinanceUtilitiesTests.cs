@@ -62,7 +62,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
             };
 
             var order = BinanceUtilities.ToInternal(input);
-            var diff = DateTimeOffset.Now - DateTimeOffset.FromUnixTimeMilliseconds(order.CreatedTimeStamp);
+            var diff = DateTimeOffset.Now - DateTimeOffset.FromUnixTimeMilliseconds(order.CreatedTimestamp);
             Assert.True(diff.TotalSeconds < 1.0, "CreatedTimeStamp of order not parsed correctly.");
         }
 
@@ -84,7 +84,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
             Assert.Equal(new Currency("EOS"), order.CommissionAsset);
             Assert.Equal(
                 Math.Floor(DateTimeOffset.FromFileTime(DateTime.Now.ToFileTimeUtc()).ToUnixTimeMilliseconds() / 1000.0),
-                Math.Floor(order.CreatedTimeStamp / 1000.0));
+                Math.Floor(order.CreatedTimestamp / 1000.0));
         }
 
         [Fact]

@@ -161,7 +161,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 tradeId: 0,
                 orderType: ToInternal(orderInfoUpdate.Type),
                 orderStatus: ToInternal(orderInfoUpdate.Status),
-                createdTimeStamp: orderInfoUpdate.OrderCreationTime.ToUnixTimestampMilliseconds(),
+                createdTimestamp: orderInfoUpdate.OrderCreationTime.ToUnixTimestampMilliseconds(),
                 setPrice: orderInfoUpdate.Price,
                 side: ToInternal(orderInfoUpdate.Side),
                 pair: TradingPair.Parse(orderInfoUpdate.Symbol),

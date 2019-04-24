@@ -74,7 +74,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.Limit,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 3.4M,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("EOSETH"),
@@ -92,7 +92,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.Limit,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 6.6M,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("EOSETH"),
@@ -110,7 +110,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.Limit,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 3.4M,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("EOSETH"),
@@ -128,7 +128,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.Limit,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 3.8M,
                 side: OrderSide.Sell,
                 pair: TradingPair.Parse("EOSETH"),
@@ -146,7 +146,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.Limit,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 1.8M,
                 side: OrderSide.Sell,
                 pair: TradingPair.Parse("EOSETH"),
@@ -164,7 +164,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.Limit,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 3.4M,
                 side: OrderSide.Sell,
                 pair: TradingPair.Parse("EOSETH"),
@@ -182,7 +182,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 8,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.Limit,
-                createdTimeStamp: 302,
+                createdTimestamp: 302,
                 setPrice: 2.1M,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("TRXETH"),
@@ -195,7 +195,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
             Assert.Equal(2.1M, order.LastFillPrice);
             Assert.Equal(15.6M, order.FilledQuantity);
             Assert.Equal(15.6M, order.LastFillIncrement);
-            Assert.Equal(2394923, order.FilledTimeStamp);
+            Assert.Equal(2394923, order.FilledTimestamp);
         }
 
         [Fact]
@@ -206,7 +206,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.StopLoss,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 0M,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("EOSETH"),
@@ -227,7 +227,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.StopLoss,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 0,
                 side: OrderSide.Sell,
                 pair: TradingPair.Parse("EOSETH"),
@@ -250,7 +250,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.StopLoss,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 0,
                 side: OrderSide.Sell,
                 pair: TradingPair.Parse("EOSETH"),
@@ -273,7 +273,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.StopLoss,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 100M,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("EOSETH"),
@@ -295,7 +295,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.StopLoss,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 100M,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("EOSETH"),
@@ -317,7 +317,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.StopLoss,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 0M,
                 side: OrderSide.Sell,
                 pair: TradingPair.Parse("EOSETH"),
@@ -338,7 +338,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 8,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderTypes.StopLoss,
-                createdTimeStamp: 302,
+                createdTimestamp: 302,
                 setPrice: 2.1M,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("TRXETH"),
@@ -355,7 +355,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
             Assert.Equal(1.9M, order.LastFillPrice);
             Assert.Equal(18.6M, order.FilledQuantity);
             Assert.Equal(18.6M, order.LastFillIncrement);
-            Assert.Equal(434424233, order.FilledTimeStamp);
+            Assert.Equal(434424233, order.FilledTimestamp);
         }
 
         private static OrderUpdate GetSomeOrder(OrderTypes type, decimal setPrice = 0)
@@ -365,7 +365,7 @@ namespace SpreadShare.Tests.ExchangeServices.BacktestProviderTests
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.Filled,
                 orderType: type,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: setPrice,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("EOSETH"),
