@@ -35,7 +35,7 @@ namespace SpreadShare.Tests.ExchangeServices.DataProviderTests
         {
             var input = Candles.Take(10);
             var rsi = input.RelativeStrengthIndex();
-            Assert.Equal(1, rsi);
+            Assert.Equal(47.348886532343584305408271475M, rsi);
         }
     }
 }

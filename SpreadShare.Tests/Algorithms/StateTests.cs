@@ -21,13 +21,7 @@ namespace SpreadShare.Tests.Algorithms
         public StateTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            var containerMethod = typeof(ExchangeFactoryService)
-                .GetMethod("BuildBinanceContainer", BindingFlags.Instance | BindingFlags.NonPublic)
-                .MakeGenericMethod(typeof(TemplateAlgorithm));
-
-            _container = (ExchangeProvidersContainer)containerMethod.Invoke(
-                ExchangeFactoryService,
-                new object[] { AlgorithmConfiguration, new TestAllocationManager() });
+            _container = ExchangeFactoryService.BuildBinanceContainer<TemplateAlgorithm>(AlgorithmConfiguration);
 
             var setTimerMethod = typeof(State<TemplateAlgorithmConfiguration>)
                 .GetMethod("SetTimer", BindingFlags.NonPublic | BindingFlags.Instance);
