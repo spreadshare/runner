@@ -627,6 +627,7 @@ namespace SpreadShare.ExchangeServices.Providers
                 return;
             }
 
+            order.TradeId = TradeId;
             UpdateAllocation(order);
             UpdateOpenOrders(order);
 
