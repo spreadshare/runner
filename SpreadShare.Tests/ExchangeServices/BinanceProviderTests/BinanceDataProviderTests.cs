@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using CSharpx;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms.Implementations;
@@ -7,7 +6,6 @@ using SpreadShare.ExchangeServices;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Tests.ExchangeServices.DataProviderTests;
-using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -46,6 +46,13 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="OrderUpdate"/> class.
+        /// </summary>
+        public OrderUpdate()
+        {
+        }
+
+        /// <summary>
         /// The status of an order.
         /// </summary>
         public enum OrderStatus
@@ -128,14 +135,14 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Gets the unique id of the order.
+        /// Gets or sets the unique id of the order.
         /// </summary>
-        public long OrderId { get; }
+        public long OrderId { get; set; }
 
         /// <summary>
-        /// Gets the id of the accompanying trade.
+        /// Gets or sets the id of the accompanying trade.
         /// </summary>
-        public long TradeId { get; }
+        public long TradeId { get; set; }
 
         /// <summary>
         /// Gets or sets the type fo the order.
@@ -143,9 +150,9 @@ namespace SpreadShare.Models.Trading
         public OrderTypes OrderType { get; set; }
 
         /// <summary>
-        /// Gets the timestamp at which the order was created.
+        /// Gets or sets the timestamp at which the order was created.
         /// </summary>
-        public long CreatedTimestamp { get; }
+        public long CreatedTimestamp { get; set; }
 
         /// <summary>
         /// Gets or sets the timestamp at which the order was filled.
@@ -153,9 +160,9 @@ namespace SpreadShare.Models.Trading
         public long FilledTimestamp { get; set; }
 
         /// <summary>
-        /// Gets the price at which the order was set.
+        /// Gets or sets the price at which the order was set.
         /// </summary>
-        public decimal SetPrice { get; }
+        public decimal SetPrice { get; set; }
 
         /// <summary>
         /// Gets or sets the price at which the stoploss order was set.
@@ -173,9 +180,9 @@ namespace SpreadShare.Models.Trading
         public decimal LastFillPrice { get; set; }
 
         /// <summary>
-        /// Gets the side of the order.
+        /// Gets or sets the side of the order.
         /// </summary>
-        public OrderSide Side { get; }
+        public OrderSide Side { get; set;  }
 
         /// <summary>
         /// Gets or sets the status of the order.
@@ -183,14 +190,14 @@ namespace SpreadShare.Models.Trading
         public OrderStatus Status { get; set; }
 
         /// <summary>
-        /// Gets the trading pair of the order.
+        /// Gets or sets the trading pair of the order.
         /// </summary>
-        public TradingPair Pair { get; }
+        public TradingPair Pair { get; set; }
 
         /// <summary>
-        /// Gets the total setQuantity of the order.
+        /// Gets or sets the total setQuantity of the order.
         /// </summary>
-        public decimal SetQuantity { get; }
+        public decimal SetQuantity { get; set; }
 
         /// <summary>
         /// Gets or sets the total filledQuantity of the order.

@@ -1,161 +1,156 @@
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using SpreadShare.Models.Trading;
+using OrderSide = SpreadShare.Models.Trading.OrderSide;
 
 namespace SpreadShare.Models.Database
 {
     /// <summary>
     /// Class to contains the state of an order update at a certain time.
     /// </summary>
-    internal class OrderEvent : DatabaseEvent
+    internal class OrderEvent : IDatabaseEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="OrderEvent"/> class.
         /// </summary>
-        /// <param name="orderId">orderId.</param>
-        /// <param name="tradeId">tradeId.</param>
-        /// <param name="orderType">orderType.</param>
-        /// <param name="orderStatus">orderStatus.</param>
-        /// <param name="createdTimestamp">createdTimestamp.</param>
-        /// <param name="filledTimestamp">filledTimeStamp.</param>
-        /// <param name="pair">pair.</param>
-        /// <param name="setQuantity">quantity.</param>
-        /// <param name="filledQuantity">filledQuantity.</param>
-        /// <param name="setPrice">price.</param>
-        /// <param name="stopPrice">stopPrice.</param>
-        /// <param name="filledPrice">filledPrice.</param>
-        /// <param name="side">side.</param>
-        /// <param name="eventTimestamp">eventTimestamp.</param>
-        public OrderEvent(
-            long orderId,
-            long tradeId,
-            string orderType,
-            string orderStatus,
-            long createdTimestamp,
-            long filledTimestamp,
-            string pair,
-            decimal setQuantity,
-            decimal filledQuantity,
-            decimal setPrice,
-            decimal stopPrice,
-            decimal filledPrice,
-            string side,
-            long eventTimestamp)
+        /// <param name="session">The session the order belongs to.</param>
+        /// <param name="eventTimestamp">The time of the event.</param>
+        /// <param name="proxy">The order update model, serving as a proxy.</param>
+        public OrderEvent(AlgorithmSession session, long eventTimestamp, OrderUpdate proxy)
         {
-            OrderId = orderId;
-            TradeId = tradeId;
-            OrderType = orderType;
-            OrderStatus = orderStatus;
-            CreatedTimestamp = createdTimestamp;
-            FilledTimestamp = filledTimestamp;
-            Pair = pair;
-            SetQuantity = setQuantity;
-            FilledQuantity = filledQuantity;
-            SetPrice = setPrice;
-            StopPrice = stopPrice;
-            FilledPrice = filledPrice;
-            Side = side;
-            EventTimestamp = eventTimestamp;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OrderEvent"/> class.
-        /// </summary>
-        /// <param name="order">The order update to pull data from.</param>
-        /// <param name="timestamp">The timestamp of the event.</param>
-        /// <param name="session">The session that this order event belongs to.</param>
-        public OrderEvent(OrderUpdate order, long timestamp, AlgorithmSession session)
-        {
-            OrderId = order.OrderId;
-            TradeId = order.TradeId;
-            OrderType = order.OrderType.ToString();
-            OrderStatus = order.Status.ToString();
-            CreatedTimestamp = order.CreatedTimestamp;
-            FilledTimestamp = order.FilledTimestamp;
-            Pair = order.Pair.ToString();
-            SetQuantity = order.SetQuantity;
-            FilledQuantity = order.FilledQuantity;
-            SetPrice = order.SetPrice;
-            StopPrice = order.StopPrice;
-            FilledPrice = order.AverageFilledPrice;
-            Side = order.Side.ToString();
-            EventTimestamp = timestamp;
             Session = session;
+            EventTimestamp = eventTimestamp;
+            Proxy = proxy;
         }
 
         /// <summary>
-        /// Gets or sets the ID of the row in the database.
+        /// Initializes a new instance of the <see cref="OrderEvent"/> class. (Used by ef core).
+        /// </summary>
+        private OrderEvent()
+        {
+            Proxy = new OrderUpdate();
+        }
+
+        #pragma warning disable SA1600
+        public bool Finalized => Proxy.Finalized;
+
+        public string CommissionAsset
+        {
+            get => Proxy.CommissionAsset?.ToString();
+            set => Proxy.CommissionAsset = new Currency(value);
+        }
+
+        public decimal Commission
+        {
+            get => Proxy.Commission;
+            set => Proxy.Commission = value;
+        }
+
+        public decimal LastFillIncrement
+        {
+            get => Proxy.LastFillIncrement;
+            set => Proxy.LastFillIncrement = value;
+        }
+
+        public decimal FilledQuantity
+        {
+            get => Proxy.FilledQuantity;
+            set => Proxy.FilledQuantity = value;
+        }
+
+        public decimal SetQuantity
+        {
+            get => Proxy.SetQuantity;
+            set => Proxy.SetQuantity = value;
+        }
+
+        public string Pair
+        {
+            get => Proxy.Pair.ToString();
+            set => Proxy.Pair = TradingPair.Parse(value);
+        }
+
+        public string Status
+        {
+            get => Proxy.Status.ToString();
+            set => Proxy.Status = Enum.Parse<OrderUpdate.OrderStatus>(value);
+        }
+
+        public string Side
+        {
+            get => Proxy.Side.ToString();
+            set => Proxy.Side = Enum.Parse<OrderSide>(value);
+        }
+
+        public decimal LastFillPrice
+        {
+            get => Proxy.LastFillPrice;
+            set => Proxy.LastFillPrice = value;
+        }
+
+        public decimal AverageFilledPrice
+        {
+            get => Proxy.AverageFilledPrice;
+            set => Proxy.AverageFilledPrice = value;
+        }
+
+        public decimal StopPrice
+        {
+            get => Proxy.StopPrice;
+            set => Proxy.StopPrice = value;
+        }
+
+        public decimal SetPrice
+        {
+            get => Proxy.SetPrice;
+            set => Proxy.SetPrice = value;
+        }
+
+        public long FilledTimestamp
+        {
+            get => Proxy.FilledTimestamp;
+            set => Proxy.FilledTimestamp = value;
+        }
+
+        public long CreatedTimestamp
+        {
+            get => Proxy.CreatedTimestamp;
+            set => Proxy.CreatedTimestamp = value;
+        }
+
+        public string OrderType
+        {
+            get => Proxy.OrderType.ToString();
+            set => Proxy.OrderType = Enum.Parse<OrderUpdate.OrderTypes>(value);
+        }
+
+        public long TradeId
+        {
+            get => Proxy.TradeId;
+            set => Proxy.TradeId = value;
+        }
+
+        public long OrderId
+        {
+            get => Proxy.OrderId;
+            set => Proxy.OrderId = value;
+        }
+        #pragma warning restore SA1600
+
+        /// <summary>
+        /// Gets or sets a unique identifier.
         /// </summary>
         [Key]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
-        /// <summary>
-        /// Gets or sets the ID of the order event.
-        /// </summary>
-        public long OrderId { get; set; }
+        /// <inheritdoc />
+        public AlgorithmSession Session { get; set; }
 
-        /// <summary>
-        /// Gets or sets the ID in specific for a certain trade.
-        /// </summary>
-        public long TradeId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Type of order.
-        /// </summary>
-        public string OrderType { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Status of the order.
-        /// </summary>
-        public string OrderStatus { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Timestamp at the creation of the trade.
-        /// </summary>
-        public long CreatedTimestamp { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Timestamp at the moment the trade was filled.
-        /// </summary>
-        public long FilledTimestamp { get; set; }
-
-        /// <summary>
-        /// Gets or sets the trading pair of the trade.
-        /// </summary>
-        public string Pair { get; set; }
-
-        /// <summary>
-        /// Gets or sets the setQuantity of the trade.
-        /// </summary>
-        public decimal SetQuantity { get; set; }
-
-        /// <summary>
-        /// Gets or sets the filledQuantity of the trade.
-        /// </summary>
-        public decimal FilledQuantity { get; set; }
-
-        /// <summary>
-        /// Gets or sets the setPrice of the trade.
-        /// </summary>
-        public decimal SetPrice { get; set; }
-
-        /// <summary>
-        /// Gets or sets the stopPrice of the trade.
-        /// </summary>
-        public decimal StopPrice { get; set; }
-
-        /// <summary>
-        /// Gets or sets the filledPrice of the trade.
-        /// </summary>
-        public decimal FilledPrice { get; set; }
-
-        /// <summary>
-        /// Gets or sets the filledPrice of the trade.
-        /// </summary>
+        /// <inheritdoc />
         public long EventTimestamp { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether the order was a buy or sell order.
-        /// </summary>
-        public string Side { get; set; }
+        [NotMapped]
+        private OrderUpdate Proxy { get; set; }
     }
 }
