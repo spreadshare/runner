@@ -123,7 +123,7 @@ namespace SpreadShare.Tests.Stubs.Binance
                     tradeId: 0,
                     orderStatus: data.Type == OrderType.Market ? OrderUpdate.OrderStatus.Filled : OrderUpdate.OrderStatus.New,
                     orderType: BinanceUtilities.ToInternal(data.Type),
-                    createdTimeStamp: 0,
+                    createdTimestamp: 0,
                     setPrice: data.Price,
                     side: BinanceUtilities.ToInternal(data.Side),
                     pair: TradingPair.Parse(symbol),

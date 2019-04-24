@@ -209,7 +209,7 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
                     tradeId: 0,
                     orderStatus: OrderUpdate.OrderStatus.Filled,
                     orderType: OrderUpdate.OrderTypes.Market,
-                    createdTimeStamp: 0,
+                    createdTimestamp: 0,
                     setPrice: 0,
                     side: side,
                     pair: pair,
@@ -232,7 +232,7 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             {
                 var wrongSide = side == OrderSide.Buy ? OrderSide.Sell : OrderSide.Buy;
                 var order = new OrderUpdate(
-                    createdTimeStamp: 0,
+                    createdTimestamp: 0,
                     orderId: 0,
                     tradeId: 0,
                     orderStatus: OrderUpdate.OrderStatus.Filled,
@@ -258,7 +258,7 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             public override ResponseObject<OrderUpdate> ExecuteMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
             {
                 var order = new OrderUpdate(
-                    createdTimeStamp: 0,
+                    createdTimestamp: 0,
                     orderId: 0,
                     tradeId: 0,
                     orderStatus: OrderUpdate.OrderStatus.Filled,
@@ -284,7 +284,7 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
             public override ResponseObject<OrderUpdate> ExecuteMarketOrder(TradingPair pair, OrderSide side, decimal quantity, long tradeId)
             {
                 var order = new OrderUpdate(
-                    createdTimeStamp: 0,
+                    createdTimestamp: 0,
                     orderId: 0,
                     tradeId: 0,
                     orderStatus: OrderUpdate.OrderStatus.Filled,
@@ -316,7 +316,7 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
                 }
 
                 var order = new OrderUpdate(
-                    createdTimeStamp: 0,
+                    createdTimestamp: 0,
                     orderId: 0,
                     tradeId: 0,
                     orderStatus: OrderUpdate.OrderStatus.Filled,
@@ -348,7 +348,7 @@ namespace SpreadShare.Tests.ExchangeServices.TradingProviderTests
                 }
 
                 var order = new OrderUpdate(
-                    createdTimeStamp: 0,
+                    createdTimestamp: 0,
                     orderId: 0,
                     tradeId: 0,
                     orderStatus: OrderUpdate.OrderStatus.Filled,

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using Dawn;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
@@ -70,14 +69,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             {
                 AverageFilledPrice = priceEstimate,
                 FilledQuantity = quantity,
-                FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds(),
+                FilledTimestamp = Timer.CurrentTime.ToUnixTimeMilliseconds(),
             };
 
             // Add to order cache to confirm filled
             _orderCache.Enqueue(order);
 
             // Write the trade to the logger
-            LogOrder(order, ParentImplementation.GetPortfolio().Clone());
+            LogOrder(order);
 
             return new ResponseObject<OrderUpdate>(
                 ResponseCode.Success,
@@ -117,7 +116,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 tradeId: tradeId,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderUpdate.OrderTypes.StopLoss,
-                createdTimeStamp: Timer.CurrentTime.ToUnixTimeMilliseconds(),
+                createdTimestamp: Timer.CurrentTime.ToUnixTimeMilliseconds(),
                 setPrice: 0,
                 side: side,
                 pair: pair,
@@ -145,14 +144,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             var order = WatchList[orderId];
             order.Status = OrderUpdate.OrderStatus.Cancelled;
-            order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
+            order.FilledTimestamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
             WatchList.Remove(order.OrderId);
 
             // Add to order cache to confirm cancelled.
             _orderCache.Enqueue(order);
 
             // Add cancelled order to the logger
-            LogOrder(order, ParentImplementation.GetPortfolio().Clone());
+            LogOrder(order);
 
             return new ResponseObject(ResponseCode.Success);
         }
@@ -195,7 +194,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                     Logger.LogInformation($"Order {order.OrderId} confirmed at {Timer.CurrentTime}");
 
                     // Write the filled trade to the logger
-                    LogOrder(order, ParentImplementation.GetPortfolio().Clone());
+                    LogOrder(order);
 
                     UpdateObservers(order);
                 }
@@ -248,7 +247,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 order.LastFillIncrement = order.SetQuantity;
                 order.LastFillPrice = order.StopPrice;
                 order.Status = OrderUpdate.OrderStatus.Filled;
-                order.FilledTimeStamp = currentTime;
+                order.FilledTimestamp = currentTime;
                 return true;
             }
 
@@ -268,20 +267,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 order.LastFillIncrement = order.SetQuantity;
                 order.LastFillPrice = order.SetPrice;
                 order.Status = OrderUpdate.OrderStatus.Filled;
-                order.FilledTimeStamp = currentTime;
+                order.FilledTimestamp = currentTime;
                 return true;
             }
 
             return false;
         }
 
-        private void LogOrder(OrderUpdate order, Portfolio portfolio)
+        private void LogOrder(OrderUpdate order)
         {
-            ((BacktestTimerProvider)Timer).AddOrder(
-                new BacktestOrder(
-                    order,
-                    JsonConvert.SerializeObject(portfolio),
-                    _dataProvider.ValuatePortfolioInBaseCurrency(portfolio)));
+            ((BacktestTimerProvider)Timer).AddOrder(order);
         }
     }
 }

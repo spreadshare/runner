@@ -69,8 +69,8 @@ namespace SpreadShare.Models.Database
             TradeId = order.TradeId;
             OrderType = order.OrderType.ToString();
             OrderStatus = order.Status.ToString();
-            CreatedTimestamp = order.CreatedTimeStamp;
-            FilledTimestamp = order.FilledTimeStamp;
+            CreatedTimestamp = order.CreatedTimestamp;
+            FilledTimestamp = order.FilledTimestamp;
             Pair = order.Pair.ToString();
             SetQuantity = order.SetQuantity;
             FilledQuantity = order.FilledQuantity;

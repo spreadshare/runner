@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Database;
 using SpreadShare.Models.Exceptions;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.BacktestDaemon;
 using SpreadShare.SupportServices.Configuration;
 
@@ -17,7 +18,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private readonly ILogger _logger;
         private readonly string _outputFolder;
-        private readonly List<BacktestOrder> _backtestOrders;
+        private readonly List<OrderUpdate> _backtestOrders;
         private readonly List<StateSwitchEvent> _stateSwitchEvents;
 
         private DateTimeOffset _currentTime;
@@ -32,7 +33,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             : base(loggerFactory)
         {
             _logger = loggerFactory.CreateLogger(GetType());
-            _backtestOrders = new List<BacktestOrder>();
+            _backtestOrders = new List<OrderUpdate>();
             _stateSwitchEvents = new List<StateSwitchEvent>();
 
             BeginTime = DateTimeOffset.FromUnixTimeMilliseconds(
@@ -80,7 +81,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// Add order to the logger.
         /// </summary>
         /// <param name="order">Order to log.</param>
-        public void AddOrder(BacktestOrder order)
+        public void AddOrder(OrderUpdate order)
         {
             _backtestOrders.Add(order);
         }
