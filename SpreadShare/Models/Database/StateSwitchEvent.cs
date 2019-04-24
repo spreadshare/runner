@@ -5,28 +5,28 @@ namespace SpreadShare.Models.Database
     /// <summary>
     /// Models a state switch event in the database.
     /// </summary>
-    internal class StateSwitchEvent : DatabaseEvent, ICsvSerializable
+    internal class StateSwitchEvent : IDatabaseEvent, ICsvSerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
         /// </summary>
-        /// <param name="timestamp">Timestamp.</param>
+        /// <param name="eventTimestamp">Timestamp.</param>
         /// <param name="name">Goal state.</param>
-        public StateSwitchEvent(long timestamp, string name)
+        public StateSwitchEvent(long eventTimestamp, string name)
         {
-            Timestamp = timestamp;
+            EventTimestamp = eventTimestamp;
             Name = name;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateSwitchEvent"/> class.
         /// </summary>
-        /// <param name="timestamp">Timestamp.</param>
+        /// <param name="eventTimestamp">Timestamp.</param>
         /// <param name="name">Goal state.</param>
         /// <param name="session">The current session.</param>
-        public StateSwitchEvent(long timestamp, string name, AlgorithmSession session)
+        public StateSwitchEvent(long eventTimestamp, string name, AlgorithmSession session)
         {
-            Timestamp = timestamp;
+            EventTimestamp = eventTimestamp;
             Name = name;
             Session = session;
         }
@@ -40,12 +40,15 @@ namespace SpreadShare.Models.Database
         /// <summary>
         /// Gets or sets the timestamp of the event.
         /// </summary>
-        public long Timestamp { get; set; }
+        public long EventTimestamp { get; set; }
 
         /// <summary>
         /// Gets or sets the state to which was switched.
         /// </summary>
         public string Name { get; set; }
+
+        /// <inheritdoc />
+        public AlgorithmSession Session { get; set; }
 
         /// <summary>
         /// Get a header matching the format of the CSV representation.
@@ -55,7 +58,7 @@ namespace SpreadShare.Models.Database
         public static string GetStaticCsvHeader(char delimiter)
         {
             return $"{nameof(Id)}{delimiter}" +
-                   $"{nameof(Timestamp)}{delimiter}" +
+                   $"{nameof(EventTimestamp)}{delimiter}" +
                    $"{nameof(Name)}{delimiter}";
         }
 
@@ -69,7 +72,7 @@ namespace SpreadShare.Models.Database
         public string GetCsvRepresentation(char delimiter)
         {
             return $"{Id}{delimiter}" +
-                   $"{Timestamp}{delimiter}" +
+                   $"{EventTimestamp}{delimiter}" +
                    $"{Name}{delimiter}";
         }
     }
