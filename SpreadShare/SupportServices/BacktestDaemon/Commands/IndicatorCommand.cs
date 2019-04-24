@@ -58,7 +58,7 @@ namespace SpreadShare.SupportServices.BacktestDaemon.Commands
         /// <inheritdoc />
         public override void Execute(BacktestDaemonState state)
         {
-            var config = new TemplateAlgorithmConfiguration(new[] { _pair }, Configuration.Configuration.Instance.CandleWidth);
+            var config = new TemplateAlgorithmConfiguration(new[] { _pair }, 60);
             var container = state.ExchangeFactory.BuildBacktestingContainer<TemplateAlgorithm>(config);
             var timer = (BacktestTimerProvider)container.TimerProvider;
             timer.SetCurrentTime(DateTimeOffset.FromUnixTimeMilliseconds(_epoch));

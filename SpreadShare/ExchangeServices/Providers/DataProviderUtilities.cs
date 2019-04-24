@@ -133,28 +133,10 @@ namespace SpreadShare.ExchangeServices.Providers
                 throw new InvalidOperationException("Cannot calculate the RateOfChange of an empty set or singular item.");
             }
 
-            IEnumerable<decimal> closeDiffs = candles.Pairwise((a, b) => b.Close - a.Close).ToArray();
-            var gain = closeDiffs.Select(x => x >= 0 ? x : 0).RunningMovingAverage();
-            var loss = closeDiffs.Select(x => x < 0 ? -x : 0).RunningMovingAverage();
+            var gain = candles.Pairwise((a, b) => b.Close - a.Close).Select(x => x > 0 ? x : 0).Average();
+            var loss = candles.Pairwise((a, b) => a.Close - b.Close).Select(x => x > 0 ? x : 0).Average();
             var rs = HelperMethods.SafeDiv(gain, loss);
             return 100M - (100M / (1M + rs));
-        }
-
-        /// <summary>
-        /// Calculates the running moving average of a set numbers. f(head, [tail]) = 1/N * head + (1 - 1/N) * f(tail).
-        /// </summary>
-        /// <param name="input">The input set.</param>
-        /// <returns>The running moving average over the set.</returns>
-        public static decimal RunningMovingAverage(this IEnumerable<decimal> input)
-        {
-            var values = (input ?? throw new ArgumentNullException(nameof(input))).ToArray();
-            if (values.Length == 0)
-            {
-                throw new InvalidOperationException("Cannot calculate the RunningMovingAverage of an empty set.");
-            }
-
-            var alpha = 1M / values.Length;
-            return values.Aggregate(values[0], (rma, t) => (alpha * t) + ((1 - alpha) * rma));
         }
     }
 }
