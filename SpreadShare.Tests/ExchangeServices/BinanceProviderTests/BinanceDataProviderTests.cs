@@ -32,10 +32,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
                 CandleWidth: {Configuration.Instance.CandleWidth}
             ";
             var config = ParseAlgorithmConfiguration(source);
-            var containerMethod = typeof(ExchangeFactoryService)
-                .GetMethod("BuildBinanceContainer", BindingFlags.Instance | BindingFlags.NonPublic)
-                .MakeGenericMethod(typeof(TemplateAlgorithm));
-            _container = (ExchangeProvidersContainer)containerMethod.Invoke(ExchangeFactoryService, new object[] { config, new TestAllocationManager() });
+            _container = ExchangeFactoryService.BuildBinanceContainer<TemplateAlgorithm>(config);
         }
 
         /// <summary>

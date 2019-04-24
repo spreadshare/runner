@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 using Config = SpreadShare.Algorithms.Implementations.TemplateAlgorithmConfiguration;
 
@@ -60,6 +62,23 @@ namespace SpreadShare.Algorithms.Implementations
     /// </summary>
     internal class TemplateAlgorithmConfiguration : AlgorithmConfiguration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TemplateAlgorithmConfiguration"/> class.
+        /// </summary>
+        public TemplateAlgorithmConfiguration()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TemplateAlgorithmConfiguration"/> class.
+        /// </summary>
+        /// <param name="pairs">The trading pairs.</param>
+        /// <param name="candleWidth">The candle width.</param>
+        public TemplateAlgorithmConfiguration(IEnumerable<TradingPair> pairs, int candleWidth)
+        {
+            __tradingPairs = pairs.Select(x => x.ToString()).ToList();
+            CandleWidth = candleWidth;
+        }
     }
 }
 

@@ -78,6 +78,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public (bool, Exception) ErrorRegister { get; private set; }
 
         /// <summary>
+        /// Forcefully sets the current time.
+        /// </summary>
+        /// <param name="time">The time to set the current time to.</param>
+        public void SetCurrentTime(DateTimeOffset time)
+        {
+            _currentTime = time;
+        }
+
+        /// <summary>
         /// Add order to the logger.
         /// </summary>
         /// <param name="order">Order to log.</param>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSharpx;
 using Dawn;
 using SpreadShare.Models.Database;
 using SpreadShare.Utilities;
@@ -120,20 +121,22 @@ namespace SpreadShare.ExchangeServices.Providers
         }
 
         /// <summary>
-        /// Calculates the running moving average of a set numbers. f(head, [tail]) = 1/N * head + (1 - 1/N) * f(tail).
+        /// Calculates the relative strength index over a set of candles.
         /// </summary>
-        /// <param name="input">The input set.</param>
-        /// <returns>The running moving average over the set.</returns>
-        public static decimal RunningMovingAverage(this IEnumerable<decimal> input)
+        /// <param name="input">Set of candles.</param>
+        /// <returns>Relative Strength Index.</returns>
+        public static decimal RelativeStrengthIndex(this IEnumerable<BacktestingCandle> input)
         {
-            var values = (input ?? throw new ArgumentNullException(nameof(input))).ToArray();
-            if (values.Length == 0)
+            var candles = (input ?? throw new ArgumentNullException(nameof(input))).ToArray();
+            if (candles.Length <= 1)
             {
-                throw new InvalidOperationException("Cannot calculate the RunningMovingAverage of an empty set.");
+                throw new InvalidOperationException("Cannot calculate the RateOfChange of an empty set or singular item.");
             }
 
-            var alpha = 1M / values.Length;
-            return values.Aggregate(values[0], (rma, t) => (alpha * t) + ((1 - alpha) * rma));
+            var gain = candles.Pairwise((a, b) => b.Close - a.Close).Select(x => x > 0 ? x : 0).Average();
+            var loss = candles.Pairwise((a, b) => a.Close - b.Close).Select(x => x > 0 ? x : 0).Average();
+            var rs = HelperMethods.SafeDiv(gain, loss);
+            return 100M - (100M / (1M + rs));
         }
     }
 }

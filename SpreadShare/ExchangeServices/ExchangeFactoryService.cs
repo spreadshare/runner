@@ -43,7 +43,7 @@ namespace SpreadShare.ExchangeServices
         }
 
         /// <summary>
-        /// Builds container for Binance.
+        /// Builds container by evaluation the Trading command line argument.
         /// </summary>
         /// <param name="algorithmConfiguration">The configuration of the algorithm.</param>
         /// <typeparam name="T">The type of the algorithm.</typeparam>
@@ -58,11 +58,17 @@ namespace SpreadShare.ExchangeServices
             }
 
             return Program.CommandLineArgs.Trading
-                ? BuildBinanceContainer<T>(algorithmConfiguration, _allocationManager)
-                : BuildBacktestingContainer<T>(algorithmConfiguration, _allocationManager);
+                ? BuildBinanceContainer<T>(algorithmConfiguration)
+                : BuildBacktestingContainer<T>(algorithmConfiguration);
         }
 
-        private ExchangeProvidersContainer BuildBinanceContainer<T>(AlgorithmConfiguration settings, IAllocationManager allocationManager)
+        /// <summary>
+        /// Builds a container for Binance.
+        /// </summary>
+        /// <param name="config">The algorithm configuration to use.</param>
+        /// <typeparam name="T">The algorithm type.</typeparam>
+        /// <returns>ExchangeProviderContainer.</returns>
+        public ExchangeProvidersContainer BuildBinanceContainer<T>(AlgorithmConfiguration config)
             where T : IBaseAlgorithm
         {
             // Makes sure that the communication is enabled
@@ -71,8 +77,8 @@ namespace SpreadShare.ExchangeServices
             var dataImplementation = new BinanceDataProvider(_loggerFactory, _binanceCommunications, timerProvider);
             var tradingImplementation = new BinanceTradingProvider(_loggerFactory, _binanceCommunications, timerProvider);
 
-            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
-            var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
+            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, config);
+            var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, _allocationManager);
 
             // Doubly linked data provider to check candles
             timerProvider.DataProvider = dataProvider;
@@ -83,15 +89,21 @@ namespace SpreadShare.ExchangeServices
             return new ExchangeProvidersContainer(_loggerFactory, dataProvider, timerProvider, tradingProvider, typeof(T));
         }
 
-        private ExchangeProvidersContainer BuildBacktestingContainer<T>(AlgorithmConfiguration settings, IAllocationManager allocationManager)
+        /// <summary>
+        /// Builds a container for Backtesting.
+        /// </summary>
+        /// <param name="config">The algorithm configuration to use.</param>
+        /// <typeparam name="T">The algorithm type.</typeparam>
+        /// <returns>ExchangeProviderContainer.</returns>
+        public ExchangeProvidersContainer BuildBacktestingContainer<T>(AlgorithmConfiguration config)
             where T : IBaseAlgorithm
         {
             var backtestTimer = new BacktestTimerProvider(_loggerFactory, Configuration.Instance.BacktestSettings);
             var dataImplementation = new BacktestDataProvider(_loggerFactory, _databaseContext, backtestTimer);
             var tradingImplementation = new BacktestTradingProvider(_loggerFactory, backtestTimer, dataImplementation);
 
-            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, settings);
-            var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, allocationManager);
+            var dataProvider = new DataProvider(_loggerFactory, dataImplementation, config);
+            var tradingProvider = new TradingProvider(_loggerFactory, tradingImplementation, dataProvider, _allocationManager);
 
             // Doubly linked inheritance for backtesting edge case
             dataImplementation.ParentImplementation = dataProvider;
