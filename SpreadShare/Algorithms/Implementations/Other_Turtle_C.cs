@@ -83,18 +83,16 @@ namespace SpreadShare.Algorithms.Implementations
 
                 // Set first stop loss order at DCMin.
                 _stoploss = trading.PlaceFullStoplossSell(FirstPair, shortTermTimePrice);
-                return new CheckState(shortTermTimePrice, _stoploss);
+                return new CheckState(_stoploss);
             }
         }
 
         private class CheckState : State<Config>
         {
-            private decimal stoplossPrice;
             private OrderUpdate stoploss;
 
-            public CheckState(decimal stoplossPrice, OrderUpdate stoploss)
+            public CheckState(OrderUpdate stoploss)
             {
-                this.stoplossPrice = stoplossPrice;
                 this.stoploss = stoploss;
             }
 
@@ -112,9 +110,9 @@ namespace SpreadShare.Algorithms.Implementations
 
             public override State<Config> OnMarketCondition(DataProvider data)
             {
-                decimal shortTermTimePrice = data.GetLowestLow(FirstPair, 10);
+                decimal shortTermTimePrice = data.GetLowestLow(FirstPair, AlgorithmConfiguration.ShortTermTime);
 
-                if (shortTermTimePrice > stoplossPrice)
+                if (shortTermTimePrice > stoploss.StopPrice)
                 {
                     return new CancelStopState(stoploss);
                 }
