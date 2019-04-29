@@ -53,6 +53,7 @@ namespace SpreadShare.Models.Database
             set => Proxy.LastFillIncrement = value;
         }
 
+        [NotMapped] // This value can be derived
         public decimal FilledQuantity
         {
             get => Proxy.FilledQuantity;
@@ -89,6 +90,7 @@ namespace SpreadShare.Models.Database
             set => Proxy.LastFillPrice = value;
         }
 
+        [NotMapped] // This value can be derived
         public decimal AverageFilledPrice
         {
             get => Proxy.AverageFilledPrice;
