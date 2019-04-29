@@ -1,13 +1,11 @@
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.ExchangeServices.Providers.Observing;
 using SpreadShare.Models.Database;
-using SpreadShare.Models.Exceptions;
 using SpreadShare.Models.Exceptions.OrderExceptions;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
@@ -31,15 +29,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// Initializes a new instance of the <see cref="BinanceTimerProvider"/> class.
         /// </summary>
         /// <param name="loggerFactory">Used to create output.</param>
-        /// <param name="comms">The communication service.</param>
-        public BinanceTimerProvider(ILoggerFactory loggerFactory, BinanceCommunicationsService comms)
+        /// <param name="candleStream">Used to get candle data.</param>
+        public BinanceTimerProvider(ILoggerFactory loggerFactory, IObservable<BacktestingCandle> candleStream)
             : base(loggerFactory)
         {
             // Set the pivot point to midnight.
             Pivot = DateTimeOffset.FromUnixTimeSeconds(0);
             _logger = loggerFactory.CreateLogger(GetType());
             _candleOpenTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(0);
-            comms.CandleDispenser.Subscribe(new ConfigurableObserver<BacktestingCandle>(
+            candleStream.Subscribe(new ConfigurableObserver<BacktestingCandle>(
                 () => { }, _ => { }, candle =>
                 {
                     _candleOpenTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(candle.OpenTimestamp);
@@ -133,14 +131,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         private void HandleException(Exception e)
         {
             Logger.LogError(e, e.Message);
-            e.Switch(
-                SwitchType.Case<TargetInvocationException>(() => HandleException(e.InnerException)),
+            e.Unpack().Switch(
                 SwitchType.Case<ArgumentException>(() => Program.ExitProgramWithCode(ExitCode.UnexpectedValue)),
                 SwitchType.Case<OutOfFundsException>(() => Program.ExitProgramWithCode(ExitCode.OrderFailure)),
                 SwitchType.Case<OrderRefusedException>(() => Program.ExitProgramWithCode(ExitCode.OrderFailure)),
-                SwitchType.Case<OrderFailedException>(() => Program.ExitProgramWithCode(ExitCode.OrderFailure)),
-                SwitchType.Case<ExchangeConnectionException>(() => _consecutiveExceptions++),
-                SwitchType.Case<ProviderException>(() => _consecutiveExceptions++),
                 SwitchType.Default(() => _consecutiveExceptions++));
         }
     }

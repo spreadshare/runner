@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using CSharpx;
 using Microsoft.Extensions.Logging;
 using SpreadShare.Algorithms.Implementations;
@@ -7,7 +6,6 @@ using SpreadShare.ExchangeServices;
 using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.Configuration;
 using SpreadShare.Tests.ExchangeServices.DataProviderTests;
-using SpreadShare.Tests.Stubs;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -32,10 +30,7 @@ namespace SpreadShare.Tests.ExchangeServices.BinanceProviderTests
                 CandleWidth: {Configuration.Instance.CandleWidth}
             ";
             var config = ParseAlgorithmConfiguration(source);
-            var containerMethod = typeof(ExchangeFactoryService)
-                .GetMethod("BuildBinanceContainer", BindingFlags.Instance | BindingFlags.NonPublic)
-                .MakeGenericMethod(typeof(TemplateAlgorithm));
-            _container = (ExchangeProvidersContainer)containerMethod.Invoke(ExchangeFactoryService, new object[] { config, new TestAllocationManager() });
+            _container = ExchangeFactoryService.BuildBinanceContainer<TemplateAlgorithm>(config);
         }
 
         /// <summary>

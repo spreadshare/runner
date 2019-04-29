@@ -96,14 +96,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 tradeId: tradeId,
                 orderStatus: OrderUpdate.OrderStatus.Filled,
                 orderType: BinanceUtilities.ToInternal(order.Type),
-                createdTimeStamp: DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                createdTimestamp: DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 setPrice: 0, // This information is unknown for market orders
                 side: side,
                 pair: pair,
                 setQuantity: realQuantity)
             {
                 FilledQuantity = order.ExecutedQuantity,
-                FilledTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                FilledTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 AverageFilledPrice = HelperMethods.SafeDiv(order.CummulativeQuoteQuantity, order.ExecutedQuantity),
             };
 

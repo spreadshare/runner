@@ -4,7 +4,10 @@ using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 using SpreadShare.Models.Database;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.BacktestDaemon;
+using SpreadShare.SupportServices.Configuration;
+using YamlDotNet.Serialization;
 using static System.IO.File;
 
 namespace SpreadShare.ExchangeServices.ProvidersBacktesting
@@ -38,7 +41,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         /// <param name="orders">Orders that have been traded.</param>
         /// <param name="stateSwitchEvents">List of state switches during the backtest.</param>
-        public void Output(List<BacktestOrder> orders, List<StateSwitchEvent> stateSwitchEvents)
+        public void Output(List<OrderUpdate> orders, List<StateSwitchEvent> stateSwitchEvents)
         {
             // Set name of folder
             if (string.IsNullOrEmpty(Program.CommandLineArgs.BacktestOutputPath))
@@ -72,7 +75,15 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// <param name="filepath">Filepath to store configuration at.</param>
         private static void OutputConfiguration(string filepath)
         {
-            Copy(BacktestDaemonService.Instance.State.CurrentBacktestConfigurationPath, filepath, true);
+            if (BacktestDaemonService.Instance.State.CurrentBacktestConfigurationPath != null)
+            {
+                Copy(BacktestDaemonService.Instance.State.CurrentBacktestConfigurationPath, filepath, true);
+            }
+            else
+            {
+                var str = new SerializerBuilder().Build().Serialize(Configuration.Instance.EnabledAlgorithm);
+                WriteAllText(filepath, str);
+            }
         }
 
         /// <summary>
@@ -80,10 +91,10 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// </summary>
         /// <param name="filepath">Filepath to store trades at.</param>
         /// <param name="orders">Orders that have been traded.</param>
-        private static void OutputOrders(string filepath, List<BacktestOrder> orders)
+        private static void OutputOrders(string filepath, List<OrderUpdate> orders)
         {
             var builder = new StringBuilder();
-            builder.AppendLine(BacktestOrder.GetStaticCsvHeader(Delimiter));
+            builder.AppendLine(OrderUpdate.GetStaticCsvHeader(Delimiter));
 
             foreach (var order in orders)
             {

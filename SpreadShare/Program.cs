@@ -20,6 +20,7 @@ namespace SpreadShare
     /// </summary>
     internal static class Program
     {
+        private static readonly IEnv Env = new RealEnvironment();
         private static ILoggerFactory _loggerFactory;
 
         /// <summary>
@@ -106,7 +107,7 @@ namespace SpreadShare
 
             DatabaseEventListenerService.CloseSession(exitCode);
 
-            Environment.Exit((int)exitCode);
+            Env.ExitEnvironment((int)exitCode);
             return (int)exitCode;
         }
 

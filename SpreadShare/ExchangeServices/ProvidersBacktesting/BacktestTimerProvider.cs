@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models.Database;
+using SpreadShare.Models.Exceptions;
+using SpreadShare.Models.Trading;
 using SpreadShare.SupportServices.BacktestDaemon;
 using SpreadShare.SupportServices.Configuration;
 
@@ -16,7 +18,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private readonly ILogger _logger;
         private readonly string _outputFolder;
-        private readonly List<BacktestOrder> _backtestOrders;
+        private readonly List<OrderUpdate> _backtestOrders;
         private readonly List<StateSwitchEvent> _stateSwitchEvents;
 
         private DateTimeOffset _currentTime;
@@ -31,10 +33,9 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             : base(loggerFactory)
         {
             _logger = loggerFactory.CreateLogger(GetType());
-            _backtestOrders = new List<BacktestOrder>();
+            _backtestOrders = new List<OrderUpdate>();
             _stateSwitchEvents = new List<StateSwitchEvent>();
 
-            // Hardcoded 2 week offset
             BeginTime = DateTimeOffset.FromUnixTimeMilliseconds(
                 BacktestDaemonService.Instance.State.BeginTimeStamp);
             _currentTime = BeginTime;
@@ -77,10 +78,19 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         public (bool, Exception) ErrorRegister { get; private set; }
 
         /// <summary>
+        /// Forcefully sets the current time.
+        /// </summary>
+        /// <param name="time">The time to set the current time to.</param>
+        public void SetCurrentTime(DateTimeOffset time)
+        {
+            _currentTime = time;
+        }
+
+        /// <summary>
         /// Add order to the logger.
         /// </summary>
         /// <param name="order">Order to log.</param>
-        public void AddOrder(BacktestOrder order)
+        public void AddOrder(OrderUpdate order)
         {
             _backtestOrders.Add(order);
         }
@@ -104,9 +114,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             {
                 try
                 {
-                    _currentTime += TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
                     _lastCandleOpen = _currentTime;
                     UpdateObservers(_currentTime.ToUnixTimeMilliseconds());
+                    _currentTime += TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
+                }
+                catch (BacktestOutOfDataException)
+                {
+                    Finished = true;
                 }
                 catch (Exception e)
                 {
@@ -127,8 +141,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             if (_currentTime >= EndTime)
             {
-                Finished = true;
-                return;
+                // Ensure that the execution of the current algorithm is halted (this method called from within the algorithm logic)
+                throw new BacktestOutOfDataException();
             }
 
             UpdateObservers(_currentTime.ToUnixTimeMilliseconds());

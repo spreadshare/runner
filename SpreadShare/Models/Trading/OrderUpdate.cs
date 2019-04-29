@@ -1,9 +1,11 @@
+using SpreadShare.Models.Database;
+
 namespace SpreadShare.Models.Trading
 {
     /// <summary>
     /// Return value of websockets.
     /// </summary>
-    internal class OrderUpdate
+    internal class OrderUpdate : ICsvSerializable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="OrderUpdate"/> class.
@@ -11,7 +13,7 @@ namespace SpreadShare.Models.Trading
         /// <param name="tradeId">The id of the trade.</param>
         /// <param name="orderStatus">The status of the order.</param>
         /// <param name="orderType">The type of the order.</param>
-        /// <param name="createdTimeStamp">The timestamp at which the order is created.</param>
+        /// <param name="createdTimestamp">The timestamp at which the order is created.</param>
         /// <param name="setPrice">SetPrice at which the order was set.</param>
         /// <param name="side">Side of the order.</param>
         /// <param name="pair">The pair of order.</param>
@@ -22,7 +24,7 @@ namespace SpreadShare.Models.Trading
             long tradeId,
             OrderStatus orderStatus,
             OrderTypes orderType,
-            long createdTimeStamp,
+            long createdTimestamp,
             decimal setPrice,
             OrderSide side,
             TradingPair pair,
@@ -31,7 +33,7 @@ namespace SpreadShare.Models.Trading
             OrderId = orderId;
             TradeId = tradeId;
             OrderType = orderType;
-            CreatedTimeStamp = createdTimeStamp;
+            CreatedTimestamp = createdTimestamp;
             SetPrice = setPrice;
             Side = side;
             Status = orderStatus;
@@ -41,6 +43,13 @@ namespace SpreadShare.Models.Trading
             FilledQuantity = 0;
             LastFillIncrement = 0;
             LastFillPrice = 0;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrderUpdate"/> class.
+        /// </summary>
+        public OrderUpdate()
+        {
         }
 
         /// <summary>
@@ -126,14 +135,14 @@ namespace SpreadShare.Models.Trading
         }
 
         /// <summary>
-        /// Gets the unique id of the order.
+        /// Gets or sets the unique id of the order.
         /// </summary>
-        public long OrderId { get; }
+        public long OrderId { get; set; }
 
         /// <summary>
-        /// Gets the id of the accompanying trade.
+        /// Gets or sets the id of the accompanying trade.
         /// </summary>
-        public long TradeId { get; }
+        public long TradeId { get; set; }
 
         /// <summary>
         /// Gets or sets the type fo the order.
@@ -141,19 +150,19 @@ namespace SpreadShare.Models.Trading
         public OrderTypes OrderType { get; set; }
 
         /// <summary>
-        /// Gets the timestamp at which the order was created.
+        /// Gets or sets the timestamp at which the order was created.
         /// </summary>
-        public long CreatedTimeStamp { get; }
+        public long CreatedTimestamp { get; set; }
 
         /// <summary>
         /// Gets or sets the timestamp at which the order was filled.
         /// </summary>
-        public long FilledTimeStamp { get; set; }
+        public long FilledTimestamp { get; set; }
 
         /// <summary>
-        /// Gets the price at which the order was set.
+        /// Gets or sets the price at which the order was set.
         /// </summary>
-        public decimal SetPrice { get; }
+        public decimal SetPrice { get; set; }
 
         /// <summary>
         /// Gets or sets the price at which the stoploss order was set.
@@ -171,9 +180,9 @@ namespace SpreadShare.Models.Trading
         public decimal LastFillPrice { get; set; }
 
         /// <summary>
-        /// Gets the side of the order.
+        /// Gets or sets the side of the order.
         /// </summary>
-        public OrderSide Side { get; }
+        public OrderSide Side { get; set;  }
 
         /// <summary>
         /// Gets or sets the status of the order.
@@ -181,14 +190,14 @@ namespace SpreadShare.Models.Trading
         public OrderStatus Status { get; set; }
 
         /// <summary>
-        /// Gets the trading pair of the order.
+        /// Gets or sets the trading pair of the order.
         /// </summary>
-        public TradingPair Pair { get; }
+        public TradingPair Pair { get; set; }
 
         /// <summary>
-        /// Gets the total setQuantity of the order.
+        /// Gets or sets the total setQuantity of the order.
         /// </summary>
-        public decimal SetQuantity { get; }
+        public decimal SetQuantity { get; set; }
 
         /// <summary>
         /// Gets or sets the total filledQuantity of the order.
@@ -215,5 +224,48 @@ namespace SpreadShare.Models.Trading
         /// </summary>
         public bool Finalized => Status == OrderStatus.Filled || Status == OrderStatus.Rejected
                                  || Status == OrderStatus.Cancelled || Status == OrderStatus.Rejected;
+
+        /// <summary>
+        /// Get a header matching the format of the CSV representation.
+        /// </summary>
+        /// <param name="delimiter">Delimiter.</param>
+        /// <returns>csv header.</returns>
+        public static string GetStaticCsvHeader(char delimiter)
+        {
+            return $"{nameof(OrderId)}{delimiter}" +
+                   $"{nameof(TradeId)}{delimiter}" +
+                   $"{nameof(OrderType)}{delimiter}" +
+                   $"{nameof(Status)}{delimiter}" +
+                   $"{nameof(Side)}{delimiter}" +
+                   $"{nameof(CreatedTimestamp)}{delimiter}" +
+                   $"{nameof(FilledTimestamp)}{delimiter}" +
+                   $"{nameof(Pair)}{delimiter}" +
+                   $"{nameof(SetQuantity)}{delimiter}" +
+                   $"{nameof(FilledQuantity)}{delimiter}" +
+                   $"{nameof(SetPrice)}{delimiter}" +
+                   $"{nameof(StopPrice)}{delimiter}" +
+                   $"FilledPrice{delimiter}";
+        }
+
+        /// <inheritdoc />
+        public string GetCsvRepresentation(char delimiter)
+        {
+            return $"{OrderId}{delimiter}" +
+                   $"{TradeId}{delimiter}" +
+                   $"{OrderType}{delimiter}" +
+                   $"{Status}{delimiter}" +
+                   $"{Side}{delimiter}" +
+                   $"{CreatedTimestamp}{delimiter}" +
+                   $"{FilledTimestamp}{delimiter}" +
+                   $"{Pair}{delimiter}" +
+                   $"{SetQuantity}{delimiter}" +
+                   $"{FilledQuantity}{delimiter}" +
+                   $"{SetPrice}{delimiter}" +
+                   $"{StopPrice}{delimiter}" +
+                   $"{AverageFilledPrice}{delimiter}";
+        }
+
+        /// <inheritdoc />
+        public string GetCsvHeader(char delimiter) => GetStaticCsvHeader(delimiter);
     }
 }

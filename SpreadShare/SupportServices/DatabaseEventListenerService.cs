@@ -143,7 +143,7 @@ namespace SpreadShare.SupportServices
                 LogLevel = logLevel,
                 Session = Session,
                 Text = formatter(state, exception),
-                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                EventTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
             };
 
             lock (Lock)
@@ -167,7 +167,7 @@ namespace SpreadShare.SupportServices
 
         private void OnNext(OrderUpdate order)
         {
-            var item = new OrderEvent(order, DateTimeOffset.Now.ToUnixTimeMilliseconds(), Session);
+            var item = new OrderEvent(Session, DateTimeOffset.Now.ToUnixTimeMilliseconds(), order);
             lock (Lock)
             {
                 _database.OrderEvents.Add(item);

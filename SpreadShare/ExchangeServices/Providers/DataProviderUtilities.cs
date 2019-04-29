@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSharpx;
 using Dawn;
 using SpreadShare.Models.Database;
 using SpreadShare.Utilities;
@@ -117,6 +118,25 @@ namespace SpreadShare.ExchangeServices.Providers
             var current = candles.Last();
             var past = candles[0];
             return HelperMethods.SafeDiv(current.Close - past.Close, past.Close);
+        }
+
+        /// <summary>
+        /// Calculates the relative strength index over a set of candles.
+        /// </summary>
+        /// <param name="input">Set of candles.</param>
+        /// <returns>Relative Strength Index.</returns>
+        public static decimal RelativeStrengthIndex(this IEnumerable<BacktestingCandle> input)
+        {
+            var candles = (input ?? throw new ArgumentNullException(nameof(input))).ToArray();
+            if (candles.Length <= 1)
+            {
+                throw new InvalidOperationException("Cannot calculate the RateOfChange of an empty set or singular item.");
+            }
+
+            var gain = candles.Pairwise((a, b) => b.Close - a.Close).Select(x => x > 0 ? x : 0).Average();
+            var loss = candles.Pairwise((a, b) => a.Close - b.Close).Select(x => x > 0 ? x : 0).Average();
+            var rs = HelperMethods.SafeDiv(gain, loss);
+            return 100M - (100M / (1M + rs));
         }
     }
 }

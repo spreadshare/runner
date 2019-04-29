@@ -45,6 +45,11 @@ namespace SpreadShare.SupportServices
         /// </summary>
         public DbSet<LogEvent> LogEvents { get; set; }
 
+        /// <summary>
+        /// Gets elements from the virtual Trade table.
+        /// </summary>
+        public DbQuery<Trade> Trades => Query<Trade>();
+
         /// <inheritdoc />
         public override int SaveChanges()
         {
@@ -89,6 +94,9 @@ namespace SpreadShare.SupportServices
         {
             modelBuilder.Entity<BacktestingCandle>()
                 .HasKey(c => new { Timestamp = c.OpenTimestamp, c.TradingPair });
+
+            modelBuilder.Query<Trade>()
+                .ToView("Trades");
         }
     }
 }

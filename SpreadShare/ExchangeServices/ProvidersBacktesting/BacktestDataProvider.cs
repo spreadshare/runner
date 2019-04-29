@@ -17,6 +17,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
     {
         private readonly BacktestTimerProvider _timer;
         private readonly BacktestBuffers _buffers;
+        private DataProvider _dataParent;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestDataProvider"/> class.
@@ -32,28 +33,38 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         }
 
         /// <summary>
-        /// Sets the DataProvider that implements this BackTestTradingProvider.
+        /// Gets or sets the DataProvider that implements this BackTestTradingProvider.
         /// </summary>
-        public DataProvider ParentImplementation { private get; set; }
+        public DataProvider ParentImplementation
+        {
+            get => _dataParent;
+            set
+            {
+                if (_dataParent != null)
+                {
+                    throw new InvalidOperationException("Cannot set the property more than once.");
+                }
+
+                _dataParent = value;
+            }
+        }
 
         /// <inheritdoc />
         public override ResponseObject<decimal> GetCurrentPriceLastTrade(TradingPair pair)
         {
-            var candle = FindCandle(pair, _timer.CurrentTime.ToUnixTimeMilliseconds(), Configuration.Instance.CandleWidth);
-            return new ResponseObject<decimal>(ResponseCode.Success, candle.Average);
-        }
-
-        /// <inheritdoc />
-        public override ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair)
-        {
-            // Ask for the open of current compressed candle
-            var timestamp = _timer.CurrentTime.ToUnixTimeMilliseconds();
-            var candle = FindCandle(pair, timestamp, Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
+            var nextCandleTime = _timer.CurrentTime
+                                 + TimeSpan.FromMinutes(Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
+            var candle = FindCandle(pair, nextCandleTime.ToUnixTimeMilliseconds(), Configuration.Instance.EnabledAlgorithm.AlgorithmConfiguration.CandleWidth);
             return new ResponseObject<decimal>(ResponseCode.Success, candle.Open);
         }
 
         /// <inheritdoc />
-        public override ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair) => GetCurrentPriceTopBid(pair);
+        public override ResponseObject<decimal> GetCurrentPriceTopBid(TradingPair pair)
+            => GetCurrentPriceLastTrade(pair);
+
+        /// <inheritdoc />
+        public override ResponseObject<decimal> GetCurrentPriceTopAsk(TradingPair pair)
+            => GetCurrentPriceLastTrade(pair);
 
         /// <inheritdoc />
         public override ResponseObject<decimal> GetPerformancePastHours(TradingPair pair, double hoursBack)
@@ -122,8 +133,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var time = _timer.CurrentTime - TimeSpan.FromMinutes(width * numberOfCandles);
             for (int i = 0; i < result.Length; i++)
             {
-                result[i] = FindCandle(pair, time.ToUnixTimeMilliseconds(), width);
                 time += TimeSpan.FromMinutes(width);
+                result[i] = FindCandle(pair, time.ToUnixTimeMilliseconds(), width);
             }
 
             return new ResponseObject<BacktestingCandle[]>(result);
@@ -156,7 +167,8 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             var buffer = _buffers.GetCandles(pair, channelWidth);
             var millisecondsCandleWidth = (int)TimeSpan.FromMinutes(channelWidth).TotalMilliseconds;
 
-            var index = (timestamp - buffer[0].OpenTimestamp) / millisecondsCandleWidth;
+            // Minus one to prevent returning candles whose close is in the future
+            var index = ((timestamp - buffer[0].OpenTimestamp) / millisecondsCandleWidth) - 1;
             if (index >= 0 && index < buffer.Length)
             {
                 return buffer[index];

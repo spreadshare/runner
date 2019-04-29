@@ -1,9 +1,12 @@
+using Dawn;
+using SpreadShare.Utilities;
+
 namespace SpreadShare.Models.Database
 {
     /// <summary>
     /// Data structure for representing candles.
     /// </summary>
-    internal class BacktestingCandle
+    public class BacktestingCandle
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BacktestingCandle"/> class.
@@ -17,6 +20,8 @@ namespace SpreadShare.Models.Database
         /// <param name="tradingPair">Trading pair of the candle.</param>
         public BacktestingCandle(long openTimestamp, decimal open, decimal close, decimal high, decimal low, decimal volume, string tradingPair)
         {
+            Guard.Argument(open).InRangeInclusive(low, high, x => $"{nameof(open)} has value {x} which is not within [{low}, {high}]");
+            Guard.Argument(close).InRangeInclusive(low, high, x => $"{nameof(close)} has value {x} which is not within [{low}, {high}]");
             OpenTimestamp = openTimestamp;
             Open = open;
             Close = close;

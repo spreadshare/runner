@@ -21,13 +21,7 @@ namespace SpreadShare.Tests.Algorithms
         public StateTests(ITestOutputHelper outputHelper)
             : base(outputHelper)
         {
-            var containerMethod = typeof(ExchangeFactoryService)
-                .GetMethod("BuildBinanceContainer", BindingFlags.Instance | BindingFlags.NonPublic)
-                .MakeGenericMethod(typeof(TemplateAlgorithm));
-
-            _container = (ExchangeProvidersContainer)containerMethod.Invoke(
-                ExchangeFactoryService,
-                new object[] { AlgorithmConfiguration, new TestAllocationManager() });
+            _container = ExchangeFactoryService.BuildBinanceContainer<TemplateAlgorithm>(AlgorithmConfiguration);
 
             var setTimerMethod = typeof(State<TemplateAlgorithmConfiguration>)
                 .GetMethod("SetTimer", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -122,7 +116,7 @@ namespace SpreadShare.Tests.Algorithms
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.Filled,
                 orderType: OrderUpdate.OrderTypes.Limit,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 0,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("EOSETH"),
@@ -142,7 +136,7 @@ namespace SpreadShare.Tests.Algorithms
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.Filled,
                 orderType: OrderUpdate.OrderTypes.Limit,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 0,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("EOSETH"),
@@ -161,7 +155,7 @@ namespace SpreadShare.Tests.Algorithms
                 tradeId: 0,
                 orderStatus: OrderUpdate.OrderStatus.Filled,
                 orderType: OrderUpdate.OrderTypes.Market,
-                createdTimeStamp: 0,
+                createdTimestamp: 0,
                 setPrice: 0,
                 side: OrderSide.Buy,
                 pair: TradingPair.Parse("EOSETH"),

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Dawn;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SpreadShare.ExchangeServices.Providers;
 using SpreadShare.Models;
 using SpreadShare.Models.Database;
@@ -69,14 +69,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             {
                 AverageFilledPrice = priceEstimate,
                 FilledQuantity = quantity,
-                FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds(),
+                FilledTimestamp = Timer.CurrentTime.ToUnixTimeMilliseconds(),
             };
 
             // Add to order cache to confirm filled
             _orderCache.Enqueue(order);
 
             // Write the trade to the logger
-            LogOrder(order, ParentImplementation.GetPortfolio().Clone());
+            LogOrder(order);
 
             return new ResponseObject<OrderUpdate>(
                 ResponseCode.Success,
@@ -116,7 +116,7 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 tradeId: tradeId,
                 orderStatus: OrderUpdate.OrderStatus.New,
                 orderType: OrderUpdate.OrderTypes.StopLoss,
-                createdTimeStamp: Timer.CurrentTime.ToUnixTimeMilliseconds(),
+                createdTimestamp: Timer.CurrentTime.ToUnixTimeMilliseconds(),
                 setPrice: 0,
                 side: side,
                 pair: pair,
@@ -144,14 +144,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             var order = WatchList[orderId];
             order.Status = OrderUpdate.OrderStatus.Cancelled;
-            order.FilledTimeStamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
+            order.FilledTimestamp = Timer.CurrentTime.ToUnixTimeMilliseconds();
             WatchList.Remove(order.OrderId);
 
             // Add to order cache to confirm cancelled.
             _orderCache.Enqueue(order);
 
             // Add cancelled order to the logger
-            LogOrder(order, ParentImplementation.GetPortfolio().Clone());
+            LogOrder(order);
 
             return new ResponseObject(ResponseCode.Success);
         }
@@ -187,14 +187,14 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
 
             foreach (var order in WatchList.Values.ToList())
             {
-                decimal price = _dataProvider.GetCurrentPriceLastTrade(order.Pair).Data;
+                var candle = _dataProvider.ParentImplementation.GetCandles(order.Pair, 1)[0];
 
-                if (GetFilledOrder(order, price, Timer.CurrentTime.ToUnixTimeMilliseconds()))
+                if (EvaluateFilledOrder(order, candle, Timer.CurrentTime.ToUnixTimeMilliseconds()))
                 {
                     Logger.LogInformation($"Order {order.OrderId} confirmed at {Timer.CurrentTime}");
 
                     // Write the filled trade to the logger
-                    LogOrder(order, ParentImplementation.GetPortfolio().Clone());
+                    LogOrder(order);
 
                     UpdateObservers(order);
                 }
@@ -210,12 +210,13 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
         /// Returns a bool indicating whether or not the order was filled, and transforms the order into a filled state if so.
         /// </summary>
         /// <param name="order">The order to check as filled.</param>
-        /// <param name="currentPrice">The price to check the order against.</param>
+        /// <param name="currentCandle">The candle to check the order against.</param>
         /// <param name="currentTime">The current time (will be used as time of fill).</param>
         /// <returns>Whether the order was filled.</returns>
         /// <exception cref="UnexpectedOrderTypeException">The order type is not supported by the method.</exception>
-        private static bool GetFilledOrder(OrderUpdate order, decimal currentPrice, long currentTime)
+        private static bool EvaluateFilledOrder(OrderUpdate order, BacktestingCandle currentCandle, long currentTime)
         {
+            Guard.Argument(currentCandle).NotNull();
             if (order == null)
             {
                 return false;
@@ -224,20 +225,20 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
             switch (order.OrderType)
             {
                 case OrderUpdate.OrderTypes.Limit:
-                    return GetFilledLimitOrder(order, currentPrice, currentTime);
+                    return GetFilledLimitOrder(order, currentCandle, currentTime);
                 case OrderUpdate.OrderTypes.StopLoss:
-                    return GetFilledStoplossOrder(order, currentPrice, currentTime);
+                    return GetFilledStoplossOrder(order, currentCandle, currentTime);
                 default:
                     throw new UnexpectedOrderTypeException(
                         $"Backtest watchlist should not contain order of type {order.OrderType}");
             }
         }
 
-        private static bool GetFilledStoplossOrder(OrderUpdate order, decimal currentPrice, long currentTime)
+        private static bool GetFilledStoplossOrder(OrderUpdate order, BacktestingCandle currentCandle, long currentTime)
         {
             bool filled = order.Side == OrderSide.Buy
-                ? currentPrice >= order.StopPrice
-                : currentPrice <= order.StopPrice;
+                ? currentCandle.High >= order.StopPrice
+                : currentCandle.Low <= order.StopPrice;
             if (filled)
             {
                 order.StopPrice = order.StopPrice;
@@ -246,18 +247,18 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 order.LastFillIncrement = order.SetQuantity;
                 order.LastFillPrice = order.StopPrice;
                 order.Status = OrderUpdate.OrderStatus.Filled;
-                order.FilledTimeStamp = currentTime;
+                order.FilledTimestamp = currentTime;
                 return true;
             }
 
             return false;
         }
 
-        private static bool GetFilledLimitOrder(OrderUpdate order, decimal currentPrice, long currentTime)
+        private static bool GetFilledLimitOrder(OrderUpdate order, BacktestingCandle currentCandle, long currentTime)
         {
             bool filled = order.Side == OrderSide.Buy
-                ? currentPrice <= order.SetPrice
-                : currentPrice >= order.SetPrice;
+                ? currentCandle.Low <= order.SetPrice
+                : currentCandle.High >= order.SetPrice;
             if (filled)
             {
                 order.StopPrice = order.StopPrice;
@@ -266,20 +267,16 @@ namespace SpreadShare.ExchangeServices.ProvidersBacktesting
                 order.LastFillIncrement = order.SetQuantity;
                 order.LastFillPrice = order.SetPrice;
                 order.Status = OrderUpdate.OrderStatus.Filled;
-                order.FilledTimeStamp = currentTime;
+                order.FilledTimestamp = currentTime;
                 return true;
             }
 
             return false;
         }
 
-        private void LogOrder(OrderUpdate order, Portfolio portfolio)
+        private void LogOrder(OrderUpdate order)
         {
-            ((BacktestTimerProvider)Timer).AddOrder(
-                new BacktestOrder(
-                    order,
-                    JsonConvert.SerializeObject(portfolio),
-                    _dataProvider.ValuatePortfolioInBaseCurrency(portfolio)));
+            ((BacktestTimerProvider)Timer).AddOrder(order);
         }
     }
 }
