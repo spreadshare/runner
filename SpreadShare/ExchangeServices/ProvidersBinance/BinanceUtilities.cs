@@ -155,7 +155,6 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
         /// <returns>OrderUpdate.</returns>
         public static OrderUpdate ToInternal(BinanceStreamOrderUpdate orderInfoUpdate)
         {
-            // TODO: Trade Id is wrong.
             var order = new OrderUpdate(
                 orderId: orderInfoUpdate.OrderId,
                 tradeId: 0,
@@ -175,6 +174,11 @@ namespace SpreadShare.ExchangeServices.ProvidersBinance
                 FilledQuantity = orderInfoUpdate.AccumulatedQuantityOfFilledTrades,
                 StopPrice = orderInfoUpdate.StopPrice,
             };
+
+            if (order.Status == OrderUpdate.OrderStatus.Filled)
+            {
+                order.FilledTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            }
 
             try
             {
