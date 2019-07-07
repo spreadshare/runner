@@ -1,92 +1,88 @@
-# SpreadShare2 [![Build Status](https://travis-ci.com/HugoPeters1024/SpreadShare2.svg?token=EzhgBYg4bqpNUB6Jq5aw&branch=master)](https://travis-ci.com/HugoPeters1024/SpreadShare2)
-Using a simple bandwagon algorithm for cryptocurrency trading on Binance
+# SpreadShare
+Run trading algorithms (Finite State Machines) on historical candle data and Binance.
 
-## Setup
-1. Install [Docker](https://docs.docker.com/install/)
-2. _(Windows)_ [Share C drive with Docker](https://medium.com/travis-on-docker/why-and-how-to-use-docker-for-development-a156c1de3b24)
-3. Create volume postgres-data 
-```docker volume create --name postgres-data```
-4. Create an `.env` file from the `.env.example` file. Replace the default passwords with randomly generated passwords.
-5. Create an `appsettings.yaml` file from the `appsettings.yaml.example` file. Replace the API credentials with actual credentials.
-5. Run Visual Studio with Docker Compose configuration or run
-```docker-compose up```
+This application is no longer maintained. We have developed visualisation, data fetching (Binance) and deployment (Ansible) software that integrates with this application. If you would like to acquire these applications, open an issue.
 
-### Linux setup
-```
-sudo apt-get install -y docker-ce && docker-compose
-docker volume create --name postgres-data
-cp .env.example .env
-cp SpreadShare/appsettings.json.example SpreadShare/appsettings.yaml
-docker-compose up
-```
+### Usage
+The runner has two modes: Live and Backtest. In Live mode, API-credentials will be used to trade live on Binance. It is recommended to run live instances on a separate server and not locally. Backtests require historical candle data provided by a postgres database. Algorithms are mode-agnostic.
 
-## Development
-If you want to run this application without Docker, the framework [.NET Core 2.1](https://www.microsoft.com/net/download/dotnet-core/2.1) is required. Furthermore, please read the [testing documentation](TESTING.md).
+##### Algorithms
+Algorithms are a collection of `State`s that return other states. States have several important properties and methods as shown in the two tables below.
 
-### Database migrations
-Each time the database schema changes, the following command needs to be ran.
-```
-dotnet ef migrations add [MigrationTitle]
-```
+| Properties |   |
+|------------|---|
+| AlgorithmConfiguration | Provides user settings for this algorithm. The configuration provides parameter tuning |
+| FirstPair | The first pair of the configurated trading pairs. Useful when only using one trading pair |
 
-### Database restore
-In development, database migrations are replaced not stacked to keep a simple history. This does require a rebuild of the database however. This can be done as follows:
-```
-cd SpreadShare2/
-docker container prune
-# EOSETH is an example
-sudo cp DataPump/EOSETH.csv DataPump/input-data/
-```
-Make sure the entry point in SpreadShare/Dockerfile looks like this:
-```
-ENTRYPOINT ["dotnet", "SpreadShare.dll", "--verbose"]
-```
-Then run the container, resulting in a fresh migration
-```
-docker-compose up --build
-# Wait for the Datapump to complete
-```
+| Methods    |   |
+|------------|---|
+| Run | Runs immediately after being switched to |
+| OnMarketCondition | Is called every candle update |
+| OnOrderUpdate | Is called on every order update reported by Binance |
+| OnTimerElapsed | Is called when a set timer has elapsed |
+| SetTimer | Sets an timer |
+| WaitForNextCandle | Wait until the candle has elapsed |
 
-Then make sure the entry point in SpreadShare/Dockerfile is set back to normal and run the container again
-```
-docker-compose up --build
-# Wait untill its done loading
-```
 
-You´re done and can now run your python scripts!
+### Setup
+Migrations only have to be ran once to update the database schema. `appsettings.yaml` contains all required settings. If you are using docker `.env` is required as well.
 
-### Dawn's Guard plugin
-For argument checking, the project consistenly uses the Guard plugin from Dawn. This plugin requires at least C#7.2. You can review the documentation here https://github.com/safakgur/guard
+##### Requirements
+- Dotnet 2.2 or Docker
+- A PostgreSQL database
+- Some knowledge about trading, candles, orders, crypto and Binance
 
-### Code coverage report
-To generate a html code coverage report using minicover, you can run the `generate-report.sh` script from within the /SpreadShare.Tests folder. You can enter the exact name of a test class as filter as an optional first argument. When it has finished it will open /SpreadShare/coverage-html/index.html in the default browser using python.
+##### Linux setup (dotnet)
+1. Install [Dotnet Core](https://dotnet.microsoft.com/download/dotnet-core/2.2)
+2. Install [PostgreSQL](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04)
+3. Copy and adjust `appsettings` file
+   ```
+    cp SpreadShare/appsettings.json.example SpreadShare/appsettings.yaml
+    nano SpreadShare/appsettings.yaml
+   ```
+4. Build project
+   ```
+   dotnet build SpreadShare.dll
+   ```
+5. Run migrations
+   ```
+   cd SpreadShare/bin/Debug/netcoreapp2.2/
+   dotnet SpreadShare.dll --migrate
+   ```
+6. Import Candle data to database (https://github.com/spreadshare/datagathering)
+7. Start runner
+   ```
+   dotnet SpreadShare.dll                       <-- Backtesting mode
+   dotnet SpreadShare.dll --trading             <-- Trading mode
+   ```
+8. Run an algorithm
+   ```
+   run --algorithm TemplateAlgorithm -i
+   ```
 
-### Architecture
-This is a console application written in [ASP.Net Core 2.1](https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-2.1). [Dependency injection](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1) is used for injecting common dependencies (such as database context and logger factories). Different modules are separated in services which are registered in `Startup.cs` and can be accessed via a `ServiceCollection`. A [PostgreSQL](https://www.postgresql.org/) database is connected with a database context. This database runs in a separate Docker container. There are three Docker containers in total: SpreadShare, the database and a ZeroMQ-enabled python application.
+##### Linux setup (docker)
+Use steps above, but instead of using dotnet:
 
-### Using Docker in development
-We have chosen to use Docker in development rather than only using Docker for deployment. This approach allows for a consistent development environment that only requires Docker and easy deployment [[1](https://medium.com/travis-on-docker/why-and-how-to-use-docker-for-development-a156c1de3b24)]. To enable debugging, we required the integration with Docker of Visual Studio. This is configured by adding support for Docker [[2](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/docker/visual-studio-tools-for-docker?view=aspnetcore-2.1)]. This results in a Docker Compose run configuration instead of a Spreadshare configuration.
+1. Install Docker
+    ```
+    sudo apt-get install -y docker-ce && docker-compose
+    ```
+2. Add correct volumes and networks
+    ```
+    docker volume create --name postgres-data
+    docker network create --name spreadshare_network
+    ```
+3. Copy and adjust .env
+    ```
+    cp .env.example .env
+    nano .env
+    ```
+4. Copy and adjust `appsettings` file
+5. Run migrations (adjust dockerfile to match correct entrypoint)
+6. Import Candle data to database (https://github.com/spreadshare/datagathering)
+7. Run docker-compose
+    ```
+    docker-compose up --build
+    ```
 
-**Disadvantage 1: Unclear error output in Docker configuration**
-However, this has a disadvantage. Errors in the `docker-compose.yml` file and the `Dockerfile`s are not displayed clearly in the output. This can be resolved by running `docker-compose build & docker-compose up` in a terminal window. 
 
-**Disadvantage 2: No terminal color support in debug output**
-Furthermore, the Visual Studio debug output window does not support special characters and by extensions colors in output ([Github issue](https://github.com/aspnet/Logging/issues/428)). We have disabled the color output using `DisableColors` in `ConsoleLoggerOptions`.
-
-### Splitting debug logs into default output and program output
-The debug output contains default output and program output. If you would like to split this output, change the following setting in Visual Studio:
-> _Tools -> Visual Studio Options Dialog -> Debugging -> Check the "Redirect All Output Window Text to the Immediate Window"_
-
-### Removing trailing whitespace in a pre-commit hook
-Add the following script to `.git/hooks/pre-commit` (no extension)
-```bash
-find . -name '*.cs' -exec sed -i 's/\s*$//g' {} +
-```
-You have to set the script executable using `chmod +x .git/hooks/pre-commit`
-
-Each time you commit, this command will remove trailing whitespace.
-
-**In JetBrain Products:** 
-```
-Settings > Editor > General > Strip trailing spaces on Save & corresponding dropdown menu
-```
